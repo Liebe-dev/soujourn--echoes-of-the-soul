@@ -1,0 +1,16 @@
+[gd_scene format=3 uid="uid://cs8cqh3o1wgds"]
+
+[ext_resource type="PackedScene" uid="uid://cs8cqh3o1wgds" path="res://a_1s_2.tscn" id="2_qtuxw"]
+[ext_resource type="Shader" uid="uid://dj7h5r3bb1evf" path="res://hp_delay.gdshader" id="9_0smmc"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_0sjgp"]
+resource_local_to_scene = true
+shader = ExtResource("9_0smmc")
+shader_parameter/hp = 1.0
+shader_parameter/hp_color = Color(0.62107486, 0.45756793, 0.13230121, 1)
+shader_parameter/highlight_color = Color(1, 1, 1, 0.35)
+
+[node name="A1S2" unique_id=17487072 instance=ExtResource("2_qtuxw")]
+
+[node name="hp_delay" parent="Hud/hud/bar/hp" parent_id_path=PackedInt32Array(293451384) index="0" unique_id=1053793673]
+material = SubResource("ShaderMaterial_0sjgp")

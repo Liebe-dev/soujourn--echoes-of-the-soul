@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://db0jhn8vm3bnw"]
+
+[ext_resource type="PackedScene" uid="uid://560h85egf0du" path="res://asset/UI/dialogueUI/main.tscn" id="1_80r70"]
+
+[node name="DialogueUI" unique_id=584895347 instance=ExtResource("1_80r70")]
+
+[node name="DialogueUI" parent="." index="0" unique_id=1847342923]
+visible = false

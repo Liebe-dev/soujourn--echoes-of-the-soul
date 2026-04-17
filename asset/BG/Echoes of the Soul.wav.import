@@ -1,0 +1,24 @@
+[remap]
+
+importer="wav"
+type="AudioStreamWAV"
+uid="uid://bivby2476phvd"
+path="res://.godot/imported/Echoes of the Soul.wav-0cd4dfb79828484d44096f50150b9948.sample"
+
+[deps]
+
+source_file="res://asset/BG/Echoes of the Soul.wav"
+dest_files=["res://.godot/imported/Echoes of the Soul.wav-0cd4dfb79828484d44096f50150b9948.sample"]
+
+[params]
+
+force/8_bit=false
+force/mono=false
+force/max_rate=false
+force/max_rate_hz=44100
+edit/trim=false
+edit/normalize=false
+edit/loop_mode=2
+edit/loop_begin=50000
+edit/loop_end=-30000
+compress/mode=2
