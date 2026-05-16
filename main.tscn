@@ -1527,6 +1527,7 @@ size = Vector2(111.5, 120.5)
 
 [node name="Main" type="Node2D" unique_id=40272100]
 script = ExtResource("1_d13ii")
+metadata/_edit_lock_ = true
 
 [node name="GodRay" type="CanvasLayer" parent="." unique_id=672273559]
 
