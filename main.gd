@@ -1,4 +1,5 @@
 extends Node2D
+#12
 @onready var wobtear = $doggo
 @onready var click_indicator = $Vignette/ClickIndicator 
 @onready var cutscene_image3 = $Vignette/cutscene3
