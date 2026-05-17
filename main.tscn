@@ -41,6 +41,7 @@
 [ext_resource type="Texture2D" uid="uid://bi2aodtsp8fhj" path="res://asset/Enemies/Wobtear_death.png" id="37_0cp0l"]
 [ext_resource type="Script" uid="uid://ckwnyresyamtm" path="res://doggo.gd" id="37_4lmeg"]
 [ext_resource type="Texture2D" uid="uid://boe6okl4teibl" path="res://asset/Enemies/Wobtear1.png" id="38_d2t1y"]
+[ext_resource type="PackedScene" uid="uid://bscreenfx01" path="res://screen_effects.tscn" id="39_screenfx"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_d13ii"]
 blend_mode = 1
@@ -1962,94 +1963,7 @@ volume_db = -20.163
 position = Vector2(1279, 408)
 shape = SubResource("RectangleShape2D_qsp4k")
 
-[node name="Vignette" type="CanvasLayer" parent="." unique_id=1638243336]
-
-[node name="BlurOverlay" type="ColorRect" parent="Vignette" unique_id=1494392578]
-visible = false
-modulate = Color(1, 1, 1, 0)
-material = SubResource("ShaderMaterial_jq2sk")
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(1, 1, 1, 0.22352941)
-
-[node name="Vignette" type="TextureRect" parent="Vignette" unique_id=1782242047]
-visible = false
-z_index = 5
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-texture = SubResource("GradientTexture2D_kq58d")
-
-[node name="BlinkScreen" type="ColorRect" parent="Vignette" unique_id=375217429]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-color = Color(0, 0, 0, 1)
-
-[node name="cutscene1" type="TextureRect" parent="Vignette" unique_id=1930914229]
-visible = false
-z_index = -1
-offset_right = 40.0
-offset_bottom = 40.0
-texture = ExtResource("30_kq58d")
-
-[node name="cutscene2" type="TextureRect" parent="Vignette" unique_id=385818489]
-visible = false
-z_index = -1
-texture_filter = 2
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("31_seu75")
-
-[node name="cutscene3" type="TextureRect" parent="Vignette" unique_id=1309765931]
-visible = false
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-texture = ExtResource("33_jq2sk")
-
-[node name="Subtitle" type="Label" parent="Vignette" unique_id=793454900]
-visible = false
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -20.0
-offset_top = -11.5
-offset_right = 20.0
-offset_bottom = 11.5
-grow_horizontal = 2
-grow_vertical = 2
-label_settings = SubResource("LabelSettings_jq2sk")
-horizontal_alignment = 1
-vertical_alignment = 1
-
-[node name="ClickIndicator" type="Label" parent="Vignette" unique_id=1877103606]
-visible = false
-offset_left = 1829.0
-offset_top = 996.0
-offset_right = 1869.0
-offset_bottom = 1038.0
-text = ">>"
-label_settings = SubResource("LabelSettings_4k2k6")
-horizontal_alignment = 1
-vertical_alignment = 1
+[node name="ScreenEffects" parent="." instance=ExtResource("39_screenfx")]
 
 [node name="doggo" type="CharacterBody2D" parent="." unique_id=1598157269]
 z_index = 1

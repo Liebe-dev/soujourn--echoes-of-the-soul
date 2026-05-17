@@ -108,7 +108,7 @@ func _on_start_pressed() -> void:
 	tween.tween_property(bgm_player, "volume_db", -50.0, 2)
 	await tween.finished
 
-	get_tree().change_scene_to_file("res://main.tscn")
+	get_tree().change_scene_to_file("res://opening.tscn")
 	
 func _on_continue_pressed() -> void:
 	get_tree().change_scene_to_file("res://continue")

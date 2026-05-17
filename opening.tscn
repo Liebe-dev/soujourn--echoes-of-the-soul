@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://copening01"]
+
+[ext_resource type="Script" path="res://opening.gd" id="1_opening"]
+[ext_resource type="PackedScene" uid="uid://c5euk4cuk8rra" path="res://vignette.tscn" id="2_vignette"]
+
+[node name="Opening" type="Node"]
+script = ExtResource("1_opening")
+
+[node name="Vignette" parent="." instance=ExtResource("2_vignette")]
