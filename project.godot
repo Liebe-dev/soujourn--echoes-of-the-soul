@@ -8,6 +8,11 @@
 
 config_version=5
 
+[Fmod]
+
+General/banks_path="res://soujournAudio"
+General/should_load_by_name=true
+
 [application]
 
 config/name="Soujourn: Echoes of the Soul"
@@ -17,6 +22,7 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 [autoload]
 
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
+FmodManager="*uid://cds10pm7hwn3p"
 
 [display]
 
@@ -27,7 +33,7 @@ window/stretch/mode="viewport"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/godot_ai/plugin.cfg")
+enabled=PackedStringArray("res://addons/fmod/plugin.cfg", "res://addons/godot_ai/plugin.cfg")
 
 [input]
 

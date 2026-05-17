@@ -2113,6 +2113,8 @@ offset_right = 583.0
 offset_bottom = 477.0
 text = "press space"
 
+[node name="CanvasLayer2" type="CanvasLayer" parent="."]
+
 [connection signal="body_entered" from="CameraZoomTrigger" to="CameraZoomTrigger" method="_on_body_entered"]
 [connection signal="body_exited" from="CameraZoomTrigger" to="CameraZoomTrigger" method="_on_body_exited"]
 [connection signal="body_entered" from="Area2D" to="." method="_on_area_2d_body_entered"]
