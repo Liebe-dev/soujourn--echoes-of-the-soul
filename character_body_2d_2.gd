@@ -9,12 +9,13 @@ var is_sliding = false
 var can_move: bool = true
 var is_locked: bool = false
 var is_resting: bool = false
+var _position_before_rest: Vector2 = Vector2.ZERO
 
-func enter_rest(world_position: Vector2, face_left: bool) -> void:
+func enter_rest(_world_position: Vector2, face_left: bool) -> void:
+	_position_before_rest = global_position
 	is_resting = true
 	is_locked = true
 	can_move = false
-	global_position = world_position
 	velocity = Vector2.ZERO
 	anim.flip_h = face_left
 	anim.play("idle")
@@ -23,9 +24,40 @@ func exit_rest() -> void:
 	is_resting = false
 	is_locked = false
 	can_move = true
+	velocity = Vector2.ZERO
+	global_position = _position_before_rest
+	snap_feet_to_floor()
+
+func snap_feet_to_floor(max_drop: float = 96.0) -> void:
+	var col := $CollisionShape2D as CollisionShape2D
+	if col == null or col.shape == null:
+		return
+	var half_h := _capsule_half_height(col)
+	var feet := Vector2(col.global_position.x, col.global_position.y + half_h)
+	var space := get_world_2d().direct_space_state
+	var query := PhysicsRayQueryParameters2D.create(
+		feet + Vector2(0, -4.0),
+		feet + Vector2(0, max_drop)
+	)
+	query.collision_mask = collision_mask
+	query.exclude = [get_rid()]
+	var hit := space.intersect_ray(query)
+	if hit.is_empty():
+		return
+	global_position.y += hit.position.y - feet.y
+
+func _capsule_half_height(col: CollisionShape2D) -> float:
+	var capsule := col.shape as CapsuleShape2D
+	if capsule == null:
+		return 32.0
+	var scale_y := col.global_transform.get_scale().y
+	return capsule.height * 0.5 * scale_y
 
 func _physics_process(delta: float) -> void:
-	if is_resting or is_locked or can_move == false:
+	if is_resting:
+		velocity = Vector2.ZERO
+		return
+	if is_locked or can_move == false:
 		velocity.x = 0
 		move_and_slide()
 		return

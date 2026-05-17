@@ -44,10 +44,11 @@ func save_at_campfire(campfire: Node2D) -> bool:
 		push_warning("SaveManager: current scene has no file path.")
 		return false
 
-	var rest_marker: Node2D = campfire.get_node_or_null("RestPosition") as Node2D
-	var spawn_pos := rest_marker.global_position if rest_marker else campfire.global_position
-
 	var hp_info := _read_player_hp(tree)
+	var spawn_pos := player.global_position
+	if player.has_method("snap_feet_to_floor"):
+		player.snap_feet_to_floor()
+		spawn_pos = player.global_position
 
 	_data["version"] = SAVE_VERSION
 	_data["scene_path"] = scene_path
@@ -98,6 +99,9 @@ func apply_continue_state() -> void:
 	else:
 		player.can_move = true
 
+	if player.has_method("snap_feet_to_floor"):
+		player.snap_feet_to_floor()
+
 	_apply_hp_to_hud(get_tree(), int(_data.get("hp", 100)), int(_data.get("max_hp", 100)))
 
 func respawn_at_checkpoint() -> void:
@@ -119,6 +123,8 @@ func respawn_at_checkpoint() -> void:
 		player.global_position = Vector2(float(pos_dict.get("x", 0.0)), float(pos_dict.get("y", 0.0)))
 		if player.has_method("exit_rest"):
 			player.exit_rest()
+		if player.has_method("snap_feet_to_floor"):
+			player.snap_feet_to_floor()
 
 	heal_player_full(get_tree())
 	_apply_hp_to_hud(get_tree(), int(_data.get("max_hp", 100)), int(_data.get("max_hp", 100)))

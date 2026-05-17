@@ -96,7 +96,7 @@ position = Vector2(0, 16)
 shape = SubResource("CircleShape2D_interact")
 
 [node name="RestPosition" type="Marker2D" parent="."]
-position = Vector2(0, 48)
+position = Vector2(0, 0)
 
 [node name="PromptLayer" type="CanvasLayer" parent="."]
 layer = 5

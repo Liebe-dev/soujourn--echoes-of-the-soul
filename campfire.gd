@@ -17,6 +17,8 @@ signal player_finished_rest
 var _player: CharacterBody2D
 var _player_in_range := false
 var _is_player_resting := false
+var _rest_cooldown := 0.0
+const REST_COOLDOWN_SEC := 0.35
 
 func _ready() -> void:
 	add_to_group("campfire")
@@ -31,14 +33,18 @@ func _ready() -> void:
 func get_checkpoint_id() -> String:
 	return checkpoint_id
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
+	if _rest_cooldown > 0.0:
+		_rest_cooldown = maxf(_rest_cooldown - delta, 0.0)
 	if _is_player_resting or _player == null:
 		return
-	if rest_position and _player_in_range:
+	if _player_in_range:
 		_face_campfire()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _player_in_range or _player == null:
+		return
+	if _rest_cooldown > 0.0:
 		return
 	if not event.is_action_pressed("Interact"):
 		return
@@ -72,10 +78,9 @@ func _sit_and_save() -> void:
 	prompt_panel.hide()
 	player_started_rest.emit()
 
-	var sit_pos := rest_position.global_position if rest_position else global_position
 	var face_left := _player.global_position.x > global_position.x
 	if _player.has_method("enter_rest"):
-		_player.enter_rest(sit_pos, face_left)
+		_player.enter_rest(Vector2.ZERO, face_left)
 
 	await get_tree().create_timer(0.35).timeout
 
@@ -96,6 +101,7 @@ func _stand_up() -> void:
 	_is_player_resting = false
 	if _player and _player.has_method("exit_rest"):
 		_player.exit_rest()
+	_rest_cooldown = REST_COOLDOWN_SEC
 	if prompt_label:
 		prompt_label.text = rest_hint
 	if _player_in_range:
