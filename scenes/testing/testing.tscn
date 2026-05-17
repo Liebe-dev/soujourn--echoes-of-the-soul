@@ -3,9 +3,62 @@
 [ext_resource type="Texture2D" uid="uid://bmvih0hswruyb" path="res://asset/Map/background/BGScene2_2.png" id="1_hdqq5"]
 [ext_resource type="PackedScene" uid="uid://c2aqlr28m4cvc" path="res://collectible_item_prefab.tscn" id="2_8d7w2"]
 [ext_resource type="PackedScene" uid="uid://dhhn1rh24dtco" path="res://scenes/adel/playable_adel.tscn" id="3_xlwwx"]
+[ext_resource type="Script" uid="uid://cuf8cr18yju4h" path="res://scenes/testing/weapon.gd" id="4_8d7w2"]
+[ext_resource type="Script" uid="uid://brk768i8hsoc3" path="res://scenes/testing/enemy.gd" id="5_2jrn0"]
+[ext_resource type="Texture2D" uid="uid://ttyy8a117aun" path="res://asset/Character/Ishmael_Idle.png" id="6_16ov7"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kj3p2"]
 size = Vector2(118.26207, 13.535665)
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_8d7w2"]
+height = 71.32498
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_88nui"]
+atlas = ExtResource("6_16ov7")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pekpq"]
+atlas = ExtResource("6_16ov7")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x3660"]
+atlas = ExtResource("6_16ov7")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yy6s2"]
+atlas = ExtResource("6_16ov7")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_km7ka"]
+atlas = ExtResource("6_16ov7")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7u0va"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_88nui")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pekpq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x3660")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yy6s2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_km7ka")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_v3pl4"]
+radius = 16.0
+height = 112.0
 
 [node name="Node2D" type="Node2D" unique_id=1768881503]
 
@@ -26,3 +79,34 @@ shape = SubResource("RectangleShape2D_kj3p2")
 position = Vector2(728, 864)
 
 [node name="PlayableAdel" parent="." unique_id=1485460165 instance=ExtResource("3_xlwwx")]
+position = Vector2(272.00003, 832)
+
+[node name="WeaponPivot" type="Marker2D" parent="PlayableAdel" unique_id=118253140]
+
+[node name="Weapon" type="Node2D" parent="PlayableAdel/WeaponPivot" unique_id=2255556]
+script = ExtResource("4_8d7w2")
+
+[node name="Hitbox" type="Area2D" parent="PlayableAdel/WeaponPivot/Weapon" unique_id=1440821768]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="PlayableAdel/WeaponPivot/Weapon/Hitbox" unique_id=154312721]
+position = Vector2(41.783524, -17.831245)
+rotation = 0.8595397
+shape = SubResource("CapsuleShape2D_8d7w2")
+disabled = true
+debug_color = Color(0.9764706, 0.03137255, 0.1764706, 0.41960785)
+
+[node name="Enemy" type="CharacterBody2D" parent="." unique_id=1127165249]
+texture_filter = 1
+position = Vector2(560, 824)
+script = ExtResource("5_2jrn0")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="Enemy" unique_id=1526573208]
+sprite_frames = SubResource("SpriteFrames_7u0va")
+animation = &"idle"
+autoplay = "idle"
+frame_progress = 0.9571249
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Enemy" unique_id=1264137358]
+shape = SubResource("CapsuleShape2D_v3pl4")
+
+[connection signal="body_entered" from="PlayableAdel/WeaponPivot/Weapon/Hitbox" to="PlayableAdel/WeaponPivot/Weapon" method="_on_hitbox_body_entered"]
