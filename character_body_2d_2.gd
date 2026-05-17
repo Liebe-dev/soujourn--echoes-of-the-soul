@@ -5,6 +5,8 @@ const SPEED = 300.0 #72.0
 const JUMP_VELOCITY = 0.0
 const SLIDE_SPEED = 300.0
 
+signal player_attacked
+
 var is_sliding = false
 var can_move: bool = true
 var is_locked: bool = false
@@ -86,6 +88,7 @@ func _physics_process(delta: float) -> void:
 		else:
 			anim.flip_h = false
 	else:
+		#Moving action
 		if Input.is_action_just_pressed("ui_accept") and is_on_floor():
 			velocity.y = JUMP_VELOCITY
 			
@@ -100,7 +103,6 @@ func _physics_process(delta: float) -> void:
 				anim.flip_h = true  
 			else:
 				anim.flip_h = false 
-				
 		else:
 			if is_on_floor():
 				if abs(velocity.x) > 100: 
