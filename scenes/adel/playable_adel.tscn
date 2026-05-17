@@ -1,0 +1,241 @@
+[gd_scene format=3 uid="uid://dhhn1rh24dtco"]
+
+[ext_resource type="Texture2D" uid="uid://xmlaq4nkm2qx" path="res://asset/Character/Adel_Idle.png" id="1_mi85b"]
+[ext_resource type="Texture2D" uid="uid://bgsugda23f5pd" path="res://asset/Character/Adel_Walking.png" id="2_fq5cy"]
+
+[sub_resource type="GDScript" id="GDScript_jn4p2"]
+script/source = "extends CharacterBody2D
+@onready var anim = $AnimatedSprite2D
+@onready var weapon_pivot = $WeaponPivot
+const SPEED = 300.0 #72.0
+const JUMP_VELOCITY = 0.0
+const SLIDE_SPEED = 300.0
+
+signal player_attacked
+
+var is_sliding = false
+var can_move: bool = true
+var is_locked: bool = false
+var is_resting: bool = false
+var _position_before_rest: Vector2 = Vector2.ZERO
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed(\"attack\"):
+		player_attacked.emit()
+
+func enter_rest(_world_position: Vector2, face_left: bool) -> void:
+	_position_before_rest = global_position
+	is_resting = true
+	is_locked = true
+	can_move = false
+	velocity = Vector2.ZERO
+	anim.flip_h = face_left
+	anim.play(\"idle\")
+
+func exit_rest() -> void:
+	is_resting = false
+	is_locked = false
+	can_move = true
+	velocity = Vector2.ZERO
+	global_position = _position_before_rest
+	snap_feet_to_floor()
+
+func snap_feet_to_floor(max_drop: float = 96.0) -> void:
+	var col := $CollisionShape2D as CollisionShape2D
+	if col == null or col.shape == null:
+		return
+	var half_h := _capsule_half_height(col)
+	var feet := Vector2(col.global_position.x, col.global_position.y + half_h)
+	var space := get_world_2d().direct_space_state
+	var query := PhysicsRayQueryParameters2D.create(
+		feet + Vector2(0, -4.0),
+		feet + Vector2(0, max_drop)
+	)
+	query.collision_mask = collision_mask
+	query.exclude = [get_rid()]
+	var hit := space.intersect_ray(query)
+	if hit.is_empty():
+		return
+	global_position.y += hit.position.y - feet.y
+
+func _capsule_half_height(col: CollisionShape2D) -> float:
+	var capsule := col.shape as CapsuleShape2D
+	if capsule == null:
+		return 32.0
+	var scale_y := col.global_transform.get_scale().y
+	return capsule.height * 0.5 * scale_y
+
+func _physics_process(delta: float) -> void:
+	if is_resting:
+		velocity = Vector2.ZERO
+		return
+	if is_locked or can_move == false:
+		velocity.x = 0
+		move_and_slide()
+		return
+	#Shadow.modulate.a = 1.0
+	if not is_on_floor():
+		velocity += get_gravity() * delta
+	#Moving action
+	if Input.is_action_just_pressed(\"ui_accept\") and is_on_floor():
+		velocity.y = JUMP_VELOCITY
+			
+	var direction := Input.get_axis(\"move_left\", \"move_right\")
+		
+	if direction:
+		weapon_pivot.scale.x = direction
+		if is_on_floor():
+			anim.play(\"walking\")
+		velocity.x = direction * SPEED
+		anim.flip_h = direction < 0
+	else:
+		if is_on_floor():
+			anim.play(\"idle\")
+					
+		velocity.x = move_toward(velocity.x, 0, SPEED)
+	move_and_slide()
+"
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]
+height = 96.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_11ixh"]
+atlas = ExtResource("1_mi85b")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w078t"]
+atlas = ExtResource("1_mi85b")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_20t1u"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(0, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fd6ls"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(100, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_boi4p"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(200, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rqpmi"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(300, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2yngh"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(400, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qqc7k"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(500, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_egoch"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(600, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_a74ic"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(700, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_iwa5b"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(800, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_n3efn"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(900, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yxtlv"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(1000, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5hair"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(1100, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_nrmhc"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(1200, 0, 100, 100)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_s5rnx"]
+atlas = ExtResource("2_fq5cy")
+region = Rect2(1300, 0, 100, 100)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_nm6dr"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_11ixh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w078t")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_20t1u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fd6ls")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_boi4p")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rqpmi")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2yngh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qqc7k")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_egoch")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_a74ic")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_iwa5b")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_n3efn")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yxtlv")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5hair")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_nrmhc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_s5rnx")
+}],
+"loop": true,
+"name": &"walking",
+"speed": 7.0
+}]
+
+[node name="PlayableAdel" type="CharacterBody2D" unique_id=1485460165 groups=["playableAdel"]]
+scale = Vector2(1.3402412, 1.345952)
+script = SubResource("GDScript_jn4p2")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1090059515]
+scale = Vector2(1.8800013, 1)
+shape = SubResource("CapsuleShape2D_ybq6y")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=849104016]
+texture_filter = 1
+sprite_frames = SubResource("SpriteFrames_nm6dr")
+animation = &"idle"
+autoplay = "idle"
+frame = 1
+frame_progress = 0.93224365

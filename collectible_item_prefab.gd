@@ -25,7 +25,7 @@ func _ready() -> void:
 		interaction.visible = false
 		
 		#Lấy instance của Player để tính toán khoảng cách
-		player = get_tree().get_first_node_in_group("Player") as CharacterBody2D
+		player = get_tree().get_first_node_in_group("playableAdel") as CharacterBody2D
 		notifier.screen_entered.connect(_on_screen_entered)
 		notifier.screen_exited.connect(_on_screen_exited)
 		
@@ -42,6 +42,7 @@ func _process(delta: float) -> void:
 	if distance <= detection_radius:
 		interaction.visible = true
 		if Input.is_action_just_pressed("Interact"):
+			#Nhặt xong thì xóa
 			print("Picked up.")
 			queue_free()
 	else:
