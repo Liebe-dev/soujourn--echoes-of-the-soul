@@ -1,8 +1,8 @@
 extends CharacterBody2D
 @onready var anim = $AnimatedSprite2D
-@onready var Shadow =$Shadow
-const SPEED = 72.0
-const JUMP_VELOCITY =0.0
+#@onready var Shadow =$Shadow
+const SPEED = 300.0 #72.0
+const JUMP_VELOCITY = 0.0
 const SLIDE_SPEED = 300.0
 
 var is_sliding = false
@@ -14,7 +14,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = 0
 		move_and_slide()
 		return
-	Shadow.modulate.a = 1.0
+	#Shadow.modulate.a = 1.0
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
@@ -33,7 +33,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = slope_normal.x * 2 * SLIDE_SPEED
 		
 		anim.play("Slide")
-		Shadow.modulate.a = 0
+		#Shadow.modulate.a = 0
 		if velocity.x < 0:
 			anim.flip_h = true
 		else:

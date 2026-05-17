@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://by6wieofxdbxs"]
+
+[ext_resource type="Texture2D" uid="uid://bmvih0hswruyb" path="res://asset/Map/background/BGScene2_2.png" id="1_co24e"]
+[ext_resource type="PackedScene" uid="uid://bnrj68nb4o4v7" path="res://Adel1.tscn" id="2_feb8i"]
+[ext_resource type="PackedScene" uid="uid://c2aqlr28m4cvc" path="res://collectible_item_prefab.tscn" id="3_feb8i"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_kj3p2"]
+size = Vector2(118.26207, 13.535665)
+
+[node name="Node2D" type="Node2D" unique_id=1768881503]
+
+[node name="StaticBody2D" type="StaticBody2D" parent="." unique_id=97297437]
+
+[node name="Sprite2D" type="Sprite2D" parent="StaticBody2D" unique_id=711209482]
+position = Vector2(432, 840)
+scale = Vector2(4.2399993, 1)
+texture = ExtResource("1_co24e")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="StaticBody2D" unique_id=1175744612]
+position = Vector2(944.00006, 952)
+rotation = -3.1415925
+scale = Vector2(18.491396, 3.518734)
+shape = SubResource("RectangleShape2D_kj3p2")
+
+[node name="CollectibleItem" parent="." unique_id=818450812 instance=ExtResource("3_feb8i")]
+position = Vector2(728, 864)
+
+[node name="CharacterBody2D" parent="." unique_id=552286992 instance=ExtResource("2_feb8i")]
+position = Vector2(496, 816)
