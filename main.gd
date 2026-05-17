@@ -62,6 +62,10 @@ func _ready() -> void:
 	vignette.modulate.a = 0.0
 	vignette.visible = true
 	await _fade_in_from_opening()
+	if SaveManager.pending_continue:
+		await get_tree().process_frame
+		SaveManager.apply_continue_state()
+		return
 	_begin_level_intro()
 
 func _fade_in_from_opening() -> void:

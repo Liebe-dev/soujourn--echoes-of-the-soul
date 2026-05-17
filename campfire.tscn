@@ -1,0 +1,144 @@
+[gd_scene format=3 uid="uid://campfire01"]
+
+[ext_resource type="Script" path="res://campfire.gd" id="1_campfire"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_interact"]
+radius = 72.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_prompt"]
+bg_color = Color(0.08, 0.06, 0.05, 0.82)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.55, 0.2, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+
+[sub_resource type="Gradient" id="Gradient_fire"]
+offsets = PackedFloat32Array(0, 0.4, 1)
+colors = PackedColorArray(1, 0.9, 0.3, 1, 1, 0.45, 0.05, 1, 0.6, 0.1, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_fire"]
+gradient = SubResource("Gradient_fire")
+width = 32
+height = 32
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="LabelSettings" id="LabelSettings_saved"]
+font_size = 28
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+
+[node name="Campfire" type="Area2D"]
+collision_layer = 0
+collision_mask = 1
+script = ExtResource("1_campfire")
+
+[node name="Visual" type="Node2D" parent="."]
+
+[node name="LogLeft" type="ColorRect" parent="Visual"]
+offset_left = -28.0
+offset_top = 8.0
+offset_right = 8.0
+offset_bottom = 20.0
+color = Color(0.28, 0.16, 0.09, 1)
+
+[node name="LogRight" type="ColorRect" parent="Visual"]
+offset_left = 8.0
+offset_top = 10.0
+offset_right = 36.0
+offset_bottom = 22.0
+color = Color(0.22, 0.12, 0.07, 1)
+
+[node name="EmberBed" type="ColorRect" parent="Visual"]
+offset_left = -8.0
+offset_top = 14.0
+offset_right = 16.0
+offset_bottom = 22.0
+color = Color(0.15, 0.08, 0.04, 1)
+
+[node name="FireParticles" type="CPUParticles2D" parent="Visual"]
+position = Vector2(4, 6)
+amount = 24
+lifetime = 0.7
+preprocess = 0.5
+explosiveness = 0.15
+randomness = 0.4
+emission_shape = 1
+emission_sphere_radius = 10.0
+direction = Vector2(0, -1)
+spread = 28.0
+gravity = Vector2(0, -40)
+initial_velocity_min = 20.0
+initial_velocity_max = 55.0
+scale_amount_min = 2.0
+scale_amount_max = 5.0
+color = Color(1, 0.55, 0.15, 0.9)
+
+[node name="GlowLight" type="PointLight2D" parent="Visual"]
+position = Vector2(4, 8)
+color = Color(1, 0.6, 0.25, 1)
+energy = 1.2
+texture = SubResource("GradientTexture2D_fire")
+texture_scale = 2.5
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, 16)
+shape = SubResource("CircleShape2D_interact")
+
+[node name="RestPosition" type="Marker2D" parent="."]
+position = Vector2(0, 48)
+
+[node name="PromptLayer" type="CanvasLayer" parent="."]
+layer = 5
+
+[node name="Prompt" type="PanelContainer" parent="PromptLayer"]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -120.0
+offset_right = 120.0
+offset_bottom = -80.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_prompt")
+
+[node name="MarginContainer" type="MarginContainer" parent="PromptLayer/Prompt"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PromptLayer/Prompt/MarginContainer"]
+layout_mode = 2
+text = "Press F to rest"
+horizontal_alignment = 1
+
+[node name="SavedLabel" type="Label" parent="PromptLayer"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -80.0
+offset_right = 80.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Saved"
+label_settings = SubResource("LabelSettings_saved")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="body_exited" from="." to="." method="_on_body_exited"]

@@ -108,10 +108,18 @@ func _on_start_pressed() -> void:
 	tween.tween_property(bgm_player, "volume_db", -50.0, 2)
 	await tween.finished
 
+	SaveManager.delete_save()
 	get_tree().change_scene_to_file("res://opening.tscn")
-	
+
 func _on_continue_pressed() -> void:
-	get_tree().change_scene_to_file("res://continue")
+	if not SaveManager.has_save():
+		return
+	fade_rect.mouse_filter = Control.MOUSE_FILTER_STOP
+	fade_rect.show()
+	var tween := create_tween()
+	tween.tween_property(fade_rect, "modulate:a", 1.0, 0.8)
+	await tween.finished
+	SaveManager.continue_game()
 
 
 func _on_option_pressed() -> void:

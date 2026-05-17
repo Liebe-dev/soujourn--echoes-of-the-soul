@@ -8,9 +8,24 @@ const SLIDE_SPEED = 300.0
 var is_sliding = false
 var can_move: bool = true
 var is_locked: bool = false
+var is_resting: bool = false
+
+func enter_rest(world_position: Vector2, face_left: bool) -> void:
+	is_resting = true
+	is_locked = true
+	can_move = false
+	global_position = world_position
+	velocity = Vector2.ZERO
+	anim.flip_h = face_left
+	anim.play("idle")
+
+func exit_rest() -> void:
+	is_resting = false
+	is_locked = false
+	can_move = true
 
 func _physics_process(delta: float) -> void:
-	if is_locked or can_move == false:
+	if is_resting or is_locked or can_move == false:
 		velocity.x = 0
 		move_and_slide()
 		return

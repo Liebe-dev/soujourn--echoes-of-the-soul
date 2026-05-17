@@ -42,6 +42,7 @@
 [ext_resource type="Script" uid="uid://ckwnyresyamtm" path="res://doggo.gd" id="37_4lmeg"]
 [ext_resource type="Texture2D" uid="uid://boe6okl4teibl" path="res://asset/Enemies/Wobtear1.png" id="38_d2t1y"]
 [ext_resource type="PackedScene" uid="uid://bscreenfx01" path="res://screen_effects.tscn" id="39_screenfx"]
+[ext_resource type="PackedScene" uid="uid://campfire01" path="res://campfire.tscn" id="40_campfire"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_d13ii"]
 blend_mode = 1
@@ -1964,6 +1965,10 @@ position = Vector2(1279, 408)
 shape = SubResource("RectangleShape2D_qsp4k")
 
 [node name="ScreenEffects" parent="." instance=ExtResource("39_screenfx")]
+
+[node name="Campfire" parent="." instance=ExtResource("40_campfire")]
+position = Vector2(720, 432)
+checkpoint_id = "main_trail_campfire"
 
 [node name="doggo" type="CharacterBody2D" parent="." unique_id=1598157269]
 z_index = 1

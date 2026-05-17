@@ -48,6 +48,16 @@ func _process(delta):
 # ======================
 #      HP SYSTEM
 # ======================
+func heal_to_full() -> void:
+	hp = max_hp
+	sync_hp_display()
+	fade_in()
+
+func sync_hp_display() -> void:
+	var percent := float(hp) / float(max_hp)
+	update_shader_value(hp_main, percent)
+	update_shader_value(hp_delay, percent)
+
 func damage(dmg: int):
 	hp = clamp(hp - dmg, 0, max_hp)
 	var percent = float(hp) / max_hp
@@ -70,6 +80,9 @@ func damage(dmg: int):
 	hide_timer = 0.0
 	in_combat = true
 	fade_in()
+
+	if hp <= 0:
+		SaveManager.respawn_at_checkpoint()
 
 func update_shader_value(node: CanvasItem, value: float):
 	if node and node.material:
