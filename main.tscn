@@ -21,7 +21,7 @@
 [ext_resource type="Texture2D" uid="uid://o6s7m6esbso0" path="res://asset/Map/background/background_layer_3_2.png" id="11_dg77c"]
 [ext_resource type="Texture2D" uid="uid://c5s2of8cfjks7" path="res://asset/Map/background/background_layer_E.png" id="12_074og"]
 [ext_resource type="PackedScene" uid="uid://uvrrmyjotnk" path="res://pause.tscn" id="13_yaehf"]
-[ext_resource type="Script" path="res://ui.gd" id="14_074og"]
+[ext_resource type="Script" uid="uid://b8l3nqsr4sed0" path="res://ui.gd" id="14_074og"]
 [ext_resource type="Shader" uid="uid://dj7h5r3bb1evf" path="res://hp_delay.gdshader" id="15_cegan"]
 [ext_resource type="Texture2D" uid="uid://tkam0atqrrq7" path="res://DarkOrbBorder.png" id="16_82xsv"]
 [ext_resource type="Shader" uid="uid://cmw5kx1hxcr5j" path="res://hp_main.gdshader" id="17_getpj"]
@@ -32,17 +32,13 @@
 [ext_resource type="Texture2D" uid="uid://dbb6o1f1jqnpc" path="res://asset/Character/Ishmael_appear.png" id="27_a6jrf"]
 [ext_resource type="Texture2D" uid="uid://ttyy8a117aun" path="res://asset/Character/Ishmael_Idle.png" id="28_xuqvo"]
 [ext_resource type="AudioStream" uid="uid://brjyyu78xiua7" path="res://asset/SFX SF/Ave Mujica - Ether   -Instrumental- Cover - AdriellMR.mp3" id="29_qsp4k"]
-[ext_resource type="Shader" uid="uid://c4xcoutb3tfra" path="res://cutscene.gdshader" id="30_htxhm"]
-[ext_resource type="Texture2D" uid="uid://dpyodq53jmc3l" path="res://asset/Cutscene/1.png" id="30_kq58d"]
-[ext_resource type="Texture2D" uid="uid://osii4keiq7ua" path="res://asset/Cutscene/2.png" id="31_seu75"]
-[ext_resource type="Texture2D" uid="uid://cup5a0fbb3dk7" path="res://asset/Cutscene/3.png" id="33_jq2sk"]
 [ext_resource type="Texture2D" uid="uid://cleya4qc2jpjx" path="res://asset/Enemies/Wobtear2.png" id="34_0rl1p"]
 [ext_resource type="Texture2D" uid="uid://cw746h78nudy7" path="res://asset/Enemies/Wobtear_attack.png" id="36_4lmeg"]
 [ext_resource type="Texture2D" uid="uid://bi2aodtsp8fhj" path="res://asset/Enemies/Wobtear_death.png" id="37_0cp0l"]
 [ext_resource type="Script" uid="uid://ckwnyresyamtm" path="res://doggo.gd" id="37_4lmeg"]
 [ext_resource type="Texture2D" uid="uid://boe6okl4teibl" path="res://asset/Enemies/Wobtear1.png" id="38_d2t1y"]
 [ext_resource type="PackedScene" uid="uid://bscreenfx01" path="res://screen_effects.tscn" id="39_screenfx"]
-[ext_resource type="PackedScene" uid="uid://campfire01" path="res://campfire.tscn" id="40_campfire"]
+[ext_resource type="PackedScene" path="res://campfire.tscn" id="40_campfire"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_d13ii"]
 blend_mode = 1
@@ -1350,57 +1346,6 @@ animations = [{
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_qsp4k"]
 size = Vector2(97, 193)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_jq2sk"]
-shader = ExtResource("30_htxhm")
-shader_parameter/lod = 1.50000007125
-
-[sub_resource type="Gradient" id="Gradient_qsp4k"]
-colors = PackedColorArray(0, 0, 0, 0, 0.5882353, 0.101960786, 0, 0.1764706)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_kq58d"]
-gradient = SubResource("Gradient_qsp4k")
-fill = 1
-fill_from = Vector2(0.5, 0.5)
-fill_to = Vector2(1, 0.5)
-
-[sub_resource type="FontFile" id="FontFile_htxhm"]
-cache/0/variation_coordinates = {}
-cache/0/face_index = 0
-cache/0/embolden = 0.0
-cache/0/transform = Transform2D(1, 0, 0, 1, 0, 0)
-cache/0/spacing_top = 0
-cache/0/spacing_bottom = 0
-cache/0/spacing_space = 0
-cache/0/spacing_glyph = 0
-cache/0/baseline_offset = 0.0
-cache/0/16/0/ascent = 0.0
-cache/0/16/0/descent = 0.0
-cache/0/16/0/underline_position = 0.0
-cache/0/16/0/underline_thickness = 0.0
-cache/0/16/0/scale = 1.0
-cache/0/30/0/ascent = 0.0
-cache/0/30/0/descent = 0.0
-cache/0/30/0/underline_position = 0.0
-cache/0/30/0/underline_thickness = 0.0
-cache/0/30/0/scale = 1.0
-cache/0/35/0/ascent = 0.0
-cache/0/35/0/descent = 0.0
-cache/0/35/0/underline_position = 0.0
-cache/0/35/0/underline_thickness = 0.0
-cache/0/35/0/scale = 1.0
-cache/0/45/0/ascent = 0.0
-cache/0/45/0/descent = 0.0
-cache/0/45/0/underline_position = 0.0
-cache/0/45/0/underline_thickness = 0.0
-cache/0/45/0/scale = 1.0
-
-[sub_resource type="LabelSettings" id="LabelSettings_jq2sk"]
-font = SubResource("FontFile_htxhm")
-font_size = 45
-
-[sub_resource type="LabelSettings" id="LabelSettings_4k2k6"]
-font_size = 30
-
 [sub_resource type="AtlasTexture" id="AtlasTexture_34ol3"]
 atlas = ExtResource("36_4lmeg")
 region = Rect2(0, 0, 128, 128)
@@ -1964,10 +1909,10 @@ volume_db = -20.163
 position = Vector2(1279, 408)
 shape = SubResource("RectangleShape2D_qsp4k")
 
-[node name="ScreenEffects" parent="." instance=ExtResource("39_screenfx")]
+[node name="ScreenEffects" parent="." unique_id=689566452 instance=ExtResource("39_screenfx")]
 
-[node name="Campfire" parent="." instance=ExtResource("40_campfire")]
-position = Vector2(720, 432)
+[node name="Campfire" parent="." unique_id=273906540 instance=ExtResource("40_campfire")]
+position = Vector2(759, 485)
 checkpoint_id = "main_trail_campfire"
 
 [node name="doggo" type="CharacterBody2D" parent="." unique_id=1598157269]
@@ -2032,7 +1977,7 @@ offset_right = 583.0
 offset_bottom = 477.0
 text = "press space"
 
-[node name="CanvasLayer2" type="CanvasLayer" parent="."]
+[node name="CanvasLayer2" type="CanvasLayer" parent="." unique_id=748911624]
 
 [connection signal="body_entered" from="CameraZoomTrigger" to="CameraZoomTrigger" method="_on_body_entered"]
 [connection signal="body_exited" from="CameraZoomTrigger" to="CameraZoomTrigger" method="_on_body_exited"]
