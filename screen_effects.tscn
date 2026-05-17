@@ -1,0 +1,34 @@
+[gd_scene format=3 uid="uid://bscreenfx01"]
+
+[sub_resource type="Gradient" id="Gradient_vignette"]
+colors = PackedColorArray(0, 0, 0, 0, 0.72156864, 0.13333334, 0, 0.10980392)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_vignette"]
+gradient = SubResource("Gradient_vignette")
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(1, 0.5)
+
+[node name="ScreenEffects" type="CanvasLayer"]
+layer = 10
+
+[node name="Vignette" type="TextureRect" parent="."]
+visible = false
+z_index = 5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = SubResource("GradientTexture2D_vignette")
+
+[node name="BlinkScreen" type="ColorRect" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
