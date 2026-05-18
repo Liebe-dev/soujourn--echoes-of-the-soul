@@ -1,55 +1,21 @@
 [gd_scene format=3 uid="uid://xoclhbtm6dob"]
 
-[ext_resource type="Script" uid="uid://b8l3nqsr4sed0" path="res://ui.gd" id="1_m6e0p"]
-[ext_resource type="Shader" uid="uid://dj7h5r3bb1evf" path="res://hp_delay.gdshader" id="2_ibotj"]
-[ext_resource type="Shader" uid="uid://cmw5kx1hxcr5j" path="res://hp_main.gdshader" id="2_nltto"]
-[ext_resource type="Texture2D" uid="uid://b0lmcyk22sei1" path="res://DarkOrbBorder.png" id="3_nltto"]
+[ext_resource type="PackedScene" uid="uid://moo3202hyjoh" path="res://hud.tscn" id="1_hud"]
+[ext_resource type="PackedScene" uid="uid://uvrrmyjotnk" path="res://pause.tscn" id="2_pause"]
+[ext_resource type="PackedScene" uid="uid://dd3kuxfkj4iwc" path="res://asset/UI/settings_menu.tscn" id="3_settings"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ibotj"]
-resource_local_to_scene = true
-shader = ExtResource("2_ibotj")
-shader_parameter/hp = 1.0
-shader_parameter/hp_color = Color(0.62107486, 0.45756793, 0.13230121, 1)
-shader_parameter/highlight_color = Color(1, 1, 1, 0.35)
+[node name="UI" type="CanvasLayer"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_nltto"]
-shader = ExtResource("2_nltto")
-shader_parameter/hp = 1.0
-shader_parameter/hp_color = Color(0.9, 0.1, 0.1, 1)
-shader_parameter/highlight_color = Color(1, 1, 1, 0.35)
+[node name="hud" parent="." instance=ExtResource("1_hud")]
 
-[node name="hud" type="Control" unique_id=1129349742]
-layout_mode = 3
-anchors_preset = 0
-script = ExtResource("1_m6e0p")
-metadata/_edit_use_anchors_ = true
+[node name="pause" parent="." instance=ExtResource("2_pause")]
+visible = false
+offset_left = 1.0
+offset_top = -3.0
+offset_right = 1.0
+offset_bottom = -3.0
+scale = Vector2(1.505, 1.505)
 
-[node name="bar" type="Control" parent="." unique_id=1927524119]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="hp" type="MarginContainer" parent="bar" unique_id=1906266083]
-custom_minimum_size = Vector2(135, 135)
-layout_mode = 1
-anchors_preset = -1
-offset_right = 230.0
-offset_bottom = 230.0
-
-[node name="hp_delay" type="TextureRect" parent="bar/hp" unique_id=1769083482]
-material = SubResource("ShaderMaterial_ibotj")
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-texture = ExtResource("3_nltto")
-
-[node name="hp_main" type="TextureRect" parent="bar/hp" unique_id=842520265]
-material = SubResource("ShaderMaterial_nltto")
-layout_mode = 2
-texture = ExtResource("3_nltto")
-
-[node name="border" type="TextureRect" parent="bar/hp" unique_id=1875050662]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-texture = ExtResource("3_nltto")
+[node name="SettingsMenu" parent="." instance=ExtResource("3_settings")]
+visible = false
+script = null

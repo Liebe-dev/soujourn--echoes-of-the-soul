@@ -16,6 +16,8 @@ var _data: Dictionary = {
 	"spawn_position": {"x": 0.0, "y": 0.0},
 	"hp": 100,
 	"max_hp": 100,
+	"flask_charges": 3,
+	"max_flask_charges": 3,
 	"facing_left": false,
 }
 
@@ -56,6 +58,10 @@ func save_at_campfire(campfire: Node2D) -> bool:
 	_data["spawn_position"] = {"x": spawn_pos.x, "y": spawn_pos.y}
 	_data["hp"] = hp_info.hp
 	_data["max_hp"] = hp_info.max_hp
+	var hud := _find_hud(tree)
+	if hud != null:
+		_data["flask_charges"] = hud.flask_charges
+		_data["max_flask_charges"] = hud.max_flask_charges
 	_data["facing_left"] = player.global_position.x > campfire.global_position.x
 
 	if not _write_to_disk():
@@ -143,6 +149,8 @@ func delete_save() -> void:
 		"spawn_position": {"x": 0.0, "y": 0.0},
 		"hp": 100,
 		"max_hp": 100,
+		"flask_charges": 3,
+		"max_flask_charges": 3,
 		"facing_left": false,
 	}
 	if FileAccess.file_exists(SAVE_PATH):
@@ -195,5 +203,27 @@ func _apply_hp_to_hud(tree: SceneTree, hp: int, max_hp: int) -> void:
 		return
 	hud.max_hp = max_hp
 	hud.hp = clampi(hp, 0, max_hp)
+	if "max_flask_charges" in hud:
+		hud.max_flask_charges = int(_data.get("max_flask_charges", hud.max_flask_charges))
+	if "flask_charges" in hud:
+		hud.flask_charges = clampi(
+			int(_data.get("flask_charges", hud.max_flask_charges)),
+			0,
+			hud.max_flask_charges
+		)
+	if hud.has_method("_recalc_flask_heal_amount"):
+		hud._recalc_flask_heal_amount()
+	if "stamina" in hud and "max_stamina" in hud:
+		hud.stamina = hud.max_stamina
 	if hud.has_method("sync_hp_display"):
 		hud.sync_hp_display()
+	if hud.has_method("sync_flask_display"):
+		hud.sync_flask_display()
+	elif hud.has_method("sync_soul_display"):
+		hud.sync_soul_display()
+	if hud.has_method("clear_all_debuffs"):
+		hud.clear_all_debuffs()
+	if hud.has_method("sync_status_icons"):
+		hud.sync_status_icons()
+	if hud.has_method("sync_stamina_display"):
+		hud.sync_stamina_display()

@@ -1,27 +1,70 @@
 [gd_scene format=3 uid="uid://moo3202hyjoh"]
 
-[ext_resource type="Script" path="res://ui.gd" id="1_a2258"]
-[ext_resource type="Shader" path="res://hp_delay.gdshader" id="2_8sq4i"]
-[ext_resource type="Texture2D" uid="uid://tkam0atqrrq7" path="res://DarkOrbBorder.png" id="3_1xsix"]
-[ext_resource type="Shader" path="res://hp_main.gdshader" id="4_rftc2"]
-[ext_resource type="PackedScene" uid="uid://uvrrmyjotnk" path="res://pause.tscn" id="5_61f8s"]
+[ext_resource type="Script" uid="uid://b8l3nqsr4sed0" path="res://ui.gd" id="1_hud"]
+[ext_resource type="Shader" uid="uid://dj7h5r3bb1evf" path="res://hp_delay.gdshader" id="2_delay"]
+[ext_resource type="Shader" uid="uid://cmw5kx1hxcr5j" path="res://hp_main.gdshader" id="3_main"]
+[ext_resource type="Texture2D" uid="uid://tkam0atqrrq7" path="res://DarkOrbBorder.png" id="4_border"]
+[ext_resource type="Shader" uid="uid://nno1l8bmdg84" path="res://flask_shake.gdshader" id="5_flask_shake"]
+[ext_resource type="Script" uid="uid://cjp4da16xous7" path="res://status_effect_bar.gd" id="7_buff_bar"]
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ryguw"]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_soul_delay"]
 resource_local_to_scene = true
-shader = ExtResource("2_8sq4i")
-shader_parameter/hp = 1.0
-shader_parameter/hp_color = Color(0.62107486, 0.45756793, 0.13230121, 1)
-shader_parameter/highlight_color = Color(1, 1, 1, 0.35)
+shader = ExtResource("2_delay")
+shader_parameter/hp = 0.0
+shader_parameter/hp_color = Color(0.45, 0.28, 0.75, 1)
+shader_parameter/highlight_color = Color(0.85, 0.7, 1, 0.4)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_d13ii"]
-shader = ExtResource("4_rftc2")
-shader_parameter/hp = 1.0
-shader_parameter/hp_color = Color(0.9, 0.1, 0.1, 1)
-shader_parameter/highlight_color = Color(1, 1, 1, 0.35)
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_soul_main"]
+resource_local_to_scene = true
+shader = ExtResource("3_main")
+shader_parameter/hp = 0.0
+shader_parameter/hp_color = Color(0.55, 0.35, 0.95, 1)
+shader_parameter/highlight_color = Color(0.9, 0.75, 1, 0.45)
 
-[node name="Hud" type="CanvasLayer" unique_id=2007568659]
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_flask_border"]
+shader = ExtResource("5_flask_shake")
+shader_parameter/shake_amount = 0.0
+shader_parameter/shake_time = 0.0
 
-[node name="hud" type="Control" parent="." unique_id=2075262826]
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_bg"]
+bg_color = Color(0.08, 0.06, 0.1, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.3, 0.4, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_hp_fill"]
+bg_color = Color(0.75, 0.15, 0.12, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stamina_bg"]
+bg_color = Color(0.08, 0.06, 0.1, 0.85)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.35, 0.3, 0.4, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_stamina_fill"]
+bg_color = Color(0.2, 0.72, 0.35, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[node name="hud" type="Control" unique_id=558584565]
 layout_mode = 3
 anchors_preset = 0
 offset_left = 12.999878
@@ -29,42 +72,150 @@ offset_top = 10.999939
 offset_right = 12.999878
 offset_bottom = 10.999939
 scale = Vector2(0.755, 0.755)
-script = ExtResource("1_a2258")
+script = ExtResource("1_hud")
 metadata/_edit_use_anchors_ = true
 
-[node name="bar" type="Control" parent="hud" unique_id=2049945630]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+[node name="bar" type="HBoxContainer" parent="." unique_id=1908086473]
+layout_mode = 0
+offset_right = 380.0
+offset_bottom = 140.0
+theme_override_constants/separation = 14
+alignment = 1
 
-[node name="hp" type="MarginContainer" parent="hud/bar" unique_id=1649867243]
+[node name="soul_flask" type="MarginContainer" parent="bar" unique_id=272496695]
 custom_minimum_size = Vector2(135, 135)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="soul_delay" type="TextureRect" parent="bar/soul_flask" unique_id=699469333]
+material = SubResource("ShaderMaterial_soul_delay")
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+texture = ExtResource("4_border")
+
+[node name="soul_main" type="TextureRect" parent="bar/soul_flask" unique_id=1095035709]
+material = SubResource("ShaderMaterial_soul_main")
+layout_mode = 2
+texture = ExtResource("4_border")
+
+[node name="border" type="TextureRect" parent="bar/soul_flask" unique_id=1077329373]
+material = SubResource("ShaderMaterial_flask_border")
+layout_mode = 2
+size_flags_horizontal = 0
+size_flags_vertical = 0
+texture = ExtResource("4_border")
+
+[node name="flask_uses_label" type="Label" parent="bar/soul_flask" unique_id=535581909]
+layout_mode = 2
+size_flags_horizontal = 4
+size_flags_vertical = 8
+theme_override_colors/font_color = Color(0.88, 0.78, 1, 1)
+theme_override_colors/font_outline_color = Color(0.1, 0.05, 0.15, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 16
+text = "x3"
+horizontal_alignment = 1
+vertical_alignment = 2
+
+[node name="hp_bar_panel" type="VBoxContainer" parent="bar" unique_id=102724991]
+custom_minimum_size = Vector2(200, 118)
+layout_mode = 2
+size_flags_vertical = 4
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="hp_label" type="Label" parent="bar/hp_bar_panel" unique_id=975659145]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9, 0.85, 0.8, 1)
+theme_override_font_sizes/font_size = 14
+text = "HP"
+
+[node name="hp_bar_wrap" type="Control" parent="bar/hp_bar_panel" unique_id=1629822628]
+custom_minimum_size = Vector2(200, 22)
+layout_mode = 2
+size_flags_vertical = 4
+
+[node name="hp_bar" type="ProgressBar" parent="bar/hp_bar_panel/hp_bar_wrap" unique_id=691482856]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/background = SubResource("StyleBoxFlat_hp_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_hp_fill")
+value = 100.0
+show_percentage = false
+
+[node name="stagger_markers" type="Control" parent="bar/hp_bar_panel/hp_bar_wrap" unique_id=1758191731]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="marker_66" type="ColorRect" parent="bar/hp_bar_panel/hp_bar_wrap/stagger_markers" unique_id=1048950630]
 layout_mode = 1
 anchors_preset = -1
-offset_right = 230.0
-offset_bottom = 230.0
+anchor_left = 0.66
+anchor_right = 0.66
+anchor_bottom = 1.0
+offset_left = -1.5
+offset_right = 1.5
+grow_vertical = 2
+color = Color(1, 0.82, 0.28, 0.95)
 
-[node name="hp_delay" type="TextureRect" parent="hud/bar/hp" unique_id=2077175201]
-material = SubResource("ShaderMaterial_ryguw")
+[node name="marker_33" type="ColorRect" parent="bar/hp_bar_panel/hp_bar_wrap/stagger_markers" unique_id=1336880828]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.33
+anchor_right = 0.33
+anchor_bottom = 1.0
+offset_left = -1.5
+offset_right = 1.5
+grow_vertical = 2
+color = Color(1, 0.82, 0.28, 0.95)
+
+[node name="stamina_label" type="Label" parent="bar/hp_bar_panel" unique_id=879449805]
 layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-texture = ExtResource("3_1xsix")
+theme_override_colors/font_color = Color(0.75, 0.9, 0.78, 1)
+theme_override_font_sizes/font_size = 14
+text = "Stamina"
 
-[node name="hp_main" type="TextureRect" parent="hud/bar/hp" unique_id=953349766]
-material = SubResource("ShaderMaterial_d13ii")
+[node name="stamina_bar" type="ProgressBar" parent="bar/hp_bar_panel" unique_id=1074121980]
+custom_minimum_size = Vector2(200, 16)
 layout_mode = 2
-texture = ExtResource("3_1xsix")
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("StyleBoxFlat_stamina_bg")
+theme_override_styles/fill = SubResource("StyleBoxFlat_stamina_fill")
+value = 100.0
+show_percentage = false
 
-[node name="border" type="TextureRect" parent="hud/bar/hp" unique_id=512636318]
+[node name="status_panel" type="VBoxContainer" parent="bar/hp_bar_panel" unique_id=1497102112]
 layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-texture = ExtResource("3_1xsix")
+theme_override_constants/separation = 4
 
-[node name="pause" parent="." unique_id=1427835890 instance=ExtResource("5_61f8s")]
-visible = false
-offset_left = -360.0
-offset_top = -220.0
-offset_right = -360.0
-offset_bottom = -220.0
+[node name="debuff_label" type="Label" parent="bar/hp_bar_panel/status_panel" unique_id=864839048]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.55, 0.55, 1)
+theme_override_font_sizes/font_size = 11
+text = "Debuffs"
+
+[node name="debuff_bar" type="HBoxContainer" parent="bar/hp_bar_panel/status_panel" unique_id=2143926087]
+layout_mode = 2
+theme_override_constants/separation = 4
+script = ExtResource("7_buff_bar")
+
+[node name="buff_label" type="Label" parent="bar/hp_bar_panel/status_panel" unique_id=1855899919]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.72, 0.85, 1)
+theme_override_font_sizes/font_size = 11
+text = "Buffs"
+
+[node name="buff_bar" type="HBoxContainer" parent="bar/hp_bar_panel/status_panel" unique_id=1013221915]
+layout_mode = 2
+theme_override_constants/separation = 4
+script = ExtResource("7_buff_bar")

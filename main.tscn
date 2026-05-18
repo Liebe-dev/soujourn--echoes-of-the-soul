@@ -20,15 +20,10 @@
 [ext_resource type="Texture2D" uid="uid://cign1uy2ssev0" path="res://asset/Map/rock.png" id="10_0odxb"]
 [ext_resource type="Texture2D" uid="uid://o6s7m6esbso0" path="res://asset/Map/background/background_layer_3_2.png" id="11_dg77c"]
 [ext_resource type="Texture2D" uid="uid://c5s2of8cfjks7" path="res://asset/Map/background/background_layer_E.png" id="12_074og"]
-[ext_resource type="PackedScene" uid="uid://uvrrmyjotnk" path="res://pause.tscn" id="13_yaehf"]
-[ext_resource type="Script" uid="uid://b8l3nqsr4sed0" path="res://ui.gd" id="14_074og"]
-[ext_resource type="Shader" uid="uid://dj7h5r3bb1evf" path="res://hp_delay.gdshader" id="15_cegan"]
-[ext_resource type="Texture2D" uid="uid://tkam0atqrrq7" path="res://DarkOrbBorder.png" id="16_82xsv"]
-[ext_resource type="Shader" uid="uid://cmw5kx1hxcr5j" path="res://hp_main.gdshader" id="17_getpj"]
+[ext_resource type="PackedScene" uid="uid://xoclhbtm6dob" path="res://ui.tscn" id="13_ui"]
 [ext_resource type="Texture2D" uid="uid://05accsg0lnmn" path="res://asset/Map/background/BGScene2_1.png" id="21_d13ii"]
 [ext_resource type="Texture2D" uid="uid://bmvih0hswruyb" path="res://asset/Map/background/BGScene2_2.png" id="22_1u8w0"]
 [ext_resource type="Texture2D" uid="uid://0f8dsl6m5g57" path="res://asset/Map/background/BGScene2_3.png" id="23_0odxb"]
-[ext_resource type="PackedScene" uid="uid://dd3kuxfkj4iwc" path="res://asset/UI/settings_menu.tscn" id="26_lswn8"]
 [ext_resource type="Texture2D" uid="uid://dbb6o1f1jqnpc" path="res://asset/Character/Ishmael_appear.png" id="27_a6jrf"]
 [ext_resource type="Texture2D" uid="uid://ttyy8a117aun" path="res://asset/Character/Ishmael_Idle.png" id="28_xuqvo"]
 [ext_resource type="AudioStream" uid="uid://brjyyu78xiua7" path="res://asset/SFX SF/Ave Mujica - Ether   -Instrumental- Cover - AdriellMR.mp3" id="29_qsp4k"]
@@ -38,7 +33,7 @@
 [ext_resource type="Script" uid="uid://ckwnyresyamtm" path="res://doggo.gd" id="37_4lmeg"]
 [ext_resource type="Texture2D" uid="uid://boe6okl4teibl" path="res://asset/Enemies/Wobtear1.png" id="38_d2t1y"]
 [ext_resource type="PackedScene" uid="uid://bscreenfx01" path="res://screen_effects.tscn" id="39_screenfx"]
-[ext_resource type="PackedScene" path="res://campfire.tscn" id="40_campfire"]
+[ext_resource type="PackedScene" uid="uid://campfire01" path="res://campfire.tscn" id="40_campfire"]
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_d13ii"]
 blend_mode = 1
@@ -1107,19 +1102,6 @@ load_path = "res://.godot/imported/background_layer_3.png-e28282f17d408c7de2dd35
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_272bh"]
 size = Vector2(6382.75, 4191.75)
 
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ryguw"]
-resource_local_to_scene = true
-shader = ExtResource("15_cegan")
-shader_parameter/hp = 1.0
-shader_parameter/hp_color = Color(0.62107486, 0.45756793, 0.13230121, 1)
-shader_parameter/highlight_color = Color(1, 1, 1, 0.35)
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_d13ii"]
-shader = ExtResource("17_getpj")
-shader_parameter/hp = 1.0
-shader_parameter/hp_color = Color(0.9, 0.1, 0.1, 1)
-shader_parameter/highlight_color = Color(1, 1, 1, 0.35)
-
 [sub_resource type="Gradient" id="Gradient_ryguw"]
 colors = PackedColorArray(1, 1, 1, 1, 0.9411765, 0, 0, 1)
 
@@ -1702,60 +1684,7 @@ visible = false
 position = Vector2(4510.625, 1925.125)
 shape = SubResource("RectangleShape2D_272bh")
 
-[node name="Hud" type="CanvasLayer" parent="." unique_id=2115869892]
-
-[node name="hud" type="Control" parent="Hud" unique_id=1505318190]
-layout_mode = 3
-anchors_preset = 0
-offset_left = 12.999878
-offset_top = 10.999939
-offset_right = 12.999878
-offset_bottom = 10.999939
-scale = Vector2(0.755, 0.755)
-script = ExtResource("14_074og")
-metadata/_edit_use_anchors_ = true
-
-[node name="bar" type="Control" parent="Hud/hud" unique_id=730412194]
-anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
-
-[node name="hp" type="MarginContainer" parent="Hud/hud/bar" unique_id=2145095083]
-custom_minimum_size = Vector2(135, 135)
-layout_mode = 1
-anchors_preset = -1
-offset_right = 230.0
-offset_bottom = 230.0
-
-[node name="hp_delay" type="TextureRect" parent="Hud/hud/bar/hp" unique_id=879150799]
-material = SubResource("ShaderMaterial_ryguw")
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-texture = ExtResource("16_82xsv")
-
-[node name="hp_main" type="TextureRect" parent="Hud/hud/bar/hp" unique_id=1840830719]
-material = SubResource("ShaderMaterial_d13ii")
-layout_mode = 2
-texture = ExtResource("16_82xsv")
-
-[node name="border" type="TextureRect" parent="Hud/hud/bar/hp" unique_id=784353573]
-layout_mode = 2
-size_flags_horizontal = 0
-size_flags_vertical = 0
-texture = ExtResource("16_82xsv")
-
-[node name="pause" parent="Hud" unique_id=1427835890 instance=ExtResource("13_yaehf")]
-visible = false
-offset_left = 1.0
-offset_top = -3.0
-offset_right = 1.0
-offset_bottom = -3.0
-scale = Vector2(1.505, 1.505)
-
-[node name="SettingsMenu" parent="Hud" unique_id=252361829 instance=ExtResource("26_lswn8")]
-visible = false
-script = null
+[node name="UI" parent="." unique_id=2098581245 instance=ExtResource("13_ui")]
 
 [node name="ParallaxBackground2" type="ParallaxBackground" parent="." unique_id=1483166771]
 layer = -101

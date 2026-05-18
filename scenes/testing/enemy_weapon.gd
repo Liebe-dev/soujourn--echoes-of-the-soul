@@ -21,5 +21,5 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 			is_facing_enemy = true
 		if body.is_guarding == true and is_facing_enemy:
 			print("player blocked the hit")
-		else:
-			print("player took the hit")
+		elif body.has_method("take_damage"):
+			body.take_damage(12, global_position)
