@@ -23,13 +23,11 @@ var is_resting: bool = false
 var is_guarding : bool = false
 var holding_duration : float = 0.0
 var _position_before_rest: Vector2 = Vector2.ZERO
-var facing_direction : int = 0
+var facing_direction : int = 1
 var is_stunned: bool = false
 var is_invulnerable: bool = false
 var is_doing_action : bool = false
 var is_dodging : bool = false
-var _enemy_contact_damage_cd: float = 0.0
-const ENEMY_TOUCH_DAMAGE_INTERVAL := 0.4
 
 func _unhandled_input(event: InputEvent) -> void:
 	#Damage test
@@ -88,19 +86,14 @@ func _apply_stagger(knockback_dir: Vector2) -> void:
 	if anim.sprite_frames and anim.sprite_frames.has_animation(\"idle\"):
 		anim.play(\"idle\")
 	get_tree().create_timer(STAGGER_STUN_SEC).timeout.connect(_on_stagger_stun_end, CONNECT_ONE_SHOT)
-	
-func knockback_when_touch_enemy(away_from_enemy: Vector2) -> void:
-	# Push radially away from enemy center (works from sides, below, or standing on head).
-	const PUSH_PER_FRAME := 260.0
-	const MAX_RADIAL_SPEED := 520.0
-	var dir := away_from_enemy
-	if dir.length_squared() < 0.0001:
-		dir = Vector2(0.0, -1.0)
-	else:
-		dir = dir.normalized()
-	var radial := velocity.dot(dir)
-	if radial < MAX_RADIAL_SPEED:
-		velocity += dir * minf(PUSH_PER_FRAME, MAX_RADIAL_SPEED - radial)
+
+func knockback_when_touch_enemy(enemy_global: Vector2) -> void:
+	var is_enemy_on_right = enemy_global.x > global_position.x
+	var angle_rad = deg_to_rad(45)
+	var launch_dir = Vector2(-cos(angle_rad), -sin(angle_rad))
+	if not is_enemy_on_right:
+		launch_dir.x = -launch_dir.x
+	velocity = launch_dir * STAGGER_KNOCKBACK
 
 func _on_stagger_stun_end() -> void:
 	is_stunned = false
@@ -167,8 +160,6 @@ func _capsule_half_height(col: CollisionShape2D) -> float:
 	return capsule.height * 0.5 * scale_y
 
 func _physics_process(delta: float) -> void:
-	if _enemy_contact_damage_cd > 0.0:
-		_enemy_contact_damage_cd -= delta
 	if is_stunned:
 		velocity.x = move_toward(velocity.x, 0.0, 400.0 * delta)
 		if not is_on_floor():
@@ -201,23 +192,30 @@ func _physics_process(delta: float) -> void:
 		if not is_on_floor():
 			velocity += get_gravity() * delta
 	else:
-		if direction:
-			weapon_pivot.scale.x = direction
-			if Input.is_action_just_pressed(\"dodge\") and not is_dodging:
-				is_dodging = true
-				is_invulnerable = true
+		if Input.is_action_just_pressed(\"dodge\") and not is_dodging:
+			is_dodging = true
+			is_invulnerable = true
+			if direction:
 				velocity.x = SPEED * 10 * direction
 				var dodge_tween = create_tween()
 				dodge_tween.set_trans(Tween.TRANS_QUAD)
 				dodge_tween.set_ease(Tween.EASE_OUT)
 				dodge_tween.tween_property(self, \"velocity:x\", direction * SPEED, 0.15)
 				await dodge_tween.finished
-				is_invulnerable = false
-				is_dodging = false
 			else:
-				if is_on_floor():
-					anim.play(\"walking\")
-				velocity.x = direction * SPEED
+				velocity.x = SPEED * 7 * -facing_direction
+				var dodge_tween = create_tween()
+				dodge_tween.set_trans(Tween.TRANS_QUAD)
+				dodge_tween.set_ease(Tween.EASE_OUT)
+				dodge_tween.tween_property(self, \"velocity:x\", facing_direction * SPEED, 0.15)
+				await dodge_tween.finished
+			is_invulnerable = false
+			is_dodging = false
+		if direction:
+			weapon_pivot.scale.x = direction
+			if is_on_floor():
+				anim.play(\"walking\")
+			velocity.x = direction * SPEED
 			anim.flip_h = direction < 0
 			facing_direction = -1 if (direction < 0) else 1
 		else:
@@ -229,16 +227,14 @@ func _physics_process(delta: float) -> void:
 		velocity.y = JUMP_VELOCITY
 
 	move_and_slide()
-	
+
 	for i in get_slide_collision_count():
 		var collision = get_slide_collision(i)
 		var collider = collision.get_collider()
 		if collider and collider.is_in_group(\"Enemy\"):
-			var away : Vector2 = global_position - collider.global_position
-			knockback_when_touch_enemy(away)
-			if not is_invulnerable and not is_stunned and _enemy_contact_damage_cd <= 0.0:
+			knockback_when_touch_enemy(collider.global_position)
+			if not is_invulnerable and not is_stunned:
 				take_damage(1, collider.global_position)
-				_enemy_contact_damage_cd = ENEMY_TOUCH_DAMAGE_INTERVAL
 			break
 "
 
