@@ -22,8 +22,8 @@ config/features=PackedStringArray("4.6", "Forward Plus")
 [autoload]
 
 SaveManager="*res://save_manager.gd"
-_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 FmodManager="*uid://cds10pm7hwn3p"
+_mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 
 [display]
 
