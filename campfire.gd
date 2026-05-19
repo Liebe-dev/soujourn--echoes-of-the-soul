@@ -19,6 +19,7 @@ var _player_in_range := false
 var _is_player_resting := false
 var _rest_cooldown := 0.0
 const REST_COOLDOWN_SEC := 0.35
+@export var detect_radius: float = 96.0
 
 func _ready() -> void:
 	add_to_group("campfire")
@@ -36,11 +37,25 @@ func get_checkpoint_id() -> String:
 func _physics_process(delta: float) -> void:
 	if _rest_cooldown > 0.0:
 		_rest_cooldown = maxf(_rest_cooldown - delta, 0.0)
-	if _is_player_resting or _player == null:
+	if _is_player_resting:
 		return
-	if _player_in_range:
-		_face_campfire()
 
+	# If we have a cached player in range, validate they're still close enough.
+	if _player_in_range:
+		if _player == null or not _player is Node2D or _player.global_position.distance_to(global_position) > detect_radius:
+			_player_in_range = false
+			_player = null
+			prompt_panel.hide()
+
+		
+	# Fallback: if nothing triggered Area2D, attempt to find a nearby player-like node
+	if not _player_in_range:
+		var candidate := _find_nearby_candidate()
+		if candidate != null:
+			_player = candidate
+			_player_in_range = true
+			if not _is_player_resting:
+				prompt_panel.show()
 func _unhandled_input(event: InputEvent) -> void:
 	if not _player_in_range or _player == null:
 		return
@@ -48,15 +63,18 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if not event.is_action_pressed("Interact"):
 		return
+		
+	# Lệnh này báo cho Godot biết: "Đống lửa đã nhận phím F rồi, đừng gửi phím F này cho ai khác nữa!"
+	get_viewport().set_input_as_handled()
 	if _is_player_resting:
 		_stand_up()
 	else:
 		_sit_and_save()
-
 func _on_body_entered(body: Node2D) -> void:
-	if not body.is_in_group("Player"):
+	# Accept any player-like body: prefer group "Player" or any body that provides `enter_rest()`
+	if not (body.is_in_group("Player") or body.has_method("enter_rest")):
 		return
-	_player = body as CharacterBody2D
+	_player = body
 	_player_in_range = true
 	if not _is_player_resting:
 		prompt_panel.show()
@@ -110,12 +128,7 @@ func _stand_up() -> void:
 		prompt_panel.hide()
 	player_finished_rest.emit()
 
-func _face_campfire() -> void:
-	if _player == null:
-		return
-	var anim: AnimatedSprite2D = _player.get_node_or_null("AnimatedSprite2D")
-	if anim:
-		anim.flip_h = _player.global_position.x > global_position.x
+
 
 func _show_saved_flash(message: String = "Saved") -> void:
 	saved_label.text = message
@@ -126,3 +139,30 @@ func _show_saved_flash(message: String = "Saved") -> void:
 	tween.tween_property(saved_label, "modulate:a", 0.0, 0.4)
 	await tween.finished
 	saved_label.hide()
+
+func _find_nearby_candidate() -> Node2D:
+	# radius in pixels to consider as 'in range'
+	# use exported `detect_radius`
+	
+	var root := get_tree().current_scene
+	if root == null:
+		return null
+	# First check nodes in Player group
+	var players := get_tree().get_nodes_in_group("Player")
+	for p in players:
+		if not p is Node2D:
+			continue
+		if p.global_position.distance_to(global_position) <= detect_radius:
+			return p
+
+	# If none, scan scene for any node with enter_rest()
+	var stack: Array = [root]
+	while stack.size() > 0:
+		var n: Node = stack.pop_back() as Node
+		for c in n.get_children():
+			if c is Node:
+				var node_c: Node = c
+				if node_c.has_method("enter_rest") and node_c.global_position.distance_to(global_position) <= detect_radius:
+					return node_c
+				stack.push_back(node_c)
+	return null

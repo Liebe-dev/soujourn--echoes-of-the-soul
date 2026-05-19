@@ -59,6 +59,12 @@ var _flask_rest_position := Vector2.ZERO
 var _flask_shake_time := 0.0
 var _flask_shake_amount := 0.0
 
+# Flask drain animation state
+var _is_flask_draining := false
+var _flask_shader_percent := 0.0
+var _flask_drain_tween = null
+const FLASK_DRAIN_DURATION := 0.9
+
 var in_combat := false
 var hide_delay := 3.0
 var hide_timer := 0.0
@@ -99,6 +105,10 @@ func _process(delta: float) -> void:
 			hide_timer = 0.0
 
 	_update_flask_shake(delta)
+
+	# Update flask shader fill percent every frame (supports tweening drain)
+	update_shader_value(soul_main, _flask_shader_percent)
+	update_shader_value(soul_delay, _flask_shader_percent)
 
 # ======================
 #   DEBUFFS / BUFFS
@@ -205,10 +215,17 @@ func _recalc_flask_heal_amount() -> void:
 
 func sync_flask_display() -> void:
 	var percent := float(flask_charges) / float(max_flask_charges) if max_flask_charges > 0 else 0.0
-	update_shader_value(soul_main, percent)
-	update_shader_value(soul_delay, percent)
+
+	# If not actively draining, directly set shader percent. During a drain we animate `_flask_shader_percent`.
+	if not _is_flask_draining:
+		_flask_shader_percent = percent
+		update_shader_value(soul_main, _flask_shader_percent)
+		update_shader_value(soul_delay, _flask_shader_percent)
 	if flask_uses_label:
 		flask_uses_label.text = "x%d" % flask_charges
+
+	# Make HUD visible when flask display updates
+	fade_in()
 
 # ======================
 #   STAGGER
@@ -343,10 +360,16 @@ func sync_hp_display() -> void:
 	hp_bar.value = hp
 	hp_label.text = "HP %d / %d" % [hp, max_hp]
 
+	# Ensure HUD is visible when HP display updates
+	fade_in()
+
 func sync_stamina_display() -> void:
 	stamina_bar.max_value = max_stamina
 	stamina_bar.value = stamina
 	stamina_label.text = "Stamina %d" % int(round(stamina))
+
+	# Ensure HUD is visible when stamina updates
+	fade_in()
 
 func enter_combat() -> void:
 	in_combat = true
@@ -418,16 +441,24 @@ func use_soul_flask() -> void:
 		return
 	if hp >= max_hp and not has_any_debuff():
 		return
+	# Start a drain animation instead of instantly consuming a charge.
+	if _is_flask_draining:
+		return
 
-	flask_charges -= 1
-	_cure_debuffs_from_flask()
-	hp = mini(hp + flask_heal_per_use, max_hp)
-	sync_hp_display()
-	sync_flask_display()
-	sync_status_icons()
-	flash_heal()
-	enter_combat()
-	_trigger_impact_feedback(SCREEN_SHAKE_FLASK)
+	var target_percent := 0.0
+	if max_flask_charges > 0:
+		target_percent = float(max(flask_charges - 1, 0)) / float(max_flask_charges)
+
+	_is_flask_draining = true
+	_trigger_flask_shake()
+	if _flask_drain_tween:
+		_flask_drain_tween.kill()
+		_flask_drain_tween = null
+
+	var t := create_tween()
+	_flask_drain_tween = t
+	t.tween_property(self, "_flask_shader_percent", target_percent, FLASK_DRAIN_DURATION)
+	t.tween_callback(Callable(self, "_on_flask_drain_complete"))
 
 func update_shader_value(node: CanvasItem, value: float) -> void:
 	if node and node.material:
@@ -465,6 +496,21 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("soul_heal"):
 		use_soul_flask()
 		get_viewport().set_input_as_handled()
+
+func _on_flask_drain_complete() -> void:
+	_is_flask_draining = false
+	_flask_drain_tween = null
+
+	# Now actually consume the charge and apply effects
+	flask_charges -= 1
+	_cure_debuffs_from_flask()
+	hp = mini(hp + flask_heal_per_use, max_hp)
+	sync_hp_display()
+	sync_flask_display()
+	sync_status_icons()
+	flash_heal()
+	enter_combat()
+	_trigger_impact_feedback(SCREEN_SHAKE_FLASK)
 
 ## Future buffs: hud.apply_buff("name", level)
 func apply_buff(buff_id: String, level: int = 1) -> void:

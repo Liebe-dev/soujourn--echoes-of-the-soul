@@ -29,6 +29,16 @@ var is_invulnerable: bool = false
 var is_doing_action : bool = false
 var is_dodging : bool = false
 
+func _ready() -> void:
+	
+	anim.flip_h = false
+	
+	if anim.scale.x < 0:
+		facing_direction = -1
+	else:
+		facing_direction = 1
+	weapon_pivot.scale.x = facing_direction
+
 func _unhandled_input(event: InputEvent) -> void:
 	#Damage test
 	if event.is_action_pressed(\"debug_take_damage\"):
@@ -76,7 +86,7 @@ func _knockback_dir(hit_from_global: Vector2) -> Vector2:
 		var dir := global_position - hit_from_global
 		if dir.length_squared() > 0.01:
 			return dir.normalized()
-	return Vector2(-1.0 if anim.flip_h else 1.0, -0.2).normalized()
+	return Vector2(-1.0 if facing_direction < 0 else 1.0, -0.2).normalized()
 	
 func _apply_stagger(knockback_dir: Vector2) -> void:
 	is_stunned = true
@@ -124,6 +134,7 @@ func enter_rest(_world_position: Vector2, face_left: bool) -> void:
 	can_move = false
 	velocity = Vector2.ZERO
 	anim.flip_h = face_left
+	facing_direction = -1 if face_left else 1
 	anim.play(\"idle\")
 
 func exit_rest() -> void:
@@ -133,6 +144,11 @@ func exit_rest() -> void:
 	velocity = Vector2.ZERO
 	global_position = _position_before_rest
 	snap_feet_to_floor()
+
+	var dir := Input.get_axis(\"move_left\", \"move_right\")
+	if dir != 0:
+		anim.flip_h = (dir < 0)
+		facing_direction = -1 if dir < 0 else 1
 
 func snap_feet_to_floor(max_drop: float = 96.0) -> void:
 	var col := $CollisionShape2D as CollisionShape2D
@@ -212,12 +228,12 @@ func _physics_process(delta: float) -> void:
 			is_invulnerable = false
 			is_dodging = false
 		if direction:
-			weapon_pivot.scale.x = direction
 			if is_on_floor():
 				anim.play(\"walking\")
 			velocity.x = direction * SPEED
-			anim.flip_h = direction < 0
-			facing_direction = -1 if (direction < 0) else 1
+			anim.flip_h = (direction < 0)
+			weapon_pivot.scale.x = -1 if direction < 0 else 1
+			facing_direction = -1 if direction < 0 else 1
 		else:
 			if is_on_floor():
 				anim.play(\"idle\")
@@ -366,7 +382,7 @@ animations = [{
 "speed": 7.0
 }]
 
-[node name="PlayableAdel" type="CharacterBody2D" unique_id=1485460165 groups=["playableAdel"]]
+[node name="PlayableAdel" type="CharacterBody2D" unique_id=1485460165 groups=["Player", "playableAdel"]]
 scale = Vector2(1.3402412, 1.345952)
 script = SubResource("GDScript_jn4p2")
 

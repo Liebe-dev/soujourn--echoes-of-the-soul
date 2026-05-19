@@ -1,25 +1,6 @@
 [gd_scene format=3 uid="uid://campfire01"]
 
-[ext_resource type="Script" path="res://campfire.gd" id="1_campfire"]
-
-[sub_resource type="CircleShape2D" id="CircleShape2D_interact"]
-radius = 72.0
-
-[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_prompt"]
-bg_color = Color(0.08, 0.06, 0.05, 0.82)
-border_width_left = 2
-border_width_top = 2
-border_width_right = 2
-border_width_bottom = 2
-border_color = Color(0.95, 0.55, 0.2, 0.9)
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-content_margin_left = 12.0
-content_margin_top = 6.0
-content_margin_right = 12.0
-content_margin_bottom = 6.0
+[ext_resource type="Script" uid="uid://kys4a4nb5xye" path="res://campfire.gd" id="1_campfire"]
 
 [sub_resource type="Gradient" id="Gradient_fire"]
 offsets = PackedFloat32Array(0, 0.4, 1)
@@ -33,40 +14,57 @@ fill = 1
 fill_from = Vector2(0.5, 0.5)
 fill_to = Vector2(0.5, 0)
 
+[sub_resource type="CircleShape2D" id="CircleShape2D_interact"]
+radius = 72.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_prompt"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(0.08, 0.06, 0.05, 0.82)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.55, 0.2, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="LabelSettings" id="LabelSettings_saved"]
 font_size = 28
 outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
-[node name="Campfire" type="Area2D"]
-collision_layer = 0
-collision_mask = 1
+[node name="Campfire" type="Area2D" unique_id=1649017633]
 script = ExtResource("1_campfire")
 
-[node name="Visual" type="Node2D" parent="."]
+[node name="Visual" type="Node2D" parent="." unique_id=182115891]
 
-[node name="LogLeft" type="ColorRect" parent="Visual"]
+[node name="LogLeft" type="ColorRect" parent="Visual" unique_id=42389681]
 offset_left = -28.0
 offset_top = 8.0
 offset_right = 8.0
 offset_bottom = 20.0
 color = Color(0.28, 0.16, 0.09, 1)
 
-[node name="LogRight" type="ColorRect" parent="Visual"]
+[node name="LogRight" type="ColorRect" parent="Visual" unique_id=1671860724]
 offset_left = 8.0
 offset_top = 10.0
 offset_right = 36.0
 offset_bottom = 22.0
 color = Color(0.22, 0.12, 0.07, 1)
 
-[node name="EmberBed" type="ColorRect" parent="Visual"]
+[node name="EmberBed" type="ColorRect" parent="Visual" unique_id=1161423975]
 offset_left = -8.0
 offset_top = 14.0
 offset_right = 16.0
 offset_bottom = 22.0
 color = Color(0.15, 0.08, 0.04, 1)
 
-[node name="FireParticles" type="CPUParticles2D" parent="Visual"]
+[node name="FireParticles" type="CPUParticles2D" parent="Visual" unique_id=2004652448]
 position = Vector2(4, 6)
 amount = 24
 lifetime = 0.7
@@ -84,24 +82,23 @@ scale_amount_min = 2.0
 scale_amount_max = 5.0
 color = Color(1, 0.55, 0.15, 0.9)
 
-[node name="GlowLight" type="PointLight2D" parent="Visual"]
+[node name="GlowLight" type="PointLight2D" parent="Visual" unique_id=1516681079]
 position = Vector2(4, 8)
 color = Color(1, 0.6, 0.25, 1)
 energy = 1.2
 texture = SubResource("GradientTexture2D_fire")
 texture_scale = 2.5
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=12106388]
 position = Vector2(0, 16)
 shape = SubResource("CircleShape2D_interact")
 
-[node name="RestPosition" type="Marker2D" parent="."]
-position = Vector2(0, 0)
+[node name="RestPosition" type="Marker2D" parent="." unique_id=1081013189]
 
-[node name="PromptLayer" type="CanvasLayer" parent="."]
+[node name="PromptLayer" type="CanvasLayer" parent="." unique_id=1947214358]
 layer = 5
 
-[node name="Prompt" type="PanelContainer" parent="PromptLayer"]
+[node name="Prompt" type="PanelContainer" parent="PromptLayer" unique_id=281631458]
 anchors_preset = 7
 anchor_left = 0.5
 anchor_top = 1.0
@@ -115,15 +112,15 @@ grow_horizontal = 2
 grow_vertical = 0
 theme_override_styles/panel = SubResource("StyleBoxFlat_prompt")
 
-[node name="MarginContainer" type="MarginContainer" parent="PromptLayer/Prompt"]
+[node name="MarginContainer" type="MarginContainer" parent="PromptLayer/Prompt" unique_id=876408983]
 layout_mode = 2
 
-[node name="Label" type="Label" parent="PromptLayer/Prompt/MarginContainer"]
+[node name="Label" type="Label" parent="PromptLayer/Prompt/MarginContainer" unique_id=307187291]
 layout_mode = 2
 text = "Press F to rest"
 horizontal_alignment = 1
 
-[node name="SavedLabel" type="Label" parent="PromptLayer"]
+[node name="SavedLabel" type="Label" parent="PromptLayer" unique_id=715767924]
 anchors_preset = 8
 anchor_left = 0.5
 anchor_top = 0.5

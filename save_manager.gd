@@ -97,7 +97,9 @@ func apply_continue_state() -> void:
 
 	var anim: AnimatedSprite2D = player.get_node_or_null("AnimatedSprite2D")
 	if anim:
-		anim.flip_h = bool(_data.get("facing_left", false))
+		var facing_left := bool(_data.get("facing_left", false))
+		anim.flip_h = facing_left
+		anim.scale.x = -1 if facing_left else 1
 		anim.play("idle")
 
 	if player.has_method("exit_rest"):

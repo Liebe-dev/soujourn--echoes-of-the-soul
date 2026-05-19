@@ -150,6 +150,9 @@ shape = SubResource("RectangleShape2D_2jrn0")
 
 [node name="Campfire" parent="." unique_id=1649017633 instance=ExtResource("9_pekpq")]
 position = Vector2(146, 905)
+checkpoint_id = null
+display_name = null
+rest_hint = null
 
 [connection signal="body_entered" from="PlayableAdel/WeaponPivot/Weapon/Hitbox" to="PlayableAdel/WeaponPivot/Weapon" method="_on_hitbox_body_entered"]
 [connection signal="body_entered" from="Enemy/EnemyWeapon/Hitbox" to="Enemy/EnemyWeapon" method="_on_hitbox_body_entered"]
