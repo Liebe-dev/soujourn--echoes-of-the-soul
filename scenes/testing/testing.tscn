@@ -7,6 +7,7 @@
 [ext_resource type="Script" uid="uid://brk768i8hsoc3" path="res://scenes/testing/enemy.gd" id="5_2jrn0"]
 [ext_resource type="Texture2D" uid="uid://ttyy8a117aun" path="res://asset/Character/Ishmael_Idle.png" id="6_16ov7"]
 [ext_resource type="Script" uid="uid://c7t7r73hc8gme" path="res://scenes/testing/enemy_weapon.gd" id="7_16ov7"]
+[ext_resource type="PackedScene" uid="uid://moo3202hyjoh" path="res://hud.tscn" id="8_88nui"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kj3p2"]
 size = Vector2(118.26207, 13.535665)
@@ -61,9 +62,6 @@ animations = [{
 radius = 16.0
 height = 112.0
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_2jrn0"]
-radius = 8.0
-
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_88nui"]
 size = Vector2(113, 113)
 
@@ -92,6 +90,7 @@ position = Vector2(728, 864)
 [node name="PlayableAdel" parent="." unique_id=1485460165 instance=ExtResource("3_xlwwx")]
 position = Vector2(272.00003, 832)
 collision_layer = 2
+collision_mask = 5
 
 [node name="WeaponPivot" type="Marker2D" parent="PlayableAdel" unique_id=118253140]
 
@@ -109,7 +108,7 @@ shape = SubResource("CapsuleShape2D_8d7w2")
 disabled = true
 debug_color = Color(0.9764706, 0.03137255, 0.1764706, 0.41960785)
 
-[node name="Enemy" type="CharacterBody2D" parent="." unique_id=1127165249]
+[node name="Enemy" type="CharacterBody2D" parent="." unique_id=1127165249 groups=["Enemy"]]
 texture_filter = 1
 position = Vector2(560, 824)
 collision_layer = 4
@@ -123,15 +122,6 @@ frame_progress = 0.9571249
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Enemy" unique_id=1264137358]
 shape = SubResource("CapsuleShape2D_v3pl4")
-
-[node name="HeadArea" type="Area2D" parent="Enemy" unique_id=1889466254]
-collision_layer = 32
-collision_mask = 2
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Enemy/HeadArea" unique_id=808689571]
-position = Vector2(0, -56)
-scale = Vector2(1, 0.120000005)
-shape = SubResource("CapsuleShape2D_2jrn0")
 
 [node name="EnemyWeapon" type="Node2D" parent="Enemy" unique_id=544000859]
 script = ExtResource("7_16ov7")
@@ -155,8 +145,8 @@ collision_mask = 0
 position = Vector2(1056, 824)
 shape = SubResource("RectangleShape2D_2jrn0")
 
+[node name="hud" parent="." unique_id=558584565 instance=ExtResource("8_88nui")]
+
 [connection signal="body_entered" from="PlayableAdel/WeaponPivot/Weapon/Hitbox" to="PlayableAdel/WeaponPivot/Weapon" method="_on_hitbox_body_entered"]
-[connection signal="body_entered" from="Enemy/HeadArea" to="Enemy" method="_on_head_area_body_entered"]
-[connection signal="body_exited" from="Enemy/HeadArea" to="Enemy" method="_on_head_area_body_exited"]
 [connection signal="body_entered" from="Enemy/EnemyWeapon/Hitbox" to="Enemy/EnemyWeapon" method="_on_hitbox_body_entered"]
 [connection signal="timeout" from="Enemy/EnemyWeapon/Timer" to="Enemy/EnemyWeapon" method="_on_timer_timeout"]
