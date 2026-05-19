@@ -1,11 +1,11 @@
 [gd_scene format=3 uid="uid://moo3202hyjoh"]
 
-[ext_resource type="Script" uid="uid://b8l3nqsr4sed0" path="res://ui.gd" id="1_hud"]
-[ext_resource type="Shader" uid="uid://dj7h5r3bb1evf" path="res://soul_flask.gdshader" id="2_delay"]
-[ext_resource type="Shader" uid="uid://cmw5kx1hxcr5j" path="res://soul_flask.gdshader" id="3_main"]
-[ext_resource type="Texture2D" uid="uid://tkam0atqrrq7" path="res://DarkOrbBorder.png" id="4_border"]
+[ext_resource type="Script" path="res://asset/UI/ui.gd" id="1_hud"]
+[ext_resource type="Shader" uid="uid://c7vdnkx2qxua0" path="res://soul_flask.gdshader" id="2_delay"]
+[ext_resource type="Shader" uid="uid://c7vdnkx2qxua0" path="res://soul_flask.gdshader" id="3_main"]
+[ext_resource type="Texture2D" uid="uid://tkam0atqrrq7" path="res://asset/UI/DarkOrbBorder.png" id="4_border"]
 [ext_resource type="Shader" uid="uid://nno1l8bmdg84" path="res://flask_shake.gdshader" id="5_flask_shake"]
-[ext_resource type="Script" uid="uid://cjp4da16xous7" path="res://status_effect_bar.gd" id="7_buff_bar"]
+[ext_resource type="Script" uid="uid://c0y5krt1q1qox" path="res://asset/UI/status_effect_bar.gd" id="7_buff_bar"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_soul_delay"]
 resource_local_to_scene = true

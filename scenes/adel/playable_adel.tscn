@@ -86,7 +86,8 @@ func _knockback_dir(hit_from_global: Vector2) -> Vector2:
 		var dir := global_position - hit_from_global
 		if dir.length_squared() > 0.01:
 			return dir.normalized()
-	return Vector2(-1.0 if facing_direction < 0 else 1.0, -0.2).normalized()
+	# fallback: knock away from the player's facing direction
+	return Vector2(1.0 if facing_direction < 0 else -1.0, -0.2).normalized()
 	
 func _apply_stagger(knockback_dir: Vector2) -> void:
 	is_stunned = true

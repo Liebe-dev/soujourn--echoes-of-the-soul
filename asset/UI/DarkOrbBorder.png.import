@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://tkam0atqrrq7"
-path="res://.godot/imported/DarkOrbBorder.png-11cdbeebbc28598f507d78eb3e867873.ctex"
+path="res://.godot/imported/DarkOrbBorder.png-d3c287f6a16d772c36bf216f83b456db.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://DarkOrbBorder.png"
-dest_files=["res://.godot/imported/DarkOrbBorder.png-11cdbeebbc28598f507d78eb3e867873.ctex"]
+source_file="res://asset/UI/DarkOrbBorder.png"
+dest_files=["res://.godot/imported/DarkOrbBorder.png-d3c287f6a16d772c36bf216f83b456db.ctex"]
 
 [params]
 

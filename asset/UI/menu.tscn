@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://gyikvnsyol4j"]
+[gd_scene format=3 uid="uid://fwjb4kq41db8"]
 
-[ext_resource type="Script" path="res://menu.gd" id="1_lti8b"]
+[ext_resource type="Script" uid="uid://cfc44bprrsfd5" path="res://menu.gd" id="1_lti8b"]
 [ext_resource type="Texture2D" uid="uid://cps22kn26nsco" path="res://asset/BG/BG.png" id="2_4hy44"]
 [ext_resource type="Texture2D" uid="uid://b6ftddm0p4ogr" path="res://asset/BG/Logo game.png" id="2_mae5d"]
 [ext_resource type="Texture2D" uid="uid://dycqcksbfsoh7" path="res://asset/BG/StartGame.png" id="3_4hy44"]
@@ -14,7 +14,7 @@
 [ext_resource type="Script" uid="uid://rgp8ld2w1gsd" path="res://continue.gd" id="10_4ndjb"]
 [ext_resource type="Texture2D" uid="uid://4q6vqwjw8n8m" path="res://asset/BG/ContinueSelect.png" id="11_3ls4m"]
 [ext_resource type="Script" uid="uid://flk5w2domw4x" path="res://quit.gd" id="12_g7jxm"]
-[ext_resource type="Script" path="res://option_se.gd" id="13_5h80m"]
+[ext_resource type="Script" uid="uid://dteilpnr4rmtp" path="res://option_se.gd" id="13_5h80m"]
 [ext_resource type="Texture2D" uid="uid://bp3kqq64kun2j" path="res://asset/BG/QuitGameSelect.png" id="13_jspdm"]
 [ext_resource type="Texture2D" uid="uid://c6rb783fothq8" path="res://asset/BG/SettingSelect.png" id="14_w25hu"]
 [ext_resource type="Script" uid="uid://dsl3khdvm7e6g" path="res://parallax_background.gd" id="17_3ls4m"]
