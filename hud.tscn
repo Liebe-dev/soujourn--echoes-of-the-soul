@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://moo3202hyjoh"]
 
 [ext_resource type="Script" path="res://asset/UI/ui.gd" id="1_hud"]
-[ext_resource type="Shader" uid="uid://c7vdnkx2qxua0" path="res://soul_flask.gdshader" id="2_delay"]
 [ext_resource type="Shader" uid="uid://c7vdnkx2qxua0" path="res://soul_flask.gdshader" id="3_main"]
 [ext_resource type="Texture2D" uid="uid://tkam0atqrrq7" path="res://asset/UI/DarkOrbBorder.png" id="4_border"]
 [ext_resource type="Shader" uid="uid://nno1l8bmdg84" path="res://flask_shake.gdshader" id="5_flask_shake"]
@@ -9,7 +8,7 @@
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_soul_delay"]
 resource_local_to_scene = true
-shader = ExtResource("2_delay")
+shader = ExtResource("3_main")
 shader_parameter/hp = 0.0
 shader_parameter/hp_color = Color(0.9, 0.2, 0.2, 1)
 shader_parameter/highlight_color = Color(1, 0.6, 0.6, 0.45)
