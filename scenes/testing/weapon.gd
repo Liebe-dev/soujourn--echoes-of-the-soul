@@ -27,4 +27,5 @@ func _on_player_attacked() -> void:
 
 func _on_hitbox_body_entered(body: CharacterBody2D) -> void:
 	if body.has_method("take_damage"):
+		body.take_damage(20, global_position)
 		print("enemy took damage")

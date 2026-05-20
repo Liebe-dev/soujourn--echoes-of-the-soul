@@ -1,10 +1,23 @@
 extends CharacterBody2D
 
+@export var max_health: int = 100
+@export var attack_damage: int = 20
+
 const SPEED = 300.0
 const JUMP_VELOCITY = -400.0
 
-func take_damage():
-	pass
+var current_health: int = max_health
+
+func _ready() -> void:
+	current_health = max_health
+
+func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
+	current_health = max(current_health - dmg, 0)
+	if current_health <= 0:
+		die()
+
+func die() -> void:
+	queue_free()
 
 func _physics_process(delta: float) -> void:
 	# Add the gravity.

@@ -87,10 +87,10 @@ scale = Vector2(18.491396, 3.518734)
 shape = SubResource("RectangleShape2D_kj3p2")
 
 [node name="CollectibleItem" parent="." unique_id=818450812 instance=ExtResource("2_8d7w2")]
-position = Vector2(43, 869)
+position = Vector2(728, 864)
 
 [node name="PlayableAdel" parent="." unique_id=1485460165 instance=ExtResource("3_xlwwx")]
-position = Vector2(309.00012, 673.00006)
+position = Vector2(272.00003, 832)
 collision_layer = 2
 collision_mask = 5
 
@@ -115,7 +115,7 @@ wait_time = 0.5
 
 [node name="Enemy" type="CharacterBody2D" parent="." unique_id=1127165249 groups=["Enemy"]]
 texture_filter = 1
-position = Vector2(1667, 859)
+position = Vector2(560, 824)
 collision_layer = 4
 script = ExtResource("5_2jrn0")
 
@@ -143,26 +143,20 @@ shape = SubResource("RectangleShape2D_88nui")
 wait_time = 1.5
 autostart = true
 
-[node name="S1E1" parent="." unique_id=148603202 instance=ExtResource("8_x3660")]
-position = Vector2(1121, 692)
-max_health = 100
-hurt_damage = 20
+[node name="S1E1" parent="Enemy/EnemyWeapon" unique_id=148603202 instance=ExtResource("8_x3660")]
+position = Vector2(291, 40)
 
 [node name="Wall" type="StaticBody2D" parent="." unique_id=439899073]
 collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Wall" unique_id=97884850]
-position = Vector2(1842, 837)
+position = Vector2(1056, 824)
 shape = SubResource("RectangleShape2D_2jrn0")
 
 [node name="hud" parent="." unique_id=558584565 instance=ExtResource("8_88nui")]
 
 [node name="Campfire" parent="." unique_id=1649017633 instance=ExtResource("9_pekpq")]
 position = Vector2(146, 905)
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=91347500]
-position = Vector2(-44, 829)
-shape = SubResource("RectangleShape2D_2jrn0")
 
 [connection signal="body_entered" from="PlayableAdel/WeaponPivot/Weapon/Hitbox" to="PlayableAdel/WeaponPivot/Weapon" method="_on_hitbox_body_entered"]
 [connection signal="timeout" from="PlayableAdel/DodgeCooldown" to="PlayableAdel" method="_on_dodge_cooldown_timeout"]
