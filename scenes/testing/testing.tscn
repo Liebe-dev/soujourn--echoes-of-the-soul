@@ -109,6 +109,9 @@ shape = SubResource("CapsuleShape2D_8d7w2")
 disabled = true
 debug_color = Color(0.9764706, 0.03137255, 0.1764706, 0.41960785)
 
+[node name="DodgeCooldown" type="Timer" parent="PlayableAdel" unique_id=2015061764]
+wait_time = 0.5
+
 [node name="Enemy" type="CharacterBody2D" parent="." unique_id=1127165249 groups=["Enemy"]]
 texture_filter = 1
 position = Vector2(560, 824)
@@ -152,5 +155,6 @@ shape = SubResource("RectangleShape2D_2jrn0")
 position = Vector2(146, 905)
 
 [connection signal="body_entered" from="PlayableAdel/WeaponPivot/Weapon/Hitbox" to="PlayableAdel/WeaponPivot/Weapon" method="_on_hitbox_body_entered"]
+[connection signal="timeout" from="PlayableAdel/DodgeCooldown" to="PlayableAdel" method="_on_dodge_cooldown_timeout"]
 [connection signal="body_entered" from="Enemy/EnemyWeapon/Hitbox" to="Enemy/EnemyWeapon" method="_on_hitbox_body_entered"]
 [connection signal="timeout" from="Enemy/EnemyWeapon/Timer" to="Enemy/EnemyWeapon" method="_on_timer_timeout"]
