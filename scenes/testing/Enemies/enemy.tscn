@@ -1,0 +1,96 @@
+[gd_scene format=3 uid="uid://u51knug3082i"]
+
+[ext_resource type="Script" uid="uid://brk768i8hsoc3" path="res://scenes/testing/Enemies/enemy.gd" id="1_5gqqg"]
+[ext_resource type="Texture2D" uid="uid://ttyy8a117aun" path="res://asset/Character/Ishmael_Idle.png" id="2_d8q4p"]
+[ext_resource type="Script" uid="uid://c7t7r73hc8gme" path="res://scenes/testing/Enemies/enemy_weapon.gd" id="3_sr175"]
+[ext_resource type="Texture2D" uid="uid://cw041w6cdrtrr" path="res://asset/UI/coin.png" id="4_xwcbe"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_88nui"]
+atlas = ExtResource("2_d8q4p")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pekpq"]
+atlas = ExtResource("2_d8q4p")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_x3660"]
+atlas = ExtResource("2_d8q4p")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_yy6s2"]
+atlas = ExtResource("2_d8q4p")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_km7ka"]
+atlas = ExtResource("2_d8q4p")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7u0va"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_88nui")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pekpq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_x3660")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_yy6s2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_km7ka")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_v3pl4"]
+radius = 16.0
+height = 112.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_88nui"]
+size = Vector2(113, 113)
+
+[node name="Enemy" type="CharacterBody2D" unique_id=1852725077 groups=["Enemy"]]
+texture_filter = 1
+collision_layer = 4
+script = ExtResource("1_5gqqg")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1557654021]
+sprite_frames = SubResource("SpriteFrames_7u0va")
+animation = &"idle"
+autoplay = "idle"
+frame_progress = 0.9571249
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1416278681]
+shape = SubResource("CapsuleShape2D_v3pl4")
+
+[node name="WeaponPivot" type="Marker2D" parent="." unique_id=661476778]
+
+[node name="EnemyWeapon" type="Node2D" parent="WeaponPivot" unique_id=243440853]
+script = ExtResource("3_sr175")
+
+[node name="Hitbox" type="Area2D" parent="WeaponPivot/EnemyWeapon" unique_id=445613241]
+collision_layer = 16
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WeaponPivot/EnemyWeapon/Hitbox" unique_id=779984344]
+position = Vector2(-96.5, 16.5)
+shape = SubResource("RectangleShape2D_88nui")
+
+[node name="Timer" type="Timer" parent="WeaponPivot/EnemyWeapon" unique_id=520553697]
+wait_time = 1.5
+autostart = true
+
+[node name="Indicator" type="Sprite2D" parent="." unique_id=1649218019]
+unique_name_in_owner = true
+position = Vector2(0, -63.999996)
+scale = Vector2(0.05, 0.05)
+texture = ExtResource("4_xwcbe")
+
+[connection signal="body_entered" from="WeaponPivot/EnemyWeapon/Hitbox" to="WeaponPivot/EnemyWeapon" method="_on_hitbox_body_entered"]
+[connection signal="timeout" from="WeaponPivot/EnemyWeapon/Timer" to="WeaponPivot/EnemyWeapon" method="_on_timer_timeout"]
