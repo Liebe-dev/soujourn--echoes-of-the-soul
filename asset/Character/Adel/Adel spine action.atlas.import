@@ -1,0 +1,16 @@
+[remap]
+
+importer="spine.atlas"
+type="SpineAtlasResource"
+uid="uid://dl11lt17gfjsx"
+path="res://.godot/imported/Adel spine action.atlas-3c368fd680dba05797d60438007a60df.spatlas"
+
+[deps]
+
+source_file="res://asset/Character/Adel/Adel spine action.atlas"
+dest_files=["res://.godot/imported/Adel spine action.atlas-3c368fd680dba05797d60438007a60df.spatlas"]
+
+[params]
+
+normal_map_prefix="n"
+specular_map_prefix="s"
