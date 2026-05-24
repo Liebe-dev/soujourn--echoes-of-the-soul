@@ -144,8 +144,6 @@ collision_mask = 2
 [node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox" unique_id=1700459006]
 shape = SubResource("CapsuleShape2D_r2j4v")
 
-[node name="WeaponPivot" type="Node2D" parent="." unique_id=1004091777]
-
 [node name="DetectionArea" type="Area2D" parent="." unique_id=811320821]
 collision_layer = 0
 collision_mask = 2

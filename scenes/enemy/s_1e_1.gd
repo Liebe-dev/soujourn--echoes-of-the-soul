@@ -119,10 +119,11 @@ func _return_to_patrol() -> void:
 	_set_animation("idle")
 
 func _update_facing() -> void:
-	pivot.scale.x = -1 if patrol_direction > 0 else 1 # [cite: 3]
-	if animated_sprite: # [cite: 3]
-		animated_sprite.flip_h = patrol_direction > 0 # [cite: 3]
-
+	if pivot != null:
+		pivot.scale.x = -1 if patrol_direction > 0 else 1 
+		
+	if animated_sprite: 
+		animated_sprite.flip_h = patrol_direction > 0
 # ----------------- TÍN HIỆU (SIGNALS) -----------------
 
 func _on_detection_entered(body: Node2D) -> void:
