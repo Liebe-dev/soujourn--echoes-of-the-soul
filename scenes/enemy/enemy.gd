@@ -1,5 +1,5 @@
 extends CharacterBody2D
-class_name EnemyPrototypeTesting
+class_name EnemyPrototype
 
 @onready var pivot = $WeaponPivot
 

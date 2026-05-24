@@ -6,8 +6,10 @@
 [ext_resource type="Script" uid="uid://cuf8cr18yju4h" path="res://scenes/testing/weapon.gd" id="4_8d7w2"]
 [ext_resource type="PackedScene" uid="uid://u51knug3082i" path="res://scenes/testing/Enemies/enemy.tscn" id="5_88nui"]
 [ext_resource type="PackedScene" uid="uid://moo3202hyjoh" path="res://hud.tscn" id="8_88nui"]
-[ext_resource type="PackedScene" uid="uid://cewpn5rhropd5" path="res://scenes/enemy/s1e1.tscn" id="8_pekpq"]
+[ext_resource type="Texture2D" uid="uid://cw746h78nudy7" path="res://asset/Enemies/Wobtear_attack.png" id="8_x3660"]
 [ext_resource type="PackedScene" uid="uid://campfire01" path="res://campfire.tscn" id="9_pekpq"]
+[ext_resource type="Texture2D" uid="uid://boe6okl4teibl" path="res://asset/Enemies/Wobtear1.png" id="9_yy6s2"]
+[ext_resource type="Texture2D" uid="uid://cleya4qc2jpjx" path="res://asset/Enemies/Wobtear2.png" id="10_km7ka"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kj3p2"]
 size = Vector2(118.26207, 13.535665)
@@ -17,6 +19,101 @@ height = 71.32498
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_2jrn0"]
 size = Vector2(20, 202)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_f1xpd"]
+atlas = ExtResource("8_x3660")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ggde3"]
+atlas = ExtResource("8_x3660")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rblf8"]
+atlas = ExtResource("8_x3660")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8v5gm"]
+atlas = ExtResource("9_yy6s2")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_abp3l"]
+atlas = ExtResource("9_yy6s2")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_c2tpr"]
+atlas = ExtResource("10_km7ka")
+region = Rect2(0, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_q8xyq"]
+atlas = ExtResource("10_km7ka")
+region = Rect2(128, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_k28ic"]
+atlas = ExtResource("10_km7ka")
+region = Rect2(256, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_2e13v"]
+atlas = ExtResource("10_km7ka")
+region = Rect2(384, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_d4rjg"]
+atlas = ExtResource("10_km7ka")
+region = Rect2(512, 0, 128, 128)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_006h5"]
+atlas = ExtResource("10_km7ka")
+region = Rect2(640, 0, 128, 128)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_7u0va"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_f1xpd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ggde3")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rblf8")
+}],
+"loop": false,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8v5gm")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_abp3l")
+}],
+"loop": true,
+"name": &"idle",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_c2tpr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_q8xyq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_k28ic")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_2e13v")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_d4rjg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_006h5")
+}],
+"loop": true,
+"name": &"walking",
+"speed": 5.0
+}]
 
 [node name="Node2D" type="Node2D" unique_id=1768881503]
 
@@ -76,12 +173,14 @@ shape = SubResource("RectangleShape2D_2jrn0")
 [node name="Campfire" parent="." unique_id=1649017633 instance=ExtResource("9_pekpq")]
 position = Vector2(146, 905)
 
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1389892606]
+position = Vector2(1443, 860)
+sprite_frames = SubResource("SpriteFrames_7u0va")
+animation = &"attack"
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=328568404]
 position = Vector2(2035, 829)
 shape = SubResource("RectangleShape2D_2jrn0")
-
-[node name="S1e1" parent="." unique_id=1475965731 instance=ExtResource("8_pekpq")]
-position = Vector2(1397, 801)
 
 [connection signal="body_entered" from="PlayableAdel/WeaponPivot/Weapon/Hitbox" to="PlayableAdel/WeaponPivot/Weapon" method="_on_hitbox_body_entered"]
 [connection signal="timeout" from="PlayableAdel/DodgeCooldown" to="PlayableAdel" method="_on_dodge_cooldown_timeout"]

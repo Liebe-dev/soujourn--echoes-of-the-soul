@@ -773,6 +773,7 @@ animations = [{
 
 [node name="PlayableAdel" type="CharacterBody2D" unique_id=1485460165 groups=["Player", "playableAdel"]]
 scale = Vector2(1.3402412, 1.345952)
+collision_layer = 3
 script = SubResource("GDScript_jn4p2")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1090059515]
