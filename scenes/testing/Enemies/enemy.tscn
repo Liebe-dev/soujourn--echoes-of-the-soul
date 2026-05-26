@@ -4,6 +4,7 @@
 [ext_resource type="Texture2D" uid="uid://ttyy8a117aun" path="res://asset/Character/Ishmael_Idle.png" id="2_d8q4p"]
 [ext_resource type="Script" uid="uid://c7t7r73hc8gme" path="res://scenes/testing/Enemies/enemy_weapon.gd" id="3_sr175"]
 [ext_resource type="Texture2D" uid="uid://cw041w6cdrtrr" path="res://asset/UI/coin.png" id="4_xwcbe"]
+[ext_resource type="Script" uid="uid://cl1v1nr5dekxr" path="res://scenes/testing/Enemies/vision_shape.gd" id="5_cjoin"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_88nui"]
 atlas = ExtResource("2_d8q4p")
@@ -55,6 +56,9 @@ height = 112.0
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_88nui"]
 size = Vector2(113, 113)
 
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_xwcbe"]
+size = Vector2(144, 144)
+
 [node name="Enemy" type="CharacterBody2D" unique_id=1852725077 groups=["Enemy"]]
 texture_filter = 1
 collision_layer = 4
@@ -86,11 +90,27 @@ shape = SubResource("RectangleShape2D_88nui")
 wait_time = 1.5
 autostart = true
 
+[node name="SpecialHitbox" type="Area2D" parent="WeaponPivot/EnemyWeapon" unique_id=622969332]
+collision_layer = 16
+collision_mask = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WeaponPivot/EnemyWeapon/SpecialHitbox" unique_id=1627708348]
+position = Vector2(-96, 16)
+shape = SubResource("RectangleShape2D_xwcbe")
+
+[node name="VisionShape" type="ShapeCast2D" parent="WeaponPivot" unique_id=1255186544]
+target_position = Vector2(-32, 0)
+collision_mask = 3
+script = ExtResource("5_cjoin")
+
 [node name="Indicator" type="Sprite2D" parent="." unique_id=1649218019]
 unique_name_in_owner = true
 position = Vector2(0, -63.999996)
 scale = Vector2(0.05, 0.05)
 texture = ExtResource("4_xwcbe")
+
+[node name="VisionRay" type="RayCast2D" parent="." unique_id=894741855]
+collision_mask = 3
 
 [connection signal="body_entered" from="WeaponPivot/EnemyWeapon/Hitbox" to="WeaponPivot/EnemyWeapon" method="_on_hitbox_body_entered"]
 [connection signal="timeout" from="WeaponPivot/EnemyWeapon/Timer" to="WeaponPivot/EnemyWeapon" method="_on_timer_timeout"]

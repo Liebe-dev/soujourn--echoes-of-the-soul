@@ -62,12 +62,20 @@ debug_color = Color(0.9764706, 0.03137255, 0.1764706, 0.41960785)
 wait_time = 0.5
 
 [node name="Enemy" parent="." unique_id=1852725077 instance=ExtResource("5_88nui")]
-position = Vector2(1958, 856)
+position = Vector2(1232, 792)
 
 [node name="Wall" type="StaticBody2D" parent="." unique_id=439899073]
 collision_mask = 0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Wall" unique_id=97884850]
+position = Vector2(1842, 837)
+shape = SubResource("RectangleShape2D_2jrn0")
+
+[node name="Wall2" type="StaticBody2D" parent="." unique_id=1756546691]
+position = Vector2(-944, 72)
+collision_mask = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Wall2" unique_id=366285491]
 position = Vector2(1842, 837)
 shape = SubResource("RectangleShape2D_2jrn0")
 
@@ -81,7 +89,7 @@ position = Vector2(2035, 829)
 shape = SubResource("RectangleShape2D_2jrn0")
 
 [node name="S1e1" parent="." unique_id=1475965731 instance=ExtResource("8_pekpq")]
-position = Vector2(1397, 801)
+position = Vector2(1960, 664)
 
 [connection signal="body_entered" from="PlayableAdel/WeaponPivot/Weapon/Hitbox" to="PlayableAdel/WeaponPivot/Weapon" method="_on_hitbox_body_entered"]
 [connection signal="timeout" from="PlayableAdel/DodgeCooldown" to="PlayableAdel" method="_on_dodge_cooldown_timeout"]

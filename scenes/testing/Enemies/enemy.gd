@@ -2,6 +2,8 @@ extends CharacterBody2D
 class_name EnemyPrototypeTesting
 
 @onready var pivot = $WeaponPivot
+@onready var vision_cast = $WeaponPivot/VisionShape
+@onready var vision_ray = $VisionRay
 
 @export var max_health: int = 100
 @export var attack_damage: int = 20
@@ -18,6 +20,7 @@ var start_position: Vector2 = Vector2.ZERO
 var ai_state: String = "walk"
 var ai_timer: float = walk_duration
 var animated_sprite: AnimatedSprite2D = null
+var is_in_scene : bool = true
 
 func _ready() -> void:
 	current_health = max_health
@@ -38,6 +41,21 @@ func die() -> void:
 	queue_free()
 
 func _physics_process(delta: float) -> void:
+	if not is_in_scene:
+		return
+	vision_cast.force_shapecast_update()
+	
+	if vision_cast.is_colliding():
+		for i in vision_cast.get_collision_count():
+			var collider = vision_cast.get_collider(i)
+			
+			if collider.is_in_group("playableAdel"):
+				vision_ray.target_position = to_local(collider.global_position)
+				vision_ray.force_raycast_update()
+				if vision_ray.is_colliding() and vision_ray.get_collider() == collider:
+					print("detected")
+				else:
+					print("out of range")
 	# Add the gravity.
 	if not is_on_floor():
 		velocity += get_gravity() * delta
@@ -74,3 +92,6 @@ func _set_animation(state: String) -> void:
 				animated_sprite.play("walking")
 			"idle":
 				animated_sprite.play("idle")
+
+func chase_player() -> void:
+	pass
