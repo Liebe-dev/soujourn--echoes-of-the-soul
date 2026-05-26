@@ -1,0 +1,92 @@
+[gd_scene format=3 uid="uid://4egogosl1we3"]
+
+[ext_resource type="Script" uid="uid://w28fja08l2an" path="res://addons/psd_to_layer_scene/psd_node.gd" id="1_nx6la"]
+[ext_resource type="Texture2D" uid="uid://cd285m03h7180" path="res://asset/Character/Adel/layers/Adel spine action use/left upper arm[merge]_0015.png" id="2_xin56"]
+[ext_resource type="Texture2D" uid="uid://b53s5gi5owcj0" path="res://asset/Character/Adel/layers/Adel spine action use/left forearm[merge]_0014.png" id="3_pptnm"]
+[ext_resource type="Texture2D" uid="uid://bqup0llt006bt" path="res://asset/Character/Adel/layers/Adel spine action use/left upper leg[merge]_0013.png" id="4_g5fo1"]
+[ext_resource type="Texture2D" uid="uid://cofwj46bcpi04" path="res://asset/Character/Adel/layers/Adel spine action use/left foreleg[merge]_0012.png" id="5_hu1vt"]
+[ext_resource type="Texture2D" uid="uid://cxjys3xplsoxn" path="res://asset/Character/Adel/layers/Adel spine action use/right upper leg[merge]_0011.png" id="6_xv1bw"]
+[ext_resource type="Texture2D" uid="uid://c7j2c6m3hssep" path="res://asset/Character/Adel/layers/Adel spine action use/left feet[merge]_0010.png" id="7_j5yna"]
+[ext_resource type="Texture2D" uid="uid://g4e6baigtdyw" path="res://asset/Character/Adel/layers/Adel spine action use/right foreleg[merge]_0009.png" id="8_offtu"]
+[ext_resource type="Texture2D" uid="uid://c15wttpagoeen" path="res://asset/Character/Adel/layers/Adel spine action use/lap[merge]_0008.png" id="9_gm7hr"]
+[ext_resource type="Texture2D" uid="uid://o2xeo782e3ti" path="res://asset/Character/Adel/layers/Adel spine action use/right feet[merge]_0007.png" id="10_wu5lb"]
+[ext_resource type="Texture2D" uid="uid://n7utffof36xy" path="res://asset/Character/Adel/layers/Adel spine action use/belly[merge]_0006.png" id="11_2pf0q"]
+[ext_resource type="Texture2D" uid="uid://h6oldcjn0l7f" path="res://asset/Character/Adel/layers/Adel spine action use/torso[merge]_0005.png" id="12_5hpsm"]
+[ext_resource type="Texture2D" uid="uid://blr7nu1ikv23u" path="res://asset/Character/Adel/layers/Adel spine action use/right upper arm[merge]_0004.png" id="13_tex2l"]
+[ext_resource type="Texture2D" uid="uid://c3w8lrb6m7uqc" path="res://asset/Character/Adel/layers/Adel spine action use/right forearm[merge]_0003.png" id="14_segbb"]
+[ext_resource type="Texture2D" uid="uid://d1i4d6biik0g3" path="res://asset/Character/Adel/layers/Adel spine action use/head[merge]_0002.png" id="15_3ibog"]
+[ext_resource type="Texture2D" uid="uid://cuyk6la6nbep4" path="res://asset/Character/Adel/layers/Adel spine action use/hair1[merge]_0001.png" id="16_f62jb"]
+[ext_resource type="Texture2D" uid="uid://bp1chv0l6pnsp" path="res://asset/Character/Adel/layers/Adel spine action use/hair2[merge]_0000.png" id="17_adx6m"]
+
+[node name="ADEL SPINE ACTION USE" type="Node2D" unique_id=1860163928]
+script = ExtResource("1_nx6la")
+psd_size = Vector2i(1920, 1080)
+
+[node name="left upper arm[merge]" type="Sprite2D" parent="." unique_id=57047861]
+position = Vector2(874.5, 445)
+texture = ExtResource("2_xin56")
+
+[node name="left forearm[merge]" type="Sprite2D" parent="." unique_id=708863222]
+position = Vector2(878.5, 542)
+texture = ExtResource("3_pptnm")
+
+[node name="left upper leg[merge]" type="Sprite2D" parent="." unique_id=508528794]
+position = Vector2(835, 664.5)
+texture = ExtResource("4_g5fo1")
+
+[node name="left foreleg[merge]" type="Sprite2D" parent="." unique_id=1254929906]
+position = Vector2(872.5, 815.5)
+texture = ExtResource("5_hu1vt")
+
+[node name="right upper leg[merge]" type="Sprite2D" parent="." unique_id=1501019756]
+position = Vector2(772, 661.5)
+texture = ExtResource("6_xv1bw")
+
+[node name="left feet[merge]" type="Sprite2D" parent="." unique_id=501514858]
+position = Vector2(879.5, 918)
+texture = ExtResource("7_j5yna")
+
+[node name="right foreleg[merge]" type="Sprite2D" parent="." unique_id=313302749]
+position = Vector2(763, 820.5)
+texture = ExtResource("8_offtu")
+
+[node name="lap[merge]" type="Sprite2D" parent="." unique_id=1803502924]
+position = Vector2(808.5, 567.5)
+texture = ExtResource("9_gm7hr")
+
+[node name="right feet[merge]" type="Sprite2D" parent="." unique_id=1827051959]
+position = Vector2(764.5, 917.5)
+texture = ExtResource("10_wu5lb")
+
+[node name="belly[merge]" type="Sprite2D" parent="." unique_id=708999897]
+position = Vector2(878.5, 624)
+texture = ExtResource("11_2pf0q")
+
+[node name="torso[merge]" type="Sprite2D" parent="." unique_id=1447844456]
+position = Vector2(801.5, 414.5)
+texture = ExtResource("12_5hpsm")
+
+[node name="right upper arm[merge]" type="Sprite2D" parent="." unique_id=460760829]
+position = Vector2(726.5, 431.5)
+texture = ExtResource("13_tex2l")
+
+[node name="right forearm[merge]" type="Sprite2D" parent="." unique_id=590120445]
+position = Vector2(719, 520)
+texture = ExtResource("14_segbb")
+
+[node name="head[merge]" type="Sprite2D" parent="." unique_id=741648628]
+position = Vector2(834, 212.5)
+texture = ExtResource("15_3ibog")
+
+[node name="hair1[merge]" type="Sprite2D" parent="." unique_id=126091615]
+position = Vector2(838, 301)
+texture = ExtResource("16_f62jb")
+
+[node name="hair2[merge]" type="Sprite2D" parent="." unique_id=2022408561]
+position = Vector2(904.5, 236.5)
+texture = ExtResource("17_adx6m")
+
+[node name="Skeleton2D" type="Skeleton2D" parent="." unique_id=751888119]
+
+[node name="hip" type="Bone2D" parent="Skeleton2D" unique_id=847027349]
+position = Vector2(813, 531)

@@ -34,7 +34,7 @@ window/stretch/mode="viewport"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/fmod/plugin.cfg", "res://addons/godot_ai/plugin.cfg")
+enabled=PackedStringArray("res://addons/fmod/plugin.cfg", "res://addons/godot_ai/plugin.cfg", "res://addons/psd_to_layer_scene/plugin.cfg")
 
 [input]
 
