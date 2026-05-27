@@ -18,75 +18,213 @@
 [ext_resource type="Texture2D" uid="uid://cuyk6la6nbep4" path="res://asset/Character/Adel/layers/Adel spine action use/hair1[merge]_0001.png" id="16_f62jb"]
 [ext_resource type="Texture2D" uid="uid://bp1chv0l6pnsp" path="res://asset/Character/Adel/layers/Adel spine action use/hair2[merge]_0000.png" id="17_adx6m"]
 
+[sub_resource type="SkeletonModification2DTwoBoneIK" id="SkeletonModification2DTwoBoneIK_nx6la"]
+target_nodepath = NodePath("../L_Foot_Target")
+joint_one_bone_idx = 9
+joint_one_bone2d_node = NodePath("hip/L_upper_leg")
+joint_two_bone_idx = 10
+joint_two_bone2d_node = NodePath("hip/L_upper_leg/L_foreleg")
+
+[sub_resource type="SkeletonModification2DTwoBoneIK" id="SkeletonModification2DTwoBoneIK_xin56"]
+target_nodepath = NodePath("../R_Foot_Target")
+joint_one_bone_idx = 12
+joint_one_bone2d_node = NodePath("hip/R_upper_leg")
+joint_two_bone_idx = 13
+joint_two_bone2d_node = NodePath("hip/R_upper_leg/R_foreleg")
+
+[sub_resource type="SkeletonModificationStack2D" id="SkeletonModificationStack2D_pptnm"]
+enabled = true
+modification_count = 2
+modifications/0 = SubResource("SkeletonModification2DTwoBoneIK_nx6la")
+modifications/1 = SubResource("SkeletonModification2DTwoBoneIK_xin56")
+
+[sub_resource type="Animation" id="Animation_g5fo1"]
+resource_name = "walk"
+loop_mode = 1
+
+[sub_resource type="AnimationLibrary" id="AnimationLibrary_hu1vt"]
+_data = {
+&"walk": SubResource("Animation_g5fo1")
+}
+
 [node name="ADEL SPINE ACTION USE" type="Node2D" unique_id=1860163928]
 script = ExtResource("1_nx6la")
 psd_size = Vector2i(1920, 1080)
 
-[node name="left upper arm[merge]" type="Sprite2D" parent="." unique_id=57047861]
-position = Vector2(874.5, 445)
-texture = ExtResource("2_xin56")
-
-[node name="left forearm[merge]" type="Sprite2D" parent="." unique_id=708863222]
-position = Vector2(878.5, 542)
-texture = ExtResource("3_pptnm")
-
-[node name="left upper leg[merge]" type="Sprite2D" parent="." unique_id=508528794]
-position = Vector2(835, 664.5)
-texture = ExtResource("4_g5fo1")
-
-[node name="left foreleg[merge]" type="Sprite2D" parent="." unique_id=1254929906]
-position = Vector2(872.5, 815.5)
-texture = ExtResource("5_hu1vt")
-
-[node name="right upper leg[merge]" type="Sprite2D" parent="." unique_id=1501019756]
-position = Vector2(772, 661.5)
-texture = ExtResource("6_xv1bw")
-
-[node name="left feet[merge]" type="Sprite2D" parent="." unique_id=501514858]
-position = Vector2(879.5, 918)
-texture = ExtResource("7_j5yna")
-
-[node name="right foreleg[merge]" type="Sprite2D" parent="." unique_id=313302749]
-position = Vector2(763, 820.5)
-texture = ExtResource("8_offtu")
-
-[node name="lap[merge]" type="Sprite2D" parent="." unique_id=1803502924]
-position = Vector2(808.5, 567.5)
-texture = ExtResource("9_gm7hr")
-
-[node name="right feet[merge]" type="Sprite2D" parent="." unique_id=1827051959]
-position = Vector2(764.5, 917.5)
-texture = ExtResource("10_wu5lb")
-
-[node name="belly[merge]" type="Sprite2D" parent="." unique_id=708999897]
-position = Vector2(878.5, 624)
-texture = ExtResource("11_2pf0q")
-
-[node name="torso[merge]" type="Sprite2D" parent="." unique_id=1447844456]
-position = Vector2(801.5, 414.5)
-texture = ExtResource("12_5hpsm")
-
-[node name="right upper arm[merge]" type="Sprite2D" parent="." unique_id=460760829]
-position = Vector2(726.5, 431.5)
-texture = ExtResource("13_tex2l")
-
-[node name="right forearm[merge]" type="Sprite2D" parent="." unique_id=590120445]
-position = Vector2(719, 520)
-texture = ExtResource("14_segbb")
-
-[node name="head[merge]" type="Sprite2D" parent="." unique_id=741648628]
-position = Vector2(834, 212.5)
-texture = ExtResource("15_3ibog")
-
-[node name="hair1[merge]" type="Sprite2D" parent="." unique_id=126091615]
-position = Vector2(838, 301)
-texture = ExtResource("16_f62jb")
-
-[node name="hair2[merge]" type="Sprite2D" parent="." unique_id=2022408561]
-position = Vector2(904.5, 236.5)
-texture = ExtResource("17_adx6m")
-
 [node name="Skeleton2D" type="Skeleton2D" parent="." unique_id=751888119]
+modification_stack = SubResource("SkeletonModificationStack2D_pptnm")
 
 [node name="hip" type="Bone2D" parent="Skeleton2D" unique_id=847027349]
 position = Vector2(813, 531)
+rest = Transform2D(1, 0, 0, 1, 813, 531)
+
+[node name="lap[merge]" type="Sprite2D" parent="Skeleton2D/hip" unique_id=1803502924]
+z_index = -1
+position = Vector2(-4.5, 36.5)
+texture = ExtResource("9_gm7hr")
+
+[node name="torso" type="Bone2D" parent="Skeleton2D/hip" unique_id=1842148446]
+position = Vector2(-2, -128)
+rest = Transform2D(1, 0, 0, 1, -2, -128)
+
+[node name="torso[merge]" type="Sprite2D" parent="Skeleton2D/hip/torso" unique_id=1447844456]
+position = Vector2(-9.5, 11.5)
+texture = ExtResource("12_5hpsm")
+
+[node name="head" type="Bone2D" parent="Skeleton2D/hip/torso" unique_id=1979794741]
+position = Vector2(-3, -113)
+rest = Transform2D(1, 0, 0, 1, -3, -113)
+
+[node name="head[merge]" type="Sprite2D" parent="Skeleton2D/hip/torso/head" unique_id=741648628]
+position = Vector2(26, -77.5)
+texture = ExtResource("15_3ibog")
+
+[node name="hair_bone2" type="Bone2D" parent="Skeleton2D/hip/torso/head" unique_id=663298614]
+position = Vector2(98, -88)
+rotation = 1.6181341
+rest = Transform2D(-0.047320146, 0.9988798, -0.9988798, -0.047320146, 98, -88)
+
+[node name="hair2[merge]" type="Sprite2D" parent="Skeleton2D/hip/torso/head/hair_bone2" unique_id=2022408561]
+position = Vector2(34.53238, -0.13421631)
+rotation = -1.6181341
+texture = ExtResource("17_adx6m")
+
+[node name="hair_bone1" type="Bone2D" parent="Skeleton2D/hip/torso/head" unique_id=1634085303]
+position = Vector2(31, -40)
+rotation = 1.8167881
+rest = Transform2D(-0.2435183, 0.9698963, -0.9698963, -0.2435183, 31, -40)
+
+[node name="hair1[merge]" type="Sprite2D" parent="Skeleton2D/hip/torso/head/hair_bone1" unique_id=126091615]
+position = Vector2(50.714706, -5.479004)
+rotation = -1.6980202
+texture = ExtResource("16_f62jb")
+
+[node name="L_upper_arm" type="Bone2D" parent="Skeleton2D/hip/torso" unique_id=550548801]
+position = Vector2(66, -23)
+rest = Transform2D(1, 0, 0, 1, 66, -23)
+
+[node name="left upper arm[merge]" type="Sprite2D" parent="Skeleton2D/hip/torso/L_upper_arm" unique_id=57047861]
+z_index = -3
+position = Vector2(-2.5, 65)
+texture = ExtResource("2_xin56")
+
+[node name="L_forearm" type="Bone2D" parent="Skeleton2D/hip/torso/L_upper_arm" unique_id=61798443]
+position = Vector2(26, 101)
+rest = Transform2D(1, 0, 0, 1, 10, 118)
+
+[node name="left forearm[merge]" type="Sprite2D" parent="Skeleton2D/hip/torso/L_upper_arm/L_forearm" unique_id=708863222]
+z_index = -3
+position = Vector2(-24.5, 61)
+texture = ExtResource("3_pptnm")
+
+[node name="R_upper_arm" type="Bone2D" parent="Skeleton2D/hip/torso" unique_id=2113145281]
+position = Vector2(-77, -41)
+rest = Transform2D(1, 0, 0, 1, -77, -41)
+
+[node name="right upper arm[merge]" type="Sprite2D" parent="Skeleton2D/hip/torso/R_upper_arm" unique_id=460760829]
+z_index = 1
+position = Vector2(-7.5, 69.5)
+texture = ExtResource("13_tex2l")
+
+[node name="R_forearm" type="Bone2D" parent="Skeleton2D/hip/torso/R_upper_arm" unique_id=1617687479]
+position = Vector2(20, 106)
+rest = Transform2D(1, 0, 0, 1, -12, 108)
+
+[node name="right forearm[merge]" type="Sprite2D" parent="Skeleton2D/hip/torso/R_upper_arm/R_forearm" unique_id=590120445]
+z_index = 1
+position = Vector2(-35, 52)
+texture = ExtResource("14_segbb")
+
+[node name="L_upper_leg" type="Bone2D" parent="Skeleton2D/hip" unique_id=1874487404]
+position = Vector2(22, 67)
+rotation = -0.19734722
+scale = Vector2(0.99982804, 0.99982804)
+rest = Transform2D(1, 0, 0, 1, 44, 207)
+metadata/_local_pose_override_enabled_ = true
+
+[node name="L_foreleg" type="Bone2D" parent="Skeleton2D/hip/L_upper_leg" unique_id=1866317577]
+position = Vector2(24.911957, 125.33957)
+rotation = 0.27668744
+scale = Vector2(0.99988705, 0.99988705)
+rest = Transform2D(1, 0, 0, 1, 1, 166)
+metadata/_local_pose_override_enabled_ = true
+
+[node name="L_feet" type="Bone2D" parent="Skeleton2D/hip/L_upper_leg/L_foreleg" unique_id=1500613863]
+position = Vector2(4, 162)
+rest = Transform2D(1, 0, 0, 1, 55, 25)
+
+[node name="left feet[merge]" type="Sprite2D" parent="Skeleton2D/hip/L_upper_leg/L_foreleg/L_feet" unique_id=501514858]
+z_index = -1
+position = Vector2(15.210327, 37.754272)
+rotation = -0.12335642
+scale = Vector2(1.0000018, 1.0000018)
+texture = ExtResource("7_j5yna")
+
+[node name="left foreleg[merge]" type="Sprite2D" parent="Skeleton2D/hip/L_upper_leg/L_foreleg" unique_id=1254929906]
+z_index = -2
+position = Vector2(-0.3484497, 98.894226)
+rotation = -0.12335642
+scale = Vector2(1.0000018, 1.0000018)
+texture = ExtResource("5_hu1vt")
+
+[node name="left upper leg[merge]" type="Sprite2D" parent="Skeleton2D/hip/L_upper_leg" unique_id=508528794]
+z_index = -3
+position = Vector2(-13.11322, 65.18463)
+rotation = 0.19846106
+scale = Vector2(0.99999976, 0.99999976)
+texture = ExtResource("4_g5fo1")
+
+[node name="R_upper_leg" type="Bone2D" parent="Skeleton2D/hip" unique_id=99498740]
+position = Vector2(-26, 64)
+rotation = 0.0003528596
+scale = Vector2(0.9999825, 0.9999825)
+rest = Transform2D(1, 0, 0, 1, -49, 209)
+metadata/_local_pose_override_enabled_ = true
+
+[node name="R_foreleg" type="Bone2D" parent="Skeleton2D/hip/R_upper_leg" unique_id=1279377425]
+position = Vector2(21.04547, 146.99614)
+rotation = -0.00068777404
+scale = Vector2(0.99997634, 0.99997634)
+rest = Transform2D(1, 0, 0, 1, -23, 167)
+metadata/_local_pose_override_enabled_ = true
+
+[node name="R_feet" type="Bone2D" parent="Skeleton2D/hip/R_upper_leg/R_foreleg" unique_id=1932739212]
+position = Vector2(-37, 147)
+rest = Transform2D(1, 0, 0, 1, 60, 27)
+
+[node name="right feet[merge]" type="Sprite2D" parent="Skeleton2D/hip/R_upper_leg/R_foreleg/R_feet" unique_id=1827051959]
+position = Vector2(-6.551697, 28.483643)
+scale = Vector2(1.0000008, 1.0000008)
+texture = ExtResource("10_wu5lb")
+
+[node name="right foreleg[merge]" type="Sprite2D" parent="Skeleton2D/hip/R_upper_leg/R_foreleg" unique_id=313302749]
+z_index = -1
+position = Vector2(-45.051147, 78.48352)
+scale = Vector2(1.0000008, 1.0000008)
+texture = ExtResource("8_offtu")
+
+[node name="right upper leg[merge]" type="Sprite2D" parent="Skeleton2D/hip/R_upper_leg" unique_id=1501019756]
+z_index = -2
+position = Vector2(-14.999573, 66.50012)
+scale = Vector2(0.99999994, 0.99999994)
+texture = ExtResource("6_xv1bw")
+
+[node name="cloth_bone" type="Bone2D" parent="Skeleton2D/hip" unique_id=72431056]
+position = Vector2(58, 5)
+rotation = 1.5448308
+rest = Transform2D(0.02596261, 0.99966294, -0.99966294, 0.02596261, 58, 5)
+
+[node name="belly[merge]" type="Sprite2D" parent="Skeleton2D/hip/cloth_bone" unique_id=708999897]
+z_index = -1
+position = Vector2(88.1651, -5.2127686)
+rotation = -1.5448308
+texture = ExtResource("11_2pf0q")
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=1783989082]
+libraries/ = SubResource("AnimationLibrary_hu1vt")
+
+[node name="L_Foot_Target" type="Marker2D" parent="." unique_id=1374595244]
+position = Vector2(864, 898)
+
+[node name="R_Foot_Target" type="Marker2D" parent="." unique_id=885455075]
+position = Vector2(738, 898)
