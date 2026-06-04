@@ -68,12 +68,17 @@
 [ext_resource type="Texture2D" uid="uid://beyt4fkiye2xs" path="res://asset/Character/Adel/idle/Adel spine action-idle_65.png" id="66_sgsvo"]
 [ext_resource type="Texture2D" uid="uid://ywsuq5xiwonx" path="res://asset/Character/Adel/idle/Adel spine action-idle_66.png" id="67_hnnyu"]
 [ext_resource type="Texture2D" uid="uid://nrkvac1yi28c" path="res://asset/Character/Adel/idle/Adel spine action-idle_67.png" id="68_k78tq"]
+[ext_resource type="PackedScene" uid="uid://4egogosl1we3" path="res://asset/Character/Adel/adel spine action use.tscn" id="69_73q5r"]
 
 [sub_resource type="GDScript" id="GDScript_jn4p2"]
 script/source = "extends CharacterBody2D
 @onready var anim = $AnimatedSprite2D
 @onready var weapon_pivot = $WeaponPivot
 @onready var dodge_cooldown = $DodgeCooldown
+@onready var animated_sprite = $AnimatedSprite2D
+@onready var spine_rig = $SpinePivot/SpineRig
+@onready var spine_anim = $SpinePivot/SpineRig/AnimationPlayer
+@onready var spine_pivot = $SpinePivot
 const SPEED = 300.0
 const JUMP_VELOCITY = -600.0
 const STAGGER_STUN_SEC := 0.45
@@ -98,6 +103,7 @@ var is_doing_action : bool = false
 var is_dodging : bool = false
 var able_to_dodge : bool = true
 var is_touched_enemy : bool = false
+var is_running : bool = false
 
 func _ready() -> void:
 	randomize()
@@ -107,7 +113,7 @@ func _ready() -> void:
 		facing_direction = -1
 	else:
 		facing_direction = 1
-	weapon_pivot.scale.x = facing_direction
+	# weapon_pivot.scale.x = facing_direction
 
 func _unhandled_input(event: InputEvent) -> void:
 	#Damage test
@@ -289,6 +295,8 @@ func _physics_process(delta: float) -> void:
 		is_guarding = false
 		is_doing_action = false
 	#Moving
+	if Input.is_action_just_pressed(\"run\") and is_on_floor():
+		is_running = not is_running
 	var direction = Input.get_axis(\"move_left\", \"move_right\")
 		
 	if is_dodging:
@@ -316,18 +324,41 @@ func _physics_process(delta: float) -> void:
 			able_to_dodge = false
 			is_invulnerable = false
 			is_dodging = false
+			
 		if can_move:
 			if direction:
-				if is_on_floor():
-					anim.play(\"walking\")
-				velocity.x = direction * SPEED
+				# 3. Tính toán tốc độ dựa trên trạng thái is_running
+				var current_speed = SPEED
+				if is_running:
+					current_speed = SPEED * 1.5 # Nếu đang chạy, tốc độ x1.5 (hoặc thay bằng số bạn muốn)
+					
+				velocity.x = direction * current_speed
+				
+				# Xử lý xoay hướng
 				anim.flip_h = (direction < 0)
 				weapon_pivot.scale.x = -1 if direction < 0 else 1
 				facing_direction = -1 if direction < 0 else 1
-			else:
+				
+				var current_scale = abs(spine_pivot.scale.x)
+				spine_pivot.scale.x = -current_scale if direction < 0 else current_scale
+				
+				# Xử lý Animation
 				if is_on_floor():
-					anim.play(\"idle\")
+					anim.visible = false
+					spine_rig.visible = true
+					
+					if is_running:
+						spine_anim.play(\"run\")
+					else:
+						spine_anim.play(\"walk\")
+			else:
+				
 				velocity.x = move_toward(velocity.x, 0, SPEED)
+				if is_on_floor():
+					anim.visible = true
+					spine_rig.visible = false
+					spine_anim.stop()
+					anim.play(\"idle\")
 
 	if Input.is_action_just_pressed(\"jump\") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
@@ -559,216 +590,7 @@ animations = [{
 }],
 "loop": true,
 "name": &"idle",
-"speed": 30.0
-}, {
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("1_fhkw6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("2_73q5r")
-}, {
-"duration": 1.0,
-"texture": ExtResource("3_b15yf")
-}, {
-"duration": 1.0,
-"texture": ExtResource("4_ww710")
-}, {
-"duration": 1.0,
-"texture": ExtResource("5_xl2jl")
-}, {
-"duration": 1.0,
-"texture": ExtResource("6_veiwb")
-}, {
-"duration": 1.0,
-"texture": ExtResource("7_11wga")
-}, {
-"duration": 1.0,
-"texture": ExtResource("8_ukurc")
-}, {
-"duration": 1.0,
-"texture": ExtResource("9_o7hu0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("10_6yvs5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("11_7kcw3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("12_a8oob")
-}, {
-"duration": 1.0,
-"texture": ExtResource("13_tmppi")
-}, {
-"duration": 1.0,
-"texture": ExtResource("14_smu4f")
-}, {
-"duration": 1.0,
-"texture": ExtResource("15_jhywf")
-}, {
-"duration": 1.0,
-"texture": ExtResource("16_pkdf0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("17_r8sap")
-}, {
-"duration": 1.0,
-"texture": ExtResource("18_owx0n")
-}, {
-"duration": 1.0,
-"texture": ExtResource("19_qw8dy")
-}, {
-"duration": 1.0,
-"texture": ExtResource("20_lofxj")
-}, {
-"duration": 1.0,
-"texture": ExtResource("21_18ub5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("22_feb61")
-}, {
-"duration": 1.0,
-"texture": ExtResource("23_83bmx")
-}, {
-"duration": 1.0,
-"texture": ExtResource("24_uar68")
-}, {
-"duration": 1.0,
-"texture": ExtResource("25_2sv38")
-}, {
-"duration": 1.0,
-"texture": ExtResource("26_41uop")
-}, {
-"duration": 1.0,
-"texture": ExtResource("27_5lv5h")
-}, {
-"duration": 1.0,
-"texture": ExtResource("28_rbm6c")
-}, {
-"duration": 1.0,
-"texture": ExtResource("29_nwfij")
-}, {
-"duration": 1.0,
-"texture": ExtResource("30_t2t4w")
-}, {
-"duration": 1.0,
-"texture": ExtResource("31_ryv6h")
-}, {
-"duration": 1.0,
-"texture": ExtResource("32_fa4qg")
-}, {
-"duration": 1.0,
-"texture": ExtResource("33_wra4t")
-}, {
-"duration": 1.0,
-"texture": ExtResource("34_g1pb7")
-}, {
-"duration": 1.0,
-"texture": ExtResource("35_eva5e")
-}, {
-"duration": 1.0,
-"texture": ExtResource("36_soopi")
-}, {
-"duration": 1.0,
-"texture": ExtResource("37_swkx0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("38_cy17f")
-}, {
-"duration": 1.0,
-"texture": ExtResource("39_eyn8r")
-}, {
-"duration": 1.0,
-"texture": ExtResource("40_qffbn")
-}, {
-"duration": 1.0,
-"texture": ExtResource("41_3cla3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("42_ejuat")
-}, {
-"duration": 1.0,
-"texture": ExtResource("43_mag76")
-}, {
-"duration": 1.0,
-"texture": ExtResource("44_88qyj")
-}, {
-"duration": 1.0,
-"texture": ExtResource("45_307po")
-}, {
-"duration": 1.0,
-"texture": ExtResource("46_2agvt")
-}, {
-"duration": 1.0,
-"texture": ExtResource("47_2h0m8")
-}, {
-"duration": 1.0,
-"texture": ExtResource("48_21sud")
-}, {
-"duration": 1.0,
-"texture": ExtResource("49_chda3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("50_7ywmy")
-}, {
-"duration": 1.0,
-"texture": ExtResource("51_vgstg")
-}, {
-"duration": 1.0,
-"texture": ExtResource("52_ygi7u")
-}, {
-"duration": 1.0,
-"texture": ExtResource("53_3fn42")
-}, {
-"duration": 1.0,
-"texture": ExtResource("54_n4xqy")
-}, {
-"duration": 1.0,
-"texture": ExtResource("55_uvbmu")
-}, {
-"duration": 1.0,
-"texture": ExtResource("56_4nahd")
-}, {
-"duration": 1.0,
-"texture": ExtResource("57_q7cyc")
-}, {
-"duration": 1.0,
-"texture": ExtResource("58_a151i")
-}, {
-"duration": 1.0,
-"texture": ExtResource("59_c3g20")
-}, {
-"duration": 1.0,
-"texture": ExtResource("60_domsb")
-}, {
-"duration": 1.0,
-"texture": ExtResource("61_o5qx0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("62_0c4va")
-}, {
-"duration": 1.0,
-"texture": ExtResource("63_k208d")
-}, {
-"duration": 1.0,
-"texture": ExtResource("64_blhct")
-}, {
-"duration": 1.0,
-"texture": ExtResource("65_60ye5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("66_sgsvo")
-}, {
-"duration": 1.0,
-"texture": ExtResource("67_hnnyu")
-}, {
-"duration": 1.0,
-"texture": ExtResource("68_k78tq")
-}],
-"loop": true,
-"name": &"walking",
-"speed": 30.0
+"speed": 45.0
 }]
 
 [node name="PlayableAdel" type="CharacterBody2D" unique_id=1485460165 groups=["Player", "playableAdel"]]
@@ -782,10 +604,14 @@ shape = SubResource("CapsuleShape2D_ybq6y")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=849104016]
 texture_filter = 1
-position = Vector2(0.7461344, 1.4859366)
+position = Vector2(1.4922688, 1.4859366)
 scale = Vector2(0.11438797, 0.11438801)
 sprite_frames = SubResource("SpriteFrames_nm6dr")
 animation = &"idle"
 autoplay = "idle"
-frame = 15
-frame_progress = 0.61599666
+
+[node name="SpinePivot" type="Node2D" parent="." unique_id=1795517573]
+
+[node name="SpineRig" parent="SpinePivot" unique_id=1860163928 instance=ExtResource("69_73q5r")]
+position = Vector2(-99.23588, -60.923428)
+scale = Vector2(0.118000016, 0.11800001)

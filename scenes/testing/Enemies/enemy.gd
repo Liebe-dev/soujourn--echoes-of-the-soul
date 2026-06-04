@@ -88,8 +88,6 @@ func _physics_process(delta: float) -> void:
 func _set_animation(state: String) -> void:
 	if animated_sprite:
 		match state:
-			"walk":
-				animated_sprite.play("walking")
 			"idle":
 				animated_sprite.play("idle")
 
