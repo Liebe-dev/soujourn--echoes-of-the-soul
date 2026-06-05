@@ -860,6 +860,18 @@ tracks/66/keys = {
 "update": 0,
 "values": [0.0]
 }
+tracks/67/type = "value"
+tracks/67/imported = false
+tracks/67/enabled = true
+tracks/67/path = NodePath("Skeleton2D/hip/lap[merge]:rotation")
+tracks/67/interp = 1
+tracks/67/loop_wrap = true
+tracks/67/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.035252202]
+}
 
 [sub_resource type="Animation" id="Animation_2pf0q"]
 resource_name = "loot"
@@ -1173,7 +1185,7 @@ tracks/25/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(8.000018, 20.999922)]
+"values": [Vector2(23.826937, 22.999924)]
 }
 tracks/26/type = "value"
 tracks/26/imported = false
@@ -1185,7 +1197,7 @@ tracks/26/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(-53.5001, 36.5)]
+"values": [Vector2(-37.673187, 38.5)]
 }
 tracks/27/type = "value"
 tracks/27/imported = false
@@ -1197,7 +1209,7 @@ tracks/27/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [Vector2(-51.0001, -112.00008)]
+"values": [Vector2(-35.173187, -110.00008)]
 }
 tracks/28/type = "value"
 tracks/28/imported = false
@@ -1305,7 +1317,7 @@ tracks/36/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [0.0]
+"values": [0.035252202]
 }
 tracks/37/type = "value"
 tracks/37/imported = false
@@ -1401,7 +1413,7 @@ tracks/44/keys = {
 "times": PackedFloat32Array(0),
 "transitions": PackedFloat32Array(1),
 "update": 0,
-"values": [1.5448308]
+"values": [1.5800829]
 }
 tracks/45/type = "value"
 tracks/45/imported = false
@@ -1426,6 +1438,18 @@ tracks/46/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 0,
 "values": [0.0]
+}
+tracks/47/type = "value"
+tracks/47/imported = false
+tracks/47/enabled = true
+tracks/47/path = NodePath("Skeleton2D/hip/lap[merge]:rotation")
+tracks/47/interp = 1
+tracks/47/loop_wrap = true
+tracks/47/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 0,
+"values": [0.035252202]
 }
 
 [sub_resource type="Animation" id="Animation_j5yna"]
@@ -1903,7 +1927,7 @@ tracks/6/keys = {
 "times": PackedFloat32Array(0, 0.3, 0.43333334, 0.73333335, 0.8666667, 1.1666667, 1.3333334, 1.6333333, 1.8333334),
 "transitions": PackedFloat32Array(1, 1, 1, 1, 1, 1, 1, 1, 1),
 "update": 0,
-"values": [-0.1233564, -0.3142087, 0.12391837689159779, -0.11170107212763669, -0.10471975511965978, 0.0471238898038467, 0.05235987755982989, -0.25488052, -0.1233564]
+"values": [-0.1233564, -0.3142087, 0.1239183768915978, -0.11170107212763668, -0.10471975511965978, 0.0471238898038467, 0.05235987755982989, -0.25488052, -0.1233564]
 }
 tracks/7/type = "value"
 tracks/7/imported = false
@@ -2176,6 +2200,7 @@ rest = Transform2D(0.9999992, 0, 0, 0.9999992, 813, 531)
 visible = false
 z_index = -1
 position = Vector2(-53.5001, 36.5)
+rotation = 0.035252202
 texture = ExtResource("9_gm7hr")
 
 [node name="lap" type="Sprite2D" parent="Skeleton2D/hip" unique_id=543769292]
@@ -2188,6 +2213,7 @@ texture = ExtResource("3_j5yna")
 [node name="torso[merge]" type="Bone2D" parent="Skeleton2D/hip" unique_id=1842148446]
 visible = false
 position = Vector2(-51.0001, -128)
+scale = Vector2(0.99999964, 0.99999964)
 rest = Transform2D(1, 0, 0, 1, -37.000088, -128)
 
 [node name="torso[merge]" type="Sprite2D" parent="Skeleton2D/hip/torso[merge]" unique_id=1447844456]
@@ -2279,21 +2305,21 @@ texture = ExtResource("14_segbb")
 [node name="L_upper_leg" type="Bone2D" parent="Skeleton2D/hip" unique_id=1874487404]
 position = Vector2(-11.9999895, 52)
 rotation = -0.17950083
-scale = Vector2(0.99984366, 0.99984366)
+scale = Vector2(0.9998467, 0.9998467)
 rest = Transform2D(0.8735092, -0.48648435, 0.48648435, 0.8735092, -25, 52)
 metadata/_local_pose_override_enabled_ = true
 
 [node name="L_foreleg" type="Bone2D" parent="Skeleton2D/hip/L_upper_leg" unique_id=1866317577]
 position = Vector2(21.260056, 137.47556)
 rotation = 0.2770661
-scale = Vector2(0.999868, 0.999868)
+scale = Vector2(0.9998688, 0.9998688)
 rest = Transform2D(0.63829863, 0.7696372, -0.7696372, 0.63829863, 21.260056, 137.47556)
 metadata/_local_pose_override_enabled_ = true
 
 [node name="L_feet" type="Bone2D" parent="Skeleton2D/hip/L_upper_leg/L_foreleg" unique_id=1500613863]
 position = Vector2(-6.656649, 183.12155)
 rotation = -0.18876056
-scale = Vector2(0.9998398, 0.9998398)
+scale = Vector2(0.99983925, 0.99983925)
 rest = Transform2D(0.9820801, -0.18761154, 0.18761154, 0.9820801, -6.656649, 183.12155)
 
 [node name="left feet[merge]" type="Sprite2D" parent="Skeleton2D/hip/L_upper_leg/L_foreleg/L_feet" unique_id=501514858]
@@ -2321,21 +2347,21 @@ texture = ExtResource("4_g5fo1")
 visible = false
 position = Vector2(-26, 64)
 rotation = -0.11199975
-scale = Vector2(0.99984014, 0.99984014)
+scale = Vector2(0.9998403, 0.9998403)
 rest = Transform2D(0.99358183, -0.11178011, 0.11178011, 0.99358183, -26, 64)
 metadata/_local_pose_override_enabled_ = true
 
 [node name="R_foreleg" type="Bone2D" parent="Skeleton2D/hip/R_upper_leg" unique_id=1279377425]
 position = Vector2(21.04547, 146.99614)
 rotation = 0.7823985
-scale = Vector2(0.9998554, 0.9998554)
+scale = Vector2(0.9998572, 0.9998572)
 rest = Transform2D(0.98110306, 0.19275497, -0.19275497, 0.98110306, 21.04547, 146.99614)
 metadata/_local_pose_override_enabled_ = true
 
 [node name="R_feet" type="Bone2D" parent="Skeleton2D/hip/R_upper_leg/R_foreleg" unique_id=1932739212]
 position = Vector2(-73.19436, 163.88885)
 rotation = 0.5224262
-scale = Vector2(0.9998156, 0.9998156)
+scale = Vector2(0.99981356, 0.99981356)
 rest = Transform2D(0.9997022, -0.014939149, 0.014939149, 0.9997022, -68.11281, 159.04987)
 
 [node name="right feet[merge]" type="Sprite2D" parent="Skeleton2D/hip/R_upper_leg/R_foreleg/R_feet" unique_id=1827051959]
@@ -2359,7 +2385,7 @@ texture = ExtResource("6_xv1bw")
 visible = false
 position = Vector2(35, 16)
 rotation = -3.1018384
-scale = Vector2(0.9998345, 0.9998345)
+scale = Vector2(0.9998338, 0.9998338)
 rest = Transform2D(-0.9990432, -0.039737206, 0.039737206, -0.9990432, 35, 16)
 
 [node name="belly" type="Sprite2D" parent="Skeleton2D/hip/cloth_bone2" unique_id=1083849315]
@@ -2398,7 +2424,7 @@ rest = Transform2D(1, 0, 0, 1, -2.089017, -107.34862)
 [node name="hair_bone2" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1/head" unique_id=824247481]
 position = Vector2(98, -88)
 rotation = 1.6181341
-scale = Vector2(0.99982774, 0.99982774)
+scale = Vector2(0.9998291, 0.9998291)
 rest = Transform2D(-0.047312167, 0.9987116, -0.9987116, -0.047312167, 98, -88)
 
 [node name="hair2" type="Sprite2D" parent="Skeleton2D/hip/torso2/torso1/head/hair_bone2" unique_id=854023447]
@@ -2410,7 +2436,7 @@ texture = ExtResource("17_adx6m")
 [node name="hair_bone1" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1/head" unique_id=2131901034]
 position = Vector2(31, -40)
 rotation = 1.8167881
-scale = Vector2(0.999844, 0.999844)
+scale = Vector2(0.9998445, 0.9998445)
 rest = Transform2D(-0.24348012, 0.9697441, -0.9697441, -0.24348012, 31, -40)
 
 [node name="hair1" type="Sprite2D" parent="Skeleton2D/hip/torso2/torso1/head/hair_bone1" unique_id=1251224613]
@@ -2426,13 +2452,13 @@ texture = ExtResource("15_3ibog")
 [node name="L_upper_arm" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1" unique_id=1510016241]
 position = Vector2(9.499755, -45.403446)
 rotation = 0.5237757
-scale = Vector2(0.99984974, 0.99984974)
+scale = Vector2(0.9998504, 0.9998504)
 rest = Transform2D(0.93023777, 0.36655867, -0.36655867, 0.93023777, 9.499755, -45.403446)
 
 [node name="L_forearm" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1/L_upper_arm" unique_id=2054228943]
 position = Vector2(9.05699, 125.501625)
 rotation = -1.0467486
-scale = Vector2(0.9998517, 0.9998517)
+scale = Vector2(0.99985105, 0.99985105)
 rest = Transform2D(0.5003127, -0.86566925, 0.86566925, 0.5003127, 9.05699, 125.501625)
 
 [node name="left forearm" type="Sprite2D" parent="Skeleton2D/hip/torso2/torso1/L_upper_arm/L_forearm" unique_id=1808740098]
@@ -2450,13 +2476,13 @@ texture = ExtResource("21_wu5lb")
 [node name="R_upper_arm" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1" unique_id=742047974]
 position = Vector2(-50.339714, -45.886616)
 rotation = -0.20765075
-scale = Vector2(0.9998366, 0.9998366)
+scale = Vector2(0.999836, 0.999836)
 rest = Transform2D(0.9783573, -0.20612785, 0.20612785, 0.9783573, -50.339714, -45.886616)
 
 [node name="R_forearm" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1/R_upper_arm" unique_id=271342894]
 position = Vector2(15.490183, 124.05001)
 rotation = 0.015835386
-scale = Vector2(0.99980795, 0.99980795)
+scale = Vector2(0.99981064, 0.99981064)
 rest = Transform2D(0.99970406, 0.015832024, -0.015832024, 0.99970406, 15.490183, 124.05001)
 
 [node name="right forearm" type="Sprite2D" parent="Skeleton2D/hip/torso2/torso1/R_upper_arm/R_forearm" unique_id=1409422122]
