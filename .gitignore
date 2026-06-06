@@ -14,3 +14,7 @@ export_credentials.cfg
 .mono/
 data_*/
 mono_crash.*.json
+*.TMP
+addons/fmod/libs/windows/~libGodotFmod.windows.editor.x86_64.dll
+addons/psd_to_layer_scene/native/~psd_layer_to_scene.dll
+bin/windows/~libspine_godot.windows.editor.x86_64.dll
