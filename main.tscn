@@ -20,7 +20,7 @@
 [ext_resource type="Texture2D" uid="uid://cign1uy2ssev0" path="res://asset/Map/rock.png" id="10_0odxb"]
 [ext_resource type="Texture2D" uid="uid://o6s7m6esbso0" path="res://asset/Map/background/background_layer_3_2.png" id="11_dg77c"]
 [ext_resource type="Texture2D" uid="uid://c5s2of8cfjks7" path="res://asset/Map/background/background_layer_E.png" id="12_074og"]
-[ext_resource type="PackedScene" uid="uid://xoclhbtm6dob" path="res://ui.tscn" id="13_ui"]
+[ext_resource type="PackedScene" uid="uid://xoclhbtm6dob" path="res://asset/UI/ui.tscn" id="13_ui"]
 [ext_resource type="Texture2D" uid="uid://05accsg0lnmn" path="res://asset/Map/background/BGScene2_1.png" id="21_d13ii"]
 [ext_resource type="Texture2D" uid="uid://bmvih0hswruyb" path="res://asset/Map/background/BGScene2_2.png" id="22_1u8w0"]
 [ext_resource type="Texture2D" uid="uid://0f8dsl6m5g57" path="res://asset/Map/background/BGScene2_3.png" id="23_0odxb"]

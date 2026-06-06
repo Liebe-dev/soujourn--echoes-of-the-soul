@@ -1,85 +1,15 @@
 [gd_scene format=3 uid="uid://dhhn1rh24dtco"]
 
-[ext_resource type="Texture2D" uid="uid://d0ejm28eurdok" path="res://asset/Character/Adel/idle/Adel spine action-idle_00.png" id="1_fhkw6"]
-[ext_resource type="Texture2D" uid="uid://fudnr1a8urhv" path="res://asset/Character/Adel/idle/Adel spine action-idle_01.png" id="2_73q5r"]
-[ext_resource type="Texture2D" uid="uid://bj8sn28t5es30" path="res://asset/Character/Adel/idle/Adel spine action-idle_02.png" id="3_b15yf"]
-[ext_resource type="Texture2D" uid="uid://t5hhahknwy47" path="res://asset/Character/Adel/idle/Adel spine action-idle_03.png" id="4_ww710"]
-[ext_resource type="Texture2D" uid="uid://cgyo1d7t84346" path="res://asset/Character/Adel/idle/Adel spine action-idle_04.png" id="5_xl2jl"]
-[ext_resource type="Texture2D" uid="uid://ds8u3k03cno7y" path="res://asset/Character/Adel/idle/Adel spine action-idle_05.png" id="6_veiwb"]
-[ext_resource type="Texture2D" uid="uid://cw6knmrt63rx1" path="res://asset/Character/Adel/idle/Adel spine action-idle_06.png" id="7_11wga"]
-[ext_resource type="Texture2D" uid="uid://btigipplb8h6t" path="res://asset/Character/Adel/idle/Adel spine action-idle_07.png" id="8_ukurc"]
-[ext_resource type="Texture2D" uid="uid://bd3wxlk0c81me" path="res://asset/Character/Adel/idle/Adel spine action-idle_08.png" id="9_o7hu0"]
-[ext_resource type="Texture2D" uid="uid://te6x7t6tdue0" path="res://asset/Character/Adel/idle/Adel spine action-idle_09.png" id="10_6yvs5"]
-[ext_resource type="Texture2D" uid="uid://g784okyngxcp" path="res://asset/Character/Adel/idle/Adel spine action-idle_10.png" id="11_7kcw3"]
-[ext_resource type="Texture2D" uid="uid://cxfhms012qphy" path="res://asset/Character/Adel/idle/Adel spine action-idle_11.png" id="12_a8oob"]
-[ext_resource type="Texture2D" uid="uid://dl6fac35y13xw" path="res://asset/Character/Adel/idle/Adel spine action-idle_12.png" id="13_tmppi"]
-[ext_resource type="Texture2D" uid="uid://dxhpeen0k0v7g" path="res://asset/Character/Adel/idle/Adel spine action-idle_13.png" id="14_smu4f"]
-[ext_resource type="Texture2D" uid="uid://dxd2dj1ohrlfr" path="res://asset/Character/Adel/idle/Adel spine action-idle_14.png" id="15_jhywf"]
-[ext_resource type="Texture2D" uid="uid://u1u38vqjh3q0" path="res://asset/Character/Adel/idle/Adel spine action-idle_15.png" id="16_pkdf0"]
-[ext_resource type="Texture2D" uid="uid://cfnilt4t15rw" path="res://asset/Character/Adel/idle/Adel spine action-idle_16.png" id="17_r8sap"]
-[ext_resource type="Texture2D" uid="uid://b6ubvgncb5clb" path="res://asset/Character/Adel/idle/Adel spine action-idle_17.png" id="18_owx0n"]
-[ext_resource type="Texture2D" uid="uid://qnbdsv5qmeq5" path="res://asset/Character/Adel/idle/Adel spine action-idle_18.png" id="19_qw8dy"]
-[ext_resource type="Texture2D" uid="uid://d1vyv3vb57co8" path="res://asset/Character/Adel/idle/Adel spine action-idle_19.png" id="20_lofxj"]
-[ext_resource type="Texture2D" uid="uid://c3svbkwisy2vj" path="res://asset/Character/Adel/idle/Adel spine action-idle_20.png" id="21_18ub5"]
-[ext_resource type="Texture2D" uid="uid://c4kbyyx5m5qmd" path="res://asset/Character/Adel/idle/Adel spine action-idle_21.png" id="22_feb61"]
-[ext_resource type="Texture2D" uid="uid://cxj1ibyv4p0gd" path="res://asset/Character/Adel/idle/Adel spine action-idle_22.png" id="23_83bmx"]
-[ext_resource type="Texture2D" uid="uid://dgnky735i2a65" path="res://asset/Character/Adel/idle/Adel spine action-idle_23.png" id="24_uar68"]
-[ext_resource type="Texture2D" uid="uid://kgouy7d5c4c5" path="res://asset/Character/Adel/idle/Adel spine action-idle_24.png" id="25_2sv38"]
-[ext_resource type="Texture2D" uid="uid://cpek11i1m6576" path="res://asset/Character/Adel/idle/Adel spine action-idle_25.png" id="26_41uop"]
-[ext_resource type="Texture2D" uid="uid://8k4bob3sh3cm" path="res://asset/Character/Adel/idle/Adel spine action-idle_26.png" id="27_5lv5h"]
-[ext_resource type="Texture2D" uid="uid://culnju81aqfmd" path="res://asset/Character/Adel/idle/Adel spine action-idle_27.png" id="28_rbm6c"]
-[ext_resource type="Texture2D" uid="uid://dfsud4nbrp8cd" path="res://asset/Character/Adel/idle/Adel spine action-idle_28.png" id="29_nwfij"]
-[ext_resource type="Texture2D" uid="uid://c24ui4psfmqb2" path="res://asset/Character/Adel/idle/Adel spine action-idle_29.png" id="30_t2t4w"]
-[ext_resource type="Texture2D" uid="uid://b3lcvg7amrehp" path="res://asset/Character/Adel/idle/Adel spine action-idle_30.png" id="31_ryv6h"]
-[ext_resource type="Texture2D" uid="uid://c31ht4g5awxvr" path="res://asset/Character/Adel/idle/Adel spine action-idle_31.png" id="32_fa4qg"]
-[ext_resource type="Texture2D" uid="uid://dju4serb116w0" path="res://asset/Character/Adel/idle/Adel spine action-idle_32.png" id="33_wra4t"]
-[ext_resource type="Texture2D" uid="uid://07lckdfv5drt" path="res://asset/Character/Adel/idle/Adel spine action-idle_33.png" id="34_g1pb7"]
-[ext_resource type="Texture2D" uid="uid://c7da6wdwyktkv" path="res://asset/Character/Adel/idle/Adel spine action-idle_34.png" id="35_eva5e"]
-[ext_resource type="Texture2D" uid="uid://b46t3xp407mik" path="res://asset/Character/Adel/idle/Adel spine action-idle_35.png" id="36_soopi"]
-[ext_resource type="Texture2D" uid="uid://dlytkq6vsq2wh" path="res://asset/Character/Adel/idle/Adel spine action-idle_36.png" id="37_swkx0"]
-[ext_resource type="Texture2D" uid="uid://djc53mrqik0v4" path="res://asset/Character/Adel/idle/Adel spine action-idle_37.png" id="38_cy17f"]
-[ext_resource type="Texture2D" uid="uid://c3224bjty7u2m" path="res://asset/Character/Adel/idle/Adel spine action-idle_38.png" id="39_eyn8r"]
-[ext_resource type="Texture2D" uid="uid://xc6qiv15cl0s" path="res://asset/Character/Adel/idle/Adel spine action-idle_39.png" id="40_qffbn"]
-[ext_resource type="Texture2D" uid="uid://y85rhlpsjn7d" path="res://asset/Character/Adel/idle/Adel spine action-idle_40.png" id="41_3cla3"]
-[ext_resource type="Texture2D" uid="uid://5emfn7xucw7a" path="res://asset/Character/Adel/idle/Adel spine action-idle_41.png" id="42_ejuat"]
-[ext_resource type="Texture2D" uid="uid://cqchydkykh814" path="res://asset/Character/Adel/idle/Adel spine action-idle_42.png" id="43_mag76"]
-[ext_resource type="Texture2D" uid="uid://dl8rwck5u8iiv" path="res://asset/Character/Adel/idle/Adel spine action-idle_43.png" id="44_88qyj"]
-[ext_resource type="Texture2D" uid="uid://b010kxmqwgp1f" path="res://asset/Character/Adel/idle/Adel spine action-idle_44.png" id="45_307po"]
-[ext_resource type="Texture2D" uid="uid://c87dphee3iv35" path="res://asset/Character/Adel/idle/Adel spine action-idle_45.png" id="46_2agvt"]
-[ext_resource type="Texture2D" uid="uid://bq4qjesg6xsi3" path="res://asset/Character/Adel/idle/Adel spine action-idle_46.png" id="47_2h0m8"]
-[ext_resource type="Texture2D" uid="uid://clpir5r6anpby" path="res://asset/Character/Adel/idle/Adel spine action-idle_47.png" id="48_21sud"]
-[ext_resource type="Texture2D" uid="uid://bvewhks2fhfup" path="res://asset/Character/Adel/idle/Adel spine action-idle_48.png" id="49_chda3"]
-[ext_resource type="Texture2D" uid="uid://cetng17frgaqo" path="res://asset/Character/Adel/idle/Adel spine action-idle_49.png" id="50_7ywmy"]
-[ext_resource type="Texture2D" uid="uid://ckt11i2rl5amk" path="res://asset/Character/Adel/idle/Adel spine action-idle_50.png" id="51_vgstg"]
-[ext_resource type="Texture2D" uid="uid://ttrwh8jpcet2" path="res://asset/Character/Adel/idle/Adel spine action-idle_51.png" id="52_ygi7u"]
-[ext_resource type="Texture2D" uid="uid://ccm8jm7fsg1gs" path="res://asset/Character/Adel/idle/Adel spine action-idle_52.png" id="53_3fn42"]
-[ext_resource type="Texture2D" uid="uid://csvao8t2irqap" path="res://asset/Character/Adel/idle/Adel spine action-idle_53.png" id="54_n4xqy"]
-[ext_resource type="Texture2D" uid="uid://bl555p1drgiln" path="res://asset/Character/Adel/idle/Adel spine action-idle_54.png" id="55_uvbmu"]
-[ext_resource type="Texture2D" uid="uid://cblgwvsy63lq" path="res://asset/Character/Adel/idle/Adel spine action-idle_55.png" id="56_4nahd"]
-[ext_resource type="Texture2D" uid="uid://yjjpwp5ryo73" path="res://asset/Character/Adel/idle/Adel spine action-idle_56.png" id="57_q7cyc"]
-[ext_resource type="Texture2D" uid="uid://f5lwjwjtpodj" path="res://asset/Character/Adel/idle/Adel spine action-idle_57.png" id="58_a151i"]
-[ext_resource type="Texture2D" uid="uid://bxcifkkc17tn0" path="res://asset/Character/Adel/idle/Adel spine action-idle_58.png" id="59_c3g20"]
-[ext_resource type="Texture2D" uid="uid://dup3ey7w41ism" path="res://asset/Character/Adel/idle/Adel spine action-idle_59.png" id="60_domsb"]
-[ext_resource type="Texture2D" uid="uid://cpp5vyntm3mc6" path="res://asset/Character/Adel/idle/Adel spine action-idle_60.png" id="61_o5qx0"]
-[ext_resource type="Texture2D" uid="uid://c0firblxkfjbl" path="res://asset/Character/Adel/idle/Adel spine action-idle_61.png" id="62_0c4va"]
-[ext_resource type="Texture2D" uid="uid://b2tmookkjoin7" path="res://asset/Character/Adel/idle/Adel spine action-idle_62.png" id="63_k208d"]
-[ext_resource type="Texture2D" uid="uid://vcu2squl6iqe" path="res://asset/Character/Adel/idle/Adel spine action-idle_63.png" id="64_blhct"]
-[ext_resource type="Texture2D" uid="uid://cj1b1rtlnfqps" path="res://asset/Character/Adel/idle/Adel spine action-idle_64.png" id="65_60ye5"]
-[ext_resource type="Texture2D" uid="uid://beyt4fkiye2xs" path="res://asset/Character/Adel/idle/Adel spine action-idle_65.png" id="66_sgsvo"]
-[ext_resource type="Texture2D" uid="uid://ywsuq5xiwonx" path="res://asset/Character/Adel/idle/Adel spine action-idle_66.png" id="67_hnnyu"]
-[ext_resource type="Texture2D" uid="uid://nrkvac1yi28c" path="res://asset/Character/Adel/idle/Adel spine action-idle_67.png" id="68_k78tq"]
 [ext_resource type="PackedScene" uid="uid://4egogosl1we3" path="res://asset/Character/Adel/adel spine action use.tscn" id="69_73q5r"]
 
 [sub_resource type="GDScript" id="GDScript_jn4p2"]
 script/source = "extends CharacterBody2D
-@onready var anim = $AnimatedSprite2D
 @onready var weapon_pivot = $WeaponPivot
 @onready var dodge_cooldown = $DodgeCooldown
-@onready var animated_sprite = $AnimatedSprite2D
 @onready var spine_rig = $SpinePivot/SpineRig
 @onready var spine_anim = $SpinePivot/SpineRig/AnimationPlayer
 @onready var spine_pivot = $SpinePivot
-const SPEED = 300.0
+const SPEED = 140.0
 const JUMP_VELOCITY = -600.0
 const STAGGER_STUN_SEC := 0.45
 const STAGGER_INVULN_SEC := 1.0
@@ -107,14 +37,6 @@ var is_running : bool = false
 
 func _ready() -> void:
 	randomize()
-	anim.flip_h = false
-	
-	if anim.scale.x < 0:
-		facing_direction = -1
-	else:
-		facing_direction = 1
-	# weapon_pivot.scale.x = facing_direction
-
 func _unhandled_input(event: InputEvent) -> void:
 	#Damage test
 	if event.is_action_pressed(\"debug_take_damage\"):
@@ -174,8 +96,7 @@ func _apply_stagger(knockback_dir: Vector2) -> void:
 	is_invulnerable = true
 	can_move = false
 	velocity = knockback_dir * STAGGER_KNOCKBACK
-	if anim.sprite_frames and anim.sprite_frames.has_animation(\"idle\"):
-		anim.play(\"idle\")
+	spine_anim.play(\"idle\")
 	get_tree().create_timer(STAGGER_STUN_SEC).timeout.connect(_on_stagger_stun_end, CONNECT_ONE_SHOT)
 
 func _on_stagger_stun_end() -> void:
@@ -212,9 +133,10 @@ func enter_rest(_world_position: Vector2, face_left: bool) -> void:
 	is_locked = true
 	can_move = false
 	velocity = Vector2.ZERO
-	anim.flip_h = face_left
+	var current_scale = abs(spine_pivot.scale.x)
+	spine_pivot.scale.x = -current_scale if face_left else current_scale
 	facing_direction = -1 if face_left else 1
-	anim.play(\"idle\")
+	spine_anim.play(\"rest\")
 
 func exit_rest() -> void:
 	is_resting = false
@@ -226,7 +148,8 @@ func exit_rest() -> void:
 
 	var dir := Input.get_axis(\"move_left\", \"move_right\")
 	if dir != 0:
-		anim.flip_h = (dir < 0)
+		var current_scale = abs(spine_pivot.scale.x)
+		spine_pivot.scale.x = -current_scale if dir < 0 else current_scale
 		facing_direction = -1 if dir < 0 else 1
 
 func snap_feet_to_floor(max_drop: float = 96.0) -> void:
@@ -327,15 +250,11 @@ func _physics_process(delta: float) -> void:
 			
 		if can_move:
 			if direction:
-				# 3. Tính toán tốc độ dựa trên trạng thái is_running
 				var current_speed = SPEED
 				if is_running:
-					current_speed = SPEED * 1.5 # Nếu đang chạy, tốc độ x1.5 (hoặc thay bằng số bạn muốn)
-					
+					current_speed = 450 
 				velocity.x = direction * current_speed
 				
-				# Xử lý xoay hướng
-				anim.flip_h = (direction < 0)
 				weapon_pivot.scale.x = -1 if direction < 0 else 1
 				facing_direction = -1 if direction < 0 else 1
 				
@@ -344,21 +263,19 @@ func _physics_process(delta: float) -> void:
 				
 				# Xử lý Animation
 				if is_on_floor():
-					anim.visible = false
 					spine_rig.visible = true
 					
 					if is_running:
 						spine_anim.play(\"run\")
 					else:
-						spine_anim.play(\"walk\")
+						spine_anim.play(\"walk\", -1, 1.5)
 			else:
 				
 				velocity.x = move_toward(velocity.x, 0, SPEED)
 				if is_on_floor():
-					anim.visible = true
-					spine_rig.visible = false
+					spine_rig.visible = true
 					spine_anim.stop()
-					anim.play(\"idle\")
+					spine_anim.play(\"idle\")
 
 	if Input.is_action_just_pressed(\"jump\") and is_on_floor():
 		velocity.y = JUMP_VELOCITY
@@ -381,236 +298,17 @@ func _on_dodge_cooldown_timeout() -> void:
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]
 height = 96.0
 
-[sub_resource type="SpriteFrames" id="SpriteFrames_nm6dr"]
-animations = [{
-"frames": [{
-"duration": 1.0,
-"texture": ExtResource("1_fhkw6")
-}, {
-"duration": 1.0,
-"texture": ExtResource("2_73q5r")
-}, {
-"duration": 1.0,
-"texture": ExtResource("3_b15yf")
-}, {
-"duration": 1.0,
-"texture": ExtResource("4_ww710")
-}, {
-"duration": 1.0,
-"texture": ExtResource("5_xl2jl")
-}, {
-"duration": 1.0,
-"texture": ExtResource("6_veiwb")
-}, {
-"duration": 1.0,
-"texture": ExtResource("7_11wga")
-}, {
-"duration": 1.0,
-"texture": ExtResource("8_ukurc")
-}, {
-"duration": 1.0,
-"texture": ExtResource("9_o7hu0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("10_6yvs5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("11_7kcw3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("12_a8oob")
-}, {
-"duration": 1.0,
-"texture": ExtResource("13_tmppi")
-}, {
-"duration": 1.0,
-"texture": ExtResource("14_smu4f")
-}, {
-"duration": 1.0,
-"texture": ExtResource("15_jhywf")
-}, {
-"duration": 1.0,
-"texture": ExtResource("16_pkdf0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("17_r8sap")
-}, {
-"duration": 1.0,
-"texture": ExtResource("18_owx0n")
-}, {
-"duration": 1.0,
-"texture": ExtResource("19_qw8dy")
-}, {
-"duration": 1.0,
-"texture": ExtResource("20_lofxj")
-}, {
-"duration": 1.0,
-"texture": ExtResource("21_18ub5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("22_feb61")
-}, {
-"duration": 1.0,
-"texture": ExtResource("23_83bmx")
-}, {
-"duration": 1.0,
-"texture": ExtResource("24_uar68")
-}, {
-"duration": 1.0,
-"texture": ExtResource("25_2sv38")
-}, {
-"duration": 1.0,
-"texture": ExtResource("26_41uop")
-}, {
-"duration": 1.0,
-"texture": ExtResource("27_5lv5h")
-}, {
-"duration": 1.0,
-"texture": ExtResource("28_rbm6c")
-}, {
-"duration": 1.0,
-"texture": ExtResource("29_nwfij")
-}, {
-"duration": 1.0,
-"texture": ExtResource("30_t2t4w")
-}, {
-"duration": 1.0,
-"texture": ExtResource("31_ryv6h")
-}, {
-"duration": 1.0,
-"texture": ExtResource("32_fa4qg")
-}, {
-"duration": 1.0,
-"texture": ExtResource("33_wra4t")
-}, {
-"duration": 1.0,
-"texture": ExtResource("34_g1pb7")
-}, {
-"duration": 1.0,
-"texture": ExtResource("35_eva5e")
-}, {
-"duration": 1.0,
-"texture": ExtResource("36_soopi")
-}, {
-"duration": 1.0,
-"texture": ExtResource("37_swkx0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("38_cy17f")
-}, {
-"duration": 1.0,
-"texture": ExtResource("39_eyn8r")
-}, {
-"duration": 1.0,
-"texture": ExtResource("40_qffbn")
-}, {
-"duration": 1.0,
-"texture": ExtResource("41_3cla3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("42_ejuat")
-}, {
-"duration": 1.0,
-"texture": ExtResource("43_mag76")
-}, {
-"duration": 1.0,
-"texture": ExtResource("44_88qyj")
-}, {
-"duration": 1.0,
-"texture": ExtResource("45_307po")
-}, {
-"duration": 1.0,
-"texture": ExtResource("46_2agvt")
-}, {
-"duration": 1.0,
-"texture": ExtResource("47_2h0m8")
-}, {
-"duration": 1.0,
-"texture": ExtResource("48_21sud")
-}, {
-"duration": 1.0,
-"texture": ExtResource("49_chda3")
-}, {
-"duration": 1.0,
-"texture": ExtResource("50_7ywmy")
-}, {
-"duration": 1.0,
-"texture": ExtResource("51_vgstg")
-}, {
-"duration": 1.0,
-"texture": ExtResource("52_ygi7u")
-}, {
-"duration": 1.0,
-"texture": ExtResource("53_3fn42")
-}, {
-"duration": 1.0,
-"texture": ExtResource("54_n4xqy")
-}, {
-"duration": 1.0,
-"texture": ExtResource("55_uvbmu")
-}, {
-"duration": 1.0,
-"texture": ExtResource("56_4nahd")
-}, {
-"duration": 1.0,
-"texture": ExtResource("57_q7cyc")
-}, {
-"duration": 1.0,
-"texture": ExtResource("58_a151i")
-}, {
-"duration": 1.0,
-"texture": ExtResource("59_c3g20")
-}, {
-"duration": 1.0,
-"texture": ExtResource("60_domsb")
-}, {
-"duration": 1.0,
-"texture": ExtResource("61_o5qx0")
-}, {
-"duration": 1.0,
-"texture": ExtResource("62_0c4va")
-}, {
-"duration": 1.0,
-"texture": ExtResource("63_k208d")
-}, {
-"duration": 1.0,
-"texture": ExtResource("64_blhct")
-}, {
-"duration": 1.0,
-"texture": ExtResource("65_60ye5")
-}, {
-"duration": 1.0,
-"texture": ExtResource("66_sgsvo")
-}, {
-"duration": 1.0,
-"texture": ExtResource("67_hnnyu")
-}, {
-"duration": 1.0,
-"texture": ExtResource("68_k78tq")
-}],
-"loop": true,
-"name": &"idle",
-"speed": 45.0
-}]
-
 [node name="PlayableAdel" type="CharacterBody2D" unique_id=1485460165 groups=["Player", "playableAdel"]]
-scale = Vector2(1.3402412, 1.345952)
 collision_layer = 3
 script = SubResource("GDScript_jn4p2")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1090059515]
-scale = Vector2(1.8800013, 1)
+scale = Vector2(2.875, 1.529)
 shape = SubResource("CapsuleShape2D_ybq6y")
 
-[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=849104016]
-texture_filter = 1
-position = Vector2(1.4922688, 1.4859366)
-scale = Vector2(0.11438797, 0.11438801)
-sprite_frames = SubResource("SpriteFrames_nm6dr")
-animation = &"idle"
-autoplay = "idle"
-
 [node name="SpinePivot" type="Node2D" parent="." unique_id=1795517573]
+position = Vector2(10, -1)
+scale = Vector2(1.5, 1.5)
 
 [node name="SpineRig" parent="SpinePivot" unique_id=1860163928 instance=ExtResource("69_73q5r")]
 position = Vector2(-99.23588, -60.923428)
