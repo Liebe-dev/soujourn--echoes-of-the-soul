@@ -1,23 +1,24 @@
 [gd_scene format=3 uid="uid://dhhn1rh24dtco"]
 
-[ext_resource type="Script" path="res://scenes/adel/playable_adel.gd" id="1_playable"]
+[ext_resource type="Script" uid="uid://xl1mn1dbt32k" path="res://scenes/adel/playable_adel.gd" id="1_playable"]
 [ext_resource type="PackedScene" uid="uid://4egogosl1we3" path="res://asset/Character/Adel/adel spine action use.tscn" id="69_73q5r"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]
-height = 96.0
+radius = 7.652174
+height = 112.49183
 
 [node name="PlayableAdel" type="CharacterBody2D" unique_id=1485460165 groups=["Player", "playableAdel"]]
 collision_layer = 3
 script = ExtResource("1_playable")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1090059515]
-visible = false
+position = Vector2(4, 1.0000001)
 scale = Vector2(2.875, 1.529)
 shape = SubResource("CapsuleShape2D_ybq6y")
 
 [node name="SpinePivot" type="Node2D" parent="." unique_id=1795517573]
 position = Vector2(10, -1)
-scale = Vector2(1.5, 1.5)
+scale = Vector2(1.8, 1.8)
 
 [node name="SpineRig" parent="SpinePivot" unique_id=1860163928 instance=ExtResource("69_73q5r")]
 position = Vector2(-99.23588, -60.923428)

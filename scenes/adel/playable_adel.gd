@@ -44,7 +44,7 @@ var _playing_land_anim := false
 func _ready() -> void:
 	randomize()
 	spine_anim.animation_finished.connect(_on_spine_anim_finished)
-
+	spine_anim.play("idle")
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("debug_take_damage"):
@@ -109,7 +109,7 @@ func _apply_stagger(knockback_dir: Vector2) -> void:
 	can_move = false
 	velocity = knockback_dir * STAGGER_KNOCKBACK
 	_playing_land_anim = false
-	spine_anim.play("idle")
+	spine_anim.play("idle", 0.1) # Thêm làm mượt khi bị choáng
 	get_tree().create_timer(STAGGER_STUN_SEC).timeout.connect(_on_stagger_stun_end, CONNECT_ONE_SHOT)
 
 
@@ -156,7 +156,7 @@ func enter_rest(_world_position: Vector2, face_left: bool) -> void:
 	var current_scale = abs(spine_pivot.scale.x)
 	spine_pivot.scale.x = -current_scale if face_left else current_scale
 	facing_direction = -1 if face_left else 1
-	spine_anim.play("rest")
+	spine_anim.play("rest", 0.15) # Thêm làm mượt khi ngồi nghỉ
 
 
 func exit_rest() -> void:
@@ -204,13 +204,13 @@ func _capsule_half_height(col: CollisionShape2D) -> float:
 func _play_jump_start() -> void:
 	_playing_land_anim = false
 	spine_rig.visible = true
-	spine_anim.play(ANIM_JUMP_START)
+	spine_anim.play(ANIM_JUMP_START, 0.05) # Bật nhảy cần phản hồi nhanh nên chỉ làm mượt rất ít (0.05s)
 
 
 func _play_jump_land() -> void:
 	_playing_land_anim = true
 	spine_rig.visible = true
-	spine_anim.play(ANIM_JUMP_LAND)
+	spine_anim.play(ANIM_JUMP_LAND, 0.1) # Chạm đất mượt mà trong 0.1s
 
 
 func _update_ground_animation(direction: float) -> void:
@@ -219,12 +219,16 @@ func _update_ground_animation(direction: float) -> void:
 	spine_rig.visible = true
 	if direction != 0.0:
 		if is_running:
-			spine_anim.play("run")
+			if spine_anim.current_animation != "run":
+				spine_anim.play("run")
 		else:
-			spine_anim.play("walk", -1, 1.5)
+			if spine_anim.current_animation != "walk":
+				spine_anim.play("walk")
 	else:
-		spine_anim.stop()
-		spine_anim.play("idle")
+		if _playing_land_anim:
+			return
+		if spine_anim.current_animation != "idle":
+			spine_anim.play("idle")
 
 
 func _update_air_animation() -> void:
@@ -235,7 +239,6 @@ func _update_air_animation() -> void:
 		return
 	spine_rig.visible = true
 	spine_anim.play(ANIM_JUMP_AIR)
-
 
 func _on_spine_anim_finished(anim_name: StringName) -> void:
 	if anim_name == ANIM_JUMP_START and not is_on_floor():
