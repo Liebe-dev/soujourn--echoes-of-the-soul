@@ -6036,14 +6036,14 @@ texture = ExtResource("14_segbb")
 [node name="L_upper_leg" type="Bone2D" parent="Skeleton2D/hip" unique_id=1874487404]
 position = Vector2(-11.9999895, 52)
 rotation = -0.17950083
-scale = Vector2(0.99985415, 0.99985415)
+scale = Vector2(0.9998539, 0.9998539)
 rest = Transform2D(0.8735092, -0.48648435, 0.48648435, 0.8735092, -25, 52)
 metadata/_local_pose_override_enabled_ = true
 
 [node name="L_foreleg" type="Bone2D" parent="Skeleton2D/hip/L_upper_leg" unique_id=1866317577]
 position = Vector2(21.260056, 137.47556)
 rotation = 0.2770661
-scale = Vector2(0.9998411, 0.9998411)
+scale = Vector2(0.99984115, 0.99984115)
 rest = Transform2D(0.63829863, 0.7696372, -0.7696372, 0.63829863, 21.260056, 137.47556)
 metadata/_local_pose_override_enabled_ = true
 
@@ -6141,7 +6141,7 @@ texture = ExtResource("11_2pf0q")
 [node name="torso2" type="Bone2D" parent="Skeleton2D/hip" unique_id=824147936]
 visible = false
 rotation = 0.111567244
-scale = Vector2(0.99995685, 0.99995685)
+scale = Vector2(0.9999567, 0.9999567)
 rest = Transform2D(0.9979594, -0.06385192, 0.06385192, 0.9979594, 0, 0)
 
 [node name="torso1" type="Bone2D" parent="Skeleton2D/hip/torso2" unique_id=1007980366]
@@ -6154,7 +6154,7 @@ rest = Transform2D(1, 0, 0, 1, -2, -128)
 z_index = 1
 position = Vector2(-2.089017, -107.34862)
 rotation = -0.18582162
-scale = Vector2(0.99996257, 0.99996257)
+scale = Vector2(0.9999627, 0.9999627)
 rest = Transform2D(1, 0, 0, 1, -2.089017, -107.34862)
 
 [node name="hair_bone2" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1/head" unique_id=824247481]
@@ -6269,5 +6269,6 @@ position = Vector2(801, 861)
 position = Vector2(738, 896)
 
 [node name="AnimationTree" type="AnimationTree" parent="." unique_id=1032558122]
+active = false
 tree_root = SubResource("AnimationNodeStateMachine_vwkbo")
 anim_player = NodePath("../AnimationPlayer")
