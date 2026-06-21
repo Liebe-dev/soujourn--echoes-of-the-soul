@@ -58,6 +58,9 @@ var _was_running := false
 var _air_accel := AIR_ACCEL_STAND
 var _air_speed_cap := AIR_SPEED_CAP_STAND
 
+# Thêm biến theo dõi trạng thái trượt phanh
+var is_skidding: bool = false 
+
 
 func _ready() -> void:
 	randomize()
@@ -127,7 +130,7 @@ func _apply_stagger(knockback_dir: Vector2) -> void:
 	can_move = false
 	velocity = knockback_dir * STAGGER_KNOCKBACK
 	_playing_land_anim = false
-	spine_anim.play("idle", 0.1) # Thêm làm mượt khi bị choáng
+	spine_anim.play("idle", 0.1)
 	get_tree().create_timer(STAGGER_STUN_SEC).timeout.connect(_on_stagger_stun_end, CONNECT_ONE_SHOT)
 
 
@@ -174,7 +177,7 @@ func enter_rest(_world_position: Vector2, face_left: bool) -> void:
 	var current_scale = abs(spine_pivot.scale.x)
 	spine_pivot.scale.x = -current_scale if face_left else current_scale
 	facing_direction = -1 if face_left else 1
-	spine_anim.play("rest", 0.15) # Thêm làm mượt khi ngồi nghỉ
+	spine_anim.play("rest", 0.15)
 
 
 func exit_rest() -> void:
@@ -283,31 +286,46 @@ func _update_facing(direction: float) -> void:
 func _play_jump_start() -> void:
 	_playing_land_anim = false
 	spine_rig.visible = true
-	spine_anim.play(ANIM_JUMP_START, 0.05) # Bật nhảy cần phản hồi nhanh nên chỉ làm mượt rất ít (0.05s)
+	spine_anim.play(ANIM_JUMP_START, 0.05)
 
 
 func _play_jump_land() -> void:
 	_playing_land_anim = true
 	spine_rig.visible = true
-	spine_anim.play(ANIM_JUMP_LAND, 0.1) # Chạm đất mượt mà trong 0.1s
+	spine_anim.play(ANIM_JUMP_LAND, 0.1)
 
 
 func _update_ground_animation(direction: float) -> void:
 	if not is_on_floor() or _playing_land_anim:
 		return
 	spine_rig.visible = true
+
+	var current_speed := absf(velocity.x)
+
 	if direction != 0.0:
-		if is_running:
+		if is_skidding:
+			is_skidding = false
+			spine_anim.play("skid")
+			spine_anim.seek(spine_anim.current_animation_length, true)
+
+		if is_running and current_speed > WALK_SPEED:
 			if spine_anim.current_animation != "run":
 				spine_anim.play("run")
 		else:
 			if spine_anim.current_animation != "walk":
 				spine_anim.play("walk")
+				
 	else:
 		if _playing_land_anim:
 			return
-		if spine_anim.current_animation != "idle":
-			spine_anim.play("idle")
+
+		if current_speed > WALK_SPEED * 0.8:
+			if not is_skidding:
+				is_skidding = true
+				spine_anim.play("skid")
+		elif current_speed < 10.0 and not is_skidding:
+			if spine_anim.current_animation != "idle":
+				spine_anim.play("idle")
 
 
 func _update_air_animation() -> void:
@@ -324,6 +342,9 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 		spine_anim.play(ANIM_JUMP_AIR)
 	elif anim_name == ANIM_JUMP_LAND:
 		_playing_land_anim = false
+		_update_ground_animation(Input.get_axis("move_left", "move_right"))
+	elif anim_name == "skid":
+		is_skidding = false
 		_update_ground_animation(Input.get_axis("move_left", "move_right"))
 
 
