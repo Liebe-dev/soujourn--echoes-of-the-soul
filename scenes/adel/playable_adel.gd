@@ -17,8 +17,10 @@ const AIR_ACCEL_STAND := 320.0
 const AIR_ACCEL_RUN := 980.0
 const AIR_SPEED_CAP_STAND := 95.0
 const AIR_SPEED_CAP_RUN := RUN_SPEED
-const JUMP_VELOCITY := -620.0
+const WALK_JUMP_VELOCITY := -480.0
+const RUN_JUMP_VELOCITY := -620.0
 const DOUBLE_JUMP_VELOCITY := -500.0
+const ENEMY_COLLISION_LAYER := 3
 const JUMP_RISE_GRAVITY_MULT := 0.75
 const JUMP_CUT_GRAVITY_MULT := 3.2
 const FALL_GRAVITY_MULT := 1.85
@@ -230,8 +232,22 @@ func _get_ground_target_speed() -> float:
 	return WALK_SPEED
 
 
+func _uses_run_jump() -> bool:
+	return is_running or absf(velocity.x) >= WALK_SPEED * 0.7
+
+
+func _get_ground_jump_velocity() -> float:
+	if _uses_run_jump():
+		return RUN_JUMP_VELOCITY
+	return WALK_JUMP_VELOCITY
+
+
+func _set_enemy_collision_enabled(enabled: bool) -> void:
+	set_collision_mask_value(ENEMY_COLLISION_LAYER, enabled)
+
+
 func _begin_air_movement() -> void:
-	if is_running or absf(velocity.x) >= WALK_SPEED * 0.7:
+	if _uses_run_jump():
 		_air_accel = AIR_ACCEL_RUN
 		_air_speed_cap = AIR_SPEED_CAP_RUN
 	else:
@@ -353,7 +369,7 @@ func _handle_jump_input() -> void:
 		return
 	if is_on_floor():
 		_begin_air_movement()
-		velocity.y = JUMP_VELOCITY
+		velocity.y = _get_ground_jump_velocity()
 		_jumps_remaining = MAX_JUMPS - 1
 		_play_jump_start()
 	elif _jumps_remaining > 0:
@@ -412,6 +428,7 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed("dodge") and not is_dodging and able_to_dodge and is_on_floor():
 			is_dodging = true
 			is_invulnerable = true
+			_set_enemy_collision_enabled(false)
 			spine_anim.play("dash")
 			_ghost_trail_loop(0.15)
 			if direction:
@@ -430,6 +447,7 @@ func _physics_process(delta: float) -> void:
 				await dodge_tween.finished
 			dodge_cooldown.start()
 			able_to_dodge = false
+			_set_enemy_collision_enabled(true)
 			is_invulnerable = false
 			is_dodging = false
 
@@ -456,10 +474,11 @@ func _physics_process(delta: float) -> void:
 		var collision = get_slide_collision(i)
 		var collider = collision.get_collider()
 		if collider and collider.is_in_group("Enemy"):
-			if not is_touched_enemy:
-				take_damage(1, collider.global_position)
-				knockback_when_touch_enemy(collider.global_position)
-				break
+			if is_dodging or is_invulnerable or is_touched_enemy:
+				continue
+			take_damage(1, collider.global_position)
+			knockback_when_touch_enemy(collider.global_position)
+			break
 
 
 func _on_dodge_cooldown_timeout() -> void:
