@@ -6,9 +6,23 @@ extends CharacterBody2D
 @onready var spine_anim = $SpinePivot/SpineRig/AnimationPlayer
 @onready var spine_pivot = $SpinePivot
 
-const SPEED = 140.0
-const JUMP_VELOCITY = -600.0
-const DOUBLE_JUMP_VELOCITY = -500.0
+const WALK_SPEED := 140.0
+const RUN_SPEED := 450.0
+const RUN_BOOST_SPEED := 520.0
+const RUN_BOOST_TIME := 0.22
+const GROUND_ACCEL := 1400.0
+const GROUND_FRICTION := 1600.0
+const TURN_ACCEL := 3200.0
+const AIR_ACCEL_STAND := 320.0
+const AIR_ACCEL_RUN := 980.0
+const AIR_SPEED_CAP_STAND := 95.0
+const AIR_SPEED_CAP_RUN := RUN_SPEED
+const JUMP_VELOCITY := -620.0
+const DOUBLE_JUMP_VELOCITY := -500.0
+const JUMP_RISE_GRAVITY_MULT := 0.75
+const JUMP_CUT_GRAVITY_MULT := 3.2
+const FALL_GRAVITY_MULT := 1.85
+const MAX_FALL_SPEED := 920.0
 const MAX_JUMPS := 2
 const ANIM_JUMP_START := " jump_start"
 const ANIM_JUMP_AIR := "jump_air (fall)"
@@ -39,6 +53,10 @@ var is_running: bool = false
 var _jumps_remaining := MAX_JUMPS
 var _was_on_floor := true
 var _playing_land_anim := false
+var _run_boost_timer := 0.0
+var _was_running := false
+var _air_accel := AIR_ACCEL_STAND
+var _air_speed_cap := AIR_SPEED_CAP_STAND
 
 
 func _ready() -> void:
@@ -201,6 +219,67 @@ func _capsule_half_height(col: CollisionShape2D) -> float:
 	return capsule.height * 0.5 * scale_y
 
 
+func _get_ground_target_speed() -> float:
+	if is_running:
+		if _run_boost_timer > 0.0:
+			return RUN_BOOST_SPEED
+		return RUN_SPEED
+	return WALK_SPEED
+
+
+func _begin_air_movement() -> void:
+	if is_running or absf(velocity.x) >= WALK_SPEED * 0.7:
+		_air_accel = AIR_ACCEL_RUN
+		_air_speed_cap = AIR_SPEED_CAP_RUN
+	else:
+		_air_accel = AIR_ACCEL_STAND
+		_air_speed_cap = AIR_SPEED_CAP_STAND
+
+
+func _apply_vertical_physics(delta: float) -> void:
+	if is_on_floor():
+		return
+
+	var gravity := get_gravity() * delta
+	if velocity.y < 0.0:
+		if Input.is_action_pressed("jump"):
+			gravity *= JUMP_RISE_GRAVITY_MULT
+		else:
+			gravity *= JUMP_CUT_GRAVITY_MULT
+	elif velocity.y > 0.0:
+		gravity *= FALL_GRAVITY_MULT
+
+	velocity += gravity
+	velocity.y = minf(velocity.y, MAX_FALL_SPEED)
+
+
+func _apply_horizontal_movement(direction: float, delta: float) -> void:
+	if not is_on_floor():
+		if direction != 0.0:
+			var target_x := direction * _air_speed_cap
+			velocity.x = move_toward(velocity.x, target_x, _air_accel * delta)
+			velocity.x = clampf(velocity.x, -_air_speed_cap, _air_speed_cap)
+		return
+
+	var target_speed := _get_ground_target_speed()
+	if direction != 0.0:
+		var target_x := direction * target_speed
+		var accel := GROUND_ACCEL
+		if signf(velocity.x) != 0.0 and signf(direction) != signf(velocity.x):
+			accel = TURN_ACCEL
+		velocity.x = move_toward(velocity.x, target_x, accel * delta)
+	else:
+		velocity.x = move_toward(velocity.x, 0.0, GROUND_FRICTION * delta)
+
+
+func _update_facing(direction: float) -> void:
+	if direction == 0.0:
+		return
+	facing_direction = -1 if direction < 0 else 1
+	var current_scale := absf(spine_pivot.scale.x)
+	spine_pivot.scale.x = -current_scale if direction < 0 else current_scale
+
+
 func _play_jump_start() -> void:
 	_playing_land_anim = false
 	spine_rig.visible = true
@@ -252,6 +331,7 @@ func _handle_jump_input() -> void:
 	if not Input.is_action_just_pressed("jump"):
 		return
 	if is_on_floor():
+		_begin_air_movement()
 		velocity.y = JUMP_VELOCITY
 		_jumps_remaining = MAX_JUMPS - 1
 		_play_jump_start()
@@ -264,10 +344,7 @@ func _handle_jump_input() -> void:
 func _physics_process(delta: float) -> void:
 	if is_stunned or is_touched_enemy:
 		velocity.x = move_toward(velocity.x, 0.0, 400.0 * delta)
-
-		if not is_on_floor():
-			velocity += get_gravity() * delta
-
+		_apply_vertical_physics(delta)
 		move_and_slide()
 
 		if is_touched_enemy and is_on_floor():
@@ -277,8 +354,7 @@ func _physics_process(delta: float) -> void:
 		return
 	if is_stunned:
 		velocity.x = move_toward(velocity.x, 0.0, 400.0 * delta)
-		if not is_on_floor():
-			velocity += get_gravity() * delta
+		_apply_vertical_physics(delta)
 		move_and_slide()
 		return
 	if is_resting:
@@ -288,8 +364,7 @@ func _physics_process(delta: float) -> void:
 		velocity.x = 0
 		move_and_slide()
 		return
-	if not is_on_floor():
-		velocity += get_gravity() * delta
+
 	if Input.is_action_just_pressed("guard and deflect") and not is_doing_action:
 		is_guarding = true
 		holding_duration = 0.0
@@ -299,30 +374,36 @@ func _physics_process(delta: float) -> void:
 	if Input.is_action_just_released("guard and deflect") and is_doing_action and is_guarding:
 		is_guarding = false
 		is_doing_action = false
+
 	if Input.is_action_just_pressed("run") and is_on_floor():
 		is_running = not is_running
-	var direction = Input.get_axis("move_left", "move_right")
+	if is_running and not _was_running and is_on_floor():
+		_run_boost_timer = RUN_BOOST_TIME
+	_was_running = is_running
+	if _run_boost_timer > 0.0:
+		_run_boost_timer = maxf(_run_boost_timer - delta, 0.0)
+
+	var direction := Input.get_axis("move_left", "move_right")
 
 	if is_dodging:
-		if not is_on_floor():
-			velocity += get_gravity() * delta
+		_apply_vertical_physics(delta)
 	else:
 		if Input.is_action_just_pressed("dodge") and not is_dodging and able_to_dodge and is_on_floor():
 			is_dodging = true
 			is_invulnerable = true
 			if direction:
-				velocity.x = SPEED * 10 * direction
+				velocity.x = WALK_SPEED * 10 * direction
 				var dodge_tween = create_tween()
 				dodge_tween.set_trans(Tween.TRANS_QUAD)
 				dodge_tween.set_ease(Tween.EASE_OUT)
-				dodge_tween.tween_property(self, "velocity:x", direction * SPEED, 0.15)
+				dodge_tween.tween_property(self, "velocity:x", direction * WALK_SPEED, 0.15)
 				await dodge_tween.finished
 			else:
-				velocity.x = SPEED * 8 * -facing_direction
+				velocity.x = WALK_SPEED * 8 * -facing_direction
 				var dodge_tween = create_tween()
 				dodge_tween.set_trans(Tween.TRANS_QUAD)
 				dodge_tween.set_ease(Tween.EASE_OUT)
-				dodge_tween.tween_property(self, "velocity:x", facing_direction * SPEED, 0.15)
+				dodge_tween.tween_property(self, "velocity:x", facing_direction * WALK_SPEED, 0.15)
 				await dodge_tween.finished
 			dodge_cooldown.start()
 			able_to_dodge = false
@@ -330,20 +411,12 @@ func _physics_process(delta: float) -> void:
 			is_dodging = false
 
 		if can_move:
-			if direction:
-				var current_speed = SPEED
-				if is_running:
-					current_speed = 450
-				velocity.x = direction * current_speed
-				facing_direction = -1 if direction < 0 else 1
-				var current_scale = abs(spine_pivot.scale.x)
-				spine_pivot.scale.x = -current_scale if direction < 0 else current_scale
-				_update_ground_animation(direction)
-			else:
-				velocity.x = move_toward(velocity.x, 0, SPEED)
-				_update_ground_animation(direction)
+			_apply_horizontal_movement(direction, delta)
+			_update_facing(direction)
+			_update_ground_animation(direction)
 
 	_handle_jump_input()
+	_apply_vertical_physics(delta)
 
 	move_and_slide()
 	_update_air_animation()
@@ -352,6 +425,8 @@ func _physics_process(delta: float) -> void:
 		_jumps_remaining = MAX_JUMPS
 		if not _was_on_floor:
 			_play_jump_land()
+	elif _was_on_floor:
+		_begin_air_movement()
 	_was_on_floor = is_on_floor()
 
 	for i in get_slide_collision_count():
