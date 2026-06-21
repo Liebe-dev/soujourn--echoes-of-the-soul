@@ -412,6 +412,8 @@ func _physics_process(delta: float) -> void:
 		if Input.is_action_just_pressed("dodge") and not is_dodging and able_to_dodge and is_on_floor():
 			is_dodging = true
 			is_invulnerable = true
+			spine_anim.play("dash")
+			_ghost_trail_loop(0.15)
 			if direction:
 				velocity.x = WALK_SPEED * 10 * direction
 				var dodge_tween = create_tween()
@@ -462,3 +464,44 @@ func _physics_process(delta: float) -> void:
 
 func _on_dodge_cooldown_timeout() -> void:
 	able_to_dodge = true
+	
+func _get_all_visible_sprites(node: Node, arr: Array) -> void:
+	if node is Sprite2D and node.visible:
+		arr.append(node)
+	for child in node.get_children():
+		_get_all_visible_sprites(child, arr)
+func _spawn_ghost_trail() -> void:
+	var ghost_parent = Node2D.new()
+	var current_scene = get_tree().current_scene
+	if current_scene:
+		current_scene.add_child(ghost_parent)
+	
+	var sprites: Array = []
+	_get_all_visible_sprites(spine_rig, sprites)
+	
+	for s in sprites:
+		var ghost_sprite = Sprite2D.new()
+		ghost_sprite.texture = s.texture
+		ghost_sprite.hframes = s.hframes
+		ghost_sprite.vframes = s.vframes
+		ghost_sprite.frame = s.frame
+		ghost_sprite.flip_h = s.flip_h
+		ghost_sprite.flip_v = s.flip_v
+		
+		ghost_sprite.global_transform = s.global_transform
+		
+		ghost_sprite.modulate = Color(0.2, 0.2, 0.2, 0.6) 
+		
+		ghost_parent.add_child(ghost_sprite)
+	
+	var tween = get_tree().create_tween()
+	tween.tween_property(ghost_parent, "modulate:a", 0.0, 0.15).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_callback(ghost_parent.queue_free)
+	
+func _ghost_trail_loop(duration: float) -> void:
+	var interval = 0.45
+	var elapsed = 0.0
+	while elapsed < duration:
+		_spawn_ghost_trail()
+		await get_tree().create_timer(interval).timeout
+		elapsed += interval
