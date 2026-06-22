@@ -179,8 +179,11 @@ func enter_rest(_world_position: Vector2, face_left: bool) -> void:
 	var current_scale = abs(spine_pivot.scale.x)
 	spine_pivot.scale.x = -current_scale if face_left else current_scale
 	facing_direction = -1 if face_left else 1
-	spine_anim.play("rest", 0.15)
-
+	spine_anim.play("idle")
+func play_rest_animation() -> void:
+	spine_anim.play("RESET", 0.0, 1.0, true)
+	spine_anim.advance(0) 
+	spine_anim.play("rest", 0.0)
 
 func exit_rest() -> void:
 	is_resting = false
@@ -430,7 +433,7 @@ func _physics_process(delta: float) -> void:
 			is_invulnerable = true
 			_set_enemy_collision_enabled(false)
 			spine_anim.play("dash")
-			_ghost_trail_loop(0.15)
+			_ghost_trail_loop(0.1)
 			if direction:
 				velocity.x = WALK_SPEED * 10 * direction
 				var dodge_tween = create_tween()
@@ -518,7 +521,7 @@ func _spawn_ghost_trail() -> void:
 	tween.tween_callback(ghost_parent.queue_free)
 	
 func _ghost_trail_loop(duration: float) -> void:
-	var interval = 0.45
+	var interval = 0.5
 	var elapsed = 0.0
 	while elapsed < duration:
 		_spawn_ghost_trail()

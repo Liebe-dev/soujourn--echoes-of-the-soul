@@ -3,6 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://cer1t2v5a2hj2" path="res://scenes/Map 1/Screenshot (616).png" id="1_a24c4"]
 [ext_resource type="Script" uid="uid://bdv551nreydpd" path="res://scenes/Map 1/map_1_scene_2.gd" id="1_p5rx4"]
 [ext_resource type="Texture2D" uid="uid://bcvx2kvjh5t28" path="res://asset/Map/oak_woods_tileset.png" id="2_p5rx4"]
+[ext_resource type="PackedScene" uid="uid://campfire01" path="res://campfire.tscn" id="4_68iag"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_68iag"]
 texture = ExtResource("2_p5rx4")
@@ -892,3 +893,6 @@ tile_set = SubResource("TileSet_68iag")
 
 [node name="SpawnPoint_Default" type="Marker2D" parent="." unique_id=213342922]
 position = Vector2(175, 836)
+
+[node name="Campfire" parent="." unique_id=1649017633 instance=ExtResource("4_68iag")]
+position = Vector2(429, 844)

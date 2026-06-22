@@ -38,6 +38,15 @@ font_size = 28
 outline_size = 4
 outline_color = Color(0, 0, 0, 1)
 
+[sub_resource type="SystemFont" id="SystemFont_oufq8"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_b5him"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y2ey3"]
+bg_color = Color(0.3083999, 0.30839992, 0.30839977, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dk7h0"]
+
 [node name="Campfire" type="Area2D" unique_id=1649017633]
 script = ExtResource("1_campfire")
 
@@ -136,6 +145,111 @@ text = "Saved"
 label_settings = SubResource("LabelSettings_saved")
 horizontal_alignment = 1
 vertical_alignment = 1
+
+[node name="RestMenu" type="Control" parent="PromptLayer" unique_id=1888212807]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="relica" type="Button" parent="PromptLayer/RestMenu" unique_id=1035503013]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 162.0
+offset_right = 445.0
+offset_bottom = 211.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Relica Edit"
+alignment = 0
+
+[node name="spell" type="Button" parent="PromptLayer/RestMenu" unique_id=54388304]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 232.0
+offset_right = 445.0
+offset_bottom = 281.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Spellbook Edit"
+alignment = 0
+
+[node name="save" type="Button" parent="PromptLayer/RestMenu" unique_id=18969856]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 302.0
+offset_right = 445.0
+offset_bottom = 351.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Save game"
+alignment = 0
+
+[node name="load" type="Button" parent="PromptLayer/RestMenu" unique_id=1544122550]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 372.0
+offset_right = 445.0
+offset_bottom = 421.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Load game"
+alignment = 0
+
+[node name="title" type="Button" parent="PromptLayer/RestMenu" unique_id=1162399152]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 442.0
+offset_right = 445.0
+offset_bottom = 491.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Return to title"
+alignment = 0
+
+[node name="leave" type="Button" parent="PromptLayer/RestMenu" unique_id=1581334203]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 512.0
+offset_right = 445.0
+offset_bottom = 561.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Leave"
+alignment = 0
+
+[node name="TransitionLayer" type="CanvasLayer" parent="." unique_id=1860909934]
+
+[node name="ColorRect" type="ColorRect" parent="TransitionLayer" unique_id=132552150]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=2095493705]
+enabled = false
 
 [connection signal="body_entered" from="." to="." method="_on_body_entered"]
 [connection signal="body_exited" from="." to="." method="_on_body_exited"]
