@@ -18,10 +18,10 @@ const AIR_ACCEL_RUN := 980.0
 const AIR_SPEED_CAP_STAND := 95.0
 const AIR_SPEED_CAP_RUN := RUN_SPEED
 const WALK_JUMP_VELOCITY := -480.0
-const RUN_JUMP_VELOCITY := -620.0
-const DOUBLE_JUMP_VELOCITY := -500.0
+const RUN_JUMP_VELOCITY := -720.0
+const DOUBLE_JUMP_VELOCITY := -700.0
 const ENEMY_COLLISION_LAYER := 3
-const JUMP_RISE_GRAVITY_MULT := 0.75
+const JUMP_RISE_GRAVITY_MULT := 1.6
 const JUMP_CUT_GRAVITY_MULT := 3.2
 const FALL_GRAVITY_MULT := 1.85
 const MAX_FALL_SPEED := 920.0
@@ -60,7 +60,6 @@ var _was_running := false
 var _air_accel := AIR_ACCEL_STAND
 var _air_speed_cap := AIR_SPEED_CAP_STAND
 
-# Thêm biến theo dõi trạng thái trượt phanh
 var is_skidding: bool = false 
 
 
@@ -263,18 +262,14 @@ func _apply_vertical_physics(delta: float) -> void:
 		return
 
 	var gravity := get_gravity() * delta
+	
 	if velocity.y < 0.0:
-		if Input.is_action_pressed("jump"):
-			gravity *= JUMP_RISE_GRAVITY_MULT
-		else:
-			gravity *= JUMP_CUT_GRAVITY_MULT
+		gravity *= JUMP_RISE_GRAVITY_MULT
 	elif velocity.y > 0.0:
 		gravity *= FALL_GRAVITY_MULT
 
 	velocity += gravity
 	velocity.y = minf(velocity.y, MAX_FALL_SPEED)
-
-
 func _apply_horizontal_movement(direction: float, delta: float) -> void:
 	if not is_on_floor():
 		if direction != 0.0:

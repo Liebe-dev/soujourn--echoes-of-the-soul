@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://bdv551nreydpd" path="res://scenes/Map 1/map_1_scene_2.gd" id="1_p5rx4"]
 [ext_resource type="Texture2D" uid="uid://bcvx2kvjh5t28" path="res://asset/Map/oak_woods_tileset.png" id="2_p5rx4"]
 [ext_resource type="PackedScene" uid="uid://campfire01" path="res://campfire.tscn" id="4_68iag"]
+[ext_resource type="PackedScene" uid="uid://npm2q3dtxa5p" path="res://scenes/adel/character_menu.tscn" id="5_kr67m"]
 
 [sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_68iag"]
 texture = ExtResource("2_p5rx4")
@@ -321,8 +322,11 @@ texture = ExtResource("2_p5rx4")
 15:15/0 = 0
 16:15/0 = 0
 18:15/0 = 0
+18:15/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, -8, 8, 8, 8, 8, -8)
 19:15/0 = 0
+19:15/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, 8, -8, 8, 8, -8, 8)
 20:15/0 = 0
+20:15/0/physics_layer_0/polygon_0/points = PackedVector2Array(-8, -8, -8, 8, 8, 8, 8, -8)
 22:15/0 = 0
 23:15/0 = 0
 27:15/0 = 0
@@ -896,3 +900,6 @@ position = Vector2(175, 836)
 
 [node name="Campfire" parent="." unique_id=1649017633 instance=ExtResource("4_68iag")]
 position = Vector2(429, 844)
+
+[node name="CharacterMenu" parent="." unique_id=1632608675 instance=ExtResource("5_kr67m")]
+visible = false

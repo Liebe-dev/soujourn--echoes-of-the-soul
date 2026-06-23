@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dhhn1rh24dtco"]
 
 [ext_resource type="Script" uid="uid://xl1mn1dbt32k" path="res://scenes/adel/playable_adel.gd" id="1_playable"]
+[ext_resource type="Script" uid="uid://jti2ptpyhs8u" path="res://scenes/adel/camera_2d.gd" id="3_67loa"]
 [ext_resource type="PackedScene" uid="uid://4egogosl1we3" path="res://asset/Character/Adel/adel spine action use.tscn" id="69_73q5r"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]
@@ -23,3 +24,8 @@ scale = Vector2(1.8, 1.8)
 [node name="SpineRig" parent="SpinePivot" unique_id=1860163928 instance=ExtResource("69_73q5r")]
 position = Vector2(-99.23588, -60.923428)
 scale = Vector2(0.118000016, 0.11800001)
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=591595691]
+offset = Vector2(0, -234.71)
+zoom = Vector2(1.05, 1.05)
+script = ExtResource("3_67loa")

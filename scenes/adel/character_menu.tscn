@@ -1,0 +1,42 @@
+[gd_scene format=3 uid="uid://npm2q3dtxa5p"]
+
+[ext_resource type="Script" uid="uid://dbb13hnd8sscl" path="res://character_menu.gd" id="1_2xj6r"]
+
+[node name="CharacterMenu" type="CanvasLayer" unique_id=1632608675]
+layer = 6
+script = ExtResource("1_2xj6r")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1533675030]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.13464922, 0.13464907, 0.1346491, 1)
+
+[node name="MainPanel" type="TextureRect" parent="." unique_id=1380199792]
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MainPanel" unique_id=1238524691]
+layout_mode = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="StatsColumn" type="VBoxContainer" parent="MainPanel/HBoxContainer" unique_id=1470113142]
+layout_mode = 2
+
+[node name="AvatarColumn" type="CenterContainer" parent="MainPanel/HBoxContainer" unique_id=2119948723]
+layout_mode = 2
+
+[node name="InventoryColumn" type="GridContainer" parent="MainPanel/HBoxContainer" unique_id=1254030904]
+layout_mode = 2
+
+[node name="TransitionRect" type="ColorRect" parent="." unique_id=2102999588]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
