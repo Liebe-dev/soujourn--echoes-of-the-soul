@@ -14,8 +14,16 @@ signal player_finished_rest
 @onready var fire_particles: CPUParticles2D = $Visual/FireParticles
 @onready var glow_light: PointLight2D = $Visual/GlowLight
 @onready var transition_rect: ColorRect = $TransitionLayer/ColorRect
-@onready var rest_menu: Control = $PromptLayer/RestMenu 
+@onready var rest_menu: Control = $PromptLayer/RestMenu
+@onready var btn_save: Button = $PromptLayer/RestMenu/save
+@onready var btn_load: Button = $PromptLayer/RestMenu/load
+@onready var btn_title: Button = $PromptLayer/RestMenu/title
+@onready var btn_leave: Button = $PromptLayer/RestMenu/leave
+@onready var load_slot_menu: Control = $PromptLayer/LoadSlotMenu
+@onready var save_slot_menu: Control = $PromptLayer/SaveSlotMenu
 @onready var cinematic_camera: Camera2D = $Camera2D
+
+const TITLE_SCENE := "res://asset/UI/menu.tscn"
 
 var _player: CharacterBody2D
 var _player_in_range := false
@@ -35,6 +43,11 @@ func _ready() -> void:
 		transition_rect.modulate.a = 0.0
 	if rest_menu:
 		rest_menu.hide()
+	if load_slot_menu:
+		load_slot_menu.hide()
+	if save_slot_menu:
+		save_slot_menu.hide()
+	_setup_rest_menu_buttons()
 	if cinematic_camera:
 		cinematic_camera.enabled = false
 		
@@ -151,6 +164,10 @@ func _stand_up() -> void:
 	# Ẩn menu
 	if rest_menu:
 		rest_menu.hide()
+	if load_slot_menu:
+		load_slot_menu.hide()
+	if save_slot_menu:
+		save_slot_menu.hide()
 
 	# 1. Fade màn hình tối đi (0.5 giây)
 	var fade_out_tween = create_tween()
@@ -189,6 +206,157 @@ func _show_saved_flash(message: String = "Saved") -> void:
 	tween.tween_property(saved_label, "modulate:a", 0.0, 0.4)
 	await tween.finished
 	saved_label.hide()
+
+
+func _setup_rest_menu_buttons() -> void:
+	if btn_save:
+		btn_save.pressed.connect(_on_save_pressed)
+	if btn_load:
+		btn_load.pressed.connect(_on_load_pressed)
+	if btn_title:
+		btn_title.pressed.connect(_on_title_pressed)
+	if btn_leave:
+		btn_leave.pressed.connect(_on_leave_pressed)
+	if load_slot_menu:
+		_populate_slot_menu(load_slot_menu, true)
+	if save_slot_menu:
+		_populate_slot_menu(save_slot_menu, false)
+
+
+func _populate_slot_menu(menu: Control, is_load_menu: bool) -> void:
+	var slot_list: VBoxContainer = menu.get_node_or_null("SlotList")
+	var back_button: Button = menu.get_node_or_null("Back")
+	if slot_list == null or back_button == null:
+		return
+
+	for child in slot_list.get_children():
+		child.queue_free()
+
+	for slot in range(1, SaveManager.MAX_SAVE_SLOTS + 1):
+		var button := Button.new()
+		button.custom_minimum_size = Vector2(340, 48)
+		button.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		button.text = _format_slot_label(slot, is_load_menu)
+		button.pressed.connect(_on_slot_selected.bind(slot, is_load_menu))
+		slot_list.add_child(button)
+
+	if not back_button.pressed.is_connected(_on_slot_menu_back_pressed):
+		back_button.pressed.connect(_on_slot_menu_back_pressed)
+
+
+func _format_slot_label(slot: int, is_load_menu: bool) -> String:
+	var info := SaveManager.get_slot_info(slot)
+	if info.get("empty", true):
+		return "Slot %d - Empty" % slot
+	var checkpoint := str(info.get("checkpoint_id", ""))
+	if checkpoint.is_empty():
+		checkpoint = "Unknown checkpoint"
+	var hp := int(info.get("hp", 0))
+	var max_hp := int(info.get("max_hp", 100))
+	if is_load_menu:
+		return "Slot %d - %s (%d/%d HP)" % [slot, checkpoint, hp, max_hp]
+	return "Slot %d - %s" % [slot, checkpoint]
+
+
+func _refresh_slot_menus() -> void:
+	if load_slot_menu:
+		_populate_slot_menu(load_slot_menu, true)
+	if save_slot_menu:
+		_populate_slot_menu(save_slot_menu, false)
+
+
+func _show_slot_menu(menu: Control) -> void:
+	if rest_menu:
+		rest_menu.hide()
+	if load_slot_menu:
+		load_slot_menu.hide()
+	if save_slot_menu:
+		save_slot_menu.hide()
+	_refresh_slot_menus()
+	menu.show()
+
+
+func _hide_slot_menus() -> void:
+	if load_slot_menu:
+		load_slot_menu.hide()
+	if save_slot_menu:
+		save_slot_menu.hide()
+	if rest_menu and _is_player_resting:
+		rest_menu.show()
+
+
+func _on_save_pressed() -> void:
+	if save_slot_menu:
+		_show_slot_menu(save_slot_menu)
+
+
+func _on_load_pressed() -> void:
+	if load_slot_menu:
+		_show_slot_menu(load_slot_menu)
+
+
+func _on_leave_pressed() -> void:
+	_hide_slot_menus()
+	_stand_up()
+
+
+func _on_title_pressed() -> void:
+	_go_to_title()
+
+
+func _on_slot_menu_back_pressed() -> void:
+	_hide_slot_menus()
+
+
+func _on_slot_selected(slot: int, is_load_menu: bool) -> void:
+	if is_load_menu:
+		_load_from_slot(slot)
+	else:
+		_save_to_slot(slot)
+
+
+func _save_to_slot(slot: int) -> void:
+	if SaveManager.save_at_campfire(self, slot):
+		_hide_slot_menus()
+		_show_saved_flash("Saved to slot %d" % slot)
+
+
+func _load_from_slot(slot: int) -> void:
+	if not SaveManager.has_save_in_slot(slot):
+		_show_saved_flash("Slot %d is empty" % slot)
+		return
+
+	var fade_out_tween := create_tween()
+	fade_out_tween.tween_property(transition_rect, "modulate:a", 1.0, 0.5)
+	await fade_out_tween.finished
+
+	var loaded := SaveManager.load_game_from_slot(slot, true)
+	if not loaded:
+		_show_saved_flash("Could not load slot %d" % slot)
+		var fade_in_tween := create_tween()
+		fade_in_tween.tween_property(transition_rect, "modulate:a", 0.0, 0.5)
+		await fade_in_tween.finished
+		_hide_slot_menus()
+		return
+
+	if SaveManager.pending_continue:
+		return
+
+	_hide_slot_menus()
+	if _player and _player.has_method("play_rest_animation"):
+		_player.play_rest_animation()
+
+	var fade_in_tween := create_tween()
+	fade_in_tween.tween_property(transition_rect, "modulate:a", 0.0, 0.5)
+	await fade_in_tween.finished
+	_show_saved_flash("Loaded slot %d" % slot)
+
+
+func _go_to_title() -> void:
+	var fade_out_tween := create_tween()
+	fade_out_tween.tween_property(transition_rect, "modulate:a", 1.0, 0.8)
+	await fade_out_tween.finished
+	get_tree().change_scene_to_file(TITLE_SCENE)
 
 
 func _find_nearby_candidate() -> Node2D:

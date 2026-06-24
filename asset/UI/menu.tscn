@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://fwjb4kq41db8"]
 
-[ext_resource type="Script" uid="uid://cfc44bprrsfd5" path="res://menu.gd" id="1_lti8b"]
+[ext_resource type="Script" uid="uid://dk4mui7x9p2wq" path="res://asset/UI/menu.gd" id="1_lti8b"]
 [ext_resource type="Texture2D" uid="uid://cps22kn26nsco" path="res://asset/BG/BG.png" id="2_4hy44"]
 [ext_resource type="Texture2D" uid="uid://b6ftddm0p4ogr" path="res://asset/BG/Logo game.png" id="2_mae5d"]
 [ext_resource type="Texture2D" uid="uid://dycqcksbfsoh7" path="res://asset/BG/StartGame.png" id="3_4hy44"]
@@ -14,7 +14,7 @@
 [ext_resource type="Script" uid="uid://rgp8ld2w1gsd" path="res://continue.gd" id="10_4ndjb"]
 [ext_resource type="Texture2D" uid="uid://4q6vqwjw8n8m" path="res://asset/BG/ContinueSelect.png" id="11_3ls4m"]
 [ext_resource type="Script" uid="uid://flk5w2domw4x" path="res://quit.gd" id="12_g7jxm"]
-[ext_resource type="Script" uid="uid://dteilpnr4rmtp" path="res://option_se.gd" id="13_5h80m"]
+[ext_resource type="Script" path="res://asset/UI/option_se.gd" id="13_5h80m"]
 [ext_resource type="Texture2D" uid="uid://bp3kqq64kun2j" path="res://asset/BG/QuitGameSelect.png" id="13_jspdm"]
 [ext_resource type="Texture2D" uid="uid://c6rb783fothq8" path="res://asset/BG/SettingSelect.png" id="14_w25hu"]
 [ext_resource type="Script" uid="uid://dsl3khdvm7e6g" path="res://parallax_background.gd" id="17_3ls4m"]
@@ -74,10 +74,11 @@ position = Vector2(959, 540)
 texture = ExtResource("5_nrnbx")
 
 [node name="Control" type="Control" parent="." unique_id=596389417]
+visible = false
 layout_mode = 3
 anchors_preset = 0
-offset_right = 40.0
-offset_bottom = 40.0
+offset_right = 1920.0
+offset_bottom = 1080.0
 
 [node name="Start" type="Button" parent="Control" unique_id=2025809496]
 texture_filter = 1
@@ -192,6 +193,7 @@ position = Vector2(960, 540)
 texture = ExtResource("2_4hy44")
 
 [node name="PressStartLabel" type="Label" parent="." unique_id=1014412559]
+visible = false
 texture_filter = 1
 offset_left = 691.0
 offset_top = 825.0
@@ -220,13 +222,13 @@ stream = ExtResource("22_guify")
 
 [node name="SettingsMenu" parent="." unique_id=252361829 instance=ExtResource("23_oil5j")]
 visible = false
-offset_left = 1437.0
-offset_top = 756.0
-offset_right = 1437.0
-offset_bottom = 756.0
+z_index = 10
+offset_left = 0.0
+offset_top = 0.0
+offset_right = 1920.0
+offset_bottom = 1080.0
 
 [connection signal="mouse_entered" from="Control/Start" to="Control/Start" method="_on_mouse_entered"]
-[connection signal="mouse_entered" from="Control/Start" to="Control/Quit" method="_on_start_mouse_entered"]
 [connection signal="mouse_exited" from="Control/Start" to="Control/Start" method="_on_mouse_exited"]
 [connection signal="pressed" from="Control/Start" to="." method="_on_start_pressed"]
 [connection signal="pressed" from="Control/Start" to="Control/Start" method="_on_pressed"]

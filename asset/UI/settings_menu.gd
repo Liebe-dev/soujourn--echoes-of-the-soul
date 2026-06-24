@@ -74,4 +74,5 @@ func _input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _on_back_button_pressed() -> void:
-	self.hide()
+	hide()
+	mouse_filter = Control.MOUSE_FILTER_IGNORE

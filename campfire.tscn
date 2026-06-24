@@ -238,6 +238,84 @@ theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
 text = "Leave"
 alignment = 0
 
+[node name="LoadSlotMenu" type="Control" parent="PromptLayer" unique_id=2109483721]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Title" type="Label" parent="PromptLayer/LoadSlotMenu" unique_id=2109483722]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 120.0
+offset_right = 445.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 32
+text = "Load Game"
+horizontal_alignment = 1
+
+[node name="SlotList" type="VBoxContainer" parent="PromptLayer/LoadSlotMenu" unique_id=2109483723]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 170.0
+offset_right = 445.0
+offset_bottom = 470.0
+theme_override_constants/separation = 8
+
+[node name="Back" type="Button" parent="PromptLayer/LoadSlotMenu" unique_id=2109483724]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 490.0
+offset_right = 445.0
+offset_bottom = 539.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Back"
+alignment = 0
+
+[node name="SaveSlotMenu" type="Control" parent="PromptLayer" unique_id=2109483725]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Title" type="Label" parent="PromptLayer/SaveSlotMenu" unique_id=2109483726]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 120.0
+offset_right = 445.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 32
+text = "Save Game"
+horizontal_alignment = 1
+
+[node name="SlotList" type="VBoxContainer" parent="PromptLayer/SaveSlotMenu" unique_id=2109483727]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 170.0
+offset_right = 445.0
+offset_bottom = 470.0
+theme_override_constants/separation = 8
+
+[node name="Back" type="Button" parent="PromptLayer/SaveSlotMenu" unique_id=2109483728]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 490.0
+offset_right = 445.0
+offset_bottom = 539.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Back"
+alignment = 0
+
 [node name="TransitionLayer" type="CanvasLayer" parent="." unique_id=1860909934]
 
 [node name="ColorRect" type="ColorRect" parent="TransitionLayer" unique_id=132552150]

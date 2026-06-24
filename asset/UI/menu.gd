@@ -58,6 +58,8 @@ func start_blinking():
 	blink_tween.tween_property(press_start_label, "modulate:a", 0.0, 1.5)
 	blink_tween.tween_property(press_start_label, "modulate:a", 1.0, 1.5)
 func _input(event):
+	if settings_menu.visible:
+		return
 	if (event is InputEventKey or event is InputEventMouseButton) and event.is_pressed():
 		if is_intro_playing:
 			is_intro_playing = false
@@ -123,7 +125,8 @@ func _on_continue_pressed() -> void:
 
 
 func _on_option_pressed() -> void:
-	settings_menu.visible = true
+	settings_menu.show()
+	settings_menu.mouse_filter = Control.MOUSE_FILTER_STOP
 
 func _on_quit_pressed() -> void:
 	fade_rect.mouse_filter = Control.MOUSE_FILTER_STOP

@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://xl1mn1dbt32k" path="res://scenes/adel/playable_adel.gd" id="1_playable"]
 [ext_resource type="Script" uid="uid://jti2ptpyhs8u" path="res://scenes/adel/camera_2d.gd" id="3_67loa"]
+[ext_resource type="PackedScene" uid="uid://moo3202hyjoh" path="res://hud.tscn" id="4_aphpq"]
 [ext_resource type="PackedScene" uid="uid://4egogosl1we3" path="res://asset/Character/Adel/adel spine action use.tscn" id="69_73q5r"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]
@@ -29,3 +30,11 @@ scale = Vector2(0.118000016, 0.11800001)
 offset = Vector2(0, -234.71)
 zoom = Vector2(1.05, 1.05)
 script = ExtResource("3_67loa")
+
+[node name="hud" parent="Camera2D" unique_id=558584565 instance=ExtResource("4_aphpq")]
+offset_left = -897.0
+offset_top = -719.0
+offset_right = -897.0
+offset_bottom = -719.0
+size_flags_horizontal = 0
+size_flags_vertical = 0

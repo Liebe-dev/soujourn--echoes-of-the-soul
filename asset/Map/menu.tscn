@@ -1,6 +1,6 @@
-[gd_scene format=3 uid="uid://fwjb4kq41db8"]
+[gd_scene format=3 uid="uid://bmapmenu6k2x9n"]
 
-[ext_resource type="Script" uid="uid://cfc44bprrsfd5" path="res://menu.gd" id="1_lti8b"]
+[ext_resource type="Script" uid="uid://cfc44bprrsfd5" path="res://asset/Map/menu.gd" id="1_lti8b"]
 [ext_resource type="PackedScene" uid="uid://c8gsvgtxhr70p" path="res://fade_trans.tscn" id="2_ouk20"]
 
 [node name="Node2D" type="Node2D" unique_id=542400964]
