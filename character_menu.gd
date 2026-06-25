@@ -1,7 +1,7 @@
 extends CanvasLayer
 
 @onready var transition_rect: ColorRect = $TransitionRect 
-@onready var menu_bg: ColorRect = $ColorRect
+@onready var menu_bg: TextureRect = $TextureRect
 @onready var main_panel: Control = $MainPanel
 
 var is_menu_open: bool = false
@@ -12,6 +12,7 @@ func _ready() -> void:
 	hide()
 	menu_bg.hide()
 	main_panel.hide()
+	transition_rect.show()
 	transition_rect.modulate.a = 0.0
 	transition_rect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
@@ -35,7 +36,6 @@ func _toggle_menu() -> void:
 		
 		get_tree().paused = true
 		show()
-		
 		var tween_in = create_tween().set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)
 		tween_in.tween_property(transition_rect, "modulate:a", 1.0, 0.6)
 		await tween_in.finished

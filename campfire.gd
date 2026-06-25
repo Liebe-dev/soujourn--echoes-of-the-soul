@@ -38,7 +38,6 @@ func _ready() -> void:
 	saved_label.hide()
 	saved_label.modulate.a = 0.0
 	
-	# Đảm bảo màn hình không bị tối lúc mới vào game
 	if transition_rect:
 		transition_rect.modulate.a = 0.0
 	if rest_menu:
@@ -89,8 +88,6 @@ func _unhandled_input(event: InputEvent) -> void:
 		
 	get_viewport().set_input_as_handled()
 	if _is_player_resting:
-		# Bạn có thể tắt tính năng "bấm F để đứng lên" vì bây giờ sẽ thoát bằng nút "Leave" trong RestMenu
-		# Nhưng tôi vẫn giữ lại ở đây để bạn test
 		_stand_up()
 	else:
 		_sit_and_save()
