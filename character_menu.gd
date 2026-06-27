@@ -1,6 +1,6 @@
 extends CanvasLayer
 
-@onready var transition_rect: ColorRect = $TransitionRect 
+@onready var transition_rect: ColorRect = $TransitionRect
 @onready var menu_bg: TextureRect = $TextureRect
 @onready var main_panel: Control = $MainPanel
 

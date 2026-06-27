@@ -67,9 +67,9 @@ func apply_to_hud(tree: SceneTree = null) -> void:
 	if hud == null:
 		return
 
-	var old_max_hp := hud.max_hp
+	var max_hp: int = int(hud.max_hp)
 	hud.max_hp = get_max_hp()
-	hud.hp = clampi(hud.hp + (hud.max_hp - old_max_hp), 0, hud.max_hp)
+	hud.hp = clampi(hud.hp + (hud.max_hp - max_hp), 0, hud.max_hp)
 
 	hud.max_stamina = get_max_stamina()
 	hud.stamina = clampf(hud.stamina, 0.0, hud.max_stamina)
@@ -129,8 +129,8 @@ func refresh_character_menu_ui(root: Node) -> void:
 	if hp_value:
 		hp_value.text = str(hud.max_hp if hud else get_max_hp())
 	if sp_value:
-		var max_stam := hud.max_stamina if hud else get_max_stamina()
-		sp_value.text = str(int(round(max_stam)))
+		var max_stamina: int = hud.max_stamina if hud else get_max_stamina()
+		sp_value.text = str(int(round(max_stamina)))
 	if points_label:
 		points_label.text = "Upgrade Points: %d  (spend at campfire)" % upgrade_points
 
@@ -159,9 +159,9 @@ func refresh_upgrade_menu_ui(root: Node) -> void:
 			HP_PER_UPGRADE,
 		]
 	if stamina_label:
-		var max_stam := hud.max_stamina if hud else get_max_stamina()
+		var max_stamina: int = hud.max_stamina if hud else get_max_stamina()
 		stamina_label.text = "%d  (+ %d next)" % [
-			int(round(max_stam)),
+			int(round(max_stamina)),
 			int(STAMINA_PER_UPGRADE),
 		]
 	if hp_btn:
@@ -174,9 +174,9 @@ func _apply_hp_upgrade() -> void:
 	if hud == null:
 		return
 
-	var old_max := hud.max_hp
+	var max_hp: int = hud.max_hp
 	hud.max_hp = get_max_hp()
-	hud.hp = clampi(hud.hp + (hud.max_hp - old_max), 0, hud.max_hp)
+	hud.hp = clampi(hud.hp + (hud.max_hp - max_hp), 0, hud.max_hp)
 	if hud.has_method("_recalc_flask_heal_amount"):
 		hud._recalc_flask_heal_amount()
 	if hud.has_method("sync_hp_display"):
@@ -187,7 +187,7 @@ func _apply_stamina_upgrade() -> void:
 	if hud == null:
 		return
 
-	var old_max := hud.max_stamina
+	var old_max := int(hud.max_stamina)
 	hud.max_stamina = get_max_stamina()
 	hud.stamina = clampf(hud.stamina + (hud.max_stamina - old_max), 0.0, hud.max_stamina)
 	if hud.has_method("sync_stamina_display"):

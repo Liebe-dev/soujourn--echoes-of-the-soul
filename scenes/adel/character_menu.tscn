@@ -824,6 +824,9 @@ border_width_bottom = 1
 border_color = Color(0.9577182, 0.9577182, 0.9577181, 1)
 
 [sub_resource type="FontFile" id="FontFile_oyqgw"]
+subpixel_positioning = 0
+msdf_pixel_range = 14
+msdf_size = 128
 cache/0/variation_coordinates = {}
 cache/0/face_index = 0
 cache/0/embolden = 0.0
