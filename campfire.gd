@@ -19,13 +19,16 @@ signal player_finished_rest
 @onready var btn_load: Button = $PromptLayer/RestMenu/load
 @onready var btn_title: Button = $PromptLayer/RestMenu/title
 @onready var btn_leave: Button = $PromptLayer/RestMenu/leave
+@onready var btn_relica: Button = $PromptLayer/RestMenu/relica
 @onready var load_slot_menu: Control = $PromptLayer/LoadSlotMenu
 @onready var save_slot_menu: Control = $PromptLayer/SaveSlotMenu
 @onready var cinematic_camera: Camera2D = $Camera2D
 
 const TITLE_SCENE := "res://asset/UI/menu.tscn"
+const UPGRADE_MENU_SCENE := preload("res://scenes/adel/campfire_upgrade_menu.tscn")
 
 var _player: CharacterBody2D
+var _upgrade_menu: Control
 var _player_in_range := false
 var _is_player_resting := false
 var _rest_cooldown := 0.0
@@ -47,6 +50,7 @@ func _ready() -> void:
 	if save_slot_menu:
 		save_slot_menu.hide()
 	_setup_rest_menu_buttons()
+	_setup_upgrade_menu()
 	if cinematic_camera:
 		cinematic_camera.enabled = false
 		
@@ -165,6 +169,8 @@ func _stand_up() -> void:
 		load_slot_menu.hide()
 	if save_slot_menu:
 		save_slot_menu.hide()
+	if _upgrade_menu:
+		_upgrade_menu.hide()
 
 	# 1. Fade màn hình tối đi (0.5 giây)
 	var fade_out_tween = create_tween()
@@ -206,6 +212,9 @@ func _show_saved_flash(message: String = "Saved") -> void:
 
 
 func _setup_rest_menu_buttons() -> void:
+	if btn_relica:
+		btn_relica.text = "Upgrade Stats"
+		btn_relica.pressed.connect(_on_relica_pressed)
 	if btn_save:
 		btn_save.pressed.connect(_on_save_pressed)
 	if btn_load:
@@ -218,6 +227,32 @@ func _setup_rest_menu_buttons() -> void:
 		_populate_slot_menu(load_slot_menu, true)
 	if save_slot_menu:
 		_populate_slot_menu(save_slot_menu, false)
+
+
+func _setup_upgrade_menu() -> void:
+	_upgrade_menu = UPGRADE_MENU_SCENE.instantiate()
+	_upgrade_menu.name = "CampfireUpgradeMenu"
+	$PromptLayer.add_child(_upgrade_menu)
+	_upgrade_menu.hide()
+	if _upgrade_menu.has_signal("closed"):
+		_upgrade_menu.closed.connect(_on_upgrade_menu_closed)
+
+
+func _on_relica_pressed() -> void:
+	if _upgrade_menu == null:
+		return
+	if rest_menu:
+		rest_menu.hide()
+	if load_slot_menu:
+		load_slot_menu.hide()
+	if save_slot_menu:
+		save_slot_menu.hide()
+	_upgrade_menu.open(self)
+
+
+func _on_upgrade_menu_closed() -> void:
+	if rest_menu and _is_player_resting:
+		rest_menu.show()
 
 
 func _populate_slot_menu(menu: Control, is_load_menu: bool) -> void:
@@ -278,6 +313,8 @@ func _hide_slot_menus() -> void:
 		load_slot_menu.hide()
 	if save_slot_menu:
 		save_slot_menu.hide()
+	if _upgrade_menu:
+		_upgrade_menu.hide()
 	if rest_menu and _is_player_resting:
 		rest_menu.show()
 

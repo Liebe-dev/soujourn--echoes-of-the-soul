@@ -31,6 +31,8 @@ func _ready() -> void:
 		animated_sprite = $AnimatedSprite2D
 	_set_animation(ai_state)
 
+@export var exp_reward: int = 30
+
 func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 	current_health = max(current_health - dmg, 0)
 	print("Enemy took %d damage (%d/%d)" % [dmg, current_health, max_health])
@@ -38,6 +40,7 @@ func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 		die()
 
 func die() -> void:
+	PlayerProgress.add_exp(exp_reward)
 	queue_free()
 
 func _physics_process(delta: float) -> void:

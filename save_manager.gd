@@ -17,6 +17,8 @@ func _ready() -> void:
 	var slot := get_first_occupied_slot()
 	if slot > 0:
 		load_from_slot(slot)
+	else:
+		PlayerProgress.read_from_save_data(_default_data())
 
 func _default_data() -> Dictionary:
 	return {
@@ -30,6 +32,12 @@ func _default_data() -> Dictionary:
 		"max_flask_charges": 3,
 		"facing_left": false,
 		"saved_at": "",
+		"level": 1,
+		"exp": 0,
+		"upgrade_points": 0,
+		"hp_upgrades": 0,
+		"stamina_upgrades": 0,
+		"max_stamina": 100.0,
 	}
 
 func get_save_path(slot: int) -> String:
@@ -101,6 +109,7 @@ func save_at_campfire(campfire: Node2D, slot: int = -1) -> bool:
 		_data["max_flask_charges"] = hud.max_flask_charges
 	_data["facing_left"] = player.global_position.x > campfire.global_position.x
 	_data["saved_at"] = Time.get_datetime_string_from_system()
+	PlayerProgress.write_to_save_data(_data)
 
 	var target_slot := slot if slot >= 1 and slot <= MAX_SAVE_SLOTS else active_slot
 	if not _write_slot_to_disk(target_slot):
@@ -119,6 +128,7 @@ func load_from_slot(slot: int) -> bool:
 		return false
 	_data = parsed
 	active_slot = slot
+	PlayerProgress.read_from_save_data(_data)
 	return true
 
 func continue_game(slot: int = -1) -> void:
@@ -175,6 +185,7 @@ func apply_loaded_state_at_rest() -> void:
 	if player.has_method("snap_feet_to_floor"):
 		player.snap_feet_to_floor()
 
+	PlayerProgress.apply_to_hud(get_tree())
 	_apply_hp_to_hud(get_tree(), int(_data.get("hp", 100)), int(_data.get("max_hp", 100)))
 
 func apply_continue_state() -> void:
@@ -204,6 +215,7 @@ func apply_continue_state() -> void:
 	if player.has_method("snap_feet_to_floor"):
 		player.snap_feet_to_floor()
 
+	PlayerProgress.apply_to_hud(get_tree())
 	_apply_hp_to_hud(get_tree(), int(_data.get("hp", 100)), int(_data.get("max_hp", 100)))
 
 func respawn_at_checkpoint() -> void:
@@ -242,6 +254,10 @@ func delete_save() -> void:
 		delete_save_slot(slot)
 	_data = _default_data()
 	active_slot = 1
+
+func sync_progress_to_active_slot() -> bool:
+	PlayerProgress.write_to_save_data(_data)
+	return _write_slot_to_disk(active_slot)
 
 func delete_save_slot(slot: int) -> void:
 	if slot < 1 or slot > MAX_SAVE_SLOTS:
@@ -298,8 +314,8 @@ func _apply_hp_to_hud(tree: SceneTree, hp: int, max_hp: int) -> void:
 	var hud := _find_hud(tree)
 	if hud == null:
 		return
-	hud.max_hp = max_hp
-	hud.hp = clampi(hp, 0, max_hp)
+	hud.max_hp = maxi(max_hp, PlayerProgress.get_max_hp())
+	hud.hp = clampi(hp, 0, hud.max_hp)
 	if "max_flask_charges" in hud:
 		hud.max_flask_charges = int(_data.get("max_flask_charges", hud.max_flask_charges))
 	if "flask_charges" in hud:
@@ -311,6 +327,7 @@ func _apply_hp_to_hud(tree: SceneTree, hp: int, max_hp: int) -> void:
 	if hud.has_method("_recalc_flask_heal_amount"):
 		hud._recalc_flask_heal_amount()
 	if "stamina" in hud and "max_stamina" in hud:
+		hud.max_stamina = PlayerProgress.get_max_stamina()
 		hud.stamina = hud.max_stamina
 	if hud.has_method("sync_hp_display"):
 		hud.sync_hp_display()

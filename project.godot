@@ -23,6 +23,7 @@ config/icon="uid://wmpjb5d4lwn"
 [autoload]
 
 SaveManager="*res://save_manager.gd"
+PlayerProgress="*res://player_progress.gd"
 FmodManager="*uid://cds10pm7hwn3p"
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 

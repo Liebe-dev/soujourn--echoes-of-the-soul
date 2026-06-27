@@ -82,6 +82,7 @@ func _ready() -> void:
 	sync_stagger_markers()
 	sync_status_icons()
 	stagger_triggered.connect(_on_stagger_triggered)
+	PlayerProgress.apply_to_hud(get_tree())
 	modulate.a = 0.0
 	is_hidden = true
 
