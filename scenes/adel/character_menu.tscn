@@ -3,15 +3,10 @@
 [ext_resource type="Script" uid="uid://dbb13hnd8sscl" path="res://character_menu.gd" id="1_2xj6r"]
 [ext_resource type="Texture2D" uid="uid://d4k6omo0cq2lq" path="res://asset/UI/Menu screen/menu character.png" id="2_rcbb7"]
 [ext_resource type="Texture2D" uid="uid://d0ejm28eurdok" path="res://asset/Character/Adel/idle/Adel spine action-idle_00.png" id="3_rcbb7"]
-
-[sub_resource type="Gradient" id="Gradient_rcbb7"]
-colors = PackedColorArray(0.003921569, 0.007843138, 0.101960786, 1, 0.0036072389, 0.0072147422, 0.09658859, 1)
-
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_oyqgw"]
-gradient = SubResource("Gradient_rcbb7")
-width = 95
-height = 79
-fill_from = Vector2(1, 1)
+[ext_resource type="Texture2D" uid="uid://7710im4bwmya" path="res://asset/UI/Menu screen/symbol.png" id="4_30n82"]
+[ext_resource type="Texture2D" uid="uid://n8w0p83ina0s" path="res://asset/UI/Menu screen/chapter.png" id="5_wr4pq"]
+[ext_resource type="Texture2D" uid="uid://dqsei3g6qhvje" path="res://asset/UI/Menu screen/weapon bar e.png" id="6_6xnrf"]
+[ext_resource type="Texture2D" uid="uid://slkgppke4tyt" path="res://asset/UI/Menu screen/arts.png" id="7_jv3ph"]
 
 [sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_cxc2q"]
 
@@ -73,13 +68,13 @@ cache/0/32/0/scale = 1.0
 offsets = PackedFloat32Array(0, 0.21328671, 0.5, 0.76573426, 1)
 colors = PackedColorArray(1, 1, 1, 0, 0.99215686, 0.99215686, 0.99215686, 1, 0.97881764, 0.97881764, 0.97881764, 1, 0.99215686, 0.99215686, 0.99215686, 1, 1, 1, 1, 0)
 
-[sub_resource type="GradientTexture2D" id="GradientTexture2D_wr4pq"]
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_30n82"]
 gradient = SubResource("Gradient_30n82")
 width = 400
 height = 2
 
 [sub_resource type="StyleBoxTexture" id="StyleBoxTexture_6xnrf"]
-texture = SubResource("GradientTexture2D_wr4pq")
+texture = SubResource("GradientTexture2D_30n82")
 texture_margin_top = 1.0
 texture_margin_bottom = 1.0
 
@@ -1021,27 +1016,26 @@ cache/0/32/0/scale = 1.0
 bg_color = Color(0.98234254, 0.9823423, 0.9823424, 1)
 border_width_top = 1
 
-[node name="CharacterMenu" type="CanvasLayer" unique_id=1632608675]
-layer = 6
-script = ExtResource("1_2xj6r")
-
-[node name="TextureRect" type="TextureRect" parent="." unique_id=1834946411]
+[node name="CharacterMenu" type="Control" unique_id=1594487750]
+z_index = 15
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-texture = SubResource("GradientTexture2D_oyqgw")
-metadata/_edit_use_anchors_ = true
+script = ExtResource("1_2xj6r")
 
 [node name="sample" type="TextureRect" parent="." unique_id=252613286]
 visible = false
-modulate = Color(1, 1, 1, 0.3372549)
+modulate = Color(1, 1, 1, 0.50980395)
+layout_mode = 0
 offset_right = 1920.0
 offset_bottom = 1080.0
 texture = ExtResource("2_rcbb7")
 
 [node name="MainPanel" type="TextureRect" parent="." unique_id=1380199792]
+layout_mode = 0
 offset_right = 40.0
 offset_bottom = 40.0
 
@@ -1391,9 +1385,63 @@ offset_right = -275.0
 offset_bottom = 487.0
 texture = ExtResource("3_rcbb7")
 
+[node name="game progress" type="Control" parent="MainPanel/MarginContainer/HBoxContainer/RightColumn" unique_id=1954635626]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="MainPanel/MarginContainer/HBoxContainer/RightColumn/game progress" unique_id=782146334]
+layout_mode = 0
+offset_left = -46.0
+offset_top = -403.0
+offset_right = 386.0
+offset_bottom = -113.0
+texture = ExtResource("4_30n82")
+stretch_mode = 4
+
+[node name="chapter" type="TextureRect" parent="MainPanel/MarginContainer/HBoxContainer/RightColumn/game progress" unique_id=2125239575]
+layout_mode = 0
+offset_left = -23.0
+offset_top = -310.0
+offset_right = 361.0
+offset_bottom = -212.0
+texture = ExtResource("5_wr4pq")
+
+[node name="PlayTimeLabel" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/RightColumn/game progress" unique_id=1394696657]
+layout_mode = 0
+offset_left = 156.0
+offset_top = -212.0
+offset_right = 196.0
+offset_bottom = -189.0
+horizontal_alignment = 1
+
+[node name="weapon" type="Control" parent="MainPanel/MarginContainer/HBoxContainer/RightColumn" unique_id=1016003425]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="MainPanel/MarginContainer/HBoxContainer/RightColumn/weapon" unique_id=860146750]
+layout_mode = 0
+offset_left = -35.0
+offset_top = -63.0
+offset_right = 179.0
+offset_bottom = 25.0
+scale = Vector2(1.9, 1.9)
+texture = ExtResource("6_6xnrf")
+stretch_mode = 4
+
+[node name="arts" type="Control" parent="MainPanel/MarginContainer/HBoxContainer/RightColumn" unique_id=294428019]
+layout_mode = 2
+
+[node name="TextureRect" type="TextureRect" parent="MainPanel/MarginContainer/HBoxContainer/RightColumn/arts" unique_id=1869715522]
+layout_mode = 0
+offset_left = 36.0
+offset_top = 126.0
+offset_right = 268.0
+offset_bottom = 179.0
+scale = Vector2(1.135, 1.135)
+texture = ExtResource("7_jv3ph")
+
 [node name="TransitionRect" type="ColorRect" parent="." unique_id=2102999588]
 visible = false
 z_index = 15
+layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0

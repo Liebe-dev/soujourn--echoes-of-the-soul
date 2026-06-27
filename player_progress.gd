@@ -1,6 +1,4 @@
 extends Node
-## Autoload: EXP, level-ups, and campfire stat upgrades (HP / stamina).
-
 signal exp_changed(current_exp: int, exp_to_next: int, level: int)
 signal level_up(new_level: int, points_gained: int)
 signal upgrade_points_changed(points: int)
@@ -13,6 +11,7 @@ const STAMINA_PER_UPGRADE := 15.0
 const EXP_PER_LEVEL_BASE := 100
 const UPGRADE_POINTS_PER_LEVEL := 1
 
+var total_play_time: float = 0.0
 var level := 1
 var exp := 0
 var upgrade_points := 0
@@ -197,3 +196,14 @@ func _find_hud(tree: SceneTree) -> Node:
 	if tree == null or tree.current_scene == null:
 		return null
 	return tree.current_scene.find_child("hud", true, false)
+func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
+func _process(delta: float) -> void:
+	total_play_time += delta
+	
+func get_formatted_time() -> String:
+	var time_in_seconds: int = int(total_play_time)
+	var hours: int = time_in_seconds / 3600
+	var minutes: int = (time_in_seconds % 3600) / 60
+	var seconds: int = time_in_seconds % 60
+	return "%02d:%02d:%02d" % [hours, minutes, seconds]

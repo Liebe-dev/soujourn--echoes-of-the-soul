@@ -3,6 +3,7 @@ extends CanvasLayer
 @onready var transition_rect: ColorRect = $TransitionRect
 @onready var menu_bg: TextureRect = $TextureRect
 @onready var main_panel: Control = $MainPanel
+@onready var play_time_label: Label =$"MainPanel/MarginContainer/HBoxContainer/RightColumn/game progress/PlayTimeLabel"
 
 var is_menu_open: bool = false
 var is_transitioning: bool = false
@@ -33,6 +34,8 @@ func _toggle_menu() -> void:
 	if is_menu_open:
 		menu_bg.hide()
 		main_panel.hide()
+		if play_time_label:
+			play_time_label.text = PlayerProgress.get_formatted_time()
 		transition_rect.modulate.a = 0.0
 		
 		get_tree().paused = true
@@ -86,3 +89,6 @@ func _is_campfire_upgrade_open() -> bool:
 		return false
 	var upgrade_menu := root.find_child("CampfireUpgradeMenu", true, false)
 	return upgrade_menu != null and upgrade_menu.visible
+func _process(delta: float) -> void:
+	if is_menu_open and play_time_label:
+		play_time_label.text = PlayerProgress.get_formatted_time()
