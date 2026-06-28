@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://ri1fqqgxpl6v"]
 
+[ext_resource type="Script" uid="uid://4f06lxtna0x6" path="res://scenes/adel/master_menu.gd" id="1_f3vor"]
 [ext_resource type="Texture2D" uid="uid://d4k6omo0cq2lq" path="res://asset/UI/Menu screen/menu character.png" id="1_nnsqw"]
 [ext_resource type="Texture2D" uid="uid://catvutlhqaoqj" path="res://asset/UI/Menu screen/Q.png" id="2_ruyj1"]
 [ext_resource type="Texture2D" uid="uid://dxe1hvhd7gcwb" path="res://asset/UI/Menu screen/choose.png" id="3_mxqv6"]
@@ -178,6 +179,8 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+script = ExtResource("1_f3vor")
 
 [node name="TextureRect" type="TextureRect" parent="." unique_id=1136797073]
 layout_mode = 1
@@ -186,6 +189,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 texture = SubResource("GradientTexture2D_skenl")
 metadata/_edit_use_anchors_ = true
 
@@ -195,6 +199,7 @@ modulate = Color(1, 1, 1, 0.50980395)
 layout_mode = 0
 offset_right = 1920.0
 offset_bottom = 1080.0
+mouse_filter = 2
 texture = ExtResource("1_nnsqw")
 
 [node name="topbar" type="VBoxContainer" parent="." unique_id=407391602]
@@ -205,6 +210,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 metadata/_edit_use_anchors_ = true
 
 [node name="TopBar" type="HBoxContainer" parent="topbar" unique_id=1966367108]
@@ -352,6 +358,8 @@ theme_override_styles/separator = SubResource("StyleBoxTexture_8q6aa")
 [node name="CharacterMenu" parent="." unique_id=1632608675 instance=ExtResource("5_ruyj1")]
 visible = false
 layout_mode = 1
+mouse_filter = 2
 
 [node name="Equipment_menu" parent="." unique_id=2118213974 instance=ExtResource("6_mxqv6")]
 layout_mode = 0
+mouse_filter = 2
