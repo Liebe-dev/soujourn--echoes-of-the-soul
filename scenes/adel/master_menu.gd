@@ -19,7 +19,7 @@ extends Control
 var current_tab_index: int = 0
 
 func _ready() -> void:
-	# Ẩn tất cả nội dung và quầng sáng trước khi khởi tạo
+	hide()
 	for i in range(tabs.size()):
 		var glow = tabs[i].get_node("GlowEffect")
 		glow.modulate.a = 0.0 # Tàng hình quầng đỏ
@@ -37,19 +37,28 @@ func switch_tab(index: int) -> void:
 		var label = tab_node.get_node("Label")
 		
 		if i == index:
-			# Bật tab hiện tại
-			glow.modulate.a = 1.0 # Hiện rõ quầng đỏ
+			glow.modulate.a = 1.0
 			label.add_theme_color_override("font_color", Color.WHITE)
 			if i < contents.size() and contents[i] != null:
-				contents[i].show()
+				var current_content = contents[i]
+				current_content.show() # Hiện lên trước
+				current_content.modulate.a = 0.0 # Ép nó tàng hình
+				var tween = create_tween()
+				tween.tween_property(current_content, "modulate:a", 1.0, 0.25).set_trans(Tween.TRANS_SINE)
+				
 		else:
-			# Tắt các tab khác
-			glow.modulate.a = 0.0 # Tàng hình quầng đỏ
-			label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 1.0)) # Màu xám
+			glow.modulate.a = 0.0
 			if i < contents.size() and contents[i] != null:
 				contents[i].hide()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("toggle_master_menu"):
+		visible = !visible
+		get_tree().paused = visible
+		get_viewport().set_input_as_handled()
+		return
+	if not visible:
+		return
 	if event.is_action_pressed("ui_page_down"): # Nút E
 		var next_tab = (current_tab_index + 1) % tabs.size()
 		switch_tab(next_tab)

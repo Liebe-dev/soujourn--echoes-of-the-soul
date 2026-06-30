@@ -79,7 +79,7 @@ position = Vector2(1842, 837)
 shape = SubResource("RectangleShape2D_2jrn0")
 
 [node name="Campfire" parent="." unique_id=1649017633 instance=ExtResource("9_pekpq")]
-position = Vector2(230, 901)
+position = Vector2(236, 883)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=328568404]
 position = Vector2(2035, 829)
