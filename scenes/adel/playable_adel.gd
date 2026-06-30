@@ -443,6 +443,7 @@ func _physics_process(delta: float) -> void:
 				dodge_tween.set_ease(Tween.EASE_OUT)
 				dodge_tween.tween_property(self, "velocity:x", facing_direction * WALK_SPEED, 0.15)
 				await dodge_tween.finished
+				dodge_cooldown.start()
 			dodge_cooldown.start()
 			able_to_dodge = false
 			_set_enemy_collision_enabled(true)

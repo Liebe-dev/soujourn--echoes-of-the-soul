@@ -45,3 +45,8 @@ size_flags_vertical = 0
 [node name="master_menu" parent="Camera2D/UI_Layer" unique_id=1898121624 instance=ExtResource("5_57033")]
 process_mode = 3
 visible = false
+
+[node name="DodgeCooldown" type="Timer" parent="." unique_id=982212932]
+one_shot = true
+
+[connection signal="timeout" from="DodgeCooldown" to="." method="_on_dodge_cooldown_timeout"]
