@@ -47,6 +47,7 @@ process_mode = 3
 visible = false
 
 [node name="DodgeCooldown" type="Timer" parent="." unique_id=982212932]
+wait_time = 0.5
 one_shot = true
 
 [connection signal="timeout" from="DodgeCooldown" to="." method="_on_dodge_cooldown_timeout"]

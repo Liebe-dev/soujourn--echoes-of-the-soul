@@ -59,7 +59,7 @@ var _run_boost_timer := 0.0
 var _was_running := false
 var _air_accel := AIR_ACCEL_STAND
 var _air_speed_cap := AIR_SPEED_CAP_STAND
-
+var has_air_dashed: bool = false
 var is_skidding: bool = false 
 
 
@@ -369,10 +369,12 @@ func _handle_jump_input() -> void:
 		_begin_air_movement()
 		velocity.y = _get_ground_jump_velocity()
 		_jumps_remaining = MAX_JUMPS - 1
+		has_air_dashed = false
 		_play_jump_start()
 	elif _jumps_remaining > 0:
 		velocity.y = DOUBLE_JUMP_VELOCITY
 		_jumps_remaining -= 1
+		has_air_dashed = false
 		_play_jump_start()
 
 
@@ -421,40 +423,51 @@ func _physics_process(delta: float) -> void:
 	var direction := Input.get_axis("move_left", "move_right")
 
 	if is_dodging:
-		_apply_vertical_physics(delta)
+		velocity.y = 0
 	else:
-		if Input.is_action_just_pressed("dodge") and not is_dodging and able_to_dodge and is_on_floor():
+		var wants_dash = Input.is_action_just_pressed("dodge") and not is_dodging and able_to_dodge
+		var can_ground_dash = is_on_floor() and direction != 0.0
+		var can_air_dash = not is_on_floor() and not has_air_dashed
+		
+		if wants_dash and (can_ground_dash or can_air_dash):
 			is_dodging = true
 			is_invulnerable = true
 			_set_enemy_collision_enabled(false)
 			spine_anim.play("dash")
 			_ghost_trail_loop(0.1)
-			if direction:
-				velocity.x = WALK_SPEED * 10 * direction
-				var dodge_tween = create_tween()
-				dodge_tween.set_trans(Tween.TRANS_QUAD)
-				dodge_tween.set_ease(Tween.EASE_OUT)
-				dodge_tween.tween_property(self, "velocity:x", direction * WALK_SPEED, 0.15)
-				await dodge_tween.finished
-			else:
-				velocity.x = WALK_SPEED * 8 * -facing_direction
-				var dodge_tween = create_tween()
-				dodge_tween.set_trans(Tween.TRANS_QUAD)
-				dodge_tween.set_ease(Tween.EASE_OUT)
-				dodge_tween.tween_property(self, "velocity:x", facing_direction * WALK_SPEED, 0.15)
-				await dodge_tween.finished
-				dodge_cooldown.start()
-			dodge_cooldown.start()
-			able_to_dodge = false
+			
+			var is_air_dodging = not is_on_floor()
+			if is_air_dodging:
+				has_air_dashed = true 
+				
+			var dash_dir = direction
+			if is_air_dodging and dash_dir == 0.0:
+				dash_dir = facing_direction
+			var dodge_tween = create_tween()
+			dodge_tween.set_trans(Tween.TRANS_QUAD)
+			dodge_tween.set_ease(Tween.EASE_OUT)
+			
+			velocity.x = WALK_SPEED * 20 * dash_dir
+			dodge_tween.tween_property(self, "velocity:x", dash_dir * WALK_SPEED, 0.3)
+			
+			await dodge_tween.finished
+			
 			_set_enemy_collision_enabled(true)
 			is_invulnerable = false
+			if not is_air_dodging:
+				velocity.x = 0
+				spine_anim.play("dash skid")
+				await get_tree().create_timer(0.2).timeout
+				
+			dodge_cooldown.start()
+			able_to_dodge = false
 			is_dodging = false
 
 		if can_move:
 			_apply_horizontal_movement(direction, delta)
 			_update_facing(direction)
 			_update_ground_animation(direction)
-
+			
 	_handle_jump_input()
 	_apply_vertical_physics(delta)
 
@@ -463,6 +476,7 @@ func _physics_process(delta: float) -> void:
 
 	if is_on_floor():
 		_jumps_remaining = MAX_JUMPS
+		has_air_dashed = false
 		if not _was_on_floor:
 			_play_jump_land()
 	elif _was_on_floor:
