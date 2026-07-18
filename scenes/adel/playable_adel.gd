@@ -75,7 +75,8 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("attack") and not is_doing_action:
 		player_attacked.emit()
 		is_doing_action = true
-
+	if event.is_action_pressed("interact"):
+		play_pickup_animation()
 
 func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 	if is_invulnerable or is_stunned:
@@ -360,7 +361,11 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 	elif anim_name == "skid":
 		is_skidding = false
 		_update_ground_animation(Input.get_axis("move_left", "move_right"))
-
+	elif anim_name == "loot":
+		can_move = true
+		is_doing_action = false
+		# Ép nhân vật quay lại dáng đứng im (idle) hoặc chạy tiếp nếu người chơi đang giữ nút di chuyển
+		_update_ground_animation(Input.get_axis("move_left", "move_right"))
 
 func _handle_jump_input() -> void:
 	if not Input.is_action_just_pressed("jump"):
@@ -493,7 +498,16 @@ func _physics_process(delta: float) -> void:
 			knockback_when_touch_enemy(collider.global_position)
 			break
 
-
+func play_pickup_animation() -> void:
+	if not is_on_floor() or is_dodging or is_stunned or is_doing_action:
+		return 
+		
+	can_move = false
+	is_doing_action = true
+	velocity.x = 0 
+	
+	# Bật animation nhặt đồ
+	spine_anim.play("loot")
 func _on_dodge_cooldown_timeout() -> void:
 	able_to_dodge = true
 	

@@ -87,7 +87,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		return
 	if _rest_cooldown > 0.0:
 		return
-	if not event.is_action_pressed("Interact"):
+	if not event.is_action_pressed("interact"):
 		return
 		
 	get_viewport().set_input_as_handled()

@@ -57,7 +57,7 @@ shape = SubResource("CapsuleShape2D_8d7w2")
 disabled = true
 debug_color = Color(0.9764706, 0.03137255, 0.1764706, 0.41960785)
 
-[node name="DodgeCooldown" type="Timer" parent="PlayableAdel" unique_id=2015061764]
+[node name="DodgeCooldown2" type="Timer" parent="PlayableAdel" unique_id=2015061764]
 wait_time = 0.5
 
 [node name="Enemy" parent="." unique_id=1852725077 instance=ExtResource("5_88nui")]
@@ -89,4 +89,3 @@ shape = SubResource("RectangleShape2D_2jrn0")
 position = Vector2(1960, 664)
 
 [connection signal="body_entered" from="PlayableAdel/WeaponPivot/Weapon/Hitbox" to="PlayableAdel/WeaponPivot/Weapon" method="_on_hitbox_body_entered"]
-[connection signal="timeout" from="PlayableAdel/DodgeCooldown" to="PlayableAdel" method="_on_dodge_cooldown_timeout"]

@@ -41,7 +41,7 @@ func _process(delta: float) -> void:
 	var distance = global_position.distance_to(player.position)
 	if distance <= detection_radius:
 		interaction.visible = true
-		if Input.is_action_just_pressed("Interact"):
+		if Input.is_action_just_pressed("interact"):
 			#Nhặt xong thì xóa
 			print("Picked up.")
 			queue_free()
