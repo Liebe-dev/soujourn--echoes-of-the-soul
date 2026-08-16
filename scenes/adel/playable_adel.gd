@@ -1,6 +1,5 @@
 extends CharacterBody2D
 
-@onready var weapon_pivot = $WeaponPivot
 @onready var dodge_cooldown = $DodgeCooldown
 @onready var spine_rig = $SpinePivot/SpineRig
 @onready var spine_anim = $SpinePivot/SpineRig/AnimationPlayer
@@ -38,6 +37,8 @@ const KNOCKBACK_FORCE := 500
 
 signal player_attacked
 
+var combo_step: int = 0
+var attack_queued: bool = false
 var can_move: bool = true
 var is_locked: bool = false
 var is_resting: bool = false
@@ -72,11 +73,29 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("debug_take_damage"):
 		take_damage(DEBUG_DAMAGE_AMOUNT, global_position + Vector2(80.0, 0.0))
 		get_viewport().set_input_as_handled()
-	if event.is_action_pressed("attack") and not is_doing_action:
-		player_attacked.emit()
-		is_doing_action = true
+	if event.is_action_pressed("attack"):
+		if not is_doing_action:
+			if combo_step == 0 or combo_step >= 4:
+				combo_step = 1
+			else:
+				combo_step += 1
+			_play_combo_step()
+		elif combo_step > 0 and combo_step < 4:
+			attack_queued = true
 	if event.is_action_pressed("interact"):
 		play_pickup_animation()
+
+func _play_combo_step() -> void:
+	can_move = false
+	is_doing_action = true
+	velocity.x = 0
+	attack_queued = false
+	if combo_step == 1 or combo_step == 3:
+		spine_anim.play("test_attack1")
+	elif combo_step == 2:
+		spine_anim.play("test_attack2")
+	elif combo_step == 4:
+		spine_anim.play("test_attack4")
 
 func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 	if is_invulnerable or is_stunned:
@@ -364,8 +383,23 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 	elif anim_name == "loot":
 		can_move = true
 		is_doing_action = false
-		# Ép nhân vật quay lại dáng đứng im (idle) hoặc chạy tiếp nếu người chơi đang giữ nút di chuyển
 		_update_ground_animation(Input.get_axis("move_left", "move_right"))
+	elif anim_name.begins_with("test_attack"):
+		if attack_queued and combo_step < 4:
+			combo_step += 1
+			_play_combo_step()
+		else:
+			attack_queued = false
+			can_move = true
+			is_doing_action = false
+			$TestAttackSprite.visible = false
+			spine_rig.visible = true
+			_update_ground_animation(Input.get_axis("move_left", "move_right"))
+			get_tree().create_timer(0.4).timeout.connect(_reset_combo)
+
+func _reset_combo() -> void:
+	if not is_doing_action:
+		combo_step = 0
 
 func _handle_jump_input() -> void:
 	if not Input.is_action_just_pressed("jump"):

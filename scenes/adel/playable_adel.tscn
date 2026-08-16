@@ -4,6 +4,7 @@
 [ext_resource type="Script" uid="uid://jti2ptpyhs8u" path="res://scenes/adel/camera_2d.gd" id="3_67loa"]
 [ext_resource type="PackedScene" uid="uid://moo3202hyjoh" path="res://hud.tscn" id="4_aphpq"]
 [ext_resource type="PackedScene" uid="uid://ri1fqqgxpl6v" path="res://scenes/adel/master_menu.tscn" id="5_57033"]
+[ext_resource type="Texture2D" uid="uid://dmp5eoe8ykdk5" path="res://scenes/testing/Animation combat/Sprite-0003.png" id="6_5ku1i"]
 [ext_resource type="PackedScene" uid="uid://4egogosl1we3" path="res://asset/Character/Adel/adel spine action use.tscn" id="69_73q5r"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]
@@ -49,5 +50,14 @@ visible = false
 [node name="DodgeCooldown" type="Timer" parent="." unique_id=982212932]
 wait_time = 0.5
 one_shot = true
+
+[node name="TestAttackSprite" type="Sprite2D" parent="." unique_id=1725196005]
+visible = false
+z_index = 50
+position = Vector2(1050, 596.00006)
+scale = Vector2(1.8874502, 1.8874502)
+texture = ExtResource("6_5ku1i")
+hframes = 4
+frame = 2
 
 [connection signal="timeout" from="DodgeCooldown" to="." method="_on_dodge_cooldown_timeout"]
