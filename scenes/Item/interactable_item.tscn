@@ -1,0 +1,57 @@
+[gd_scene format=3 uid="uid://d0ag3gjgymxhb"]
+
+[ext_resource type="Script" uid="uid://cxs1ybobkiq0l" path="res://scenes/Item/interact_item.gd" id="1_h64jf"]
+[ext_resource type="Texture2D" uid="uid://bynxun18bsdnq" path="res://asset/Map/sign.png" id="2_wo7e3"]
+
+[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_4c57u"]
+radius = 57.0
+height = 198.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5vw27"]
+bg_color = Color(0.36078432, 0.6117647, 0.77254903, 0.56078434)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.60554177, 0.6128641, 0.9580094, 1)
+expand_margin_left = 2.0
+expand_margin_right = 2.0
+
+[node name="InteractableItem" type="Area2D" unique_id=1047649459]
+script = ExtResource("1_h64jf")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=510612510]
+z_index = -1
+texture_filter = 1
+position = Vector2(616, 438.00003)
+scale = Vector2(4.545454, 4.5454535)
+texture = ExtResource("2_wo7e3")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=699392421]
+visible = false
+position = Vector2(610, 427)
+shape = SubResource("CapsuleShape2D_4c57u")
+
+[node name="DialogueBox" type="PanelContainer" parent="." unique_id=1878711914]
+offset_left = 581.0
+offset_top = 315.0
+offset_right = 645.0
+offset_bottom = 355.0
+theme_override_styles/panel = SubResource("StyleBoxFlat_5vw27")
+
+[node name="MarginContainer" type="MarginContainer" parent="DialogueBox" unique_id=1212423485]
+layout_mode = 2
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = -3
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = -3
+
+[node name="Label" type="Label" parent="DialogueBox/MarginContainer" unique_id=2035934880]
+texture_filter = 1
+layout_mode = 2
+text = "Hachimi"
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="body_exited" from="." to="." method="_on_body_exited"]

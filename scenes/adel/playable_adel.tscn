@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://dhhn1rh24dtco"]
 
 [ext_resource type="Script" uid="uid://xl1mn1dbt32k" path="res://scenes/adel/playable_adel.gd" id="1_playable"]
-[ext_resource type="Script" uid="uid://jti2ptpyhs8u" path="res://scenes/adel/camera_2d.gd" id="3_67loa"]
-[ext_resource type="PackedScene" uid="uid://moo3202hyjoh" path="res://hud.tscn" id="4_aphpq"]
-[ext_resource type="PackedScene" uid="uid://ri1fqqgxpl6v" path="res://scenes/adel/master_menu.tscn" id="5_57033"]
+[ext_resource type="Script" uid="uid://jti2ptpyhs8u" path="res://scenes/camera_2d.gd" id="3_67loa"]
+[ext_resource type="PackedScene" uid="uid://moo3202hyjoh" path="res://scenes/UI/hud.tscn" id="4_aphpq"]
+[ext_resource type="PackedScene" uid="uid://ri1fqqgxpl6v" path="res://scenes/UI/master_menu.tscn" id="5_57033"]
 [ext_resource type="PackedScene" uid="uid://4egogosl1we3" path="res://asset/Character/Adel/adel spine action use.tscn" id="69_73q5r"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]

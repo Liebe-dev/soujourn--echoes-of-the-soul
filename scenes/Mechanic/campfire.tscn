@@ -1,0 +1,335 @@
+[gd_scene format=3 uid="uid://campfire01"]
+
+[ext_resource type="Script" uid="uid://kys4a4nb5xye" path="res://scenes/Mechanic/campfire.gd" id="1_campfire"]
+
+[sub_resource type="Gradient" id="Gradient_fire"]
+offsets = PackedFloat32Array(0, 0.4, 1)
+colors = PackedColorArray(1, 0.9, 0.3, 1, 1, 0.45, 0.05, 1, 0.6, 0.1, 0, 0)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_fire"]
+gradient = SubResource("Gradient_fire")
+width = 32
+height = 32
+fill = 1
+fill_from = Vector2(0.5, 0.5)
+fill_to = Vector2(0.5, 0)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_interact"]
+radius = 72.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_prompt"]
+content_margin_left = 12.0
+content_margin_top = 6.0
+content_margin_right = 12.0
+content_margin_bottom = 6.0
+bg_color = Color(0.08, 0.06, 0.05, 0.82)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.95, 0.55, 0.2, 0.9)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="LabelSettings" id="LabelSettings_saved"]
+font_size = 28
+outline_size = 4
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="SystemFont" id="SystemFont_oufq8"]
+subpixel_positioning = 0
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_b5him"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_y2ey3"]
+bg_color = Color(0.3083999, 0.30839992, 0.30839977, 1)
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dk7h0"]
+
+[node name="Campfire" type="Area2D" unique_id=1649017633]
+script = ExtResource("1_campfire")
+
+[node name="Visual" type="Node2D" parent="." unique_id=182115891]
+
+[node name="LogLeft" type="ColorRect" parent="Visual" unique_id=42389681]
+offset_left = -28.0
+offset_top = 8.0
+offset_right = 8.0
+offset_bottom = 20.0
+color = Color(0.28, 0.16, 0.09, 1)
+
+[node name="LogRight" type="ColorRect" parent="Visual" unique_id=1671860724]
+offset_left = 8.0
+offset_top = 10.0
+offset_right = 36.0
+offset_bottom = 22.0
+color = Color(0.22, 0.12, 0.07, 1)
+
+[node name="EmberBed" type="ColorRect" parent="Visual" unique_id=1161423975]
+offset_left = -8.0
+offset_top = 14.0
+offset_right = 16.0
+offset_bottom = 22.0
+color = Color(0.15, 0.08, 0.04, 1)
+
+[node name="FireParticles" type="CPUParticles2D" parent="Visual" unique_id=2004652448]
+position = Vector2(4, 6)
+amount = 24
+lifetime = 0.7
+preprocess = 0.5
+explosiveness = 0.15
+randomness = 0.4
+emission_shape = 1
+emission_sphere_radius = 10.0
+direction = Vector2(0, -1)
+spread = 28.0
+gravity = Vector2(0, -40)
+initial_velocity_min = 20.0
+initial_velocity_max = 55.0
+scale_amount_min = 2.0
+scale_amount_max = 5.0
+color = Color(1, 0.55, 0.15, 0.9)
+
+[node name="GlowLight" type="PointLight2D" parent="Visual" unique_id=1516681079]
+position = Vector2(4, 8)
+color = Color(1, 0.6, 0.25, 1)
+energy = 1.2
+texture = SubResource("GradientTexture2D_fire")
+texture_scale = 2.5
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=12106388]
+position = Vector2(0, 16)
+shape = SubResource("CircleShape2D_interact")
+
+[node name="RestPosition" type="Marker2D" parent="." unique_id=1081013189]
+
+[node name="PromptLayer" type="CanvasLayer" parent="." unique_id=1947214358]
+layer = 5
+
+[node name="Prompt" type="PanelContainer" parent="PromptLayer" unique_id=281631458]
+anchors_preset = 7
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -120.0
+offset_top = -120.0
+offset_right = 120.0
+offset_bottom = -80.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_styles/panel = SubResource("StyleBoxFlat_prompt")
+
+[node name="MarginContainer" type="MarginContainer" parent="PromptLayer/Prompt" unique_id=876408983]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="PromptLayer/Prompt/MarginContainer" unique_id=307187291]
+layout_mode = 2
+text = "Press F to rest"
+horizontal_alignment = 1
+
+[node name="SavedLabel" type="Label" parent="PromptLayer" unique_id=715767924]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -80.0
+offset_top = -80.0
+offset_right = 80.0
+offset_bottom = -40.0
+grow_horizontal = 2
+grow_vertical = 2
+text = "Saved"
+label_settings = SubResource("LabelSettings_saved")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="RestMenu" type="Control" parent="PromptLayer" unique_id=1888212807]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="relica" type="Button" parent="PromptLayer/RestMenu" unique_id=1035503013]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 162.0
+offset_right = 445.0
+offset_bottom = 211.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Relica Edit"
+alignment = 0
+
+[node name="spell" type="Button" parent="PromptLayer/RestMenu" unique_id=54388304]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 232.0
+offset_right = 445.0
+offset_bottom = 281.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Spellbook Edit"
+alignment = 0
+
+[node name="save" type="Button" parent="PromptLayer/RestMenu" unique_id=18969856]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 302.0
+offset_right = 445.0
+offset_bottom = 351.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Save game"
+alignment = 0
+
+[node name="load" type="Button" parent="PromptLayer/RestMenu" unique_id=1544122550]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 372.0
+offset_right = 445.0
+offset_bottom = 421.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Load game"
+alignment = 0
+
+[node name="title" type="Button" parent="PromptLayer/RestMenu" unique_id=1162399152]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 442.0
+offset_right = 445.0
+offset_bottom = 491.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Return to title"
+alignment = 0
+
+[node name="leave" type="Button" parent="PromptLayer/RestMenu" unique_id=1581334203]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 512.0
+offset_right = 445.0
+offset_bottom = 561.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Leave"
+alignment = 0
+
+[node name="LoadSlotMenu" type="Control" parent="PromptLayer" unique_id=2109483721]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Title" type="Label" parent="PromptLayer/LoadSlotMenu" unique_id=2109483722]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 120.0
+offset_right = 445.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 32
+text = "Load Game"
+horizontal_alignment = 1
+
+[node name="SlotList" type="VBoxContainer" parent="PromptLayer/LoadSlotMenu" unique_id=2109483723]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 170.0
+offset_right = 445.0
+offset_bottom = 470.0
+theme_override_constants/separation = 8
+
+[node name="Back" type="Button" parent="PromptLayer/LoadSlotMenu" unique_id=2109483724]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 490.0
+offset_right = 445.0
+offset_bottom = 539.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Back"
+alignment = 0
+
+[node name="SaveSlotMenu" type="Control" parent="PromptLayer" unique_id=2109483725]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="Title" type="Label" parent="PromptLayer/SaveSlotMenu" unique_id=2109483726]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 120.0
+offset_right = 445.0
+offset_bottom = 160.0
+theme_override_font_sizes/font_size = 32
+text = "Save Game"
+horizontal_alignment = 1
+
+[node name="SlotList" type="VBoxContainer" parent="PromptLayer/SaveSlotMenu" unique_id=2109483727]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 170.0
+offset_right = 445.0
+offset_bottom = 470.0
+theme_override_constants/separation = 8
+
+[node name="Back" type="Button" parent="PromptLayer/SaveSlotMenu" unique_id=2109483728]
+layout_mode = 0
+offset_left = 105.0
+offset_top = 490.0
+offset_right = 445.0
+offset_bottom = 539.0
+theme_override_fonts/font = SubResource("SystemFont_oufq8")
+theme_override_font_sizes/font_size = 35
+theme_override_styles/normal = SubResource("StyleBoxEmpty_b5him")
+theme_override_styles/pressed = SubResource("StyleBoxFlat_y2ey3")
+theme_override_styles/hover = SubResource("StyleBoxFlat_dk7h0")
+text = "Back"
+alignment = 0
+
+[node name="TransitionLayer" type="CanvasLayer" parent="." unique_id=1860909934]
+
+[node name="ColorRect" type="ColorRect" parent="TransitionLayer" unique_id=132552150]
+modulate = Color(1, 1, 1, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=2095493705]
+enabled = false
+
+[connection signal="body_entered" from="." to="." method="_on_body_entered"]
+[connection signal="body_exited" from="." to="." method="_on_body_exited"]

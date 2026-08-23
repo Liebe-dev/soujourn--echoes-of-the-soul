@@ -20,10 +20,14 @@ run/main_scene="uid://fwjb4kq41db8"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="uid://wmpjb5d4lwn"
 
+[audio]
+
+buses/default_bus_layout=""
+
 [autoload]
 
-SaveManager="*res://save_manager.gd"
-PlayerProgress="*res://player_progress.gd"
+SaveManager="*res://scenes/UI/save_manager.gd"
+PlayerProgress="*res://scenes/Mechanic/player_progress.gd"
 FmodManager="*uid://cds10pm7hwn3p"
 _mcp_game_helper="*res://addons/godot_ai/runtime/game_helper.gd"
 

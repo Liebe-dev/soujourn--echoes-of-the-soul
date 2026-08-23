@@ -1,0 +1,26 @@
+[gd_scene format=3 uid="uid://c2aqlr28m4cvc"]
+
+[ext_resource type="Script" uid="uid://vp6gf058a6tp" path="res://scenes/Item/collectible_item_prefab.gd" id="1_642o1"]
+[ext_resource type="Texture2D" uid="uid://bynxun18bsdnq" path="res://asset/Map/sign.png" id="2_sdivx"]
+
+[node name="CollectibleItem" type="Node2D" unique_id=818450812]
+position = Vector2(706, 497)
+script = ExtResource("1_642o1")
+
+[node name="Icon" type="Sprite2D" parent="." unique_id=1850621480]
+texture_filter = 1
+scale = Vector2(2.7403274, 3.009169)
+texture = ExtResource("2_sdivx")
+
+[node name="Interact" type="Label" parent="." unique_id=893752518]
+texture_filter = 1
+offset_left = 30.0
+offset_top = -25.0
+offset_right = 91.0
+offset_bottom = 11.0
+theme_override_font_sizes/font_size = 32
+text = "F"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="VisibleOnScreenNotifier2D" type="VisibleOnScreenNotifier2D" parent="." unique_id=1017799050]

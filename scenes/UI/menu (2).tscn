@@ -1,0 +1,243 @@
+[gd_scene format=3 uid="uid://fwjb4kq41db8"]
+
+[ext_resource type="Script" uid="uid://dk4mui7yap2wq" path="res://scenes/UI/menu (2).gd" id="1_lti8b"]
+[ext_resource type="Texture2D" uid="uid://cps22kn26nsco" path="res://asset/BG/BG.png" id="2_4hy44"]
+[ext_resource type="Texture2D" uid="uid://b6ftddm0p4ogr" path="res://asset/BG/Logo game.png" id="2_mae5d"]
+[ext_resource type="Texture2D" uid="uid://dycqcksbfsoh7" path="res://asset/BG/StartGame.png" id="3_4hy44"]
+[ext_resource type="Texture2D" uid="uid://ry4jw0hd0bv3" path="res://asset/BG/BG Sample.jpg" id="4_l48gv"]
+[ext_resource type="Texture2D" uid="uid://jlvhcbjm40bu" path="res://asset/BG/Slogan.png" id="5_nrnbx"]
+[ext_resource type="Texture2D" uid="uid://c8w2u88rvlma8" path="res://asset/BG/Continue.png" id="6_ecwwl"]
+[ext_resource type="Texture2D" uid="uid://8m8jmve1re2" path="res://asset/BG/NewGameSelect.png" id="6_iqepy"]
+[ext_resource type="Texture2D" uid="uid://rfbniqwquh32" path="res://asset/BG/Setting.png" id="7_ecwwl"]
+[ext_resource type="Script" uid="uid://wxievhv54ohp" path="res://scenes/UI/start.gd" id="7_h1wq0"]
+[ext_resource type="Texture2D" uid="uid://ysk4nefesr1f" path="res://asset/BG/QuitGame.png" id="8_kk3ma"]
+[ext_resource type="Script" uid="uid://rgp8ld2w1gsd" path="res://scenes/UI/continue.gd" id="10_4ndjb"]
+[ext_resource type="Texture2D" uid="uid://4q6vqwjw8n8m" path="res://asset/BG/ContinueSelect.png" id="11_3ls4m"]
+[ext_resource type="Script" uid="uid://flk5w2domw4x" path="res://scenes/UI/quit.gd" id="12_g7jxm"]
+[ext_resource type="Script" uid="uid://dteilpnr4rmtp" path="res://scenes/UI/option_se.gd" id="13_5h80m"]
+[ext_resource type="Texture2D" uid="uid://bp3kqq64kun2j" path="res://asset/BG/QuitGameSelect.png" id="13_jspdm"]
+[ext_resource type="Texture2D" uid="uid://c6rb783fothq8" path="res://asset/BG/SettingSelect.png" id="14_w25hu"]
+[ext_resource type="Script" uid="uid://dsl3khdvm7e6g" path="res://scenes/UI/parallax_background.gd" id="17_3ls4m"]
+[ext_resource type="AudioStream" uid="uid://bivby2476phvd" path="res://asset/BG/Echoes of the Soul.wav" id="19_5h80m"]
+[ext_resource type="AudioStream" uid="uid://8gokeyqms3wt" path="res://asset/BG/Hover.wav" id="20_w25hu"]
+[ext_resource type="AudioStream" uid="uid://dltx7o7ukuo2r" path="res://asset/BG/Click.wav" id="21_td6mg"]
+[ext_resource type="AudioStream" uid="uid://bgkhib6eeo8pn" path="res://asset/BG/mixkit-magic-sweep-game-trophy-257.wav" id="22_guify"]
+[ext_resource type="PackedScene" uid="uid://dd3kuxfkj4iwc" path="res://scenes/UI/settings_menu.tscn" id="23_oil5j"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_mae5d"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_h1wq0"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_dwrpx"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_kk3ma"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_gd0jp"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_g7jxm"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_nrnbx"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_4ndjb"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_jspdm"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_iqepy"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_3ls4m"]
+
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_oxnod"]
+
+[sub_resource type="SystemFont" id="SystemFont_3ls4m"]
+font_names = PackedStringArray("Trajan Pro")
+subpixel_positioning = 0
+
+[sub_resource type="LabelSettings" id="LabelSettings_5h80m"]
+font = SubResource("SystemFont_3ls4m")
+font_size = 38
+
+[node name="Node2D2" type="Node2D" unique_id=542400964]
+script = ExtResource("1_lti8b")
+
+[node name="BG" type="Sprite2D" parent="." unique_id=1325464601]
+texture_filter = 1
+position = Vector2(960, 541)
+texture = ExtResource("2_mae5d")
+
+[node name="BgSample" type="Sprite2D" parent="." unique_id=989476266]
+visible = false
+z_index = -1
+position = Vector2(944, 541)
+texture = ExtResource("4_l48gv")
+
+[node name="Slogan" type="Sprite2D" parent="." unique_id=1446761118]
+position = Vector2(959, 540)
+texture = ExtResource("5_nrnbx")
+
+[node name="Control" type="Control" parent="." unique_id=596389417]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 1920.0
+offset_bottom = 1080.0
+
+[node name="Start" type="Button" parent="Control" unique_id=2025809496]
+texture_filter = 1
+layout_mode = 0
+offset_left = 816.0
+offset_top = 641.0
+offset_right = 1101.0
+offset_bottom = 743.0
+theme_override_colors/font_color = Color(0.8745098, 0.8745098, 0.8745098, 1)
+theme_override_styles/normal = SubResource("StyleBoxEmpty_mae5d")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_h1wq0")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_dwrpx")
+icon = ExtResource("3_4hy44")
+script = ExtResource("7_h1wq0")
+
+[node name="StartSe" type="TextureRect" parent="Control/Start" unique_id=822259365]
+layout_mode = 0
+offset_left = -45.0
+offset_top = 34.0
+offset_right = 338.0
+offset_bottom = 73.0
+texture = ExtResource("6_iqepy")
+
+[node name="Continue" type="Button" parent="Control" unique_id=1634565481]
+texture_filter = 1
+layout_mode = 0
+offset_left = 853.0
+offset_top = 730.0
+offset_right = 1076.0
+offset_bottom = 788.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_kk3ma")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_gd0jp")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_g7jxm")
+icon = ExtResource("6_ecwwl")
+script = ExtResource("10_4ndjb")
+
+[node name="ContinueSe" type="TextureRect" parent="Control/Continue" unique_id=571008924]
+layout_mode = 0
+offset_left = -62.0
+offset_top = 9.0
+offset_right = 275.0
+offset_bottom = 49.0
+texture = ExtResource("11_3ls4m")
+
+[node name="Option" type="Button" parent="Control" unique_id=1088280684]
+texture_filter = 1
+layout_mode = 0
+offset_left = 878.0
+offset_top = 799.0
+offset_right = 1072.0
+offset_bottom = 867.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_nrnbx")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_4ndjb")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_jspdm")
+icon = ExtResource("7_ecwwl")
+script = ExtResource("13_5h80m")
+
+[node name="OptionSe" type="TextureRect" parent="Control/Option" unique_id=697694418]
+layout_mode = 0
+offset_left = -60.0
+offset_top = 15.0
+offset_right = 224.0
+offset_bottom = 52.0
+texture = ExtResource("14_w25hu")
+
+[node name="Quit" type="Button" parent="Control" unique_id=461256747]
+texture_filter = 1
+layout_mode = 0
+offset_left = 828.0
+offset_top = 858.0
+offset_right = 1097.0
+offset_bottom = 942.0
+theme_override_styles/normal = SubResource("StyleBoxEmpty_iqepy")
+theme_override_styles/pressed = SubResource("StyleBoxEmpty_3ls4m")
+theme_override_styles/hover = SubResource("StyleBoxEmpty_oxnod")
+icon = ExtResource("8_kk3ma")
+script = ExtResource("12_g7jxm")
+
+[node name="QuitSe" type="TextureRect" parent="Control/Quit" unique_id=1775503402]
+layout_mode = 0
+offset_left = -59.0
+offset_top = 31.0
+offset_right = 328.0
+offset_bottom = 65.0
+texture = ExtResource("13_jspdm")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="FadeRect" type="ColorRect" parent="." unique_id=1484219693]
+visible = false
+custom_minimum_size = Vector2(1920, 1080)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = 1920.0
+offset_bottom = 1080.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0, 0, 0, 1)
+
+[node name="ParallaxBackground" type="ParallaxBackground" parent="." unique_id=1014215836]
+script = ExtResource("17_3ls4m")
+
+[node name="ParallaxLayer" type="ParallaxLayer" parent="ParallaxBackground" unique_id=355112114]
+texture_filter = 1
+texture_repeat = 3
+motion_mirroring = Vector2(1920, 0)
+
+[node name="Sprite2D" type="Sprite2D" parent="ParallaxBackground/ParallaxLayer" unique_id=190274775]
+position = Vector2(960, 540)
+texture = ExtResource("2_4hy44")
+
+[node name="PressStartLabel" type="Label" parent="." unique_id=1014412559]
+visible = false
+texture_filter = 1
+offset_left = 691.0
+offset_top = 825.0
+offset_right = 1232.0
+offset_bottom = 880.0
+text = "- Press to Start Journey -"
+label_settings = SubResource("LabelSettings_5h80m")
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="BGMPlayer" type="AudioStreamPlayer2D" parent="." unique_id=1881600358]
+stream = ExtResource("19_5h80m")
+volume_db = -6.314
+autoplay = true
+
+[node name="HoverSound" type="AudioStreamPlayer2D" parent="." unique_id=1646070612]
+stream = ExtResource("20_w25hu")
+
+[node name="ClickSound" type="AudioStreamPlayer2D" parent="." unique_id=2046672891]
+stream = ExtResource("21_td6mg")
+
+[node name="AudioStreamPlayer2D" type="AudioStreamPlayer2D" parent="." unique_id=1713009331]
+
+[node name="StartSound" type="AudioStreamPlayer2D" parent="." unique_id=1789189070]
+stream = ExtResource("22_guify")
+
+[node name="SettingsMenu" parent="." unique_id=252361829 instance=ExtResource("23_oil5j")]
+visible = false
+z_index = 10
+offset_right = 1920.0
+offset_bottom = 1080.0
+
+[connection signal="mouse_entered" from="Control/Start" to="Control/Start" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Control/Start" to="Control/Start" method="_on_mouse_exited"]
+[connection signal="pressed" from="Control/Start" to="." method="_on_start_pressed"]
+[connection signal="pressed" from="Control/Start" to="Control/Start" method="_on_pressed"]
+[connection signal="mouse_entered" from="Control/Continue" to="Control/Continue" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Control/Continue" to="Control/Continue" method="_on_mouse_exited"]
+[connection signal="pressed" from="Control/Continue" to="." method="_on_continue_pressed"]
+[connection signal="mouse_entered" from="Control/Option" to="Control/Option" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Control/Option" to="Control/Option" method="_on_mouse_exited"]
+[connection signal="pressed" from="Control/Option" to="." method="_on_option_pressed"]
+[connection signal="mouse_entered" from="Control/Quit" to="Control/Quit" method="_on_mouse_entered"]
+[connection signal="mouse_exited" from="Control/Quit" to="Control/Quit" method="_on_mouse_exited"]
+[connection signal="pressed" from="Control/Quit" to="." method="_on_quit_pressed"]
+[connection signal="pressed" from="Control/Quit" to="Control/Quit" method="_on_pressed"]
