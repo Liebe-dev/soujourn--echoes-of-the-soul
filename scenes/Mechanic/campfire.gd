@@ -25,7 +25,7 @@ signal player_finished_rest
 @onready var cinematic_camera: Camera2D = $Camera2D
 
 const TITLE_SCENE := "res://asset/UI/menu.tscn"
-const UPGRADE_MENU_SCENE := preload("res://scenes/adel/campfire_upgrade_menu.tscn")
+const UPGRADE_MENU_SCENE := preload("res://scenes/UI/campfire_upgrade_menu.tscn")
 
 var _player: CharacterBody2D
 var _upgrade_menu: Control

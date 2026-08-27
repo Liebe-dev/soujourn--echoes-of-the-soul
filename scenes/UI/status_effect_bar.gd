@@ -1,7 +1,7 @@
 extends HBoxContainer
 ## Row of buff or debuff icon slots (placeholder colors until textures are added).
 
-const SLOT_SCENE := preload("res://asset/UI/status_icon_slot.tscn")
+const SLOT_SCENE := preload("res://scenes/UI/status_icon_slot.tscn")
 
 var _slots: Dictionary = {}
 
