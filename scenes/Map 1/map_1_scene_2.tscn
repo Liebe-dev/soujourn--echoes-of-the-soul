@@ -1,6 +1,5 @@
 [gd_scene format=4 uid="uid://dmov8ff311ro5"]
 
-[ext_resource type="Texture2D" uid="uid://cer1t2v5a2hj2" path="res://scenes/Map 1/Screenshot (616).png" id="1_a24c4"]
 [ext_resource type="Script" uid="uid://bdv551nreydpd" path="res://scenes/Map 1/map_1_scene_2.gd" id="1_p5rx4"]
 [ext_resource type="Texture2D" uid="uid://bcvx2kvjh5t28" path="res://asset/Map/oak_woods_tileset.png" id="2_p5rx4"]
 [ext_resource type="PackedScene" uid="uid://campfire01" path="res://scenes/Mechanic/campfire.tscn" id="4_68iag"]
@@ -873,13 +872,6 @@ sources/0 = SubResource("TileSetAtlasSource_p5rx4")
 
 [node name="Map 1 Scene 2" type="Node2D" unique_id=2062625887]
 script = ExtResource("1_p5rx4")
-
-[node name="TextureRect" type="TextureRect" parent="." unique_id=1232806305]
-visible = false
-modulate = Color(1, 1, 1, 0.49411765)
-offset_right = 40.0
-offset_bottom = 40.0
-texture = ExtResource("1_a24c4")
 
 [node name="TileMap" type="TileMap" parent="." unique_id=1923528149]
 scale = Vector2(3, 3)

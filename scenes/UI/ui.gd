@@ -2,10 +2,7 @@ extends Control
 
 signal stagger_triggered(tier: int, floor_hp: int)
 signal stagger_debuff_applied(debuff_id: String, level: int)
-
-# ======================
-#      STATS
-# ======================
+#     STATS
 var max_hp := 100
 var hp := 100
 var max_flask_charges := 3
@@ -14,7 +11,7 @@ var max_stamina := 100.0
 var stamina := 100.0
 var flask_heal_per_use := 34
 
-## Debuffs (extend with buffs dict later).
+# Debuffs
 var bleeding_level := 0
 var fracture_level := 0
 var active_buffs: Dictionary = {}
@@ -35,9 +32,6 @@ const SCREEN_SHAKE_FLASK := 0.5
 const SCREEN_SHAKE_STAGGER := 0.72
 const FLASK_SHAKE_DECAY := 3.5
 
-# ======================
-#      NODES
-# ======================
 @onready var soul_flask: MarginContainer = $bar/soul_flask
 @onready var soul_main: TextureRect = $bar/soul_flask/soul_main
 @onready var soul_delay: TextureRect = $bar/soul_flask/soul_delay
@@ -59,7 +53,6 @@ var _flask_rest_position := Vector2.ZERO
 var _flask_shake_time := 0.0
 var _flask_shake_amount := 0.0
 
-# Flask drain animation state
 var _is_flask_draining := false
 var _flask_shader_percent := 0.0
 var _flask_drain_tween = null
@@ -71,6 +64,7 @@ var hide_timer := 0.0
 var is_hidden := false
 var fade_tween: Tween
 
+#hàm hệ thống
 func _ready() -> void:
 	_flask_rest_position = soul_flask.position
 	_recalc_flask_heal_amount()
@@ -85,6 +79,11 @@ func _ready() -> void:
 	PlayerProgress.apply_to_hud(get_tree())
 	modulate.a = 0.0
 	is_hidden = true
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("soul_heal"):
+		use_soul_flask()
+		get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
 	if stagger_lock_timer > 0.0:
@@ -107,244 +106,10 @@ func _process(delta: float) -> void:
 
 	_update_flask_shake(delta)
 
-	# Update flask shader fill percent every frame (supports tweening drain)
 	update_shader_value(soul_main, _flask_shader_percent)
 	update_shader_value(soul_delay, _flask_shader_percent)
 
-# ======================
-#   DEBUFFS / BUFFS
-# ======================
-func has_bleeding() -> bool:
-	return bleeding_level > 0
-
-func has_fracture() -> bool:
-	return fracture_level > 0
-
-func clear_all_debuffs() -> void:
-	bleeding_level = 0
-	fracture_level = 0
-	_bleed_tick_timer = 0.0
-	sync_status_icons()
-
-## Flask: removes all bleeding; fracture only −1 level (both can apply on one drink).
-func _cure_debuffs_from_flask() -> void:
-	if has_bleeding():
-		bleeding_level = 0
-		_bleed_tick_timer = 0.0
-	if has_fracture():
-		fracture_level -= 1
-	sync_status_icons()
-
-func get_damage_taken_multiplier() -> float:
-	if fracture_level <= 0:
-		return 1.0
-	return 1.0 + 0.2 * fracture_level
-
-func get_damage_dealt_multiplier() -> float:
-	match fracture_level:
-		0:
-			return 1.0
-		1:
-			return 0.85
-		2:
-			return 0.8
-		_:
-			return 0.65
-
-func get_move_speed_multiplier() -> float:
-	if fracture_level >= 2:
-		return 0.72
-	return 1.0
-
-func get_attack_speed_multiplier() -> float:
-	if fracture_level >= 2:
-		return 0.75
-	return 1.0
-
-func sync_status_icons() -> void:
-	if debuff_bar:
-		debuff_bar.set_effect("bleeding", bleeding_level, false)
-		debuff_bar.set_effect("fracture", fracture_level, false)
-	if buff_bar:
-		buff_bar.clear_all()
-		for buff_id in active_buffs.keys():
-			buff_bar.set_effect(buff_id, int(active_buffs[buff_id]), true)
-
-func _process_bleeding(delta: float) -> void:
-	if bleeding_level <= 0:
-		_bleed_tick_timer = 0.0
-		return
-	_bleed_tick_timer += delta
-	if _bleed_tick_timer >= BLEED_TICK_INTERVAL:
-		_bleed_tick_timer = 0.0
-		var dps: int = BLEED_DPS.get(bleeding_level, 3)
-		_apply_raw_hp_loss(dps, true)
-
-func _apply_random_stagger_debuff() -> void:
-	if randf() < 0.5:
-		_apply_bleeding(1)
-	else:
-		_apply_fracture(1)
-
-func _apply_bleeding(level: int) -> void:
-	bleeding_level = maxi(bleeding_level, level)
-	sync_status_icons()
-	stagger_debuff_applied.emit("bleeding", bleeding_level)
-	enter_combat()
-
-func _apply_fracture(add_levels: int = 1) -> void:
-	fracture_level = clampi(fracture_level + add_levels, 0, 3)
-	sync_status_icons()
-	stagger_debuff_applied.emit("fracture", fracture_level)
-	enter_combat()
-
-# ======================
-#   FLASK
-# ======================
-func restore_flask_charges() -> void:
-	flask_charges = max_flask_charges
-	sync_flask_display()
-
-func add_max_flask_charges(extra: int) -> void:
-	max_flask_charges = maxi(max_flask_charges + extra, 1)
-	flask_charges = mini(flask_charges + extra, max_flask_charges)
-	_recalc_flask_heal_amount()
-	sync_flask_display()
-
-func _recalc_flask_heal_amount() -> void:
-	flask_heal_per_use = maxi(1, int(ceil(float(max_hp) / float(max_flask_charges))))
-
-func sync_flask_display() -> void:
-	var percent := float(flask_charges) / float(max_flask_charges) if max_flask_charges > 0 else 0.0
-
-	# If not actively draining, directly set shader percent. During a drain we animate `_flask_shader_percent`.
-	if not _is_flask_draining:
-		_flask_shader_percent = percent
-		update_shader_value(soul_main, _flask_shader_percent)
-		update_shader_value(soul_delay, _flask_shader_percent)
-	if flask_uses_label:
-		flask_uses_label.text = "x%d" % flask_charges
-
-	# Make HUD visible when flask display updates
-	fade_in()
-
-# ======================
-#   STAGGER
-# ======================
-func restore_stagger_thresholds() -> void:
-	stagger_tiers_ready = [true, true]
-	stagger_lock_hp = -1
-	stagger_lock_timer = 0.0
-	sync_stagger_markers()
-
-func sync_stagger_markers() -> void:
-	if stagger_marker_66:
-		stagger_marker_66.color = STAGGER_MARKER_READY if stagger_tiers_ready[0] else STAGGER_MARKER_USED
-	if stagger_marker_33:
-		stagger_marker_33.color = STAGGER_MARKER_READY if stagger_tiers_ready[1] else STAGGER_MARKER_USED
-
-func _stagger_floor_hp(tier: int) -> int:
-	return int(round(max_hp * STAGGER_THRESHOLD_FRACS[tier]))
-
-func _on_stagger_triggered(_tier: int, _floor_hp: int) -> void:
-	_trigger_impact_feedback(SCREEN_SHAKE_STAGGER)
-
-func _resolve_stagger_crossing(prev_hp: int, target_hp: int, tier: int) -> Dictionary:
-	var floor_hp := _stagger_floor_hp(tier)
-	var out := {
-		"target_hp": target_hp,
-		"triggered": false,
-		"skip_player_stagger": false,
-		"floor_hp": floor_hp,
-		"tier": tier,
-	}
-	if prev_hp <= floor_hp or target_hp > floor_hp:
-		return out
-
-	out.triggered = true
-	stagger_tiers_ready[tier] = false
-	sync_stagger_markers()
-
-	if has_bleeding():
-		out.target_hp = floor_hp
-		out.skip_player_stagger = true
-		stagger_lock_hp = -1
-		stagger_lock_timer = 0.0
-		_apply_bleeding(2)
-		stagger_triggered.emit(tier, floor_hp)
-		return out
-
-	out.target_hp = floor_hp
-	stagger_lock_hp = floor_hp
-	stagger_lock_timer = STAGGER_LOCK_DURATION
-	_apply_random_stagger_debuff()
-	stagger_triggered.emit(tier, floor_hp)
-	return out
-
-# ======================
-#   SHAKE
-# ======================
-func _trigger_impact_feedback(screen_strength: float) -> void:
-	var fx := _get_screen_effects()
-	if fx and fx.has_method("trigger_impact_shake"):
-		fx.trigger_impact_shake(screen_strength)
-	_trigger_flask_shake()
-
-func _trigger_flask_shake() -> void:
-	_flask_shake_time = 0.0
-	_flask_shake_amount = 1.0
-
-func _update_flask_shake(delta: float) -> void:
-	if _flask_shake_amount <= 0.0:
-		soul_flask.position = _flask_rest_position
-		_set_flask_border_shake(0.0, 0.0)
-		return
-	_flask_shake_time += delta
-	_flask_shake_amount = maxf(_flask_shake_amount - delta * FLASK_SHAKE_DECAY, 0.0)
-	var wobble := Vector2(
-		sin(_flask_shake_time * 64.0),
-		cos(_flask_shake_time * 58.0)
-	) * _flask_shake_amount * 5.0
-	soul_flask.position = _flask_rest_position + wobble
-	_set_flask_border_shake(_flask_shake_time, _flask_shake_amount)
-
-func _set_flask_border_shake(time: float, amount: float) -> void:
-	if flask_border and flask_border.material:
-		flask_border.material.set_shader_parameter("shake_time", time)
-		flask_border.material.set_shader_parameter("shake_amount", amount)
-
-func _get_screen_effects() -> Node:
-	var root := get_tree().current_scene
-	if root == null:
-		return null
-	return root.get_node_or_null("ScreenEffects")
-
-# ======================
-#   STAMINA
-# ======================
-func can_spend_stamina(action: String) -> bool:
-	if not STAMINA_COST.has(action):
-		return true
-	return stamina >= STAMINA_COST[action]
-
-func spend_stamina(action: String) -> bool:
-	if not STAMINA_COST.has(action):
-		return true
-	var cost: float = STAMINA_COST[action]
-	if stamina < cost:
-		return false
-	stamina -= cost
-	sync_stamina_display()
-	enter_combat()
-	return true
-
-func restore_stamina_full() -> void:
-	stamina = max_stamina
-	sync_stamina_display()
-
-# ======================
-#      HP
-# ======================
+#hàm công khai nhóm sát thương
 func heal_to_full() -> void:
 	hp = max_hp
 	stamina = max_stamina
@@ -355,38 +120,6 @@ func heal_to_full() -> void:
 	sync_flask_display()
 	sync_stamina_display()
 	fade_in()
-
-func sync_hp_display() -> void:
-	hp_bar.max_value = max_hp
-	hp_bar.value = hp
-	hp_label.text = "HP %d / %d" % [hp, max_hp]
-
-	# Ensure HUD is visible when HP display updates
-	fade_in()
-
-func sync_stamina_display() -> void:
-	stamina_bar.max_value = max_stamina
-	stamina_bar.value = stamina
-	stamina_label.text = "Stamina %d" % int(round(stamina))
-
-	# Ensure HUD is visible when stamina updates
-	fade_in()
-
-func enter_combat() -> void:
-	in_combat = true
-	hide_timer = 0.0
-	fade_in()
-
-func _apply_raw_hp_loss(amount: int, from_bleed: bool = false) -> void:
-	if amount <= 0 or hp <= 0:
-		return
-	hp = maxi(hp - amount, 0)
-	sync_hp_display()
-	if from_bleed:
-		flash_red()
-	enter_combat()
-	if hp <= 0:
-		SaveManager.respawn_at_checkpoint()
 
 func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF) -> Dictionary:
 	var result := {
@@ -434,15 +167,23 @@ func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF) -> Dictiona
 func damage(dmg: int) -> void:
 	apply_damage(dmg)
 
-func has_any_debuff() -> bool:
-	return has_bleeding() or has_fracture()
+func enter_combat() -> void:
+	in_combat = true
+	hide_timer = 0.0
+	fade_in()
 
+func restore_stagger_thresholds() -> void:
+	stagger_tiers_ready = [true, true]
+	stagger_lock_hp = -1
+	stagger_lock_timer = 0.0
+	sync_stagger_markers()
+
+#hàm công khai nhóm hồi phục
 func use_soul_flask() -> void:
 	if flask_charges <= 0:
 		return
 	if hp >= max_hp and not has_any_debuff():
 		return
-	# Start a drain animation instead of instantly consuming a charge.
 	if _is_flask_draining:
 		return
 
@@ -460,6 +201,122 @@ func use_soul_flask() -> void:
 	_flask_drain_tween = t
 	t.tween_property(self, "_flask_shader_percent", target_percent, FLASK_DRAIN_DURATION)
 	t.tween_callback(Callable(self, "_on_flask_drain_complete"))
+
+func restore_flask_charges() -> void:
+	flask_charges = max_flask_charges
+	sync_flask_display()
+
+func add_max_flask_charges(extra: int) -> void:
+	max_flask_charges = maxi(max_flask_charges + extra, 1)
+	flask_charges = mini(flask_charges + extra, max_flask_charges)
+	_recalc_flask_heal_amount()
+	sync_flask_display()
+
+#hàm công khai nhóm thể lực
+func can_spend_stamina(action: String) -> bool:
+	if not STAMINA_COST.has(action):
+		return true
+	return stamina >= STAMINA_COST[action]
+
+func spend_stamina(action: String) -> bool:
+	if not STAMINA_COST.has(action):
+		return true
+	var cost: float = STAMINA_COST[action]
+	if stamina < cost:
+		return false
+	stamina -= cost
+	sync_stamina_display()
+	enter_combat()
+	return true
+
+func restore_stamina_full() -> void:
+	stamina = max_stamina
+	sync_stamina_display()
+
+#hàm công khai nhóm hiệu ứng
+func get_damage_taken_multiplier() -> float:
+	if fracture_level <= 0:
+		return 1.0
+	return 1.0 + 0.2 * fracture_level
+
+func get_damage_dealt_multiplier() -> float:
+	match fracture_level:
+		0: return 1.0
+		1: return 0.85
+		2: return 0.8
+		_: return 0.65
+
+func get_move_speed_multiplier() -> float:
+	if fracture_level >= 2:
+		return 0.72
+	return 1.0
+
+func get_attack_speed_multiplier() -> float:
+	if fracture_level >= 2:
+		return 0.75
+	return 1.0
+
+func has_bleeding() -> bool:
+	return bleeding_level > 0
+
+func has_fracture() -> bool:
+	return fracture_level > 0
+
+func has_any_debuff() -> bool:
+	return has_bleeding() or has_fracture()
+
+func clear_all_debuffs() -> void:
+	bleeding_level = 0
+	fracture_level = 0
+	_bleed_tick_timer = 0.0
+	sync_status_icons()
+
+func apply_buff(buff_id: String, level: int = 1) -> void:
+	active_buffs[buff_id] = level
+	sync_status_icons()
+
+func remove_buff(buff_id: String) -> void:
+	active_buffs.erase(buff_id)
+	if buff_bar:
+		buff_bar.remove_effect(buff_id)
+
+#hàm công khai nhóm giao diện
+func sync_hp_display() -> void:
+	hp_bar.max_value = max_hp
+	hp_bar.value = hp
+	hp_label.text = "HP %d / %d" % [hp, max_hp]
+	fade_in()
+
+func sync_stamina_display() -> void:
+	stamina_bar.max_value = max_stamina
+	stamina_bar.value = stamina
+	stamina_label.text = "Stamina %d" % int(round(stamina))
+	fade_in()
+
+func sync_flask_display() -> void:
+	var percent := float(flask_charges) / float(max_flask_charges) if max_flask_charges > 0 else 0.0
+	if not _is_flask_draining:
+		_flask_shader_percent = percent
+		update_shader_value(soul_main, _flask_shader_percent)
+		update_shader_value(soul_delay, _flask_shader_percent)
+	if flask_uses_label:
+		flask_uses_label.text = "x%d" % flask_charges
+	fade_in()
+
+func sync_status_icons() -> void:
+	if debuff_bar:
+		debuff_bar.set_effect("bleeding", bleeding_level, false)
+		debuff_bar.set_effect("fracture", fracture_level, false)
+	if buff_bar:
+		buff_bar.clear_all()
+		for buff_id in active_buffs.keys():
+			buff_bar.set_effect(buff_id, int(active_buffs[buff_id]), true)
+
+func sync_stagger_markers() -> void:
+	if stagger_marker_66:
+		stagger_marker_66.color = STAGGER_MARKER_READY if stagger_tiers_ready[0] else STAGGER_MARKER_USED
+	if stagger_marker_33:
+		stagger_marker_33.color = STAGGER_MARKER_READY if stagger_tiers_ready[1] else STAGGER_MARKER_USED
 
 func update_shader_value(node: CanvasItem, value: float) -> void:
 	if node and node.material:
@@ -493,16 +350,137 @@ func fade_out() -> void:
 	fade_tween = create_tween()
 	fade_tween.tween_property(self, "modulate:a", 0.0, 0.6)
 
-func _unhandled_input(event: InputEvent) -> void:
-	if event.is_action_pressed("soul_heal"):
-		use_soul_flask()
-		get_viewport().set_input_as_handled()
+#hàm nội bộ nhóm sát thương và trạng thái
+func _apply_raw_hp_loss(amount: int, from_bleed: bool = false) -> void:
+	if amount <= 0 or hp <= 0:
+		return
+	hp = maxi(hp - amount, 0)
+	sync_hp_display()
+	if from_bleed:
+		flash_red()
+	enter_combat()
+	if hp <= 0:
+		SaveManager.respawn_at_checkpoint()
+
+func _process_bleeding(delta: float) -> void:
+	if bleeding_level <= 0:
+		_bleed_tick_timer = 0.0
+		return
+	_bleed_tick_timer += delta
+	if _bleed_tick_timer >= BLEED_TICK_INTERVAL:
+		_bleed_tick_timer = 0.0
+		var dps: int = BLEED_DPS.get(bleeding_level, 3)
+		_apply_raw_hp_loss(dps, true)
+
+func _apply_random_stagger_debuff() -> void:
+	if randf() < 0.5:
+		_apply_bleeding(1)
+	else:
+		_apply_fracture(1)
+
+func _apply_bleeding(level: int) -> void:
+	bleeding_level = maxi(bleeding_level, level)
+	sync_status_icons()
+	stagger_debuff_applied.emit("bleeding", bleeding_level)
+	enter_combat()
+
+func _apply_fracture(add_levels: int = 1) -> void:
+	fracture_level = clampi(fracture_level + add_levels, 0, 3)
+	sync_status_icons()
+	stagger_debuff_applied.emit("fracture", fracture_level)
+	enter_combat()
+
+func _cure_debuffs_from_flask() -> void:
+	if has_bleeding():
+		bleeding_level = 0
+		_bleed_tick_timer = 0.0
+	if has_fracture():
+		fracture_level -= 1
+	sync_status_icons()
+
+func _recalc_flask_heal_amount() -> void:
+	flask_heal_per_use = maxi(1, int(ceil(float(max_hp) / float(max_flask_charges))))
+
+#hàm nội bộ nhóm stagger
+func _resolve_stagger_crossing(prev_hp: int, target_hp: int, tier: int) -> Dictionary:
+	var floor_hp := _stagger_floor_hp(tier)
+	var out := {
+		"target_hp": target_hp,
+		"triggered": false,
+		"skip_player_stagger": false,
+		"floor_hp": floor_hp,
+		"tier": tier,
+	}
+	if prev_hp <= floor_hp or target_hp > floor_hp:
+		return out
+
+	out.triggered = true
+	stagger_tiers_ready[tier] = false
+	sync_stagger_markers()
+
+	if has_bleeding():
+		out.target_hp = floor_hp
+		out.skip_player_stagger = true
+		stagger_lock_hp = -1
+		stagger_lock_timer = 0.0
+		_apply_bleeding(2)
+		stagger_triggered.emit(tier, floor_hp)
+		return out
+
+	out.target_hp = floor_hp
+	stagger_lock_hp = floor_hp
+	stagger_lock_timer = STAGGER_LOCK_DURATION
+	_apply_random_stagger_debuff()
+	stagger_triggered.emit(tier, floor_hp)
+	return out
+
+func _stagger_floor_hp(tier: int) -> int:
+	return int(round(max_hp * STAGGER_THRESHOLD_FRACS[tier]))
+
+#hàm nội bộ nhóm vfx
+func _trigger_impact_feedback(screen_strength: float) -> void:
+	var fx := _get_screen_effects()
+	if fx and fx.has_method("trigger_impact_shake"):
+		fx.trigger_impact_shake(screen_strength)
+	_trigger_flask_shake()
+
+func _trigger_flask_shake() -> void:
+	_flask_shake_time = 0.0
+	_flask_shake_amount = 1.0
+
+func _update_flask_shake(delta: float) -> void:
+	if _flask_shake_amount <= 0.0:
+		soul_flask.position = _flask_rest_position
+		_set_flask_border_shake(0.0, 0.0)
+		return
+	_flask_shake_time += delta
+	_flask_shake_amount = maxf(_flask_shake_amount - delta * FLASK_SHAKE_DECAY, 0.0)
+	var wobble := Vector2(
+		sin(_flask_shake_time * 64.0),
+		cos(_flask_shake_time * 58.0)
+	) * _flask_shake_amount * 5.0
+	soul_flask.position = _flask_rest_position + wobble
+	_set_flask_border_shake(_flask_shake_time, _flask_shake_amount)
+
+func _set_flask_border_shake(time: float, amount: float) -> void:
+	if flask_border and flask_border.material:
+		flask_border.material.set_shader_parameter("shake_time", time)
+		flask_border.material.set_shader_parameter("shake_amount", amount)
+
+func _get_screen_effects() -> Node:
+	var root := get_tree().current_scene
+	if root == null:
+		return null
+	return root.get_node_or_null("ScreenEffects")
+
+#hàm tín hiệu
+func _on_stagger_triggered(_tier: int, _floor_hp: int) -> void:
+	_trigger_impact_feedback(SCREEN_SHAKE_STAGGER)
 
 func _on_flask_drain_complete() -> void:
 	_is_flask_draining = false
 	_flask_drain_tween = null
 
-	# Now actually consume the charge and apply effects
 	flask_charges -= 1
 	_cure_debuffs_from_flask()
 	hp = mini(hp + flask_heal_per_use, max_hp)
@@ -512,13 +490,3 @@ func _on_flask_drain_complete() -> void:
 	flash_heal()
 	enter_combat()
 	_trigger_impact_feedback(SCREEN_SHAKE_FLASK)
-
-## Future buffs: hud.apply_buff("name", level)
-func apply_buff(buff_id: String, level: int = 1) -> void:
-	active_buffs[buff_id] = level
-	sync_status_icons()
-
-func remove_buff(buff_id: String) -> void:
-	active_buffs.erase(buff_id)
-	if buff_bar:
-		buff_bar.remove_effect(buff_id)

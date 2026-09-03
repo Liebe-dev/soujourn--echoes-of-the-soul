@@ -39,6 +39,7 @@ offset_right = -897.0
 offset_bottom = -719.0
 size_flags_horizontal = 0
 size_flags_vertical = 0
+mouse_filter = 2
 
 [node name="UI_Layer" type="CanvasLayer" parent="Camera2D" unique_id=473024919]
 

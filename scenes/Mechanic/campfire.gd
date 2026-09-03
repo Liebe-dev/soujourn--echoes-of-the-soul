@@ -3,6 +3,7 @@ extends Area2D
 @export var checkpoint_id: String = "campfire_01"
 @export var display_name: String = "Campfire"
 @export_multiline var rest_hint: String = "Press F to rest"
+@export var detect_radius: float = 96.0
 
 signal player_started_rest
 signal player_finished_rest
@@ -26,15 +27,15 @@ signal player_finished_rest
 
 const TITLE_SCENE := "res://asset/UI/menu.tscn"
 const UPGRADE_MENU_SCENE := preload("res://scenes/UI/campfire_upgrade_menu.tscn")
+const REST_COOLDOWN_SEC := 0.35
 
 var _player: CharacterBody2D
 var _upgrade_menu: Control
 var _player_in_range := false
 var _is_player_resting := false
 var _rest_cooldown := 0.0
-const REST_COOLDOWN_SEC := 0.35
-@export var detect_radius: float = 96.0
 
+#hàm hệ thống
 func _ready() -> void:
 	add_to_group("campfire")
 	prompt_panel.hide()
@@ -49,8 +50,10 @@ func _ready() -> void:
 		load_slot_menu.hide()
 	if save_slot_menu:
 		save_slot_menu.hide()
+		
 	_setup_rest_menu_buttons()
 	_setup_upgrade_menu()
+	
 	if cinematic_camera:
 		cinematic_camera.enabled = false
 		
@@ -58,9 +61,6 @@ func _ready() -> void:
 		prompt_label.text = rest_hint
 	if checkpoint_id.is_empty():
 		checkpoint_id = name.to_lower().replace(" ", "_")
-
-func get_checkpoint_id() -> String:
-	return checkpoint_id
 
 func _physics_process(delta: float) -> void:
 	if _rest_cooldown > 0.0:
@@ -96,23 +96,11 @@ func _unhandled_input(event: InputEvent) -> void:
 	else:
 		_sit_and_save()
 
-func _on_body_entered(body: Node2D) -> void:
-	if not (body.is_in_group("Player") or body.has_method("enter_rest")):
-		return
-	_player = body
-	_player_in_range = true
-	if not _is_player_resting:
-		prompt_panel.show()
+#hàm công khai
+func get_checkpoint_id() -> String:
+	return checkpoint_id
 
-func _on_body_exited(body: Node2D) -> void:
-	if body != _player:
-		return
-	if _is_player_resting:
-		return
-	_player_in_range = false
-	_player = null
-	prompt_panel.hide()
-
+#hàm nội bộ nhóm logic nghỉ ngơi
 func _sit_and_save() -> void:
 	if _player == null:
 		return
@@ -162,7 +150,6 @@ func _stand_up() -> void:
 	if not _is_player_resting:
 		return
 		
-	# Ẩn menu
 	if rest_menu:
 		rest_menu.hide()
 	if load_slot_menu:
@@ -172,24 +159,20 @@ func _stand_up() -> void:
 	if _upgrade_menu:
 		_upgrade_menu.hide()
 
-	# 1. Fade màn hình tối đi (0.5 giây)
 	var fade_out_tween = create_tween()
 	fade_out_tween.tween_property(transition_rect, "modulate:a", 1.0, 0.5)
 	await fade_out_tween.finished
 	
-	# (Màn hình đang tối) Trả lại quyền điều khiển
 	_is_player_resting = false
 	if _player and _player.has_method("exit_rest"):
 		_player.exit_rest()
 		
-	# Tắt camera cinematic để Godot tự động trả về camera mặc định của người chơi
 	if cinematic_camera:
 		cinematic_camera.enabled = false
 		
 	_rest_cooldown = REST_COOLDOWN_SEC
 	player_finished_rest.emit()
 
-	# 2. Fade màn hình sáng trở lại (0.5 giây)
 	var fade_in_tween = create_tween()
 	fade_in_tween.tween_property(transition_rect, "modulate:a", 0.0, 0.5)
 	await fade_in_tween.finished
@@ -199,18 +182,29 @@ func _stand_up() -> void:
 			prompt_label.text = rest_hint
 		prompt_panel.show()
 
+func _find_nearby_candidate() -> Node2D:
+	var root := get_tree().current_scene
+	if root == null:
+		return null
+	var players := get_tree().get_nodes_in_group("Player")
+	for p in players:
+		if not p is Node2D:
+			continue
+		if p.global_position.distance_to(global_position) <= detect_radius:
+			return p
 
-func _show_saved_flash(message: String = "Saved") -> void:
-	saved_label.text = message
-	saved_label.show()
-	var tween := create_tween()
-	tween.tween_property(saved_label, "modulate:a", 1.0, 0.25)
-	tween.tween_interval(1.2)
-	tween.tween_property(saved_label, "modulate:a", 0.0, 0.4)
-	await tween.finished
-	saved_label.hide()
+	var stack: Array = [root]
+	while stack.size() > 0:
+		var n: Node = stack.pop_back() as Node
+		for c in n.get_children():
+			if c is Node:
+				var node_c: Node = c
+				if node_c.has_method("enter_rest") and node_c.global_position.distance_to(global_position) <= detect_radius:
+					return node_c
+				stack.push_back(node_c)
+	return null
 
-
+#hàm nội bộ nhóm UI và hiệu ứng
 func _setup_rest_menu_buttons() -> void:
 	if btn_relica:
 		btn_relica.text = "Upgrade Stats"
@@ -228,7 +222,6 @@ func _setup_rest_menu_buttons() -> void:
 	if save_slot_menu:
 		_populate_slot_menu(save_slot_menu, false)
 
-
 func _setup_upgrade_menu() -> void:
 	_upgrade_menu = UPGRADE_MENU_SCENE.instantiate()
 	_upgrade_menu.name = "CampfireUpgradeMenu"
@@ -237,23 +230,15 @@ func _setup_upgrade_menu() -> void:
 	if _upgrade_menu.has_signal("closed"):
 		_upgrade_menu.closed.connect(_on_upgrade_menu_closed)
 
-
-func _on_relica_pressed() -> void:
-	if _upgrade_menu == null:
-		return
-	if rest_menu:
-		rest_menu.hide()
-	if load_slot_menu:
-		load_slot_menu.hide()
-	if save_slot_menu:
-		save_slot_menu.hide()
-	_upgrade_menu.open(self)
-
-
-func _on_upgrade_menu_closed() -> void:
-	if rest_menu and _is_player_resting:
-		rest_menu.show()
-
+func _show_saved_flash(message: String = "Saved") -> void:
+	saved_label.text = message
+	saved_label.show()
+	var tween := create_tween()
+	tween.tween_property(saved_label, "modulate:a", 1.0, 0.25)
+	tween.tween_interval(1.2)
+	tween.tween_property(saved_label, "modulate:a", 0.0, 0.4)
+	await tween.finished
+	saved_label.hide()
 
 func _populate_slot_menu(menu: Control, is_load_menu: bool) -> void:
 	var slot_list: VBoxContainer = menu.get_node_or_null("SlotList")
@@ -275,7 +260,6 @@ func _populate_slot_menu(menu: Control, is_load_menu: bool) -> void:
 	if not back_button.pressed.is_connected(_on_slot_menu_back_pressed):
 		back_button.pressed.connect(_on_slot_menu_back_pressed)
 
-
 func _format_slot_label(slot: int, is_load_menu: bool) -> String:
 	var info := SaveManager.get_slot_info(slot)
 	if info.get("empty", true):
@@ -289,13 +273,11 @@ func _format_slot_label(slot: int, is_load_menu: bool) -> String:
 		return "Slot %d - %s (%d/%d HP)" % [slot, checkpoint, hp, max_hp]
 	return "Slot %d - %s" % [slot, checkpoint]
 
-
 func _refresh_slot_menus() -> void:
 	if load_slot_menu:
 		_populate_slot_menu(load_slot_menu, true)
 	if save_slot_menu:
 		_populate_slot_menu(save_slot_menu, false)
-
 
 func _show_slot_menu(menu: Control) -> void:
 	if rest_menu:
@@ -307,7 +289,6 @@ func _show_slot_menu(menu: Control) -> void:
 	_refresh_slot_menus()
 	menu.show()
 
-
 func _hide_slot_menus() -> void:
 	if load_slot_menu:
 		load_slot_menu.hide()
@@ -318,42 +299,11 @@ func _hide_slot_menus() -> void:
 	if rest_menu and _is_player_resting:
 		rest_menu.show()
 
-
-func _on_save_pressed() -> void:
-	if save_slot_menu:
-		_show_slot_menu(save_slot_menu)
-
-
-func _on_load_pressed() -> void:
-	if load_slot_menu:
-		_show_slot_menu(load_slot_menu)
-
-
-func _on_leave_pressed() -> void:
-	_hide_slot_menus()
-	_stand_up()
-
-
-func _on_title_pressed() -> void:
-	_go_to_title()
-
-
-func _on_slot_menu_back_pressed() -> void:
-	_hide_slot_menus()
-
-
-func _on_slot_selected(slot: int, is_load_menu: bool) -> void:
-	if is_load_menu:
-		_load_from_slot(slot)
-	else:
-		_save_to_slot(slot)
-
-
+#hàm nội bộ nhóm hệ thống
 func _save_to_slot(slot: int) -> void:
 	if SaveManager.save_at_campfire(self, slot):
 		_hide_slot_menus()
 		_show_saved_flash("Saved to slot %d" % slot)
-
 
 func _load_from_slot(slot: int) -> void:
 	if not SaveManager.has_save_in_slot(slot):
@@ -385,32 +335,65 @@ func _load_from_slot(slot: int) -> void:
 	await fade_in_tween.finished
 	_show_saved_flash("Loaded slot %d" % slot)
 
-
 func _go_to_title() -> void:
 	var fade_out_tween := create_tween()
 	fade_out_tween.tween_property(transition_rect, "modulate:a", 1.0, 0.8)
 	await fade_out_tween.finished
 	get_tree().change_scene_to_file(TITLE_SCENE)
 
+#hàm tín hiệu
+func _on_body_entered(body: Node2D) -> void:
+	if not (body.is_in_group("Player") or body.has_method("enter_rest")):
+		return
+	_player = body
+	_player_in_range = true
+	if not _is_player_resting:
+		prompt_panel.show()
 
-func _find_nearby_candidate() -> Node2D:
-	var root := get_tree().current_scene
-	if root == null:
-		return null
-	var players := get_tree().get_nodes_in_group("Player")
-	for p in players:
-		if not p is Node2D:
-			continue
-		if p.global_position.distance_to(global_position) <= detect_radius:
-			return p
+func _on_body_exited(body: Node2D) -> void:
+	if body != _player:
+		return
+	if _is_player_resting:
+		return
+	_player_in_range = false
+	_player = null
+	prompt_panel.hide()
 
-	var stack: Array = [root]
-	while stack.size() > 0:
-		var n: Node = stack.pop_back() as Node
-		for c in n.get_children():
-			if c is Node:
-				var node_c: Node = c
-				if node_c.has_method("enter_rest") and node_c.global_position.distance_to(global_position) <= detect_radius:
-					return node_c
-				stack.push_back(node_c)
-	return null
+func _on_relica_pressed() -> void:
+	if _upgrade_menu == null:
+		return
+	if rest_menu:
+		rest_menu.hide()
+	if load_slot_menu:
+		load_slot_menu.hide()
+	if save_slot_menu:
+		save_slot_menu.hide()
+	_upgrade_menu.open(self)
+
+func _on_upgrade_menu_closed() -> void:
+	if rest_menu and _is_player_resting:
+		rest_menu.show()
+
+func _on_save_pressed() -> void:
+	if save_slot_menu:
+		_show_slot_menu(save_slot_menu)
+
+func _on_load_pressed() -> void:
+	if load_slot_menu:
+		_show_slot_menu(load_slot_menu)
+
+func _on_leave_pressed() -> void:
+	_hide_slot_menus()
+	_stand_up()
+
+func _on_title_pressed() -> void:
+	_go_to_title()
+
+func _on_slot_menu_back_pressed() -> void:
+	_hide_slot_menus()
+
+func _on_slot_selected(slot: int, is_load_menu: bool) -> void:
+	if is_load_menu:
+		_load_from_slot(slot)
+	else:
+		_save_to_slot(slot)
