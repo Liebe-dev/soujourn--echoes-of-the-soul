@@ -64,6 +64,9 @@ var has_air_dashed: bool = false
 var is_skidding: bool = false 
 var current_weapon: String = "saber"
 var has_air_comboed: bool = false
+var is_jump_attacking: bool = false
+var is_jump_attack_landing: bool = false
+var jump_attack_land_timer: float = 0.0
 
 #hàm hệ thống
 func _ready() -> void:
@@ -76,9 +79,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		take_damage(DEBUG_DAMAGE_AMOUNT, global_position + Vector2(80.0, 0.0))
 		get_viewport().set_input_as_handled()
 	if event.is_action_pressed("attack"):
-		if not is_on_floor() and (has_air_comboed or combo_step >= 4):
-			_play_jump_attack()
+		if is_jump_attack_landing and jump_attack_land_timer >= 0.3:
+			_cancel_jump_attack_land()
+		if not is_on_floor() and (has_air_comboed or combo_step >= 4 or Input.is_action_pressed("move_down")):
+			if not is_jump_attacking:
+				_play_jump_attack()
 			return
+			
 		if not is_doing_action:
 			if combo_step == 0 or combo_step >= 4:
 				combo_step = 1
@@ -109,13 +116,25 @@ func _physics_process(delta: float) -> void:
 	if is_resting:
 		velocity = Vector2.ZERO
 		return
+	if is_jump_attack_landing:
+		jump_attack_land_timer += delta
+		if jump_attack_land_timer >= 0.3 and Input.get_axis("move_left", "move_right") != 0.0:
+			_cancel_jump_attack_land()
+
 	if is_locked or not can_move:
 		if combo_step > 0 and not is_on_floor():
 			velocity.y = 0.0
+		elif is_jump_attacking and not is_on_floor():
+			velocity.y += get_gravity().y * 1.5 * delta
+			velocity.y = minf(velocity.y, MAX_FALL_SPEED * 1.5)
 		else:
 			_apply_vertical_physics(delta)
+			
 		velocity.x = move_toward(velocity.x, 0.0, GROUND_FRICTION * delta)
 		move_and_slide()
+		
+		if is_on_floor() and is_jump_attacking:
+			_play_jump_attack_land()
 		return
 
 	if Input.is_action_just_pressed("guard and deflect") and not is_doing_action:
@@ -279,7 +298,26 @@ func _reset_combo() -> void:
 		combo_step = 0
 
 func _play_jump_attack() -> void:
-	print("Kích hoạt Jump Attack")
+	can_move = false
+	is_doing_action = true
+	is_jump_attacking = true
+	combo_step = 0 # Ngắt combo hiện tại
+	velocity.x = 0 # Triệt tiêu đà ngang để cắm thẳng xuống
+	spine_anim.play("jump_attack(air)")
+	# Lưu ý: Chỉ cần tắt nút Loop (Vòng lặp) trong bảng AnimationPlayer cho 
+	# animation "jump_attack(air)", nó sẽ tự động đóng băng ở frame cuối cùng khi đang rơi.
+
+func _play_jump_attack_land() -> void:
+	is_jump_attacking = false
+	is_jump_attack_landing = true
+	jump_attack_land_timer = 0.0
+	_playing_land_anim = false
+	spine_anim.play("jump_attack(land)")
+
+func _cancel_jump_attack_land() -> void:
+	is_jump_attack_landing = false
+	can_move = true
+	is_doing_action = false
 
 func _knockback_dir(hit_from_global: Vector2) -> Vector2:
 	if hit_from_global != Vector2.INF:
@@ -541,8 +579,13 @@ func _ghost_trail_loop(duration: float) -> void:
 		elapsed += interval
 
 #hàm tín hiệu
+#hàm tín hiệu
 func _on_spine_anim_finished(anim_name: StringName) -> void:
-	if anim_name == ANIM_JUMP_START and not is_on_floor():
+	if anim_name == "jump_attack(land)": # <-- Bắt buộc phải bắt đầu bằng if
+		if is_jump_attack_landing:
+			_cancel_jump_attack_land()
+			_update_ground_animation(Input.get_axis("move_left", "move_right"))
+	elif anim_name == ANIM_JUMP_START and not is_on_floor(): # <-- Đổi thành elif
 		spine_anim.play(ANIM_JUMP_AIR)
 	elif anim_name == ANIM_JUMP_LAND:
 		_playing_land_anim = false
@@ -565,7 +608,7 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 			spine_rig.visible = true
 			_update_ground_animation(Input.get_axis("move_left", "move_right"))
 			get_tree().create_timer(0.4).timeout.connect(_reset_combo)
-
+		
 func _on_dodge_cooldown_timeout() -> void:
 	able_to_dodge = true
 
