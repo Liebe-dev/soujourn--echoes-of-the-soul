@@ -178,11 +178,30 @@ func restore_stagger_thresholds() -> void:
 	stagger_lock_timer = 0.0
 	sync_stagger_markers()
 
+
+func restore_one_stagger_threshold() -> bool:
+	for tier in range(STAGGER_THRESHOLD_FRACS.size() - 1, -1, -1):
+		if stagger_tiers_ready[tier]:
+			continue
+		stagger_tiers_ready[tier] = true
+		stagger_lock_hp = -1
+		stagger_lock_timer = 0.0
+		sync_stagger_markers()
+		return true
+	return false
+
+
+func has_used_stagger_threshold() -> bool:
+	for tier_ready in stagger_tiers_ready:
+		if not tier_ready:
+			return true
+	return false
+
 #hàm công khai nhóm hồi phục
 func use_soul_flask() -> void:
 	if flask_charges <= 0:
 		return
-	if hp >= max_hp and not has_any_debuff():
+	if hp >= max_hp and not has_any_debuff() and not has_used_stagger_threshold():
 		return
 	if _is_flask_draining:
 		return
@@ -484,6 +503,7 @@ func _on_flask_drain_complete() -> void:
 	flask_charges -= 1
 	_cure_debuffs_from_flask()
 	hp = mini(hp + flask_heal_per_use, max_hp)
+	restore_one_stagger_threshold()
 	sync_hp_display()
 	sync_flask_display()
 	sync_status_icons()
