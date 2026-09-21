@@ -67,11 +67,6 @@ var active_buffs: Dictionary:
 	set(value):
 		_stats.active_buffs = value
 
-const STAGGER_THRESHOLD_FRACS := [0.66, 0.33]
-const STAGGER_LOCK_DURATION := 1.0
-const BLEED_TICK_INTERVAL := 1.0
-const BLEED_DPS := {1: 3, 2: 6}
-
 var stagger_tiers_ready: Array[bool]:
 	get:
 		return _stats.stagger_tiers_ready
@@ -91,7 +86,6 @@ var stagger_lock_timer: float:
 		_stats.stagger_lock_timer = value
 
 const STAMINA_COST := {"attack": 20.0, "parry": 15.0, "deflect": 15.0}
-const STAMINA_REGEN_PER_SEC := 28.0
 const SCREEN_SHAKE_FLASK := 0.5
 const SCREEN_SHAKE_STAGGER := 0.72
 const FLASK_SHAKE_DECAY := 3.5

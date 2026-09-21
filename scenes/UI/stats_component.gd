@@ -7,14 +7,6 @@ class_name StatsComponent
 ##   không sync_*/flash_*/enter_combat/fade_* — side-effect hiển thị do ui.gd lo ở D1.3.
 ## - Chưa được wire (dead code) cho tới D1.2/D1.3.
 
-# Signal nội bộ — ui.gd sẽ lắng nghe ở D1.3 (chưa ai connect trong D1.1):
-#   stagger_state_changed  ≡ nơi cũ gọi sync_stagger_markers()
-#   debuff_applied         ≡ nơi cũ emit stagger_debuff_applied(...)
-#   stagger_triggered      ≡ nơi cũ emit stagger_triggered(...) (giữ nguyên tên + payload)
-signal stagger_state_changed()
-signal debuff_applied(debuff_id: String, level: int)
-signal stagger_triggered(tier: int, floor_hp: int)
-
 # --- State ---
 var max_hp: int = 100
 var hp: int = 100
@@ -64,48 +56,10 @@ func heal_to_full() -> void:
 	restore_flask_charges()
 	clear_all_debuffs()
 
-func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF) -> Dictionary:
-	var result := {
-		"damage_taken": 0,
-		"staggered": false,
-		"stagger_tier": -1,
-		"floor_hp": -1,
-		"skip_player_stagger": false,
-	}
-	if dmg <= 0:
-		return result
-
-	var scaled_dmg := maxi(1, int(round(float(dmg) * get_damage_taken_multiplier())))
-	var prev_hp := hp
-	var target_hp := prev_hp - scaled_dmg
-
-	if stagger_lock_timer > 0.0 and stagger_lock_hp >= 0 and not has_bleeding():
-		target_hp = maxi(target_hp, stagger_lock_hp)
-
-	for tier in STAGGER_THRESHOLD_FRACS.size():
-		if not stagger_tiers_ready[tier]:
-			continue
-		var cross := resolve_stagger_crossing(prev_hp, target_hp, tier)
-		if cross.triggered:
-			target_hp = cross.target_hp
-			result.staggered = true
-			result.stagger_tier = tier
-			result.floor_hp = cross.floor_hp
-			result.skip_player_stagger = cross.skip_player_stagger
-			break
-
-	hp = clampi(target_hp, 0, max_hp)
-	result.damage_taken = prev_hp - hp
-	return result
-
-func damage(dmg: int) -> void:
-	apply_damage(dmg)
-
 func restore_stagger_thresholds() -> void:
 	stagger_tiers_ready = [true, true]
 	stagger_lock_hp = -1
 	stagger_lock_timer = 0.0
-	stagger_state_changed.emit()
 
 func restore_one_stagger_threshold() -> bool:
 	for tier in range(STAGGER_THRESHOLD_FRACS.size() - 1, -1, -1):
@@ -114,7 +68,6 @@ func restore_one_stagger_threshold() -> bool:
 		stagger_tiers_ready[tier] = true
 		stagger_lock_hp = -1
 		stagger_lock_timer = 0.0
-		stagger_state_changed.emit()
 		return true
 	return false
 
