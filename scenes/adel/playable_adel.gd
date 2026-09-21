@@ -1,6 +1,6 @@
 extends CharacterBody2D
-
-@onready var dodge_cooldown = $DodgeCooldown
+fhhgh
+@onready var dodge_cooldown = $DojhhdgeCooldown
 @onready var spine_rig = $SpinePivot/SpineRig
 @onready var spine_anim = $SpinePivot/SpineRig/AnimationPlayer
 @onready var spine_pivot = $SpinePivot
