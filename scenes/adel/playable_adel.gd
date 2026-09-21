@@ -34,6 +34,7 @@ const STAGGER_KNOCKBACK := 300.0
 const HIT_INVULN_SEC := 0.2
 const DEBUG_DAMAGE_AMOUNT := 10
 const KNOCKBACK_FORCE := 500
+const ENEMY_CONTACT_DAMAGE := 1
 
 signal player_attacked
 
@@ -107,11 +108,6 @@ func _physics_process(delta: float) -> void:
 			can_move = true
 			is_touched_enemy = false
 			is_invulnerable = false
-		return
-	if is_stunned:
-		velocity.x = move_toward(velocity.x, 0.0, 400.0 * delta)
-		_apply_vertical_physics(delta)
-		move_and_slide()
 		return
 	if is_resting:
 		velocity = Vector2.ZERO
@@ -194,7 +190,7 @@ func _physics_process(delta: float) -> void:
 		if collider and collider.is_in_group("Enemy"):
 			if is_dodging or is_invulnerable or is_touched_enemy:
 				continue
-			take_damage(1, collider.global_position)
+			take_damage(ENEMY_CONTACT_DAMAGE, collider.global_position)
 			break
 
 #hàm công khai
@@ -228,7 +224,7 @@ func get_attack_speed_multiplier() -> float:
 		return hud.get_attack_speed_multiplier()
 	return 1.0
 
-func enter_rest(_world_position: Vector2, face_left: bool) -> void:
+func enter_rest(face_left: bool) -> void:
 	_position_before_rest = global_position
 	is_resting = true
 	is_locked = true
@@ -352,12 +348,6 @@ func _find_hud() -> Node:
 		return null
 	return root.find_child("hud", true, false)
 
-	var dir := Input.get_axis("move_left", "move_right")
-	if dir != 0:
-		var current_scale = abs(spine_pivot.scale.x)
-		spine_pivot.scale.x = -current_scale if dir < 0 else current_scale
-		facing_direction = -1 if dir < 0 else 1
-
 #hàm nội bộ nhóm vật lý
 func _get_move_speed_multiplier() -> float:
 	var hud := _find_hud()
@@ -375,7 +365,7 @@ func _perform_dash(dash_direction: float) -> void:
 			spine_anim.play("dash_air")
 		else:
 			spine_anim.play("dash")
-		_ghost_trail_loop(0.1)
+		_ghost_trail_loop(0.25)
 		var dash_dir = dash_direction
 		if is_air_dodging and dash_dir == 0.0:
 			dash_dir = facing_direction
@@ -385,12 +375,16 @@ func _perform_dash(dash_direction: float) -> void:
 		velocity.x = WALK_SPEED * 20 * dash_dir
 		dodge_tween.tween_property(self, "velocity:x", dash_dir * WALK_SPEED, 0.3)
 		await dodge_tween.finished
+		if not is_instance_valid(self):
+			return
 		_set_enemy_collision_enabled(true)
 		is_invulnerable = false
 		if not is_air_dodging:
 			velocity.x = 0
 			spine_anim.play("dash skid")
 			await get_tree().create_timer(0.2).timeout
+			if not is_instance_valid(self):
+				return
 		else:
 			velocity.x = 0
 		dodge_cooldown.start()
@@ -542,50 +536,86 @@ func _get_all_visible_sprites(node: Node, arr: Array) -> void:
 	for child in node.get_children():
 		_get_all_visible_sprites(child, arr)
 
+const GHOST_TRAIL_INTERVAL := 0.05
+const GHOST_TRAIL_MAX := 24
+const GHOST_FADE_DURATION := 0.15
+
+var _ghost_pool: Array[Node2D] = []
+
 func _spawn_ghost_trail() -> void:
-	var ghost_parent = Node2D.new()
-	var current_scene = get_tree().current_scene
-	if current_scene:
-		current_scene.add_child(ghost_parent)
-	
 	var sprites: Array = []
 	_get_all_visible_sprites(spine_rig, sprites)
-	
-	for s in sprites:
-		var ghost_sprite = Sprite2D.new()
-		ghost_sprite.texture = s.texture
-		ghost_sprite.hframes = s.hframes
-		ghost_sprite.vframes = s.vframes
-		ghost_sprite.frame = s.frame
-		ghost_sprite.flip_h = s.flip_h
-		ghost_sprite.flip_v = s.flip_v
-		
-		ghost_sprite.global_transform = s.global_transform
-		
-		ghost_sprite.modulate = Color(0.2, 0.2, 0.2, 0.6) 
-		
-		ghost_parent.add_child(ghost_sprite)
-	
-	var tween = get_tree().create_tween()
-	tween.tween_property(ghost_parent, "modulate:a", 0.0, 0.15).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_callback(ghost_parent.queue_free)
+	if sprites.is_empty():
+		return
+
+	var ghost_parent := _get_pooled_ghost()
+	if ghost_parent == null:
+		ghost_parent = Node2D.new()
+		ghost_parent.name = "GhostTrail"
+		var current_scene = get_tree().current_scene
+		if current_scene:
+			current_scene.add_child(ghost_parent)
+
+	ghost_parent.visible = true
+	ghost_parent.modulate = Color(1, 1, 1, 0.6)
+
+	for i in sprites.size():
+		var src: Sprite2D = sprites[i]
+		var dst: Sprite2D
+		if i < ghost_parent.get_child_count():
+			dst = ghost_parent.get_child(i) as Sprite2D
+		else:
+			dst = Sprite2D.new()
+			dst.modulate = Color(0.2, 0.2, 0.2, 1.0)
+			ghost_parent.add_child(dst)
+		dst.visible = true
+		dst.texture = src.texture
+		dst.hframes = src.hframes
+		dst.vframes = src.vframes
+		dst.frame = src.frame
+		dst.flip_h = src.flip_h
+		dst.flip_v = src.flip_v
+		dst.global_transform = src.global_transform
+
+	for i in range(sprites.size(), ghost_parent.get_child_count()):
+		var extra := ghost_parent.get_child(i) as Sprite2D
+		if extra:
+			extra.visible = false
+
+	var tween := get_tree().create_tween()
+	tween.tween_property(ghost_parent, "modulate:a", 0.0, GHOST_FADE_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_callback(_recycle_ghost.bind(ghost_parent))
+
+func _get_pooled_ghost() -> Node2D:
+	while not _ghost_pool.is_empty():
+		var ghost: Node2D = _ghost_pool.pop_back()
+		if is_instance_valid(ghost):
+			return ghost
+	return null
+
+func _recycle_ghost(ghost_parent: Node2D) -> void:
+	if not is_instance_valid(ghost_parent):
+		return
+	ghost_parent.visible = false
+	if _ghost_pool.size() < GHOST_TRAIL_MAX:
+		_ghost_pool.append(ghost_parent)
+	else:
+		ghost_parent.queue_free()
 
 func _ghost_trail_loop(duration: float) -> void:
-	var interval = 0.5
-	var elapsed = 0.0
-	while elapsed < duration:
+	var elapsed := 0.0
+	while elapsed < duration and is_instance_valid(self):
 		_spawn_ghost_trail()
-		await get_tree().create_timer(interval).timeout
-		elapsed += interval
+		await get_tree().create_timer(GHOST_TRAIL_INTERVAL).timeout
+		elapsed += GHOST_TRAIL_INTERVAL
 
 #hàm tín hiệu
-#hàm tín hiệu
 func _on_spine_anim_finished(anim_name: StringName) -> void:
-	if anim_name == "jump_attack(land)": # <-- Bắt buộc phải bắt đầu bằng if
+	if anim_name == "jump_attack(land)":
 		if is_jump_attack_landing:
 			_cancel_jump_attack_land()
 			_update_ground_animation(Input.get_axis("move_left", "move_right"))
-	elif anim_name == ANIM_JUMP_START and not is_on_floor(): # <-- Đổi thành elif
+	elif anim_name == ANIM_JUMP_START and not is_on_floor():
 		spine_anim.play(ANIM_JUMP_AIR)
 	elif anim_name == ANIM_JUMP_LAND:
 		_playing_land_anim = false
@@ -607,7 +637,7 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 			is_doing_action = false
 			spine_rig.visible = true
 			_update_ground_animation(Input.get_axis("move_left", "move_right"))
-			get_tree().create_timer(0.4).timeout.connect(_reset_combo)
+			get_tree().create_timer(0.4).timeout.connect(_reset_combo, CONNECT_ONE_SHOT)
 		
 func _on_dodge_cooldown_timeout() -> void:
 	able_to_dodge = true
