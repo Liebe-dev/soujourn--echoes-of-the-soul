@@ -25,7 +25,7 @@ const JUMP_CUT_GRAVITY_MULT := 3.2
 const FALL_GRAVITY_MULT := 2
 const MAX_FALL_SPEED := 920.0
 const MAX_JUMPS := 2
-const ANIM_JUMP_START := " jump_start"
+const ANIM_JUMP_START := "jump_start"
 const ANIM_JUMP_AIR := "jump_air (fall)"
 const ANIM_JUMP_LAND := "jump_land"
 const STAGGER_STUN_SEC := 0.45
@@ -34,6 +34,7 @@ const STAGGER_KNOCKBACK := 300.0
 const HIT_INVULN_SEC := 0.2
 const DEBUG_DAMAGE_AMOUNT := 10
 const KNOCKBACK_FORCE := 500
+const ENEMY_CONTACT_DAMAGE := 1
 
 signal player_attacked
 
@@ -97,6 +98,99 @@ func _play_combo_step() -> void:
 	elif combo_step == 4:
 		spine_anim.play("test_attack4")
 
+<<<<<<< Updated upstream
+=======
+		if is_touched_enemy and is_on_floor():
+			can_move = true
+			is_touched_enemy = false
+			is_invulnerable = false
+		return
+	if is_resting:
+		velocity = Vector2.ZERO
+		return
+	if is_jump_attack_landing:
+		jump_attack_land_timer += delta
+		if jump_attack_land_timer >= 0.3 and Input.get_axis("move_left", "move_right") != 0.0:
+			_cancel_jump_attack_land()
+
+	if is_locked or not can_move:
+		if combo_step > 0 and not is_on_floor():
+			velocity.y = 0.0
+		elif is_jump_attacking and not is_on_floor():
+			velocity.y += get_gravity().y * 1.5 * delta
+			velocity.y = minf(velocity.y, MAX_FALL_SPEED * 1.5)
+		else:
+			_apply_vertical_physics(delta)
+			
+		velocity.x = move_toward(velocity.x, 0.0, GROUND_FRICTION * delta)
+		move_and_slide()
+		
+		if is_on_floor() and is_jump_attacking:
+			_play_jump_attack_land()
+		return
+
+	if Input.is_action_just_pressed("guard and deflect") and not is_doing_action:
+		is_guarding = true
+		holding_duration = 0.0
+		is_doing_action = true
+	if is_guarding:
+		holding_duration += delta
+	if Input.is_action_just_released("guard and deflect") and is_doing_action and is_guarding:
+		is_guarding = false
+		is_doing_action = false
+
+	if Input.is_action_just_pressed("run") and is_on_floor():
+		is_running = not is_running
+	if is_running and not _was_running and is_on_floor():
+		_run_boost_timer = RUN_BOOST_TIME
+	_was_running = is_running
+	if _run_boost_timer > 0.0:
+		_run_boost_timer = maxf(_run_boost_timer - delta, 0.0)
+
+	var direction := Input.get_axis("move_left", "move_right")
+
+	if is_dodging:
+		velocity.y = 0
+	else:
+		var wants_dash = Input.is_action_just_pressed("dodge") and not is_dodging and able_to_dodge
+		var can_ground_dash = is_on_floor() and direction != 0.0
+		var can_air_dash = not is_on_floor() and not has_air_dashed
+		
+		if wants_dash and (can_ground_dash or can_air_dash):
+			_perform_dash(direction)
+
+		if can_move and not is_dodging:
+			_apply_horizontal_movement(direction, delta)
+			_update_facing(direction)
+			_update_ground_animation(direction)
+	if not is_dodging:
+		_handle_jump_input()
+		_apply_vertical_physics(delta)
+
+	move_and_slide()
+	_update_air_animation()
+
+	if is_on_floor():
+		_jumps_remaining = MAX_JUMPS
+		has_air_dashed = false
+		has_air_comboed = false
+		if not _was_on_floor:
+			_play_jump_land()
+	elif _was_on_floor:
+		_begin_air_movement()
+	_was_on_floor = is_on_floor()
+
+	for i in get_slide_collision_count():
+		var collision = get_slide_collision(i)
+		var collider = collision.get_collider()
+		if collider and collider.is_in_group("Enemy"):
+			if is_dodging or is_invulnerable or is_touched_enemy:
+				continue
+			take_damage(ENEMY_CONTACT_DAMAGE, collider.global_position)
+			break
+
+#hàm công khai
+>>>>>>> Stashed changes
 func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 	if is_invulnerable or is_stunned:
 		return
@@ -125,6 +219,7 @@ func get_attack_speed_multiplier() -> float:
 		return hud.get_attack_speed_multiplier()
 	return 1.0
 
+<<<<<<< Updated upstream
 
 func _get_move_speed_multiplier() -> float:
 	var hud := _find_hud()
@@ -189,6 +284,9 @@ func _find_hud() -> Node:
 
 
 func enter_rest(_world_position: Vector2, face_left: bool) -> void:
+=======
+func enter_rest(face_left: bool) -> void:
+>>>>>>> Stashed changes
 	_position_before_rest = global_position
 	is_resting = true
 	is_locked = true
@@ -245,6 +343,110 @@ func _capsule_half_height(col: CollisionShape2D) -> float:
 	var scale_y := col.global_transform.get_scale().y
 	return capsule.height * 0.5 * scale_y
 
+<<<<<<< Updated upstream
+=======
+func _reset_combo() -> void:
+	if not is_doing_action:
+		combo_step = 0
+
+func _play_jump_attack() -> void:
+	can_move = false
+	is_doing_action = true
+	is_jump_attacking = true
+	combo_step = 0 # Ngắt combo hiện tại
+	velocity.x = 0 # Triệt tiêu đà ngang để cắm thẳng xuống
+	spine_anim.play("jump_attack(air)")
+	# Lưu ý: Chỉ cần tắt nút Loop (Vòng lặp) trong bảng AnimationPlayer cho 
+	# animation "jump_attack(air)", nó sẽ tự động đóng băng ở frame cuối cùng khi đang rơi.
+
+func _play_jump_attack_land() -> void:
+	is_jump_attacking = false
+	is_jump_attack_landing = true
+	jump_attack_land_timer = 0.0
+	_playing_land_anim = false
+	spine_anim.play("jump_attack(land)")
+
+func _cancel_jump_attack_land() -> void:
+	is_jump_attack_landing = false
+	can_move = true
+	is_doing_action = false
+
+func _knockback_dir(hit_from_global: Vector2) -> Vector2:
+	if hit_from_global != Vector2.INF:
+		var dir := global_position - hit_from_global
+		if dir.length_squared() > 0.01:
+			var dir_normal = dir.normalized()
+			if abs(dir_normal.x) < 0.1:
+				dir_normal.x = -facing_direction
+			dir_normal.y = randf_range(-0.2, -0.7)
+			return dir_normal
+	return Vector2(1.0 if facing_direction < 0 else -1.0, -0.2).normalized()
+
+func _apply_stagger(knockback_dir: Vector2) -> void:
+	is_stunned = true
+	is_invulnerable = true
+	can_move = false
+	velocity = knockback_dir * STAGGER_KNOCKBACK
+	_playing_land_anim = false
+	spine_anim.play("idle", 0.1)
+	get_tree().create_timer(STAGGER_STUN_SEC).timeout.connect(_on_stagger_stun_end, CONNECT_ONE_SHOT)
+
+func _start_invulnerability(duration: float) -> void:
+	is_invulnerable = true
+	get_tree().create_timer(duration).timeout.connect(_end_invulnerability, CONNECT_ONE_SHOT)
+
+func _end_invulnerability() -> void:
+	is_invulnerable = false
+
+func _find_hud() -> Node:
+	var root := get_tree().current_scene
+	if root == null:
+		return null
+	return root.find_child("hud", true, false)
+
+#hàm nội bộ nhóm vật lý
+func _get_move_speed_multiplier() -> float:
+	var hud := _find_hud()
+	if hud and hud.has_method("get_move_speed_multiplier"):
+		return hud.get_move_speed_multiplier()
+	return 1.0
+
+func _perform_dash(dash_direction: float) -> void:
+		is_dodging = true
+		is_invulnerable = true
+		_set_enemy_collision_enabled(false)
+		var is_air_dodging = not is_on_floor()
+		if is_air_dodging:
+			has_air_dashed = true
+			spine_anim.play("dash_air")
+		else:
+			spine_anim.play("dash")
+		_ghost_trail_loop(0.25)
+		var dash_dir = dash_direction
+		if is_air_dodging and dash_dir == 0.0:
+			dash_dir = facing_direction
+		var dodge_tween = create_tween()
+		dodge_tween.set_trans(Tween.TRANS_QUAD)
+		dodge_tween.set_ease(Tween.EASE_OUT)
+		velocity.x = WALK_SPEED * 20 * dash_dir
+		dodge_tween.tween_property(self, "velocity:x", dash_dir * WALK_SPEED, 0.3)
+		await dodge_tween.finished
+		if not is_instance_valid(self):
+			return
+		_set_enemy_collision_enabled(true)
+		is_invulnerable = false
+		if not is_air_dodging:
+			velocity.x = 0
+			spine_anim.play("dash skid")
+			await get_tree().create_timer(0.2).timeout
+			if not is_instance_valid(self):
+				return
+		else:
+			velocity.x = 0
+		dodge_cooldown.start()
+		able_to_dodge = false
+		is_dodging = false
+>>>>>>> Stashed changes
 
 func _get_ground_target_speed() -> float:
 	if is_running:
@@ -550,14 +752,20 @@ func _get_all_visible_sprites(node: Node, arr: Array) -> void:
 		arr.append(node)
 	for child in node.get_children():
 		_get_all_visible_sprites(child, arr)
+<<<<<<< Updated upstream
+=======
+
+const GHOST_TRAIL_INTERVAL := 0.05
+const GHOST_TRAIL_MAX := 24
+const GHOST_FADE_DURATION := 0.15
+
+var _ghost_pool: Array[Node2D] = []
+
+>>>>>>> Stashed changes
 func _spawn_ghost_trail() -> void:
-	var ghost_parent = Node2D.new()
-	var current_scene = get_tree().current_scene
-	if current_scene:
-		current_scene.add_child(ghost_parent)
-	
 	var sprites: Array = []
 	_get_all_visible_sprites(spine_rig, sprites)
+<<<<<<< Updated upstream
 	
 	for s in sprites:
 		var ghost_sprite = Sprite2D.new()
@@ -578,10 +786,115 @@ func _spawn_ghost_trail() -> void:
 	tween.tween_property(ghost_parent, "modulate:a", 0.0, 0.15).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 	tween.tween_callback(ghost_parent.queue_free)
 	
+=======
+	if sprites.is_empty():
+		return
+
+	var ghost_parent := _get_pooled_ghost()
+	if ghost_parent == null:
+		ghost_parent = Node2D.new()
+		ghost_parent.name = "GhostTrail"
+		var current_scene = get_tree().current_scene
+		if current_scene:
+			current_scene.add_child(ghost_parent)
+
+	ghost_parent.visible = true
+	ghost_parent.modulate = Color(1, 1, 1, 0.6)
+
+	for i in sprites.size():
+		var src: Sprite2D = sprites[i]
+		var dst: Sprite2D
+		if i < ghost_parent.get_child_count():
+			dst = ghost_parent.get_child(i) as Sprite2D
+		else:
+			dst = Sprite2D.new()
+			dst.modulate = Color(0.2, 0.2, 0.2, 1.0)
+			ghost_parent.add_child(dst)
+		dst.visible = true
+		dst.texture = src.texture
+		dst.hframes = src.hframes
+		dst.vframes = src.vframes
+		dst.frame = src.frame
+		dst.flip_h = src.flip_h
+		dst.flip_v = src.flip_v
+		dst.global_transform = src.global_transform
+
+	for i in range(sprites.size(), ghost_parent.get_child_count()):
+		var extra := ghost_parent.get_child(i) as Sprite2D
+		if extra:
+			extra.visible = false
+
+	var tween := get_tree().create_tween()
+	tween.tween_property(ghost_parent, "modulate:a", 0.0, GHOST_FADE_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	tween.tween_callback(_recycle_ghost.bind(ghost_parent))
+
+func _get_pooled_ghost() -> Node2D:
+	while not _ghost_pool.is_empty():
+		var ghost: Node2D = _ghost_pool.pop_back()
+		if is_instance_valid(ghost):
+			return ghost
+	return null
+
+func _recycle_ghost(ghost_parent: Node2D) -> void:
+	if not is_instance_valid(ghost_parent):
+		return
+	ghost_parent.visible = false
+	if _ghost_pool.size() < GHOST_TRAIL_MAX:
+		_ghost_pool.append(ghost_parent)
+	else:
+		ghost_parent.queue_free()
+
+>>>>>>> Stashed changes
 func _ghost_trail_loop(duration: float) -> void:
-	var interval = 0.5
-	var elapsed = 0.0
-	while elapsed < duration:
+	var elapsed := 0.0
+	while elapsed < duration and is_instance_valid(self):
 		_spawn_ghost_trail()
+<<<<<<< Updated upstream
 		await get_tree().create_timer(interval).timeout
 		elapsed += interval
+=======
+		await get_tree().create_timer(GHOST_TRAIL_INTERVAL).timeout
+		elapsed += GHOST_TRAIL_INTERVAL
+
+#hàm tín hiệu
+func _on_spine_anim_finished(anim_name: StringName) -> void:
+	if anim_name == "jump_attack(land)":
+		if is_jump_attack_landing:
+			_cancel_jump_attack_land()
+			_update_ground_animation(Input.get_axis("move_left", "move_right"))
+	elif anim_name == ANIM_JUMP_START and not is_on_floor():
+		spine_anim.play(ANIM_JUMP_AIR)
+	elif anim_name == ANIM_JUMP_LAND:
+		_playing_land_anim = false
+		_update_ground_animation(Input.get_axis("move_left", "move_right"))
+	elif anim_name == "skid":
+		is_skidding = false
+		_update_ground_animation(Input.get_axis("move_left", "move_right"))
+	elif anim_name == "loot":
+		can_move = true
+		is_doing_action = false
+		_update_ground_animation(Input.get_axis("move_left", "move_right"))
+	elif anim_name.begins_with(current_weapon + "_attack_"):
+		if attack_queued and combo_step < 4:
+			combo_step += 1
+			_play_combo_step()
+		else:
+			attack_queued = false
+			can_move = true
+			is_doing_action = false
+			spine_rig.visible = true
+			_update_ground_animation(Input.get_axis("move_left", "move_right"))
+			get_tree().create_timer(0.4).timeout.connect(_reset_combo, CONNECT_ONE_SHOT)
+		
+func _on_dodge_cooldown_timeout() -> void:
+	able_to_dodge = true
+
+func _on_stagger_stun_end() -> void:
+	is_stunned = false
+	can_move = true
+	var remaining := maxf(STAGGER_INVULN_SEC - STAGGER_STUN_SEC, 0.0)
+	if remaining > 0.0:
+		get_tree().create_timer(remaining).timeout.connect(_end_invulnerability, CONNECT_ONE_SHOT)
+	else:
+		_end_invulnerability()
+>>>>>>> Stashed changes

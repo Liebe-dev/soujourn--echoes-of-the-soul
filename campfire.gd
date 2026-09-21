@@ -3,6 +3,11 @@ extends Area2D
 @export var checkpoint_id: String = "campfire_01"
 @export var display_name: String = "Campfire"
 @export_multiline var rest_hint: String = "Press F to rest"
+<<<<<<< Updated upstream:campfire.gd
+=======
+@export var detect_radius: float = 96.0
+@export var rest_offset: float = 60.0
+>>>>>>> Stashed changes:scenes/Mechanic/campfire.gd
 
 signal player_started_rest
 signal player_finished_rest
@@ -32,8 +37,12 @@ var _upgrade_menu: Control
 var _player_in_range := false
 var _is_player_resting := false
 var _rest_cooldown := 0.0
+<<<<<<< Updated upstream:campfire.gd
 const REST_COOLDOWN_SEC := 0.35
 @export var detect_radius: float = 96.0
+=======
+var _saved_flash_tween: Tween
+>>>>>>> Stashed changes:scenes/Mechanic/campfire.gd
 
 func _ready() -> void:
 	add_to_group("campfire")
@@ -68,19 +77,10 @@ func _physics_process(delta: float) -> void:
 	if _is_player_resting:
 		return
 
-	if _player_in_range:
-		if _player == null or not _player is Node2D or _player.global_position.distance_to(global_position) > detect_radius:
-			_player_in_range = false
-			_player = null
-			prompt_panel.hide()
-
-	if not _player_in_range:
-		var candidate := _find_nearby_candidate()
-		if candidate != null:
-			_player = candidate
-			_player_in_range = true
-			if not _is_player_resting:
-				prompt_panel.show()
+	if _player_in_range and (_player == null or not is_instance_valid(_player)):
+		_player_in_range = false
+		_player = null
+		prompt_panel.hide()
 
 func _unhandled_input(event: InputEvent) -> void:
 	if not _player_in_range or _player == null:
@@ -122,22 +122,20 @@ func _sit_and_save() -> void:
 	player_started_rest.emit()
 
 	var face_left := _player.global_position.x > global_position.x
-	if _player.has_method("enter_rest"):
-		_player.enter_rest(Vector2.ZERO, face_left)
+	_player.enter_rest(face_left)
 
 	var fade_out_tween = create_tween()
 	fade_out_tween.tween_property(transition_rect, "modulate:a", 1.0, 0.7)
 	await fade_out_tween.finished
 	
-	if _player.has_method("play_rest_animation"):
+	if _player:
 		_player.play_rest_animation()
-	var fixed_distance = 60.0
-
 	if face_left:
-		_player.global_position.x = global_position.x + fixed_distance
+		_player.global_position.x = global_position.x + rest_offset
 	else:
-		_player.global_position.x = global_position.x - fixed_distance
+		_player.global_position.x = global_position.x - rest_offset
 
+	# Tự động hồi máu và lưu vào slot đang hoạt động (active_slot) khi ngồi nghỉ.
 	SaveManager.heal_player_full()
 	SaveManager.save_at_campfire(self)
 	
@@ -145,10 +143,8 @@ func _sit_and_save() -> void:
 		cinematic_camera.enabled = true
 		cinematic_camera.global_position = global_position
 		cinematic_camera.offset = Vector2(0, -70.0)
+		cinematic_camera.zoom = Vector2(3.0, 3.0)
 		cinematic_camera.make_current()
-		cinematic_camera.global_position = global_position
-		cinematic_camera.zoom = Vector2(3.0, 3.0) 
-		cinematic_camera.make_current() 
 
 	var fade_in_tween = create_tween()
 	fade_in_tween.tween_property(transition_rect, "modulate:a", 0.0, 2.0) 
@@ -179,7 +175,7 @@ func _stand_up() -> void:
 	
 	# (Màn hình đang tối) Trả lại quyền điều khiển
 	_is_player_resting = false
-	if _player and _player.has_method("exit_rest"):
+	if _player:
 		_player.exit_rest()
 		
 	# Tắt camera cinematic để Godot tự động trả về camera mặc định của người chơi
@@ -199,6 +195,7 @@ func _stand_up() -> void:
 			prompt_label.text = rest_hint
 		prompt_panel.show()
 
+<<<<<<< Updated upstream:campfire.gd
 
 func _show_saved_flash(message: String = "Saved") -> void:
 	saved_label.text = message
@@ -211,6 +208,9 @@ func _show_saved_flash(message: String = "Saved") -> void:
 	saved_label.hide()
 
 
+=======
+#hàm nội bộ nhóm UI và hiệu ứng
+>>>>>>> Stashed changes:scenes/Mechanic/campfire.gd
 func _setup_rest_menu_buttons() -> void:
 	if btn_relica:
 		btn_relica.text = "Upgrade Stats"
@@ -237,6 +237,7 @@ func _setup_upgrade_menu() -> void:
 	if _upgrade_menu.has_signal("closed"):
 		_upgrade_menu.closed.connect(_on_upgrade_menu_closed)
 
+<<<<<<< Updated upstream:campfire.gd
 
 func _on_relica_pressed() -> void:
 	if _upgrade_menu == null:
@@ -254,6 +255,18 @@ func _on_upgrade_menu_closed() -> void:
 	if rest_menu and _is_player_resting:
 		rest_menu.show()
 
+=======
+func _show_saved_flash(message: String = "Saved") -> void:
+	if _saved_flash_tween and _saved_flash_tween.is_valid():
+		_saved_flash_tween.kill()
+	saved_label.text = message
+	saved_label.show()
+	saved_label.modulate.a = 1.0
+	_saved_flash_tween = create_tween()
+	_saved_flash_tween.tween_interval(1.2)
+	_saved_flash_tween.tween_property(saved_label, "modulate:a", 0.0, 0.4)
+	_saved_flash_tween.tween_callback(saved_label.hide)
+>>>>>>> Stashed changes:scenes/Mechanic/campfire.gd
 
 func _populate_slot_menu(menu: Control, is_load_menu: bool) -> void:
 	var slot_list: VBoxContainer = menu.get_node_or_null("SlotList")
@@ -377,7 +390,7 @@ func _load_from_slot(slot: int) -> void:
 		return
 
 	_hide_slot_menus()
-	if _player and _player.has_method("play_rest_animation"):
+	if _player:
 		_player.play_rest_animation()
 
 	var fade_in_tween := create_tween()
@@ -392,6 +405,17 @@ func _go_to_title() -> void:
 	await fade_out_tween.finished
 	get_tree().change_scene_to_file(TITLE_SCENE)
 
+<<<<<<< Updated upstream:campfire.gd
+=======
+#hàm tín hiệu
+func _on_body_entered(body: Node2D) -> void:
+	if not body.is_in_group("Player"):
+		return
+	_player = body as CharacterBody2D
+	_player_in_range = true
+	if not _is_player_resting:
+		prompt_panel.show()
+>>>>>>> Stashed changes:scenes/Mechanic/campfire.gd
 
 func _find_nearby_candidate() -> Node2D:
 	var root := get_tree().current_scene

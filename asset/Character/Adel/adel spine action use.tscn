@@ -8084,13 +8084,21 @@ scale = Vector2(29.28, 2.71)
 texture = SubResource("GradientTexture2D_offtu")
 
 [node name="Skeleton2D" type="Skeleton2D" parent="." unique_id=751888119]
+<<<<<<< Updated upstream
 visible = false
+=======
+position = Vector2(0, -21)
+>>>>>>> Stashed changes
 modification_stack = SubResource("SkeletonModificationStack2D_pptnm")
 
 [node name="hip" type="Bone2D" parent="Skeleton2D" unique_id=847027349]
 position = Vector2(813, 531)
+<<<<<<< Updated upstream
 rotation = 0.22371711
 scale = Vector2(0.99999106, 0.99999106)
+=======
+scale = Vector2(0.99999017, 0.99999017)
+>>>>>>> Stashed changes
 rest = Transform2D(0.9999992, 0, 0, 0.9999992, 813, 531)
 
 [node name="lap[merge]" type="Sprite2D" parent="Skeleton2D/hip" unique_id=1803502924]
@@ -8159,8 +8167,13 @@ position = Vector2(0.4999386, 61.499958)
 texture = ExtResource("8_wu5lb")
 
 [node name="L_upper_arm" type="Bone2D" parent="Skeleton2D/hip/torso[merge]" unique_id=550548801]
+<<<<<<< Updated upstream
 position = Vector2(64.00006, -28.04218)
 rotation = -0.010251027
+=======
+position = Vector2(44.817806, -67.62174)
+rotation = -0.010251021
+>>>>>>> Stashed changes
 scale = Vector2(0.9998284, 0.9998284)
 rest = Transform2D(0.9999458, -0.010250827, 0.010250827, 0.9999458, 59.000057, -46.042194)
 
@@ -8205,22 +8218,36 @@ texture = ExtResource("14_segbb")
 
 [node name="L_upper_leg" type="Bone2D" parent="Skeleton2D/hip" unique_id=1874487404]
 position = Vector2(-11.9999895, 52)
+<<<<<<< Updated upstream
 rotation = -0.17950083
 scale = Vector2(0.9998412, 0.9998412)
+=======
+rotation = -0.17943205
+scale = Vector2(0.9998462, 0.9998462)
+>>>>>>> Stashed changes
 rest = Transform2D(0.8735092, -0.48648435, 0.48648435, 0.8735092, -25, 52)
 metadata/_local_pose_override_enabled_ = true
 
 [node name="L_foreleg" type="Bone2D" parent="Skeleton2D/hip/L_upper_leg" unique_id=1866317577]
 position = Vector2(21.260056, 137.47556)
+<<<<<<< Updated upstream
 rotation = 0.2770661
 scale = Vector2(0.9998641, 0.9998641)
+=======
+rotation = 0.27694732
+scale = Vector2(0.99985534, 0.99985534)
+>>>>>>> Stashed changes
 rest = Transform2D(0.63829863, 0.7696372, -0.7696372, 0.63829863, 21.260056, 137.47556)
 metadata/_local_pose_override_enabled_ = true
 
 [node name="L_feet" type="Bone2D" parent="Skeleton2D/hip/L_upper_leg/L_foreleg" unique_id=1500613863]
 position = Vector2(-6.656649, 183.12155)
+<<<<<<< Updated upstream
 rotation = -0.18876056
 scale = Vector2(0.9998449, 0.9998449)
+=======
+scale = Vector2(0.99984455, 0.99984455)
+>>>>>>> Stashed changes
 rest = Transform2D(0.9820801, -0.18761154, 0.18761154, 0.9820801, -6.656649, 183.12155)
 
 [node name="left feet[merge]" type="Sprite2D" parent="Skeleton2D/hip/L_upper_leg/L_foreleg/L_feet" unique_id=501514858]
@@ -8247,23 +8274,38 @@ texture = ExtResource("4_g5fo1")
 [node name="R_upper_leg" type="Bone2D" parent="Skeleton2D/hip" unique_id=99498740]
 visible = false
 position = Vector2(-26, 64)
+<<<<<<< Updated upstream
 rotation = -0.11199975
 scale = Vector2(0.9998492, 0.99984354)
 skew = -0.00030004978
+=======
+rotation = -0.11186957
+scale = Vector2(0.99984646, 0.9998467)
+skew = -0.0003927946
+>>>>>>> Stashed changes
 rest = Transform2D(0.99358183, -0.11178011, 0.11178011, 0.99358183, -26, 64)
 metadata/_local_pose_override_enabled_ = true
 
 [node name="R_foreleg" type="Bone2D" parent="Skeleton2D/hip/R_upper_leg" unique_id=1279377425]
 position = Vector2(21.04547, 146.99614)
+<<<<<<< Updated upstream
 rotation = 0.7823985
 scale = Vector2(0.99985, 0.99985)
+=======
+rotation = 0.19372971
+scale = Vector2(0.99985194, 0.99985194)
+>>>>>>> Stashed changes
 rest = Transform2D(0.98110306, 0.19275497, -0.19275497, 0.98110306, 21.04547, 146.99614)
 metadata/_local_pose_override_enabled_ = true
 
 [node name="R_feet" type="Bone2D" parent="Skeleton2D/hip/R_upper_leg/R_foreleg" unique_id=1932739212]
 position = Vector2(-73.19436, 163.88885)
 rotation = 0.5224262
+<<<<<<< Updated upstream
 scale = Vector2(0.9998359, 0.9998359)
+=======
+scale = Vector2(0.9998366, 0.9998366)
+>>>>>>> Stashed changes
 rest = Transform2D(0.9997022, -0.014939149, 0.014939149, 0.9997022, -68.11281, 159.04987)
 
 [node name="right feet[merge]" type="Sprite2D" parent="Skeleton2D/hip/R_upper_leg/R_foreleg/R_feet" unique_id=1827051959]
@@ -8287,7 +8329,11 @@ texture = ExtResource("6_xv1bw")
 visible = false
 position = Vector2(35, 16)
 rotation = -3.1018384
+<<<<<<< Updated upstream
 scale = Vector2(0.99984163, 0.99984163)
+=======
+scale = Vector2(0.9998323, 0.9998323)
+>>>>>>> Stashed changes
 rest = Transform2D(-0.9990432, -0.039737206, 0.039737206, -0.9990432, 35, 16)
 
 [node name="belly" type="Sprite2D" parent="Skeleton2D/hip/cloth_bone2" unique_id=1083849315]
@@ -8312,27 +8358,43 @@ texture = ExtResource("11_2pf0q")
 [node name="torso2" type="Bone2D" parent="Skeleton2D/hip" unique_id=824147936]
 visible = false
 rotation = 0.111567244
+<<<<<<< Updated upstream
 scale = Vector2(0.9998607, 0.99986386)
 skew = 0.1658063
+=======
+scale = Vector2(0.9998595, 0.9998619)
+>>>>>>> Stashed changes
 rest = Transform2D(0.9979594, -0.06385192, 0.06385192, 0.9979594, 0, 0)
 
 [node name="torso1" type="Bone2D" parent="Skeleton2D/hip/torso2" unique_id=1007980366]
 position = Vector2(-0.22670937, -127.76924)
 rotation = 0.04238328
+<<<<<<< Updated upstream
 scale = Vector2(0.9998665, 0.9998665)
+=======
+scale = Vector2(0.9998363, 0.9998363)
+>>>>>>> Stashed changes
 rest = Transform2D(1, 0, 0, 1, -2, -128)
 
 [node name="head" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1" unique_id=1542034224]
 z_index = 1
 position = Vector2(-2.089017, -107.34862)
 rotation = -0.18582162
+<<<<<<< Updated upstream
 scale = Vector2(0.9998783, 0.9998783)
+=======
+scale = Vector2(0.99987483, 0.99987483)
+>>>>>>> Stashed changes
 rest = Transform2D(1, 0, 0, 1, -2.089017, -107.34862)
 
 [node name="hair_bone2" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1/head" unique_id=824247481]
 position = Vector2(98, -88)
 rotation = 1.6181341
+<<<<<<< Updated upstream
 scale = Vector2(0.9998264, 0.9998264)
+=======
+scale = Vector2(0.99982744, 0.99982744)
+>>>>>>> Stashed changes
 rest = Transform2D(-0.047312167, 0.9987116, -0.9987116, -0.047312167, 98, -88)
 
 [node name="hair2" type="Sprite2D" parent="Skeleton2D/hip/torso2/torso1/head/hair_bone2" unique_id=854023447]
@@ -8360,13 +8422,21 @@ texture = ExtResource("15_3ibog")
 [node name="L_upper_arm" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1" unique_id=1510016241]
 position = Vector2(9.499755, -45.403446)
 rotation = 0.5237757
+<<<<<<< Updated upstream
 scale = Vector2(0.9998469, 0.9998469)
+=======
+scale = Vector2(0.9998476, 0.9998476)
+>>>>>>> Stashed changes
 rest = Transform2D(0.93023777, 0.36655867, -0.36655867, 0.93023777, 9.499755, -45.403446)
 
 [node name="L_forearm" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1/L_upper_arm" unique_id=2054228943]
 position = Vector2(9.05699, 125.501625)
 rotation = -1.0467486
+<<<<<<< Updated upstream
 scale = Vector2(0.9998466, 0.9998466)
+=======
+scale = Vector2(0.9998467, 0.9998467)
+>>>>>>> Stashed changes
 rest = Transform2D(0.5003127, -0.86566925, 0.86566925, 0.5003127, 9.05699, 125.501625)
 
 [node name="left forearm" type="Sprite2D" parent="Skeleton2D/hip/torso2/torso1/L_upper_arm/L_forearm" unique_id=1808740098]
@@ -8384,14 +8454,23 @@ texture = ExtResource("21_wu5lb")
 [node name="R_upper_arm" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1" unique_id=742047974]
 position = Vector2(-50.339714, -45.886616)
 rotation = -0.20765075
+<<<<<<< Updated upstream
 scale = Vector2(0.9998423, 0.9998423)
+=======
+scale = Vector2(0.9998426, 0.9998426)
+>>>>>>> Stashed changes
 rest = Transform2D(0.9783573, -0.20612785, 0.20612785, 0.9783573, -50.339714, -45.886616)
 
 [node name="R_forearm" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1/R_upper_arm" unique_id=271342894]
 position = Vector2(15.490183, 124.05001)
 rotation = 0.015835386
+<<<<<<< Updated upstream
 scale = Vector2(0.999862, 0.99985814)
 skew = -0.052615285
+=======
+scale = Vector2(0.9998616, 0.99986756)
+skew = -0.052649736
+>>>>>>> Stashed changes
 rest = Transform2D(0.99970406, 0.015832024, -0.015832024, 0.99970406, 15.490183, 124.05001)
 
 [node name="right forearm" type="Sprite2D" parent="Skeleton2D/hip/torso2/torso1/R_upper_arm/R_forearm" unique_id=1409422122]

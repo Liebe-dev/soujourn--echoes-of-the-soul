@@ -32,8 +32,13 @@
 [ext_resource type="Texture2D" uid="uid://bi2aodtsp8fhj" path="res://asset/Enemies/Wobtear_death.png" id="37_0cp0l"]
 [ext_resource type="Script" uid="uid://ckwnyresyamtm" path="res://doggo.gd" id="37_4lmeg"]
 [ext_resource type="Texture2D" uid="uid://boe6okl4teibl" path="res://asset/Enemies/Wobtear1.png" id="38_d2t1y"]
+<<<<<<< Updated upstream:main.tscn
 [ext_resource type="PackedScene" uid="uid://bscreenfx01" path="res://screen_effects.tscn" id="39_screenfx"]
 [ext_resource type="PackedScene" uid="uid://campfire01" path="res://campfire.tscn" id="40_campfire"]
+=======
+[ext_resource type="PackedScene" uid="uid://bscreenfx01" path="res://scenes/Effect/screen_effects.tscn" id="39_screenfx"]
+[ext_resource type="PackedScene" uid="uid://campfire01" path="res://scenes/Mechanic/campfire.tscn" id="40_campfire"]
+>>>>>>> Stashed changes:scenes/Map 1/main.tscn
 
 [sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_d13ii"]
 blend_mode = 1
