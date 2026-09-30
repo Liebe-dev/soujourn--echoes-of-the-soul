@@ -4,43 +4,21 @@ extends CharacterBody2D
 @onready var spine_anim = $SpinePivot/SpineRig/AnimationPlayer
 @onready var spine_pivot = $SpinePivot
 
-const WALK_SPEED := 140.0
-const RUN_SPEED := 450.0
-const RUN_BOOST_SPEED := 520.0
-const RUN_BOOST_TIME := 0.22
-const GROUND_ACCEL := 1400.0
-const GROUND_FRICTION := 1600.0
-const TURN_ACCEL := 3200.0
-const AIR_ACCEL_STAND := 320.0
-const AIR_ACCEL_RUN := 980.0
-const AIR_SPEED_CAP_STAND := 95.0
-const AIR_SPEED_CAP_RUN := RUN_SPEED
-const WALK_JUMP_VELOCITY := -480.0
-const RUN_JUMP_VELOCITY := -720.0
-const DOUBLE_JUMP_VELOCITY := -700.0
 const ENEMY_COLLISION_LAYER := 3
-const JUMP_RISE_GRAVITY_MULT := 1.6
-const JUMP_CUT_GRAVITY_MULT := 3.2
-const FALL_GRAVITY_MULT := 2
-const MAX_FALL_SPEED := 920.0
-const MAX_JUMPS := 2
 const ANIM_JUMP_START := " jump_start"
 const ANIM_JUMP_AIR := "jump_air (fall)"
 const ANIM_JUMP_LAND := "jump_land"
-const STAGGER_STUN_SEC := 0.45
-const STAGGER_INVULN_SEC := 1.0
-const STAGGER_KNOCKBACK := 300.0
-const HIT_INVULN_SEC := 0.2
 const DEBUG_DAMAGE_AMOUNT := 10
 const KNOCKBACK_FORCE := 500
 const ENEMY_CONTACT_DAMAGE := 1
-const JUMP_ATTACK_HANG_TIME := 0.15
-const JUMP_ATTACK_FALL_MULT := 4.7
 
 signal player_attacked
 
-var combo_step: int = 0
-var attack_queued: bool = false
+var locomotion: LocomotionComponent
+var combat: CombatComponent
+var damage: DamageComponent
+var dash: DashComponent
+
 var can_move: bool = true
 var is_locked: bool = false
 var is_resting: bool = false
@@ -48,33 +26,21 @@ var is_guarding: bool = false
 var holding_duration: float = 0.0
 var _position_before_rest: Vector2 = Vector2.ZERO
 var facing_direction: int = 1
-var is_stunned: bool = false
-var is_invulnerable: bool = false
 var is_doing_action: bool = false
-var is_dodging: bool = false
-var able_to_dodge: bool = true
-var is_touched_enemy: bool = false
-var is_running: bool = false
-var _jumps_remaining := MAX_JUMPS
-var _was_on_floor := true
 var _playing_land_anim := false
-var _run_boost_timer := 0.0
-var _was_running := false
-var _air_accel := AIR_ACCEL_STAND
-var _air_speed_cap := AIR_SPEED_CAP_STAND
-var has_air_dashed: bool = false
 var is_skidding: bool = false 
-var current_weapon: String = "saber"
-var has_air_comboed: bool = false
-var is_jump_attacking: bool = false
-var is_jump_attack_hanging: bool = false
-var jump_attack_hang_timer: float = 0.0
-var is_jump_attack_landing: bool = false
-var jump_attack_land_timer: float = 0.0
 
 #hàm hệ thống
 func _ready() -> void:
 	randomize()
+	locomotion = LocomotionComponent.new(self)
+	locomotion.jumped.connect(_on_locomotion_jumped)
+	locomotion.landed.connect(_on_locomotion_landed)
+	combat = CombatComponent.new(self, locomotion)
+	damage = DamageComponent.new(self)
+	damage.staggered.connect(_on_damage_staggered)
+	damage.stagger_recovered.connect(_on_damage_stagger_recovered)
+	dash = DashComponent.new(locomotion, dodge_cooldown)
 	spine_anim.animation_finished.connect(_on_spine_anim_finished)
 	spine_anim.play("idle")
 
@@ -83,62 +49,45 @@ func _unhandled_input(event: InputEvent) -> void:
 		take_damage(DEBUG_DAMAGE_AMOUNT, global_position + Vector2(80.0, 0.0))
 		get_viewport().set_input_as_handled()
 	if event.is_action_pressed("attack"):
-		if is_jump_attack_landing and jump_attack_land_timer >= 0.3:
+		if combat.should_cancel_jump_attack_land():
 			_cancel_jump_attack_land()
-		if not is_on_floor() and (has_air_comboed or combo_step >= 4 or Input.is_action_pressed("move_down")):
-			if not is_jump_attacking:
+		match combat.handle_attack_input(is_doing_action):
+			CombatComponent.AttackAction.START_JUMP_ATTACK:
 				_play_jump_attack()
-			return
-			
-		if not is_doing_action:
-			if combo_step == 0 or combo_step >= 4:
-				combo_step = 1
-			else:
-				combo_step += 1
-			_play_combo_step()
-		elif combo_step > 0 and combo_step < 4:
-			attack_queued = true
+			CombatComponent.AttackAction.START_COMBO:
+				_play_combo_step()
+			_:
+				pass
 	if event.is_action_pressed("interact"):
 		play_pickup_animation()
 
 func _physics_process(delta: float) -> void:
-	if is_stunned or is_touched_enemy:
+	if damage.is_stunned or damage.is_touched_enemy:
 		velocity.x = move_toward(velocity.x, 0.0, 400.0 * delta)
-		_apply_vertical_physics(delta)
+		locomotion.apply_vertical_physics(delta)
 		move_and_slide()
 
-		if is_touched_enemy and is_on_floor():
+		if damage.is_touched_enemy and is_on_floor():
 			can_move = true
-			is_touched_enemy = false
-			is_invulnerable = false
+			damage.is_touched_enemy = false
+			damage.is_invulnerable = false
 		return
 	if is_resting:
 		velocity = Vector2.ZERO
 		return
-	if is_jump_attack_landing:
-		jump_attack_land_timer += delta
-		if jump_attack_land_timer >= 0.3 and Input.get_axis("move_left", "move_right") != 0.0:
+	if combat.is_jump_attack_landing:
+		combat.jump_attack_land_timer += delta
+		if combat.jump_attack_land_timer >= 0.3 and Input.get_axis("move_left", "move_right") != 0.0:
 			_cancel_jump_attack_land()
 
 	if is_locked or not can_move:
-		if combo_step > 0 and not is_on_floor():
-			velocity.y = 0.0
-		elif is_jump_attacking and not is_on_floor():
-			if is_jump_attack_hanging:
-				jump_attack_hang_timer = maxf(jump_attack_hang_timer - delta, 0.0)
-				velocity.y = 0.0
-				if jump_attack_hang_timer <= 0.0:
-					is_jump_attack_hanging = false
-			else:
-				velocity.y += get_gravity().y * JUMP_ATTACK_FALL_MULT * delta
-				velocity.y = minf(velocity.y, MAX_FALL_SPEED * JUMP_ATTACK_FALL_MULT)
-		else:
-			_apply_vertical_physics(delta)
+		if not combat.apply_combat_air_physics(delta):
+			locomotion.apply_vertical_physics(delta)
 			
-		velocity.x = move_toward(velocity.x, 0.0, GROUND_FRICTION * delta)
+		velocity.x = move_toward(velocity.x, 0.0, locomotion.GROUND_FRICTION * delta)
 		move_and_slide()
 		
-		if is_on_floor() and is_jump_attacking:
+		if is_on_floor() and combat.is_jump_attacking:
 			_play_jump_attack_land()
 		return
 
@@ -152,59 +101,40 @@ func _physics_process(delta: float) -> void:
 		is_guarding = false
 		is_doing_action = false
 
-	if Input.is_action_just_pressed("run") and is_on_floor():
-		is_running = not is_running
-	if is_running and not _was_running and is_on_floor():
-		_run_boost_timer = RUN_BOOST_TIME
-	_was_running = is_running
-	if _run_boost_timer > 0.0:
-		_run_boost_timer = maxf(_run_boost_timer - delta, 0.0)
+	locomotion.update_run_state(delta)
 
 	var direction := Input.get_axis("move_left", "move_right")
 
-	if is_dodging:
+	if dash.is_dodging:
 		velocity.y = 0
 	else:
-		var wants_dash = Input.is_action_just_pressed("dodge") and not is_dodging and able_to_dodge
-		var can_ground_dash = is_on_floor() and direction != 0.0
-		var can_air_dash = not is_on_floor() and not has_air_dashed
-		
-		if wants_dash and (can_ground_dash or can_air_dash):
+		if dash.can_dash(direction, is_on_floor()):
 			_perform_dash(direction)
 
-		if can_move and not is_dodging:
-			_apply_horizontal_movement(direction, delta)
+		if can_move and not dash.is_dodging:
+			locomotion.apply_horizontal_movement(direction, delta)
 			_update_facing(direction)
 			_update_ground_animation(direction)
-	if not is_dodging:
-		_handle_jump_input()
-		_apply_vertical_physics(delta)
+	if not dash.is_dodging:
+		locomotion.handle_jump()
+		locomotion.apply_vertical_physics(delta)
 
 	move_and_slide()
 	_update_air_animation()
-
-	if is_on_floor():
-		_jumps_remaining = MAX_JUMPS
-		has_air_dashed = false
-		has_air_comboed = false
-		if not _was_on_floor:
-			_play_jump_land()
-	elif _was_on_floor:
-		_begin_air_movement()
-	_was_on_floor = is_on_floor()
+	locomotion.update_ground_state()
 
 	for i in get_slide_collision_count():
 		var collision = get_slide_collision(i)
 		var collider = collision.get_collider()
 		if collider and collider.is_in_group("Enemy"):
-			if is_dodging or is_invulnerable or is_touched_enemy:
+			if dash.is_dodging or damage.is_invulnerable or damage.is_touched_enemy:
 				continue
 			take_damage(ENEMY_CONTACT_DAMAGE, collider.global_position)
 			break
 
 #hàm công khai
 func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
-	if is_invulnerable or is_stunned:
+	if not damage.can_take_damage():
 		return
 
 	var hud := _find_hud()
@@ -213,13 +143,12 @@ func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 
 	var hit: Dictionary = hud.apply_damage(dmg, hit_from_global)
 	if hit.get("staggered", false) and not hit.get("skip_player_stagger", false):
-		_apply_stagger(_knockback_dir(hit_from_global))
+		damage.apply_stagger(damage.compute_knockback_dir(hit_from_global, facing_direction))
 	elif hit.get("damage_taken", 0) > 0:
-		_start_invulnerability(HIT_INVULN_SEC)
+		damage.start_invulnerability(DamageComponent.HIT_INVULN_SEC)
 
 func change_weapon(new_weapon_name: String) -> void:
-	current_weapon = new_weapon_name
-	combo_step = 0
+	combat.change_weapon(new_weapon_name)
 
 func get_damage_dealt_multiplier() -> float:
 	var hud := _find_hud()
@@ -277,7 +206,7 @@ func snap_feet_to_floor(max_drop: float = 96.0) -> void:
 	global_position.y += hit.position.y - feet.y
 
 func play_pickup_animation() -> void:
-	if not is_on_floor() or is_dodging or is_stunned or is_doing_action:
+	if not is_on_floor() or dash.is_dodging or damage.is_stunned or is_doing_action:
 		return 
 	can_move = false
 	is_doing_action = true
@@ -289,26 +218,20 @@ func _play_combo_step() -> void:
 	can_move = false
 	is_doing_action = true
 	velocity.x = 0
-	attack_queued = false
 	_playing_land_anim = false 
 	is_skidding = false
 	velocity.x = facing_direction * 150.0
 	if not is_on_floor():
 		velocity.y = 0.0
-	var anim_to_play: String = current_weapon + "_attack_" + str(combo_step)
-	spine_anim.play(anim_to_play)
+	spine_anim.play(combat.get_attack_anim_name())
 
 func _reset_combo() -> void:
-	if not is_doing_action:
-		combo_step = 0
+	combat.reset_combo_if_idle(is_doing_action)
 
 func _play_jump_attack() -> void:
 	can_move = false
 	is_doing_action = true
-	is_jump_attacking = true
-	is_jump_attack_hanging = true
-	jump_attack_hang_timer = JUMP_ATTACK_HANG_TIME
-	combo_step = 0 # Ngắt combo hiện tại
+	combat.start_jump_attack()
 	velocity.x = 0 # Triệt tiêu đà ngang để cắm thẳng xuống
 	velocity.y = 0.0
 	spine_anim.play("jump_attack(air)")
@@ -316,45 +239,14 @@ func _play_jump_attack() -> void:
 	# animation "jump_attack(air)", nó sẽ tự động đóng băng ở frame cuối cùng khi đang rơi.
 
 func _play_jump_attack_land() -> void:
-	is_jump_attacking = false
-	is_jump_attack_hanging = false
-	jump_attack_hang_timer = 0.0
-	is_jump_attack_landing = true
-	jump_attack_land_timer = 0.0
+	combat.begin_jump_attack_land()
 	_playing_land_anim = false
 	spine_anim.play("jump_attack(land)")
 
 func _cancel_jump_attack_land() -> void:
-	is_jump_attack_landing = false
+	combat.cancel_jump_attack_land()
 	can_move = true
 	is_doing_action = false
-
-func _knockback_dir(hit_from_global: Vector2) -> Vector2:
-	if hit_from_global != Vector2.INF:
-		var dir := global_position - hit_from_global
-		if dir.length_squared() > 0.01:
-			var dir_normal = dir.normalized()
-			if abs(dir_normal.x) < 0.1:
-				dir_normal.x = -facing_direction
-			dir_normal.y = randf_range(-0.2, -0.7)
-			return dir_normal
-	return Vector2(1.0 if facing_direction < 0 else -1.0, -0.2).normalized()
-
-func _apply_stagger(knockback_dir: Vector2) -> void:
-	is_stunned = true
-	is_invulnerable = true
-	can_move = false
-	velocity = knockback_dir * STAGGER_KNOCKBACK
-	_playing_land_anim = false
-	spine_anim.play("idle", 0.1)
-	get_tree().create_timer(STAGGER_STUN_SEC).timeout.connect(_on_stagger_stun_end, CONNECT_ONE_SHOT)
-
-func _start_invulnerability(duration: float) -> void:
-	is_invulnerable = true
-	get_tree().create_timer(duration).timeout.connect(_end_invulnerability, CONNECT_ONE_SHOT)
-
-func _end_invulnerability() -> void:
-	is_invulnerable = false
 
 func _find_hud() -> Node:
 	var root := get_tree().current_scene
@@ -370,110 +262,35 @@ func _get_move_speed_multiplier() -> float:
 	return 1.0
 
 func _perform_dash(dash_direction: float) -> void:
-		is_dodging = true
-		is_invulnerable = true
+		var dash_info: Dictionary = dash.start_dash(dash_direction, is_on_floor(), facing_direction)
+		damage.is_invulnerable = true
 		_set_enemy_collision_enabled(false)
-		var is_air_dodging = not is_on_floor()
+		var is_air_dodging: bool = dash_info["is_air"]
+		var dash_dir: float = dash_info["direction"]
 		if is_air_dodging:
-			has_air_dashed = true
 			spine_anim.play("dash_air")
 		else:
 			spine_anim.play("dash")
 		_ghost_trail_loop(0.25)
-		var dash_dir = dash_direction
-		if is_air_dodging and dash_dir == 0.0:
-			dash_dir = facing_direction
 		var dodge_tween = create_tween()
 		dodge_tween.set_trans(Tween.TRANS_QUAD)
 		dodge_tween.set_ease(Tween.EASE_OUT)
-		velocity.x = WALK_SPEED * 20 * dash_dir
-		dodge_tween.tween_property(self, "velocity:x", dash_dir * WALK_SPEED, 0.3)
+		velocity.x = dash_info["initial_speed"] * dash_dir
+		dodge_tween.tween_property(self, "velocity:x", dash_dir * dash_info["target_speed"], DashComponent.DASH_TWEEN_DURATION)
 		await dodge_tween.finished
 		if not is_instance_valid(self):
 			return
 		_set_enemy_collision_enabled(true)
-		is_invulnerable = false
+		damage.is_invulnerable = false
 		if not is_air_dodging:
 			velocity.x = 0
 			spine_anim.play("dash skid")
-			await get_tree().create_timer(0.2).timeout
+			await get_tree().create_timer(DashComponent.DASH_SKID_DURATION).timeout
 			if not is_instance_valid(self):
 				return
 		else:
 			velocity.x = 0
-		dodge_cooldown.start()
-		able_to_dodge = false
-		is_dodging = false
-
-func _get_ground_target_speed() -> float:
-	if is_running:
-		if _run_boost_timer > 0.0:
-			return RUN_BOOST_SPEED
-		return RUN_SPEED
-	return WALK_SPEED
-
-func _uses_run_jump() -> bool:
-	return is_running or absf(velocity.x) >= WALK_SPEED * 0.7
-
-func _get_ground_jump_velocity() -> float:
-	if _uses_run_jump():
-		return RUN_JUMP_VELOCITY
-	return WALK_JUMP_VELOCITY
-
-func _begin_air_movement() -> void:
-	if _uses_run_jump():
-		_air_accel = AIR_ACCEL_RUN
-		_air_speed_cap = AIR_SPEED_CAP_RUN
-	else:
-		_air_accel = AIR_ACCEL_STAND
-		_air_speed_cap = AIR_SPEED_CAP_STAND
-
-func _apply_vertical_physics(delta: float) -> void:
-	if is_on_floor():
-		return
-
-	var gravity := get_gravity() * delta
-	
-	if velocity.y < 0.0:
-		gravity *= JUMP_RISE_GRAVITY_MULT
-	elif velocity.y > 0.0:
-		gravity *= FALL_GRAVITY_MULT
-
-	velocity += gravity
-	velocity.y = minf(velocity.y, MAX_FALL_SPEED)
-
-func _apply_horizontal_movement(direction: float, delta: float) -> void:
-	if not is_on_floor():
-		if direction != 0.0:
-			var target_x := direction * _air_speed_cap
-			velocity.x = move_toward(velocity.x, target_x, _air_accel * delta)
-			velocity.x = clampf(velocity.x, -_air_speed_cap, _air_speed_cap)
-		return
-
-	var target_speed := _get_ground_target_speed()
-	if direction != 0.0:
-		var target_x := direction * target_speed
-		var accel := GROUND_ACCEL
-		if signf(velocity.x) != 0.0 and signf(direction) != signf(velocity.x):
-			accel = TURN_ACCEL
-		velocity.x = move_toward(velocity.x, target_x, accel * delta)
-	else:
-		velocity.x = move_toward(velocity.x, 0.0, GROUND_FRICTION * delta)
-
-func _handle_jump_input() -> void:
-	if not Input.is_action_just_pressed("jump"):
-		return
-	if is_on_floor():
-		_begin_air_movement()
-		velocity.y = _get_ground_jump_velocity()
-		_jumps_remaining = MAX_JUMPS - 1
-		has_air_dashed = false
-		_play_jump_start()
-	elif _jumps_remaining > 0:
-		velocity.y = DOUBLE_JUMP_VELOCITY
-		_jumps_remaining -= 1
-		has_air_dashed = false
-		_play_jump_start()
+		dash.end_dash()
 
 func _capsule_half_height(col: CollisionShape2D) -> float:
 	var capsule := col.shape as CapsuleShape2D
@@ -503,6 +320,15 @@ func _play_jump_land() -> void:
 	spine_rig.visible = true
 	spine_anim.play(ANIM_JUMP_LAND, 0.1)
 
+func _on_locomotion_jumped() -> void:
+	dash.reset_air_dash()
+	_play_jump_start()
+
+func _on_locomotion_landed() -> void:
+	dash.reset_air_dash()
+	combat.has_air_comboed = false
+	_play_jump_land()
+
 func _update_ground_animation(direction: float) -> void:
 	if not is_on_floor() or _playing_land_anim:
 		return
@@ -516,7 +342,7 @@ func _update_ground_animation(direction: float) -> void:
 			spine_anim.play("skid")
 			spine_anim.seek(spine_anim.current_animation_length, true)
 
-		if is_running and current_speed > WALK_SPEED:
+		if locomotion.is_running and current_speed > locomotion.WALK_SPEED:
 			if spine_anim.current_animation != "run":
 				spine_anim.play("run")
 		else:
@@ -527,7 +353,7 @@ func _update_ground_animation(direction: float) -> void:
 		if _playing_land_anim:
 			return
 
-		if current_speed > WALK_SPEED * 0.8:
+		if current_speed > locomotion.WALK_SPEED * 0.8:
 			if not is_skidding:
 				is_skidding = true
 				spine_anim.play("skid")
@@ -536,7 +362,7 @@ func _update_ground_animation(direction: float) -> void:
 				spine_anim.play("idle")
 
 func _update_air_animation() -> void:
-	if is_on_floor() or _playing_land_anim or is_dodging:
+	if is_on_floor() or _playing_land_anim or dash.is_dodging:
 		return
 	var current_anim: StringName = spine_anim.current_animation
 	if current_anim == ANIM_JUMP_START or current_anim == ANIM_JUMP_AIR:
@@ -626,7 +452,7 @@ func _ghost_trail_loop(duration: float) -> void:
 #hàm tín hiệu
 func _on_spine_anim_finished(anim_name: StringName) -> void:
 	if anim_name == "jump_attack(land)":
-		if is_jump_attack_landing:
+		if combat.is_jump_attack_landing:
 			_cancel_jump_attack_land()
 			_update_ground_animation(Input.get_axis("move_left", "move_right"))
 	elif anim_name == ANIM_JUMP_START and not is_on_floor():
@@ -641,26 +467,27 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 		can_move = true
 		is_doing_action = false
 		_update_ground_animation(Input.get_axis("move_left", "move_right"))
-	elif anim_name.begins_with(current_weapon + "_attack_"):
-		if attack_queued and combo_step < 4:
-			combo_step += 1
-			_play_combo_step()
-		else:
-			attack_queued = false
-			can_move = true
-			is_doing_action = false
-			spine_rig.visible = true
-			_update_ground_animation(Input.get_axis("move_left", "move_right"))
-			get_tree().create_timer(0.4).timeout.connect(_reset_combo, CONNECT_ONE_SHOT)
+	elif anim_name.begins_with(combat.current_weapon + "_attack_"):
+		match combat.on_attack_anim_finished():
+			CombatComponent.AttackAction.START_COMBO:
+				_play_combo_step()
+			CombatComponent.AttackAction.FINISH_COMBO:
+				can_move = true
+				is_doing_action = false
+				spine_rig.visible = true
+				_update_ground_animation(Input.get_axis("move_left", "move_right"))
+				get_tree().create_timer(0.4).timeout.connect(_reset_combo, CONNECT_ONE_SHOT)
 		
 func _on_dodge_cooldown_timeout() -> void:
-	able_to_dodge = true
+	dash.on_cooldown_timeout()
 
-func _on_stagger_stun_end() -> void:
-	is_stunned = false
+func _on_damage_staggered(knockback_velocity: Vector2) -> void:
+	is_doing_action = false
+	combat.interrupt()
+	can_move = false
+	velocity = knockback_velocity
+	_playing_land_anim = false
+	spine_anim.play("idle", 0.1)
+
+func _on_damage_stagger_recovered() -> void:
 	can_move = true
-	var remaining := maxf(STAGGER_INVULN_SEC - STAGGER_STUN_SEC, 0.0)
-	if remaining > 0.0:
-		get_tree().create_timer(remaining).timeout.connect(_end_invulnerability, CONNECT_ONE_SHOT)
-	else:
-		_end_invulnerability()

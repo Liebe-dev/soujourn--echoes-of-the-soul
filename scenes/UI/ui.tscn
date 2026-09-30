@@ -4,11 +4,11 @@
 [ext_resource type="PackedScene" uid="uid://uvrrmyjotnk" path="res://scenes/UI/pause.tscn" id="2_pause"]
 [ext_resource type="PackedScene" uid="uid://dd3kuxfkj4iwc" path="res://scenes/UI/settings_menu.tscn" id="3_settings"]
 
-[node name="UI" type="CanvasLayer"]
+[node name="UI" type="CanvasLayer" unique_id=775480664]
 
-[node name="hud" parent="." instance=ExtResource("1_hud")]
+[node name="hud" parent="." unique_id=940879532 instance=ExtResource("1_hud")]
 
-[node name="pause" parent="." instance=ExtResource("2_pause")]
+[node name="pause" parent="." unique_id=2052814493 instance=ExtResource("2_pause")]
 visible = false
 offset_left = 1.0
 offset_top = -3.0
@@ -16,6 +16,6 @@ offset_right = 1.0
 offset_bottom = -3.0
 scale = Vector2(1.505, 1.505)
 
-[node name="SettingsMenu" parent="." instance=ExtResource("3_settings")]
+[node name="SettingsMenu" parent="." unique_id=298409569 instance=ExtResource("3_settings")]
 visible = false
 script = null
