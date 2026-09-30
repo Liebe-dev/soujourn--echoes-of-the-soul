@@ -3,7 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://bmvih0hswruyb" path="res://asset/Map/background/BGScene2_2.png" id="1_hdqq5"]
 [ext_resource type="PackedScene" uid="uid://c2aqlr28m4cvc" path="res://scenes/Item/collectible_item_prefab.tscn" id="2_8d7w2"]
 [ext_resource type="PackedScene" uid="uid://dhhn1rh24dtco" path="res://scenes/adel/playable_adel.tscn" id="3_xlwwx"]
-[ext_resource type="Script" uid="uid://cuf8cr18yju4h" path="res://scenes/testing/weapon.gd" id="4_8d7w2"]
+[ext_resource type="Script" uid="uid://cqwot6k6a2rdo" path="res://scenes/adel/weapon/weapon_data.gd" id="4_8d7w2"]
 [ext_resource type="PackedScene" uid="uid://u51knug3082i" path="res://scenes/testing/Enemies/enemy.tscn" id="5_88nui"]
 [ext_resource type="PackedScene" uid="uid://cewpn5rhropd5" path="res://scenes/enemy/s1e1.tscn" id="8_pekpq"]
 [ext_resource type="PackedScene" uid="uid://campfire01" path="res://scenes/Mechanic/campfire.tscn" id="9_pekpq"]
