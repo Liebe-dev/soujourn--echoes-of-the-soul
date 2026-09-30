@@ -24,7 +24,7 @@ const JUMP_ATTACK_HANG_TIME := 0.15
 const JUMP_ATTACK_FALL_MULT := 4.7
 
 # --- Combat state owned by CombatComponent ---
-var current_weapon: String = "saber"
+
 var combo_step: int = 0
 var attack_queued: bool = false
 var has_air_comboed: bool = false
@@ -36,19 +36,29 @@ var jump_attack_land_timer: float = 0.0
 
 var _body: CharacterBody2D
 var _locomotion: LocomotionComponent
+var _attack_hitbox: Area2D
+var equipped_weapon: WeaponData
 
-func _init(body: CharacterBody2D, locomotion: LocomotionComponent) -> void:
+
+func _init(
+	body: CharacterBody2D,
+	locomotion: LocomotionComponent,
+	weapon: WeaponData,
+	attack_hitbox: Area2D
+) -> void:
 	_body = body
 	_locomotion = locomotion
-
+	equipped_weapon = weapon
+	_attack_hitbox = attack_hitbox
+	_attack_hitbox.monitoring = false
 # --- Weapon ---
-func change_weapon(new_weapon_name: String) -> void:
-	current_weapon = new_weapon_name
+func change_weapon(new_weapon: WeaponData) -> void:
+	equipped_weapon = new_weapon
 	combo_step = 0
 
 # --- Animation name helper ---
 func get_attack_anim_name() -> String:
-	return current_weapon + "_attack_" + str(combo_step)
+	return equipped_weapon.animation_prefix + "_attack_" + str(combo_step)
 
 # --- Attack input (was inline in _unhandled_input) ---
 func handle_attack_input(is_doing_action: bool) -> AttackAction:
@@ -75,9 +85,9 @@ func on_attack_anim_finished() -> AttackAction:
 		combo_step += 1
 		attack_queued = false
 		return AttackAction.START_COMBO
+
 	attack_queued = false
 	return AttackAction.FINISH_COMBO
-
 # --- Jump attack state transitions ---
 func start_jump_attack() -> void:
 	is_jump_attacking = true
@@ -133,3 +143,33 @@ func apply_combat_air_physics(delta: float) -> bool:
 		return true
 
 	return false
+
+func enable_attack_hitbox() -> void:
+	_attack_hitbox.monitoring = true
+
+
+func disable_attack_hitbox() -> void:
+	_attack_hitbox.monitoring = false
+
+func start_attack_hitbox_window() -> void:
+	var attack_index := combo_step - 1
+
+	if attack_index < 0:
+		return
+
+	if attack_index >= equipped_weapon.attack_active_start.size():
+		return
+
+	if attack_index >= equipped_weapon.attack_active_end.size():
+		return
+
+	var active_start: float = equipped_weapon.attack_active_start[attack_index]
+	var active_end: float = equipped_weapon.attack_active_end[attack_index]
+
+	await _body.get_tree().create_timer(active_start).timeout
+
+	enable_attack_hitbox()
+
+	await _body.get_tree().create_timer(active_end - active_start).timeout
+
+	disable_attack_hitbox()

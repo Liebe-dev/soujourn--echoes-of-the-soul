@@ -1,6 +1,7 @@
 [gd_scene format=3 uid="uid://dhhn1rh24dtco"]
 
 [ext_resource type="Script" uid="uid://xl1mn1dbt32k" path="res://scenes/adel/playable_adel.gd" id="1_playable"]
+[ext_resource type="PackedScene" uid="uid://c2j1ldt5uvdn7" path="res://scenes/adel/weapon/saber.tscn" id="3_5ku1i"]
 [ext_resource type="Script" uid="uid://jti2ptpyhs8u" path="res://scenes/camera_2d.gd" id="3_67loa"]
 [ext_resource type="PackedScene" uid="uid://moo3202hyjoh" path="res://scenes/UI/hud.tscn" id="4_aphpq"]
 [ext_resource type="PackedScene" uid="uid://ri1fqqgxpl6v" path="res://scenes/UI/master_menu.tscn" id="5_57033"]
@@ -9,6 +10,9 @@
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]
 radius = 7.652174
 height = 112.49183
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_pvmv5"]
+size = Vector2(152.5798, 124.5)
 
 [node name="PlayableAdel" type="CharacterBody2D" unique_id=1485460165 groups=["Player", "playableAdel"]]
 collision_layer = 3
@@ -26,6 +30,20 @@ scale = Vector2(1.8, 1.8)
 [node name="SpineRig" parent="SpinePivot" unique_id=1860163928 instance=ExtResource("69_73q5r")]
 position = Vector2(-99.23588, -60.923428)
 scale = Vector2(0.118000016, 0.11800001)
+
+[node name="WeaponHolder" type="Node2D" parent="." unique_id=64812415]
+
+[node name="Saber" parent="WeaponHolder" unique_id=1256340448 instance=ExtResource("3_5ku1i")]
+position = Vector2(10, -1)
+scale = Vector2(1.8, 1.8)
+
+[node name="AttackHitbox" type="Area2D" parent="." unique_id=323120375]
+collision_layer = 8
+monitoring = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitbox" unique_id=729430378]
+position = Vector2(166, 0)
+shape = SubResource("RectangleShape2D_pvmv5")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=591595691]
 offset = Vector2(0, -234.71)

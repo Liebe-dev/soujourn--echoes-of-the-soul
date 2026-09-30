@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://c2j1ldt5uvdn7"]
+
+[ext_resource type="Script" uid="uid://cqwot6k6a2rdo" path="res://scenes/adel/weapon/weapon_data.gd" id="1_s0jpl"]
+
+[node name="Saber" type="Node2D" unique_id=2053763636]
+script = ExtResource("1_s0jpl")
+hitbox_offset = Vector2(166, 0)
+hitbox_size = Vector2(152.58, 124.5)

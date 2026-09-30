@@ -3,6 +3,9 @@ extends CharacterBody2D
 @onready var spine_rig = $SpinePivot/SpineRig
 @onready var spine_anim = $SpinePivot/SpineRig/AnimationPlayer
 @onready var spine_pivot = $SpinePivot
+@onready var weapon: WeaponData = $WeaponHolder/Saber
+@onready var attack_hitbox: Area2D = $AttackHitbox
+@onready var attack_hitbox_shape: CollisionShape2D = $AttackHitbox/CollisionShape2D
 
 const ENEMY_COLLISION_LAYER := 3
 const ANIM_JUMP_START := " jump_start"
@@ -33,33 +36,45 @@ var is_skidding: bool = false
 #hàm hệ thống
 func _ready() -> void:
 	randomize()
+
 	locomotion = LocomotionComponent.new(self)
 	locomotion.jumped.connect(_on_locomotion_jumped)
 	locomotion.landed.connect(_on_locomotion_landed)
-	combat = CombatComponent.new(self, locomotion)
+
+	combat = CombatComponent.new(
+		self,
+		locomotion,
+		weapon,
+		$AttackHitbox
+	)
+	configure_attack_hitbox(combat.equipped_weapon)
+
 	damage = DamageComponent.new(self)
 	damage.staggered.connect(_on_damage_staggered)
 	damage.stagger_recovered.connect(_on_damage_stagger_recovered)
+
 	dash = DashComponent.new(locomotion, dodge_cooldown)
+
 	spine_anim.animation_finished.connect(_on_spine_anim_finished)
 	spine_anim.play("idle")
-
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("debug_take_damage"):
 		take_damage(DEBUG_DAMAGE_AMOUNT, global_position + Vector2(80.0, 0.0))
 		get_viewport().set_input_as_handled()
+
 	if event.is_action_pressed("attack"):
 		if combat.should_cancel_jump_attack_land():
 			_cancel_jump_attack_land()
+
 		match combat.handle_attack_input(is_doing_action):
 			CombatComponent.AttackAction.START_JUMP_ATTACK:
 				_play_jump_attack()
+
 			CombatComponent.AttackAction.START_COMBO:
 				_play_combo_step()
+
 			_:
 				pass
-	if event.is_action_pressed("interact"):
-		play_pickup_animation()
 
 func _physics_process(delta: float) -> void:
 	if damage.is_stunned or damage.is_touched_enemy:
@@ -147,8 +162,8 @@ func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 	elif hit.get("damage_taken", 0) > 0:
 		damage.start_invulnerability(DamageComponent.HIT_INVULN_SEC)
 
-func change_weapon(new_weapon_name: String) -> void:
-	combat.change_weapon(new_weapon_name)
+func change_weapon(new_weapon: WeaponData) -> void:
+	combat.change_weapon(new_weapon)
 
 func get_damage_dealt_multiplier() -> float:
 	var hud := _find_hud()
@@ -223,8 +238,9 @@ func _play_combo_step() -> void:
 	velocity.x = facing_direction * 150.0
 	if not is_on_floor():
 		velocity.y = 0.0
-	spine_anim.play(combat.get_attack_anim_name())
 
+	spine_anim.play(combat.get_attack_anim_name())
+	combat.start_attack_hitbox_window()
 func _reset_combo() -> void:
 	combat.reset_combo_if_idle(is_doing_action)
 
@@ -467,7 +483,7 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 		can_move = true
 		is_doing_action = false
 		_update_ground_animation(Input.get_axis("move_left", "move_right"))
-	elif anim_name.begins_with(combat.current_weapon + "_attack_"):
+	elif anim_name.begins_with(combat.equipped_weapon.animation_prefix + "_attack_"):
 		match combat.on_attack_anim_finished():
 			CombatComponent.AttackAction.START_COMBO:
 				_play_combo_step()
@@ -491,3 +507,16 @@ func _on_damage_staggered(knockback_velocity: Vector2) -> void:
 
 func _on_damage_stagger_recovered() -> void:
 	can_move = true
+
+func configure_attack_hitbox(weapon: WeaponData) -> void:
+	attack_hitbox.position = weapon.hitbox_offset
+
+	var shape := attack_hitbox_shape.shape as RectangleShape2D
+	if shape:
+		shape.size = weapon.hitbox_size
+func enable_attack_hitbox() -> void:
+	combat.enable_attack_hitbox()
+
+
+func disable_attack_hitbox() -> void:
+	combat.disable_attack_hitbox()
