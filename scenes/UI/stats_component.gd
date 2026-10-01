@@ -1,11 +1,10 @@
 extends RefCounted
 class_name StatsComponent
-## D1.1 — Model stats tách khỏi scenes/UI/ui.gd.
+## Active D1 gameplay-stats model used by the ui.gd facade.
 ##
-## - Chỉ chứa state + logic stats (HP / stamina / flask / debuff / stagger).
-## - KHÔNG phụ thuộc node, scene hay autoload: không get_tree(), không SaveManager,
-##   không sync_*/flash_*/enter_combat/fade_* — side-effect hiển thị do ui.gd lo ở D1.3.
-## - Chưa được wire (dead code) cho tới D1.2/D1.3.
+## Owns state and model logic for HP, stamina, flask, debuffs, and stagger.
+## It does not depend on nodes, scenes, autoloads, UI synchronization, VFX,
+## tweens, or SaveManager. Those side effects remain in ui.gd.
 
 # --- State ---
 var max_hp: int = 100
@@ -56,6 +55,48 @@ func heal_to_full() -> void:
 	restore_flask_charges()
 	clear_all_debuffs()
 
+func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF) -> Dictionary:
+	var result := {
+		"damage_taken": 0,
+		"staggered": false,
+		"stagger_tier": -1,
+		"floor_hp": -1,
+		"skip_player_stagger": false,
+		"markers_changed": false,
+		"debuff_id": "",
+		"debuff_level": 0,
+		"died": false,
+	}
+	if dmg <= 0:
+		return result
+
+	var scaled_dmg := maxi(1, int(round(float(dmg) * get_damage_taken_multiplier())))
+	var prev_hp := hp
+	var target_hp := prev_hp - scaled_dmg
+
+	if stagger_lock_timer > 0.0 and stagger_lock_hp >= 0 and not has_bleeding():
+		target_hp = maxi(target_hp, stagger_lock_hp)
+
+	for tier in STAGGER_THRESHOLD_FRACS.size():
+		if not stagger_tiers_ready[tier]:
+			continue
+		var cross := resolve_stagger_crossing(prev_hp, target_hp, tier)
+		if cross.triggered:
+			target_hp = cross.target_hp
+			result.staggered = true
+			result.stagger_tier = tier
+			result.floor_hp = cross.floor_hp
+			result.skip_player_stagger = cross.skip_player_stagger
+			result.markers_changed = cross.markers_changed
+			result.debuff_id = cross.debuff_id
+			result.debuff_level = cross.debuff_level
+			break
+
+	hp = clampi(target_hp, 0, max_hp)
+	result.damage_taken = prev_hp - hp
+	result.died = hp <= 0
+	return result
+
 func restore_stagger_thresholds() -> void:
 	stagger_tiers_ready = [true, true]
 	stagger_lock_hp = -1
@@ -86,6 +127,26 @@ func add_max_flask_charges(extra: int) -> void:
 	flask_charges = mini(flask_charges + extra, max_flask_charges)
 	recalc_flask_heal_amount()
 
+func can_use_soul_flask() -> bool:
+	if flask_charges <= 0:
+		return false
+	return hp < max_hp or has_any_debuff() or has_used_stagger_threshold()
+
+func use_soul_flask() -> Dictionary:
+	var result := {
+		"used": false,
+		"threshold_restored": false,
+	}
+	if not can_use_soul_flask():
+		return result
+
+	consume_flask_charge()
+	cure_debuffs_from_flask()
+	heal_from_flask()
+	result.threshold_restored = restore_one_stagger_threshold()
+	result.used = true
+	return result
+
 func consume_flask_charge() -> void:
 	flask_charges -= 1
 
@@ -103,13 +164,16 @@ func recalc_flask_heal_amount() -> void:
 	flask_heal_per_use = maxi(1, int(ceil(float(max_hp) / float(max_flask_charges))))
 
 # --- Stamina ---
+func has_stamina_cost(action: String) -> bool:
+	return STAMINA_COST.has(action)
+
 func can_spend_stamina(action: String) -> bool:
-	if not STAMINA_COST.has(action):
+	if not has_stamina_cost(action):
 		return true
 	return stamina >= STAMINA_COST[action]
 
 func spend_stamina(action: String) -> bool:
-	if not STAMINA_COST.has(action):
+	if not has_stamina_cost(action):
 		return true
 	var cost: float = STAMINA_COST[action]
 	if stamina < cost:

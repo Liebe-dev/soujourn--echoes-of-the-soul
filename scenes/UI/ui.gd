@@ -85,7 +85,6 @@ var stagger_lock_timer: float:
 	set(value):
 		_stats.stagger_lock_timer = value
 
-const STAMINA_COST := {"attack": 20.0, "parry": 15.0, "deflect": 15.0}
 const SCREEN_SHAKE_FLASK := 0.5
 const SCREEN_SHAKE_STAGGER := 0.72
 const FLASK_SHAKE_DECAY := 3.5
@@ -176,56 +175,27 @@ func heal_to_full() -> void:
 	sync_flask_display()
 	sync_status_icons()
 	sync_hp_display()
-	sync_flask_display()
 	sync_stamina_display()
 	fade_in()
 
 func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF) -> Dictionary:
-	var result := {
-		"damage_taken": 0,
-		"staggered": false,
-		"stagger_tier": -1,
-		"floor_hp": -1,
-		"skip_player_stagger": false,
-	}
-	if dmg <= 0:
-		return result
+	var result := _stats.apply_damage(dmg, _hit_from_global)
 
-	var scaled_dmg := maxi(1, int(round(float(dmg) * _stats.get_damage_taken_multiplier())))
-	var prev_hp := _stats.hp
-	var target_hp := prev_hp - scaled_dmg
-
-	if _stats.stagger_lock_timer > 0.0 and _stats.stagger_lock_hp >= 0 and not _stats.has_bleeding():
-		target_hp = maxi(target_hp, _stats.stagger_lock_hp)
-
-	for tier in _stats.STAGGER_THRESHOLD_FRACS.size():
-		if not _stats.stagger_tiers_ready[tier]:
-			continue
-		var cross := _stats.resolve_stagger_crossing(prev_hp, target_hp, tier)
-		if cross.triggered:
-			target_hp = cross.target_hp
-			result.staggered = true
-			result.stagger_tier = tier
-			result.floor_hp = cross.floor_hp
-			result.skip_player_stagger = cross.skip_player_stagger
-			if cross.markers_changed:
-				sync_stagger_markers()
-			if cross.debuff_id != "":
-				sync_status_icons()
-				stagger_debuff_applied.emit(cross.debuff_id, cross.debuff_level)
-				enter_combat()
-			stagger_triggered.emit(tier, cross.floor_hp)
-			break
-
-	_stats.hp = clampi(target_hp, 0, _stats.max_hp)
-	result.damage_taken = prev_hp - _stats.hp
+	if result.markers_changed:
+		sync_stagger_markers()
+	if result.debuff_id != "":
+		sync_status_icons()
+		stagger_debuff_applied.emit(result.debuff_id, result.debuff_level)
+		enter_combat()
+	if result.staggered:
+		stagger_triggered.emit(result.stagger_tier, result.floor_hp)
 
 	if result.damage_taken > 0:
 		sync_hp_display()
 		flash_red()
 		enter_combat()
 
-	if _stats.hp <= 0:
+	if result.died:
 		SaveManager.respawn_at_checkpoint()
 
 	return result
@@ -255,9 +225,7 @@ func has_used_stagger_threshold() -> bool:
 
 #hàm công khai nhóm hồi phục
 func use_soul_flask() -> void:
-	if flask_charges <= 0:
-		return
-	if hp >= max_hp and not has_any_debuff() and not has_used_stagger_threshold():
+	if not _stats.can_use_soul_flask():
 		return
 	if _is_flask_draining:
 		return
@@ -291,7 +259,7 @@ func can_spend_stamina(action: String) -> bool:
 
 func spend_stamina(action: String) -> bool:
 	var spent := _stats.spend_stamina(action)
-	if spent and STAMINA_COST.has(action):
+	if spent and _stats.has_stamina_cost(action):
 		sync_stamina_display()
 		enter_combat()
 	return spent
@@ -406,12 +374,6 @@ func fade_out() -> void:
 	fade_tween.tween_property(self, "modulate:a", 0.0, 0.6)
 
 #hàm nội bộ nhóm sát thương và trạng thái
-
-
-func _cure_debuffs_from_flask() -> void:
-	_stats.cure_debuffs_from_flask()
-	sync_status_icons()
-
 func _recalc_flask_heal_amount() -> void:
 	_stats.recalc_flask_heal_amount()
 
@@ -459,10 +421,11 @@ func _on_flask_drain_complete() -> void:
 	_is_flask_draining = false
 	_flask_drain_tween = null
 
-	_stats.consume_flask_charge()
-	_cure_debuffs_from_flask()
-	_stats.heal_from_flask()
-	restore_one_stagger_threshold()
+	var flask_result := _stats.use_soul_flask()
+	if not flask_result.used:
+		return
+	if flask_result.threshold_restored:
+		sync_stagger_markers()
 	sync_hp_display()
 	sync_flask_display()
 	sync_status_icons()
