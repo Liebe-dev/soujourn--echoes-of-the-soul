@@ -12,14 +12,14 @@ radius = 7.652174
 height = 112.49183
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pvmv5"]
-size = Vector2(152.5798, 124.5)
+size = Vector2(163.2899, 75)
 
 [node name="PlayableAdel" type="CharacterBody2D" unique_id=1485460165 groups=["Player", "playableAdel"]]
 collision_layer = 3
 script = ExtResource("1_playable")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1090059515]
-position = Vector2(4, 1.0000001)
+position = Vector2(-5, -1.1920929e-07)
 scale = Vector2(2.875, 1.529)
 shape = SubResource("CapsuleShape2D_ybq6y")
 
@@ -42,7 +42,7 @@ collision_layer = 8
 monitoring = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitbox" unique_id=729430378]
-position = Vector2(166, 0)
+position = Vector2(99.35505, 4.5)
 shape = SubResource("RectangleShape2D_pvmv5")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=591595691]
