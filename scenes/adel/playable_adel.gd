@@ -3,6 +3,7 @@ extends CharacterBody2D
 @onready var spine_rig = $SpinePivot/SpineRig
 @onready var spine_anim = $SpinePivot/SpineRig/AnimationPlayer
 @onready var spine_pivot = $SpinePivot
+@onready var saber_hitbox: SaberHitbox = $WeaponPivot/SaberHitbox
 
 const ENEMY_COLLISION_LAYER := 3
 const ANIM_JUMP_START := " jump_start"
@@ -224,6 +225,7 @@ func _play_combo_step() -> void:
 	if not is_on_floor():
 		velocity.y = 0.0
 	spine_anim.play(combat.get_attack_anim_name())
+	saber_hitbox.play_attack_window(combat.get_attack_anim_name())
 
 func _reset_combo() -> void:
 	combat.reset_combo_if_idle(is_doing_action)
@@ -484,6 +486,7 @@ func _on_dodge_cooldown_timeout() -> void:
 func _on_damage_staggered(knockback_velocity: Vector2) -> void:
 	is_doing_action = false
 	combat.interrupt()
+	saber_hitbox.stop_attack_window()
 	can_move = false
 	velocity = knockback_velocity
 	_playing_land_anim = false

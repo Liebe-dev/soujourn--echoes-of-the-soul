@@ -1,0 +1,1265 @@
+WorkerThreadPool: 12 threads, 9 max low-priority.
+WARNING: PDB file 'D:/Godot Project/soujourn--echoes-of-the-soul.worktrees/combat-system-enhancement-steps/addons/psd_to_layer_scene/native/psd_layer_to_scene.pdb' for library 'D:/Godot Project/soujourn--echoes-of-the-soul.worktrees/combat-system-enhancement-steps/addons/psd_to_layer_scene/native/~psd_layer_to_scene.dll' was not found, skipping copy/rename.
+   at: copy_and_rename_pdb (platform/windows/windows_utils.cpp:159)
+Initialize godot-rust (API v4.2.2.stable.official, runtime v4.7.stable.official)
+Godot Engine v4.7.stable.official.5b4e0cb0f - https://godotengine.org
+TextServer: Added interface "Dummy"
+TextServer: Added interface "ICU / HarfBuzz / Graphite (Built-in)"
+Accessibility: AccessKit driver loaded.
+Native OpenGL API detected: 3.3: NVIDIA - NVIDIA GeForce RTX 2050
+NVAPI: Init OK!
+NVAPI: Profile not found, creating...
+NVAPI: Application not found in profile, creating...
+NVAPI: Error creating application: NVAPI_EXECUTABLE_ALREADY_IN_USE(code -167)
+Accessibility: window 0 adapter created.
+SDL: Init OK!
+Using "winink" pen tablet driver...
+Shader 'CanvasSdfShaderGLES3' SHA256: 211e25ed4c200adc2b1fecd0a57e544524a6cc47a8ea7fd155fd4913518f1da9
+Shader 'SkeletonShaderGLES3' SHA256: 5abe4758cb85fb5583d3903b69dba6031cda8d6c8437f1461487a4acbedbfe96
+Shader 'ParticlesShaderGLES3' SHA256: 63cfa3c8cceebc2e9e4a97e464997f051f6a9eb593c0afc6693ca599680f2941
+Shader 'ParticlesCopyShaderGLES3' SHA256: c6fc4ae60032f3d2c79bdfccaeeb2ad4dd38fb4c3784210eca1daa467635d2a6
+Shader 'CopyShaderGLES3' SHA256: 14e2f4ff454ecf1de6cea8c4dfe7f239e9f31fa1e5e93b16c7a7ff43942f5bc2
+Shader 'CubemapFilterShaderGLES3' SHA256: df11afe97a4921a2ef359a88039610162ef63aa977f8edfe9d73d4fb0b99e782
+Shader 'GlowShaderGLES3' SHA256: db3eb8ea304eba25427b116065eb1d87c64d09273dacca61bc44a31bade521f3
+Shader 'PostShaderGLES3' SHA256: 9cc5f4099a2a51726a427f0238a198ddb11ae3fda338c326658012d4fe065dff
+Shader 'FeedShaderGLES3' SHA256: d992d80ec657f32658b1433864b0d4a0e327ed2d4b8addd2826ba59fd4da7dd8
+Shader 'CanvasShaderGLES3' SHA256: 5b047755ac7f2f4b7f88a83cc2c91ef9d702213247ecd0087424768e3482db1b
+Shader 'CanvasOcclusionShaderGLES3' SHA256: e049a30e35cb9a1a66c775dcf84dc793b726558fa05c2422cf67147d95b93f26
+Shader 'SceneShaderGLES3' SHA256: 02dcccc3c96a2d85bd5c455179847224d73107f50b0a4098eab1dd010622f4b6
+Shader 'SkyShaderGLES3' SHA256: cd265dabdd1ced8a02e2d0c24d65f2309cbb7860db6778f41efc1592ce5109c1
+Shader 'TexBlitShaderGLES3' SHA256: e9cf9d830cbca1b148579c698bc214c5f19bc9e086172f3129625eedb7fa2234
+OpenGL API 3.3.0 NVIDIA 610.62 - Compatibility - Using Device: NVIDIA - NVIDIA GeForce RTX 2050
+
+TextServer: Primary interface set to: "ICU / HarfBuzz / Graphite (Built-in)".
+FMOD Sound System: Successfully set DSP buffer size
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_systemi.cpp in SystemI::setAdvancedSettings(): mAdvancedSettings.cbSize                   = 104
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_systemi.cpp in SystemI::setAdvancedSettings(): mAdvancedSettings.defaultDecodeBufferSize  = 400
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_systemi.cpp in SystemI::setAdvancedSettings(): mAdvancedSettings.distanceFilterCenterFreq = 1500.000000
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_systemi.cpp in SystemI::setAdvancedSettings(): mAdvancedSettings.DSPBufferPoolSize        = 8
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_systemi.cpp in SystemI::setAdvancedSettings(): mAdvancedSettings.resamplerMethod          = 2
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_systemi.cpp in SystemI::setAdvancedSettings(): mAdvancedSettings.randomSeed               = 1790838238
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_systemi.cpp in SystemI::setAdvancedSettings(): mAdvancedSettings.maxConvolutionThreads    = 3
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\studio_api\src\fmod_runtime_manager.cpp in Manager::init(): maxchannels = 1024 studioflags = 00000000 flags 00000004 extradriverdata 0000000000000000.
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_systemi.cpp in SystemI::init(): Initialize version=20306 (149358), maxchannels=1024, flags=0x00020004
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_systemi_driver.cpp in SystemI::setOutputInternal(): Setting output to 'FMOD WASAPI Output'
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\platforms\win\src\fmod_output_wasapi.cpp in OutputWASAPI::init(): Mix Format (WAVEFORMATEX): wFormatTag=0xFFFE, nChannels=2, nSamplesPerSec=48000, nAvgBytesPerSec=384000, nBlockAlign=8, wBitsPerSample=32, cbSize=22.
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\platforms\win\src\fmod_output_wasapi.cpp in OutputWASAPI::init(): Mix Format (WAVEFORMATEXTENSIBLE): wValidBitsPerSample=32, dwChannelMask=0x00000003, SubFormat=00000003-0000-0010-8000-00AA00389B71.
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\platforms\win\src\fmod_output_wasapi.cpp in OutputWASAPI::init(): Output buffer size: 2048 samples, latency: 0.00ms, period: 10.00ms, DSP buffer: 512 * 4
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_thread.cpp in Thread::initThread(): Init FMOD stream thread. Affinity: 0x4000000000000003, Priority: 0xFFFF7FFB, Stack Size: 98304, Semaphore: No, Sleep Time: 10, Looping: Yes.
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_systemi_dsp.cpp in SystemI::DSPCodecPoolRegister(): register codec pool for pool type 0
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_thread.cpp in Thread::initThread(): Init FMOD mixer thread. Affinity: 0x4000000000000001, Priority: 0xFFFF7FFA, Stack Size: 81920, Semaphore: No, Sleep Time: 0, Looping: Yes.
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\studio_api\src\fmod_asyncmanager.cpp in AsyncManager::init(): manager 0000021C7219A298 isAsync 1 updatePeriod 0.02
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_thread.cpp in Thread::initThread(): Init FMOD Studio update thread. Affinity: 0x4000000000000002, Priority: 0xFFFF7FFD, Stack Size: 98304, Semaphore: No, Sleep Time: 1, Looping: No.
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\studio_api\src\fmod_asyncmanager.cpp in AsyncManager::init(): done
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\studio_api\src\fmod_playback_system.cpp in PlaybackSystem::init(): 
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_thread.cpp in Thread::initThread(): Init FMOD Studio sample load thread. Affinity: 0x4000000000000003, Priority: 0xFFFF7FFD, Stack Size: 98304, Semaphore: No, Sleep Time: 1, Looping: No.
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\studio_api\src\fmod_playback_system.cpp in PlaybackSystem::init(): done
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\core_api\src\fmod_thread.cpp in Thread::initThread(): Init FMOD Studio bank load thread. Affinity: 0x4000000000000003, Priority: 0xFFFF7FFD, Stack Size: 98304, Semaphore: No, Sleep Time: 1, Looping: No.
+
+[FMOD INFO] C:\buildagent1\work\c1c3f17eb167c494\studio_api\src\fmod_runtime_manager.cpp in Manager::init(): done.
+
+FMOD Sound System: Successfully initialized
+Custom File System enabled.
+FMOD Sound System: Successfully set global 3D settings
+CORE API HASH: 3472268009
+EDITOR API HASH: 2212757246
+SceneTreeFTI: traversal method DEFAULT
+Loading resource: C:/Users/xuank/AppData/Roaming/Godot/editor_settings-4.7.tres remapped: C:/Users/xuank/AppData/Roaming/Godot/editor_settings-4.7.tres
+Completed load for: 'C:/Users/xuank/AppData/Roaming/Godot/editor_settings-4.7.tres' remapped 'C:/Users/xuank/AppData/Roaming/Godot/editor_settings-4.7.tres' at thread -1
+EditorSettings: Load OK!
+EditorTheme: Generating new theme for the config '1013720055'.
+EditorTheme: Generating new icons.
+EditorTheme: Generating new fonts.
+EditorTheme: Generating new styles.
+Loading resource: C:/Users/xuank/AppData/Local/Godot/editor_doc_cache-4.7.res remapped: C:/Users/xuank/AppData/Local/Godot/editor_doc_cache-4.7.res
+Loaded system CA certificates
+Completed load for: 'C:/Users/xuank/AppData/Local/Godot/editor_doc_cache-4.7.res' remapped 'C:/Users/xuank/AppData/Local/Godot/editor_doc_cache-4.7.res' at thread -1
+Loading resource: res://scenes/UI/save_manager.gd remapped: res://scenes/UI/save_manager.gd
+Completed load for: 'res://scenes/UI/save_manager.gd' remapped 'res://scenes/UI/save_manager.gd' at thread -1
+Loading resource: res://addons/fmod/FmodManager.gd remapped: res://addons/fmod/FmodManager.gd
+Completed load for: 'res://addons/fmod/FmodManager.gd' remapped 'res://addons/fmod/FmodManager.gd' at thread -1
+Loading resource: res://addons/godot_ai/runtime/game_helper.gd remapped: res://addons/godot_ai/runtime/game_helper.gd
+Completed load for: 'res://addons/godot_ai/runtime/game_helper.gd' remapped 'res://addons/godot_ai/runtime/game_helper.gd' at thread -1
+Loading resource: res://addons/fmod/FmodPlugin.gd remapped: res://addons/fmod/FmodPlugin.gd
+Loading resource: res://addons/fmod/icons/fmod_icon.svg remapped: res://addons/fmod/icons/fmod_icon.svg
+Loading resource: res://.godot/imported/fmod_icon.svg-cca7eb13231881fafaea0d598d407ea3.editor.ctex remapped: res://.godot/imported/fmod_icon.svg-cca7eb13231881fafaea0d598d407ea3.editor.ctex
+Completed load for: 'res://addons/fmod/icons/fmod_icon.svg' remapped 'res://addons/fmod/icons/fmod_icon.svg' at thread -1
+Loading resource: res://addons/fmod/icons/vca_icon.svg remapped: res://addons/fmod/icons/vca_icon.svg
+Loading resource: res://.godot/imported/vca_icon.svg-def43f27fe148a7a0b18c7dcaab20c79.editor.ctex remapped: res://.godot/imported/vca_icon.svg-def43f27fe148a7a0b18c7dcaab20c79.editor.ctex
+Completed load for: 'res://addons/fmod/icons/vca_icon.svg' remapped 'res://addons/fmod/icons/vca_icon.svg' at thread -1
+Loading resource: res://addons/fmod/icons/bank_icon.svg remapped: res://addons/fmod/icons/bank_icon.svg
+Loading resource: res://.godot/imported/bank_icon.svg-8de6c7bff09a67352e162b3c61b601de.editor.ctex remapped: res://.godot/imported/bank_icon.svg-8de6c7bff09a67352e162b3c61b601de.editor.ctex
+Completed load for: 'res://addons/fmod/icons/bank_icon.svg' remapped 'res://addons/fmod/icons/bank_icon.svg' at thread -1
+Loading resource: res://addons/fmod/icons/event_icon.svg remapped: res://addons/fmod/icons/event_icon.svg
+Loading resource: res://.godot/imported/event_icon.svg-4e6e2103d076f95b7bef82f079e433e6.editor.ctex remapped: res://.godot/imported/event_icon.svg-4e6e2103d076f95b7bef82f079e433e6.editor.ctex
+Completed load for: 'res://addons/fmod/icons/event_icon.svg' remapped 'res://addons/fmod/icons/event_icon.svg' at thread -1
+Loading resource: res://addons/fmod/icons/bus_icon.svg remapped: res://addons/fmod/icons/bus_icon.svg
+Loading resource: res://.godot/imported/bus_icon.svg-f536ffd3c4893e79a9d3cb9a1b4fb50c.editor.ctex remapped: res://.godot/imported/bus_icon.svg-f536ffd3c4893e79a9d3cb9a1b4fb50c.editor.ctex
+Completed load for: 'res://addons/fmod/icons/bus_icon.svg' remapped 'res://addons/fmod/icons/bus_icon.svg' at thread -1
+Loading resource: res://addons/fmod/icons/snapshot_icon.svg remapped: res://addons/fmod/icons/snapshot_icon.svg
+Loading resource: res://.godot/imported/snapshot_icon.svg-7b517248819b3685844766808fbce2a5.editor.ctex remapped: res://.godot/imported/snapshot_icon.svg-7b517248819b3685844766808fbce2a5.editor.ctex
+Completed load for: 'res://addons/fmod/icons/snapshot_icon.svg' remapped 'res://addons/fmod/icons/snapshot_icon.svg' at thread -1
+Completed load for: 'res://addons/fmod/FmodPlugin.gd' remapped 'res://addons/fmod/FmodPlugin.gd' at thread -1
+Loading resource: res://addons/fmod/tool/ui/FmodBankExplorer.tscn remapped: res://addons/fmod/tool/ui/FmodBankExplorer.tscn
+Loading resource: res://addons/fmod/tool/ui/EventPlayControls.gd remapped: res://addons/fmod/tool/ui/EventPlayControls.gd
+Completed load for: 'res://addons/fmod/tool/ui/EventPlayControls.gd' remapped 'res://addons/fmod/tool/ui/EventPlayControls.gd' at thread -1
+Loading resource: res://addons/fmod/tool/ui/EventParametersDisplay.tscn remapped: res://addons/fmod/tool/ui/EventParametersDisplay.tscn
+Loading resource: res://addons/fmod/tool/ui/EventParametersDisplay.gd remapped: res://addons/fmod/tool/ui/EventParametersDisplay.gd
+Loading resource: res://addons/fmod/tool/ui/ParameterDisplay.tscn remapped: res://addons/fmod/tool/ui/ParameterDisplay.tscn
+Completed load for: 'res://addons/fmod/tool/ui/ParameterDisplay.tscn' remapped 'res://addons/fmod/tool/ui/ParameterDisplay.tscn' at thread -1
+Completed load for: 'res://addons/fmod/tool/ui/EventParametersDisplay.gd' remapped 'res://addons/fmod/tool/ui/EventParametersDisplay.gd' at thread -1
+Completed load for: 'res://addons/fmod/tool/ui/EventParametersDisplay.tscn' remapped 'res://addons/fmod/tool/ui/EventParametersDisplay.tscn' at thread -1
+Completed load for: 'res://addons/fmod/tool/ui/FmodBankExplorer.tscn' remapped 'res://addons/fmod/tool/ui/FmodBankExplorer.tscn' at thread -1
+Loading resource: res://addons/fmod/tool/property_editors/FmodEventEditorProperty.tscn remapped: res://addons/fmod/tool/property_editors/FmodEventEditorProperty.tscn
+Loading resource: res://addons/fmod/tool/property_editors/FmodPathEditorProperty.tscn remapped: res://addons/fmod/tool/property_editors/FmodPathEditorProperty.tscn
+Loading resource: res://addons/fmod/tool/property_editors/FmodPathEditorProperty.gd remapped: res://addons/fmod/tool/property_editors/FmodPathEditorProperty.gd
+Completed load for: 'res://addons/fmod/tool/property_editors/FmodPathEditorProperty.gd' remapped 'res://addons/fmod/tool/property_editors/FmodPathEditorProperty.gd' at thread -1
+Loading resource: res://addons/fmod/tool/property_editors/FmodGuidAndPathPropertyEditorUi.tscn remapped: res://addons/fmod/tool/property_editors/FmodGuidAndPathPropertyEditorUi.tscn
+Completed load for: 'res://addons/fmod/tool/property_editors/FmodGuidAndPathPropertyEditorUi.tscn' remapped 'res://addons/fmod/tool/property_editors/FmodGuidAndPathPropertyEditorUi.tscn' at thread -1
+Completed load for: 'res://addons/fmod/tool/property_editors/FmodPathEditorProperty.tscn' remapped 'res://addons/fmod/tool/property_editors/FmodPathEditorProperty.tscn' at thread -1
+Loading resource: res://addons/fmod/tool/property_editors/FmodEventEditorProperty.gd remapped: res://addons/fmod/tool/property_editors/FmodEventEditorProperty.gd
+Completed load for: 'res://addons/fmod/tool/property_editors/FmodEventEditorProperty.gd' remapped 'res://addons/fmod/tool/property_editors/FmodEventEditorProperty.gd' at thread -1
+Completed load for: 'res://addons/fmod/tool/property_editors/FmodEventEditorProperty.tscn' remapped 'res://addons/fmod/tool/property_editors/FmodEventEditorProperty.tscn' at thread -1
+WARNING: Cannot find master strings bank at res://soujournAudio/Master.strings.bank
+   at: push_warning (core/variant/variant_utility.cpp:1033)
+   GDScript backtrace (most recent call first):
+       [0] reload_all_banks (res://addons/fmod/tool/FmodBankDatabase.gd:18)
+       [1] _init (res://addons/fmod/FmodPlugin.gd:18)
+Loading resource: res://addons/godot_ai/plugin.gd remapped: res://addons/godot_ai/plugin.gd
+Completed load for: 'res://addons/godot_ai/plugin.gd' remapped 'res://addons/godot_ai/plugin.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/claude_code.gd remapped: res://addons/godot_ai/clients/claude_code.gd
+Completed load for: 'res://addons/godot_ai/clients/claude_code.gd' remapped 'res://addons/godot_ai/clients/claude_code.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/claude_desktop.gd remapped: res://addons/godot_ai/clients/claude_desktop.gd
+Completed load for: 'res://addons/godot_ai/clients/claude_desktop.gd' remapped 'res://addons/godot_ai/clients/claude_desktop.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/codex.gd remapped: res://addons/godot_ai/clients/codex.gd
+Completed load for: 'res://addons/godot_ai/clients/codex.gd' remapped 'res://addons/godot_ai/clients/codex.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/codebuddy.gd remapped: res://addons/godot_ai/clients/codebuddy.gd
+Completed load for: 'res://addons/godot_ai/clients/codebuddy.gd' remapped 'res://addons/godot_ai/clients/codebuddy.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/grok.gd remapped: res://addons/godot_ai/clients/grok.gd
+Completed load for: 'res://addons/godot_ai/clients/grok.gd' remapped 'res://addons/godot_ai/clients/grok.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/antigravity.gd remapped: res://addons/godot_ai/clients/antigravity.gd
+Completed load for: 'res://addons/godot_ai/clients/antigravity.gd' remapped 'res://addons/godot_ai/clients/antigravity.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/cursor.gd remapped: res://addons/godot_ai/clients/cursor.gd
+Completed load for: 'res://addons/godot_ai/clients/cursor.gd' remapped 'res://addons/godot_ai/clients/cursor.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/windsurf.gd remapped: res://addons/godot_ai/clients/windsurf.gd
+Completed load for: 'res://addons/godot_ai/clients/windsurf.gd' remapped 'res://addons/godot_ai/clients/windsurf.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/vscode.gd remapped: res://addons/godot_ai/clients/vscode.gd
+Completed load for: 'res://addons/godot_ai/clients/vscode.gd' remapped 'res://addons/godot_ai/clients/vscode.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/vscode_insiders.gd remapped: res://addons/godot_ai/clients/vscode_insiders.gd
+Completed load for: 'res://addons/godot_ai/clients/vscode_insiders.gd' remapped 'res://addons/godot_ai/clients/vscode_insiders.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/zed.gd remapped: res://addons/godot_ai/clients/zed.gd
+Completed load for: 'res://addons/godot_ai/clients/zed.gd' remapped 'res://addons/godot_ai/clients/zed.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/gemini_cli.gd remapped: res://addons/godot_ai/clients/gemini_cli.gd
+Completed load for: 'res://addons/godot_ai/clients/gemini_cli.gd' remapped 'res://addons/godot_ai/clients/gemini_cli.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/cline.gd remapped: res://addons/godot_ai/clients/cline.gd
+Completed load for: 'res://addons/godot_ai/clients/cline.gd' remapped 'res://addons/godot_ai/clients/cline.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/kilo_code.gd remapped: res://addons/godot_ai/clients/kilo_code.gd
+Completed load for: 'res://addons/godot_ai/clients/kilo_code.gd' remapped 'res://addons/godot_ai/clients/kilo_code.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/roo_code.gd remapped: res://addons/godot_ai/clients/roo_code.gd
+Completed load for: 'res://addons/godot_ai/clients/roo_code.gd' remapped 'res://addons/godot_ai/clients/roo_code.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/zoo_code.gd remapped: res://addons/godot_ai/clients/zoo_code.gd
+Completed load for: 'res://addons/godot_ai/clients/zoo_code.gd' remapped 'res://addons/godot_ai/clients/zoo_code.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/kiro.gd remapped: res://addons/godot_ai/clients/kiro.gd
+Completed load for: 'res://addons/godot_ai/clients/kiro.gd' remapped 'res://addons/godot_ai/clients/kiro.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/trae.gd remapped: res://addons/godot_ai/clients/trae.gd
+Completed load for: 'res://addons/godot_ai/clients/trae.gd' remapped 'res://addons/godot_ai/clients/trae.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/opencode.gd remapped: res://addons/godot_ai/clients/opencode.gd
+Completed load for: 'res://addons/godot_ai/clients/opencode.gd' remapped 'res://addons/godot_ai/clients/opencode.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/qwen_code.gd remapped: res://addons/godot_ai/clients/qwen_code.gd
+Completed load for: 'res://addons/godot_ai/clients/qwen_code.gd' remapped 'res://addons/godot_ai/clients/qwen_code.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/kimi_code.gd remapped: res://addons/godot_ai/clients/kimi_code.gd
+Completed load for: 'res://addons/godot_ai/clients/kimi_code.gd' remapped 'res://addons/godot_ai/clients/kimi_code.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/hermes.gd remapped: res://addons/godot_ai/clients/hermes.gd
+Completed load for: 'res://addons/godot_ai/clients/hermes.gd' remapped 'res://addons/godot_ai/clients/hermes.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/pi.gd remapped: res://addons/godot_ai/clients/pi.gd
+Completed load for: 'res://addons/godot_ai/clients/pi.gd' remapped 'res://addons/godot_ai/clients/pi.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/deepseek_harness.gd remapped: res://addons/godot_ai/clients/deepseek_harness.gd
+Completed load for: 'res://addons/godot_ai/clients/deepseek_harness.gd' remapped 'res://addons/godot_ai/clients/deepseek_harness.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/zcode.gd remapped: res://addons/godot_ai/clients/zcode.gd
+Completed load for: 'res://addons/godot_ai/clients/zcode.gd' remapped 'res://addons/godot_ai/clients/zcode.gd' at thread -1
+Loading resource: res://addons/godot_ai/clients/omp.gd remapped: res://addons/godot_ai/clients/omp.gd
+Completed load for: 'res://addons/godot_ai/clients/omp.gd' remapped 'res://addons/godot_ai/clients/omp.gd' at thread -1
+Failed to bind socket. Error: 3.
+MCP | using uvx (godot-ai==4.2.3)
+MCP | plugin loaded
+MCP | Probing the configured server endpoint.
+Loading resource: res://addons/psd_to_layer_scene/plugin.gd remapped: res://addons/psd_to_layer_scene/plugin.gd
+Loading resource: res://addons/psd_to_layer_scene/execute_panel.tscn remapped: res://addons/psd_to_layer_scene/execute_panel.tscn
+Loading resource: res://addons/psd_to_layer_scene/execute_panel.gd remapped: res://addons/psd_to_layer_scene/execute_panel.gd
+Completed load for: 'res://addons/psd_to_layer_scene/execute_panel.gd' remapped 'res://addons/psd_to_layer_scene/execute_panel.gd' at thread -1
+Completed load for: 'res://addons/psd_to_layer_scene/execute_panel.tscn' remapped 'res://addons/psd_to_layer_scene/execute_panel.tscn' at thread -1
+Completed load for: 'res://addons/psd_to_layer_scene/plugin.gd' remapped 'res://addons/psd_to_layer_scene/plugin.gd' at thread -1
+Failed to bind socket. Error: 3.
+Loading resource: res://addons/psd_to_layer_scene/translation/translation.gd remapped: res://addons/psd_to_layer_scene/translation/translation.gd
+Completed load for: 'res://addons/psd_to_layer_scene/translation/translation.gd' remapped 'res://addons/psd_to_layer_scene/translation/translation.gd' at thread -1
+MCP | adopted external server
+MCP | connecting to server (attempt 1)
+MCP | connected to server; authenticating
+MCP | authenticated with server
+thirdparty/mbedtls/library/ssl_tls13_generic.c:1552: 0000021CF1CD9A40: Perform PSA-based ECDH/FFDH computation.
+WARNING: UID duplicate detected between res://asset/UI/dialogueUI/main.tscn and res://asset/BG/main.tscn.
+   at: _process_file_system (editor/file_system/editor_file_system.cpp:1405)
+thirdparty/mbedtls/library/ssl_tls13_client.c:1950: 0000021CF1CD9A40: Switch to handshake keys for inbound traffic
+thirdparty/mbedtls/library/ssl_tls13_generic.c:0403: 0000021CF1CD9A40: mbedtls_ssl_tls13_process_certificate_verify() returned 0 (-0x0000)
+thirdparty/mbedtls/library/ssl_tls13_client.c:2639: 0000021CF1CD9A40: Switch to handshake traffic keys for outbound traffic
+thirdparty/mbedtls/library/ssl_tls13_generic.c:1235: 0000021CF1CD9A40: Switch to application keys for inbound traffic
+thirdparty/mbedtls/library/ssl_tls13_generic.c:1238: 0000021CF1CD9A40: Switch to application keys for outbound traffic
+Accessibility: window 1 adapter created.
+Accessibility: window 1 adapter initial update completed.
+Loading resource: res://scenes/adel/playable_adel.tscn remapped: res://scenes/adel/playable_adel.tscn
+Loading resource: res://scenes/adel/playable_adel.gd remapped: res://scenes/adel/playable_adel.gd
+Completed load for: 'res://scenes/adel/playable_adel.gd' remapped 'res://scenes/adel/playable_adel.gd' at thread -1
+Loading resource: res://scenes/camera_2d.gd remapped: res://scenes/camera_2d.gd
+Completed load for: 'res://scenes/camera_2d.gd' remapped 'res://scenes/camera_2d.gd' at thread -1
+Loading resource: res://scenes/UI/hud.tscn remapped: res://scenes/UI/hud.tscn
+Loading resource: res://scenes/UI/ui.gd remapped: res://scenes/UI/ui.gd
+Completed load for: 'res://scenes/UI/ui.gd' remapped 'res://scenes/UI/ui.gd' at thread -1
+Loading resource: res://scenes/UI/soul_flask.gdshader remapped: res://scenes/UI/soul_flask.gdshader
+Completed load for: 'res://scenes/UI/soul_flask.gdshader' remapped 'res://scenes/UI/soul_flask.gdshader' at thread -1
+Loading resource: res://asset/UI/DarkOrbBorder.png remapped: res://asset/UI/DarkOrbBorder.png
+Loading resource: res://.godot/imported/DarkOrbBorder.png-d3c287f6a16d772c36bf216f83b456db.ctex remapped: res://.godot/imported/DarkOrbBorder.png-d3c287f6a16d772c36bf216f83b456db.ctex
+Completed load for: 'res://asset/UI/DarkOrbBorder.png' remapped 'res://asset/UI/DarkOrbBorder.png' at thread -1
+Loading resource: res://scenes/UI/flask_shake.gdshader remapped: res://scenes/UI/flask_shake.gdshader
+Completed load for: 'res://scenes/UI/flask_shake.gdshader' remapped 'res://scenes/UI/flask_shake.gdshader' at thread -1
+Loading resource: res://scenes/UI/status_effect_bar.gd remapped: res://scenes/UI/status_effect_bar.gd
+Loading resource: res://scenes/UI/status_icon_slot.tscn remapped: res://scenes/UI/status_icon_slot.tscn
+Loading resource: res://scenes/UI/status_icon_slot.gd remapped: res://scenes/UI/status_icon_slot.gd
+Completed load for: 'res://scenes/UI/status_icon_slot.gd' remapped 'res://scenes/UI/status_icon_slot.gd' at thread -1
+Completed load for: 'res://scenes/UI/status_icon_slot.tscn' remapped 'res://scenes/UI/status_icon_slot.tscn' at thread -1
+Completed load for: 'res://scenes/UI/status_effect_bar.gd' remapped 'res://scenes/UI/status_effect_bar.gd' at thread -1
+Completed load for: 'res://scenes/UI/hud.tscn' remapped 'res://scenes/UI/hud.tscn' at thread -1
+Loading resource: res://scenes/UI/master_menu.tscn remapped: res://scenes/UI/master_menu.tscn
+Loading resource: res://scenes/UI/master_menu.gd remapped: res://scenes/UI/master_menu.gd
+Completed load for: 'res://scenes/UI/master_menu.gd' remapped 'res://scenes/UI/master_menu.gd' at thread -1
+Loading resource: res://asset/UI/Menu screen/menu character.png remapped: res://asset/UI/Menu screen/menu character.png
+Loading resource: res://.godot/imported/menu character.png-ce45837e43a3600e2415bca7b8b6510e.ctex remapped: res://.godot/imported/menu character.png-ce45837e43a3600e2415bca7b8b6510e.ctex
+Completed load for: 'res://asset/UI/Menu screen/menu character.png' remapped 'res://asset/UI/Menu screen/menu character.png' at thread -1
+Loading resource: res://asset/UI/Menu screen/Q.png remapped: res://asset/UI/Menu screen/Q.png
+Loading resource: res://.godot/imported/Q.png-99dbe2f4fcd7969fdc5913ce38b11292.ctex remapped: res://.godot/imported/Q.png-99dbe2f4fcd7969fdc5913ce38b11292.ctex
+Completed load for: 'res://asset/UI/Menu screen/Q.png' remapped 'res://asset/UI/Menu screen/Q.png' at thread -1
+Loading resource: res://asset/UI/Menu screen/choose.png remapped: res://asset/UI/Menu screen/choose.png
+Loading resource: res://.godot/imported/choose.png-71e5ab7d3dd29994adb38cc001337b00.ctex remapped: res://.godot/imported/choose.png-71e5ab7d3dd29994adb38cc001337b00.ctex
+Completed load for: 'res://asset/UI/Menu screen/choose.png' remapped 'res://asset/UI/Menu screen/choose.png' at thread -1
+Loading resource: res://asset/UI/Menu screen/E.png remapped: res://asset/UI/Menu screen/E.png
+Loading resource: res://.godot/imported/E.png-76b8e73a7547f0495f0f5ff1b2f5810b.ctex remapped: res://.godot/imported/E.png-76b8e73a7547f0495f0f5ff1b2f5810b.ctex
+Completed load for: 'res://asset/UI/Menu screen/E.png' remapped 'res://asset/UI/Menu screen/E.png' at thread -1
+Loading resource: res://scenes/UI/character_menu.tscn remapped: res://scenes/UI/character_menu.tscn
+Loading resource: res://scenes/UI/character_menu.gd remapped: res://scenes/UI/character_menu.gd
+Completed load for: 'res://scenes/UI/character_menu.gd' remapped 'res://scenes/UI/character_menu.gd' at thread -1
+Loading resource: res://asset/Character/Adel/idle/Adel spine action-idle_00.png remapped: res://asset/Character/Adel/idle/Adel spine action-idle_00.png
+Loading resource: res://.godot/imported/Adel spine action-idle_00.png-283fcdc49192cb00591ff2c1e66fa445.ctex remapped: res://.godot/imported/Adel spine action-idle_00.png-283fcdc49192cb00591ff2c1e66fa445.ctex
+Completed load for: 'res://asset/Character/Adel/idle/Adel spine action-idle_00.png' remapped 'res://asset/Character/Adel/idle/Adel spine action-idle_00.png' at thread -1
+Loading resource: res://asset/UI/Menu screen/symbol.png remapped: res://asset/UI/Menu screen/symbol.png
+Loading resource: res://.godot/imported/symbol.png-6cc2d5bd88d22b16b94dac6e90368777.ctex remapped: res://.godot/imported/symbol.png-6cc2d5bd88d22b16b94dac6e90368777.ctex
+Completed load for: 'res://asset/UI/Menu screen/symbol.png' remapped 'res://asset/UI/Menu screen/symbol.png' at thread -1
+Loading resource: res://asset/UI/Menu screen/chapter.png remapped: res://asset/UI/Menu screen/chapter.png
+Loading resource: res://.godot/imported/chapter.png-b9f5829f8e96c5adc8eb62f9d2b38c9a.ctex remapped: res://.godot/imported/chapter.png-b9f5829f8e96c5adc8eb62f9d2b38c9a.ctex
+Completed load for: 'res://asset/UI/Menu screen/chapter.png' remapped 'res://asset/UI/Menu screen/chapter.png' at thread -1
+Loading resource: res://asset/UI/Menu screen/weapon bar e.png remapped: res://asset/UI/Menu screen/weapon bar e.png
+Loading resource: res://.godot/imported/weapon bar e.png-7fc0e07b5274f5ca2254a382efb11f2c.ctex remapped: res://.godot/imported/weapon bar e.png-7fc0e07b5274f5ca2254a382efb11f2c.ctex
+Completed load for: 'res://asset/UI/Menu screen/weapon bar e.png' remapped 'res://asset/UI/Menu screen/weapon bar e.png' at thread -1
+Loading resource: res://asset/UI/Menu screen/arts.png remapped: res://asset/UI/Menu screen/arts.png
+Loading resource: res://.godot/imported/arts.png-640295e537096d89fbffd8f3881e253f.ctex remapped: res://.godot/imported/arts.png-640295e537096d89fbffd8f3881e253f.ctex
+Completed load for: 'res://asset/UI/Menu screen/arts.png' remapped 'res://asset/UI/Menu screen/arts.png' at thread -1
+Completed load for: 'res://scenes/UI/character_menu.tscn' remapped 'res://scenes/UI/character_menu.tscn' at thread -1
+Loading resource: res://scenes/UI/equipment_menu.tscn remapped: res://scenes/UI/equipment_menu.tscn
+Loading resource: res://scenes/UI/equipment_menu.gd remapped: res://scenes/UI/equipment_menu.gd
+Completed load for: 'res://scenes/UI/equipment_menu.gd' remapped 'res://scenes/UI/equipment_menu.gd' at thread -1
+Loading resource: res://asset/UI/Menu screen/menu equipment.png remapped: res://asset/UI/Menu screen/menu equipment.png
+Loading resource: res://.godot/imported/menu equipment.png-a1013313c491b46c7a161b27a519ddbe.ctex remapped: res://.godot/imported/menu equipment.png-a1013313c491b46c7a161b27a519ddbe.ctex
+Completed load for: 'res://asset/UI/Menu screen/menu equipment.png' remapped 'res://asset/UI/Menu screen/menu equipment.png' at thread -1
+Loading resource: res://asset/UI/Menu screen/Char.png remapped: res://asset/UI/Menu screen/Char.png
+Loading resource: res://.godot/imported/Char.png-5401001bc029e8f17062e89a35c79d25.ctex remapped: res://.godot/imported/Char.png-5401001bc029e8f17062e89a35c79d25.ctex
+Completed load for: 'res://asset/UI/Menu screen/Char.png' remapped 'res://asset/UI/Menu screen/Char.png' at thread -1
+Loading resource: res://asset/UI/Menu screen/equip icon.png remapped: res://asset/UI/Menu screen/equip icon.png
+Loading resource: res://.godot/imported/equip icon.png-aeda094460f64f80cddbcac418088a55.ctex remapped: res://.godot/imported/equip icon.png-aeda094460f64f80cddbcac418088a55.ctex
+Completed load for: 'res://asset/UI/Menu screen/equip icon.png' remapped 'res://asset/UI/Menu screen/equip icon.png' at thread -1
+Loading resource: res://asset/UI/Menu screen/relica icon.png remapped: res://asset/UI/Menu screen/relica icon.png
+Loading resource: res://.godot/imported/relica icon.png-2a0db69c100f3240b7cffd12fc0b9f16.ctex remapped: res://.godot/imported/relica icon.png-2a0db69c100f3240b7cffd12fc0b9f16.ctex
+Completed load for: 'res://asset/UI/Menu screen/relica icon.png' remapped 'res://asset/UI/Menu screen/relica icon.png' at thread -1
+Loading resource: res://asset/UI/Menu screen/icon equip.png remapped: res://asset/UI/Menu screen/icon equip.png
+Loading resource: res://.godot/imported/icon equip.png-bf29764a9c53b718665044f8a9ec0c08.ctex remapped: res://.godot/imported/icon equip.png-bf29764a9c53b718665044f8a9ec0c08.ctex
+Completed load for: 'res://asset/UI/Menu screen/icon equip.png' remapped 'res://asset/UI/Menu screen/icon equip.png' at thread -1
+Completed load for: 'res://scenes/UI/equipment_menu.tscn' remapped 'res://scenes/UI/equipment_menu.tscn' at thread -1
+Completed load for: 'res://scenes/UI/master_menu.tscn' remapped 'res://scenes/UI/master_menu.tscn' at thread -1
+Loading resource: res://asset/Character/Adel/adel spine action use.tscn remapped: res://asset/Character/Adel/adel spine action use.tscn
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/left upper arm[merge]_0015.png remapped: res://asset/Character/Adel/layers/Adel spine action use/left upper arm[merge]_0015.png
+Loading resource: res://.godot/imported/left upper arm[merge]_0015.png-6bad3f4a197ee697cbbcc3c7b808399d.ctex remapped: res://.godot/imported/left upper arm[merge]_0015.png-6bad3f4a197ee697cbbcc3c7b808399d.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/left upper arm[merge]_0015.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/left upper arm[merge]_0015.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/lap.png remapped: res://asset/Character/Adel/layers/Adel spine action use/lap.png
+Loading resource: res://.godot/imported/lap.png-d900277fab90c068af239bf1c27ae4da.ctex remapped: res://.godot/imported/lap.png-d900277fab90c068af239bf1c27ae4da.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/lap.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/lap.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/left forearm[merge]_0014.png remapped: res://asset/Character/Adel/layers/Adel spine action use/left forearm[merge]_0014.png
+Loading resource: res://.godot/imported/left forearm[merge]_0014.png-7440801ef261248c033f51d06033526c.ctex remapped: res://.godot/imported/left forearm[merge]_0014.png-7440801ef261248c033f51d06033526c.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/left forearm[merge]_0014.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/left forearm[merge]_0014.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/left upper leg[merge]_0013.png remapped: res://asset/Character/Adel/layers/Adel spine action use/left upper leg[merge]_0013.png
+Loading resource: res://.godot/imported/left upper leg[merge]_0013.png-03c6346c7aaee92b274e992fcdaea167.ctex remapped: res://.godot/imported/left upper leg[merge]_0013.png-03c6346c7aaee92b274e992fcdaea167.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/left upper leg[merge]_0013.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/left upper leg[merge]_0013.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/head.png remapped: res://asset/Character/Adel/layers/Adel spine action use/head.png
+Loading resource: res://.godot/imported/head.png-a6f1723ff0407a18f612478e4cf57db4.ctex remapped: res://.godot/imported/head.png-a6f1723ff0407a18f612478e4cf57db4.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/head.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/head.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/left foreleg[merge]_0012.png remapped: res://asset/Character/Adel/layers/Adel spine action use/left foreleg[merge]_0012.png
+Loading resource: res://.godot/imported/left foreleg[merge]_0012.png-d07818d2f5a1386348f831b5263b0a02.ctex remapped: res://.godot/imported/left foreleg[merge]_0012.png-d07818d2f5a1386348f831b5263b0a02.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/left foreleg[merge]_0012.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/left foreleg[merge]_0012.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/right upper leg[merge]_0011.png remapped: res://asset/Character/Adel/layers/Adel spine action use/right upper leg[merge]_0011.png
+Loading resource: res://.godot/imported/right upper leg[merge]_0011.png-84d70b79d7c33b92fb80d2ef653328ee.ctex remapped: res://.godot/imported/right upper leg[merge]_0011.png-84d70b79d7c33b92fb80d2ef653328ee.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/right upper leg[merge]_0011.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/right upper leg[merge]_0011.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/left feet[merge]_0010.png remapped: res://asset/Character/Adel/layers/Adel spine action use/left feet[merge]_0010.png
+Loading resource: res://.godot/imported/left feet[merge]_0010.png-ab02b61303115ed0587c249ffbb0a671.ctex remapped: res://.godot/imported/left feet[merge]_0010.png-ab02b61303115ed0587c249ffbb0a671.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/left feet[merge]_0010.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/left feet[merge]_0010.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/right foreleg[merge]_0009.png remapped: res://asset/Character/Adel/layers/Adel spine action use/right foreleg[merge]_0009.png
+Loading resource: res://.godot/imported/right foreleg[merge]_0009.png-b34d7d717ef4ac2a91ca1a6990382b73.ctex remapped: res://.godot/imported/right foreleg[merge]_0009.png-b34d7d717ef4ac2a91ca1a6990382b73.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/right foreleg[merge]_0009.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/right foreleg[merge]_0009.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/hair 1.png remapped: res://asset/Character/Adel/layers/Adel spine action use/hair 1.png
+Loading resource: res://.godot/imported/hair 1.png-81af399d28f285e253ef4bcb01b8c7c0.ctex remapped: res://.godot/imported/hair 1.png-81af399d28f285e253ef4bcb01b8c7c0.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/hair 1.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/hair 1.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/lap[merge]_0008.png remapped: res://asset/Character/Adel/layers/Adel spine action use/lap[merge]_0008.png
+Loading resource: res://.godot/imported/lap[merge]_0008.png-3bb5a727b09cdd32fdd8545fdbdab5a4.ctex remapped: res://.godot/imported/lap[merge]_0008.png-3bb5a727b09cdd32fdd8545fdbdab5a4.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/lap[merge]_0008.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/lap[merge]_0008.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/right feet[merge]_0007.png remapped: res://asset/Character/Adel/layers/Adel spine action use/right feet[merge]_0007.png
+Loading resource: res://.godot/imported/right feet[merge]_0007.png-3155433efd7a1a4e5c511e411b4a229f.ctex remapped: res://.godot/imported/right feet[merge]_0007.png-3155433efd7a1a4e5c511e411b4a229f.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/right feet[merge]_0007.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/right feet[merge]_0007.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/belly[merge]_0006.png remapped: res://asset/Character/Adel/layers/Adel spine action use/belly[merge]_0006.png
+Loading resource: res://.godot/imported/belly[merge]_0006.png-7ede70f3fb42be1d6359bfea34a5d04a.ctex remapped: res://.godot/imported/belly[merge]_0006.png-7ede70f3fb42be1d6359bfea34a5d04a.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/belly[merge]_0006.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/belly[merge]_0006.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/torso[merge]_0005.png remapped: res://asset/Character/Adel/layers/Adel spine action use/torso[merge]_0005.png
+Loading resource: res://.godot/imported/torso[merge]_0005.png-29f91109a136a7daedacf449b7aaf550.ctex remapped: res://.godot/imported/torso[merge]_0005.png-29f91109a136a7daedacf449b7aaf550.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/torso[merge]_0005.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/torso[merge]_0005.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/right upper arm[merge]_0004.png remapped: res://asset/Character/Adel/layers/Adel spine action use/right upper arm[merge]_0004.png
+Loading resource: res://.godot/imported/right upper arm[merge]_0004.png-9dbf894d4cbcc3d594a7328243c84cd3.ctex remapped: res://.godot/imported/right upper arm[merge]_0004.png-9dbf894d4cbcc3d594a7328243c84cd3.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/right upper arm[merge]_0004.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/right upper arm[merge]_0004.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/right forearm[merge]_0003.png remapped: res://asset/Character/Adel/layers/Adel spine action use/right forearm[merge]_0003.png
+Loading resource: res://.godot/imported/right forearm[merge]_0003.png-04f5b06e968935b8402920728f072528.ctex remapped: res://.godot/imported/right forearm[merge]_0003.png-04f5b06e968935b8402920728f072528.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/right forearm[merge]_0003.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/right forearm[merge]_0003.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/head[merge]_0002.png remapped: res://asset/Character/Adel/layers/Adel spine action use/head[merge]_0002.png
+Loading resource: res://.godot/imported/head[merge]_0002.png-4f211de73165cfdcafc9609eaa0f7db5.ctex remapped: res://.godot/imported/head[merge]_0002.png-4f211de73165cfdcafc9609eaa0f7db5.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/head[merge]_0002.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/head[merge]_0002.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/hair1[merge]_0001.png remapped: res://asset/Character/Adel/layers/Adel spine action use/hair1[merge]_0001.png
+Loading resource: res://.godot/imported/hair1[merge]_0001.png-c720f668e9682a9b3d897f2fb7d4ff4e.ctex remapped: res://.godot/imported/hair1[merge]_0001.png-c720f668e9682a9b3d897f2fb7d4ff4e.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/hair1[merge]_0001.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/hair1[merge]_0001.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/hair2[merge]_0000.png remapped: res://asset/Character/Adel/layers/Adel spine action use/hair2[merge]_0000.png
+Loading resource: res://.godot/imported/hair2[merge]_0000.png-a62f6cbb0e8ebf92df56d712f930d0c1.ctex remapped: res://.godot/imported/hair2[merge]_0000.png-a62f6cbb0e8ebf92df56d712f930d0c1.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/hair2[merge]_0000.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/hair2[merge]_0000.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/belly.png remapped: res://asset/Character/Adel/layers/Adel spine action use/belly.png
+Loading resource: res://.godot/imported/belly.png-03838de9d2c1b539185e6131d159786f.ctex remapped: res://.godot/imported/belly.png-03838de9d2c1b539185e6131d159786f.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/belly.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/belly.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/toro1.png remapped: res://asset/Character/Adel/layers/Adel spine action use/toro1.png
+Loading resource: res://.godot/imported/toro1.png-dc68414e1aabd8e871ca41e5c7b3b539.ctex remapped: res://.godot/imported/toro1.png-dc68414e1aabd8e871ca41e5c7b3b539.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/toro1.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/toro1.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/left upper arm.png remapped: res://asset/Character/Adel/layers/Adel spine action use/left upper arm.png
+Loading resource: res://.godot/imported/left upper arm.png-d4d059b15a26f1acda280f9d44740811.ctex remapped: res://.godot/imported/left upper arm.png-d4d059b15a26f1acda280f9d44740811.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/left upper arm.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/left upper arm.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/right upper arm.png remapped: res://asset/Character/Adel/layers/Adel spine action use/right upper arm.png
+Loading resource: res://.godot/imported/right upper arm.png-62aa3a0a01892fe554970a62d7d6ff42.ctex remapped: res://.godot/imported/right upper arm.png-62aa3a0a01892fe554970a62d7d6ff42.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/right upper arm.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/right upper arm.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/torso2.png remapped: res://asset/Character/Adel/layers/Adel spine action use/torso2.png
+Loading resource: res://.godot/imported/torso2.png-6a5a866da54b58dc4360a8ec1b7f44ef.ctex remapped: res://.godot/imported/torso2.png-6a5a866da54b58dc4360a8ec1b7f44ef.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/torso2.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/torso2.png' at thread -1
+Loading resource: res://asset/Character/Adel/layers/Adel spine action use/right forelegid.png remapped: res://asset/Character/Adel/layers/Adel spine action use/right forelegid.png
+Loading resource: res://.godot/imported/right forelegid.png-e31b0ca82bdfe5bbf694cbec10c358c2.ctex remapped: res://.godot/imported/right forelegid.png-e31b0ca82bdfe5bbf694cbec10c358c2.ctex
+Completed load for: 'res://asset/Character/Adel/layers/Adel spine action use/right forelegid.png' remapped 'res://asset/Character/Adel/layers/Adel spine action use/right forelegid.png' at thread -1
+Loading resource: res://asset/Character/Adel/Saber attack/mov_1_1.png remapped: res://asset/Character/Adel/Saber attack/mov_1_1.png
+Loading resource: res://.godot/imported/mov_1_1.png-42cdf3da1ddbb01b894e69c7b9eb3bf7.ctex remapped: res://.godot/imported/mov_1_1.png-42cdf3da1ddbb01b894e69c7b9eb3bf7.ctex
+Completed load for: 'res://asset/Character/Adel/Saber attack/mov_1_1.png' remapped 'res://asset/Character/Adel/Saber attack/mov_1_1.png' at thread -1
+Loading resource: res://asset/Character/Adel/Saber attack/mov j-sheet.png remapped: res://asset/Character/Adel/Saber attack/mov j-sheet.png
+Loading resource: res://.godot/imported/mov j-sheet.png-3adff3d02b187479dea8dcff261591e3.ctex remapped: res://.godot/imported/mov j-sheet.png-3adff3d02b187479dea8dcff261591e3.ctex
+Completed load for: 'res://asset/Character/Adel/Saber attack/mov j-sheet.png' remapped 'res://asset/Character/Adel/Saber attack/mov j-sheet.png' at thread -1
+Loading resource: res://asset/Character/Adel/Saber attack/mov_1_2.png remapped: res://asset/Character/Adel/Saber attack/mov_1_2.png
+Loading resource: res://.godot/imported/mov_1_2.png-0aa83487b3a318ace50a0c9ed5285c1d.ctex remapped: res://.godot/imported/mov_1_2.png-0aa83487b3a318ace50a0c9ed5285c1d.ctex
+Completed load for: 'res://asset/Character/Adel/Saber attack/mov_1_2.png' remapped 'res://asset/Character/Adel/Saber attack/mov_1_2.png' at thread -1
+Loading resource: res://asset/Character/Adel/Saber attack/mov_1_3.png remapped: res://asset/Character/Adel/Saber attack/mov_1_3.png
+Loading resource: res://.godot/imported/mov_1_3.png-aae440aa7bfc7fc148dcd049d2754718.ctex remapped: res://.godot/imported/mov_1_3.png-aae440aa7bfc7fc148dcd049d2754718.ctex
+Completed load for: 'res://asset/Character/Adel/Saber attack/mov_1_3.png' remapped 'res://asset/Character/Adel/Saber attack/mov_1_3.png' at thread -1
+Loading resource: res://asset/Character/Adel/Saber attack/mov_1_4.png remapped: res://asset/Character/Adel/Saber attack/mov_1_4.png
+Loading resource: res://.godot/imported/mov_1_4.png-5eb3d78e1751f3287f3e68f5aeeb2143.ctex remapped: res://.godot/imported/mov_1_4.png-5eb3d78e1751f3287f3e68f5aeeb2143.ctex
+Completed load for: 'res://asset/Character/Adel/Saber attack/mov_1_4.png' remapped 'res://asset/Character/Adel/Saber attack/mov_1_4.png' at thread -1
+Loading resource: res://asset/Character/Adel/Saber attack/saber_ready.png remapped: res://asset/Character/Adel/Saber attack/saber_ready.png
+Loading resource: res://.godot/imported/saber_ready.png-8a6e9bba3d6bfe7b60d308d8db8b36af.ctex remapped: res://.godot/imported/saber_ready.png-8a6e9bba3d6bfe7b60d308d8db8b36af.ctex
+Completed load for: 'res://asset/Character/Adel/Saber attack/saber_ready.png' remapped 'res://asset/Character/Adel/Saber attack/saber_ready.png' at thread -1
+Loading resource: res://asset/Character/Adel/Saber attack/saber_stagger.png remapped: res://asset/Character/Adel/Saber attack/saber_stagger.png
+Loading resource: res://.godot/imported/saber_stagger.png-a2db2acf865c252ce72ece225231db6e.ctex remapped: res://.godot/imported/saber_stagger.png-a2db2acf865c252ce72ece225231db6e.ctex
+Completed load for: 'res://asset/Character/Adel/Saber attack/saber_stagger.png' remapped 'res://asset/Character/Adel/Saber attack/saber_stagger.png' at thread -1
+Completed load for: 'res://asset/Character/Adel/adel spine action use.tscn' remapped 'res://asset/Character/Adel/adel spine action use.tscn' at thread -1
+Completed load for: 'res://scenes/adel/playable_adel.tscn' remapped 'res://scenes/adel/playable_adel.tscn' at thread -1
+Loading resource: res://scenes/Map 1/map_1_scene_2.tscn remapped: res://scenes/Map 1/map_1_scene_2.tscn
+Loading resource: res://scenes/Map 1/map_1_scene_2.gd remapped: res://scenes/Map 1/map_1_scene_2.gd
+Loading resource: res://scenes/adel/playable_adel.tscn remapped: res://scenes/adel/playable_adel.tscn
+Loading resource: res://scenes/UI/hud.tscn remapped: res://scenes/UI/hud.tscn
+Completed load for: 'res://scenes/UI/hud.tscn' remapped 'res://scenes/UI/hud.tscn' at thread -1
+Loading resource: res://scenes/UI/master_menu.tscn remapped: res://scenes/UI/master_menu.tscn
+Completed load for: 'res://scenes/UI/master_menu.tscn' remapped 'res://scenes/UI/master_menu.tscn' at thread -1
+Loading resource: res://asset/Character/Adel/adel spine action use.tscn remapped: res://asset/Character/Adel/adel spine action use.tscn
+Completed load for: 'res://asset/Character/Adel/adel spine action use.tscn' remapped 'res://asset/Character/Adel/adel spine action use.tscn' at thread -1
+Completed load for: 'res://scenes/adel/playable_adel.tscn' remapped 'res://scenes/adel/playable_adel.tscn' at thread -1
+Completed load for: 'res://scenes/Map 1/map_1_scene_2.gd' remapped 'res://scenes/Map 1/map_1_scene_2.gd' at thread -1
+Loading resource: res://asset/Map/oak_woods_tileset.png remapped: res://asset/Map/oak_woods_tileset.png
+Loading resource: res://.godot/imported/oak_woods_tileset.png-612695b9322545b35b3b069a1d762a3e.ctex remapped: res://.godot/imported/oak_woods_tileset.png-612695b9322545b35b3b069a1d762a3e.ctex
+Completed load for: 'res://asset/Map/oak_woods_tileset.png' remapped 'res://asset/Map/oak_woods_tileset.png' at thread -1
+Loading resource: res://scenes/Mechanic/campfire.tscn remapped: res://scenes/Mechanic/campfire.tscn
+Loading resource: res://scenes/Mechanic/campfire.gd remapped: res://scenes/Mechanic/campfire.gd
+Loading resource: res://scenes/UI/campfire_upgrade_menu.tscn remapped: res://scenes/UI/campfire_upgrade_menu.tscn
+Loading resource: res://scenes/UI/campfire_upgrade_menu.gd remapped: res://scenes/UI/campfire_upgrade_menu.gd
+Completed load for: 'res://scenes/UI/campfire_upgrade_menu.gd' remapped 'res://scenes/UI/campfire_upgrade_menu.gd' at thread -1
+Completed load for: 'res://scenes/UI/campfire_upgrade_menu.tscn' remapped 'res://scenes/UI/campfire_upgrade_menu.tscn' at thread -1
+Completed load for: 'res://scenes/Mechanic/campfire.gd' remapped 'res://scenes/Mechanic/campfire.gd' at thread -1
+Completed load for: 'res://scenes/Mechanic/campfire.tscn' remapped 'res://scenes/Mechanic/campfire.tscn' at thread -1
+Completed load for: 'res://scenes/Map 1/map_1_scene_2.tscn' remapped 'res://scenes/Map 1/map_1_scene_2.tscn' at thread -1
+Loading resource: res://scenes/testing/testing.tscn remapped: res://scenes/testing/testing.tscn
+Loading resource: res://asset/Map/background/BGScene2_2.png remapped: res://asset/Map/background/BGScene2_2.png
+Loading resource: res://.godot/imported/BGScene2_2.png-6d87af044207e6de0cce55ab900de796.ctex remapped: res://.godot/imported/BGScene2_2.png-6d87af044207e6de0cce55ab900de796.ctex
+Completed load for: 'res://asset/Map/background/BGScene2_2.png' remapped 'res://asset/Map/background/BGScene2_2.png' at thread -1
+Loading resource: res://scenes/Item/collectible_item_prefab.tscn remapped: res://scenes/Item/collectible_item_prefab.tscn
+Loading resource: res://scenes/Item/collectible_item_prefab.gd remapped: res://scenes/Item/collectible_item_prefab.gd
+Completed load for: 'res://scenes/Item/collectible_item_prefab.gd' remapped 'res://scenes/Item/collectible_item_prefab.gd' at thread -1
+Loading resource: res://asset/Map/sign.png remapped: res://asset/Map/sign.png
+Loading resource: res://.godot/imported/sign.png-62e2e59f2c2b77f0b6e9d257d80ba3a7.ctex remapped: res://.godot/imported/sign.png-62e2e59f2c2b77f0b6e9d257d80ba3a7.ctex
+Completed load for: 'res://asset/Map/sign.png' remapped 'res://asset/Map/sign.png' at thread -1
+Completed load for: 'res://scenes/Item/collectible_item_prefab.tscn' remapped 'res://scenes/Item/collectible_item_prefab.tscn' at thread -1
+Loading resource: res://scenes/testing/Enemies/enemy.tscn remapped: res://scenes/testing/Enemies/enemy.tscn
+Loading resource: res://scenes/testing/Enemies/enemy.gd remapped: res://scenes/testing/Enemies/enemy.gd
+Completed load for: 'res://scenes/testing/Enemies/enemy.gd' remapped 'res://scenes/testing/Enemies/enemy.gd' at thread -1
+Loading resource: res://asset/Character/Ishmael_Idle.png remapped: res://asset/Character/Ishmael_Idle.png
+Loading resource: res://.godot/imported/Ishmael_Idle.png-bab88fb62541bdf1ef9552d782a0cbea.ctex remapped: res://.godot/imported/Ishmael_Idle.png-bab88fb62541bdf1ef9552d782a0cbea.ctex
+Completed load for: 'res://asset/Character/Ishmael_Idle.png' remapped 'res://asset/Character/Ishmael_Idle.png' at thread -1
+Loading resource: res://scenes/testing/Enemies/enemy_weapon.gd remapped: res://scenes/testing/Enemies/enemy_weapon.gd
+Completed load for: 'res://scenes/testing/Enemies/enemy_weapon.gd' remapped 'res://scenes/testing/Enemies/enemy_weapon.gd' at thread -1
+Loading resource: res://asset/UI/coin.png remapped: res://asset/UI/coin.png
+Loading resource: res://.godot/imported/coin.png-849485b6bfa51d7eff13ca04bc120772.ctex remapped: res://.godot/imported/coin.png-849485b6bfa51d7eff13ca04bc120772.ctex
+Completed load for: 'res://asset/UI/coin.png' remapped 'res://asset/UI/coin.png' at thread -1
+Loading resource: res://scenes/testing/Enemies/vision_shape.gd remapped: res://scenes/testing/Enemies/vision_shape.gd
+Completed load for: 'res://scenes/testing/Enemies/vision_shape.gd' remapped 'res://scenes/testing/Enemies/vision_shape.gd' at thread -1
+Completed load for: 'res://scenes/testing/Enemies/enemy.tscn' remapped 'res://scenes/testing/Enemies/enemy.tscn' at thread -1
+Loading resource: res://scenes/enemy/s1e1.tscn remapped: res://scenes/enemy/s1e1.tscn
+Loading resource: res://scenes/enemy/s_1e_1.gd remapped: res://scenes/enemy/s_1e_1.gd
+Completed load for: 'res://scenes/enemy/s_1e_1.gd' remapped 'res://scenes/enemy/s_1e_1.gd' at thread -1
+Loading resource: res://asset/Enemies/Wobtear_attack.png remapped: res://asset/Enemies/Wobtear_attack.png
+Loading resource: res://.godot/imported/Wobtear_attack.png-44d05482845062e08814cb9d305c62c1.ctex remapped: res://.godot/imported/Wobtear_attack.png-44d05482845062e08814cb9d305c62c1.ctex
+Completed load for: 'res://asset/Enemies/Wobtear_attack.png' remapped 'res://asset/Enemies/Wobtear_attack.png' at thread -1
+Loading resource: res://asset/Enemies/Wobtear1.png remapped: res://asset/Enemies/Wobtear1.png
+Loading resource: res://.godot/imported/Wobtear1.png-cc3837175c8b9971590c24230359d9d1.ctex remapped: res://.godot/imported/Wobtear1.png-cc3837175c8b9971590c24230359d9d1.ctex
+Completed load for: 'res://asset/Enemies/Wobtear1.png' remapped 'res://asset/Enemies/Wobtear1.png' at thread -1
+Loading resource: res://asset/Enemies/Wobtear2.png remapped: res://asset/Enemies/Wobtear2.png
+Loading resource: res://.godot/imported/Wobtear2.png-25f138e034ea2dedd5e4cec0f04f6b62.ctex remapped: res://.godot/imported/Wobtear2.png-25f138e034ea2dedd5e4cec0f04f6b62.ctex
+Completed load for: 'res://asset/Enemies/Wobtear2.png' remapped 'res://asset/Enemies/Wobtear2.png' at thread -1
+Completed load for: 'res://scenes/enemy/s1e1.tscn' remapped 'res://scenes/enemy/s1e1.tscn' at thread -1
+Loading resource: res://scenes/Mechanic/campfire.tscn remapped: res://scenes/Mechanic/campfire.tscn
+Completed load for: 'res://scenes/Mechanic/campfire.tscn' remapped 'res://scenes/Mechanic/campfire.tscn' at thread -1
+Completed load for: 'res://scenes/testing/testing.tscn' remapped 'res://scenes/testing/testing.tscn' at thread -1
+WARNING: No Bone2D children of node hair_bone2. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node hair_bone1. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node hair_bone. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node L_forearm. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node R_forearm. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node L_feet. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node R_feet. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node cloth_bone2. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node cloth_bone. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node hair_bone2. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node hair_bone1. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node L_forearm. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node R_forearm. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+WARNING: No Bone2D children of node R_foreleg. Cannot calculate bone length or angle reliably.
+Using transform rotation for bone angle.
+   at: calculate_length_and_rotation (scene/2d/skeleton_2d.cpp:451)
+MCP | [event] scene_changed -> res://scenes/adel/playable_adel.tscn
+Loading resource: res://.godot/editor/editor_script_doc_cache.res remapped: res://.godot/editor/editor_script_doc_cache.res
+Generated 'res://addons/fmod/libs/android/arm64/CopyPast_Fmod_Libs_Here.txt' preview in 822 usec
+Generated 'res://addons/fmod/libs/iOS/CopyPast_Fmod_Libs_Here.txt' preview in 483 usec
+Generated 'res://addons/fmod/libs/linux/CopyPast_Fmod_Libs_Here.txt' preview in 631 usec
+Generated 'res://addons/fmod/libs/macos/CopyPast_Fmod_Libs_Here.txt' preview in 1185 usec
+Generated 'res://addons/fmod/libs/windows/CopyPast_Fmod_Libs_Here.txt' preview in 1238 usec
+Generated 'res://addons/fmod/tool/property_editors/FmodBankPathsPropertyEditorUi.tscn' preview in 92 usec
+Generated 'res://addons/fmod/tool/property_editors/FmodEventEditorProperty.tscn' preview in 64 usec
+Generated 'res://addons/fmod/tool/property_editors/FmodGuidAndPathPropertyEditorUi.tscn' preview in 51 usec
+Generated 'res://addons/fmod/tool/property_editors/FmodPathEditorProperty.tscn' preview in 50 usec
+Generated 'res://addons/fmod/tool/ui/EventParametersDisplay.tscn' preview in 57 usec
+Generated 'res://addons/fmod/tool/ui/EventParametersWindow.tscn' preview in 41 usec
+Generated 'res://addons/fmod/tool/ui/FmodBankExplorer.tscn' preview in 56 usec
+Generated 'res://addons/fmod/tool/ui/ParameterDisplay.tscn' preview in 45 usec
+Generated 'res://addons/fmod/tool/ui/TestFmodBankExplorer.tscn' preview in 44 usec
+Completed load for: 'res://.godot/editor/editor_script_doc_cache.res' remapped 'res://.godot/editor/editor_script_doc_cache.res' at thread -1
+Generated 'res://addons/fmod/fmod.gdextension' preview in 522 usec
+Generated 'res://addons/fmod/plugin.cfg' preview in 335 usec
+Generated 'res://addons/godot_ai/plugin.cfg' preview in 332 usec
+Generated 'res://addons/godot_ai/README.md' preview in 927 usec
+Generated 'res://addons/psd_to_layer_scene/translation/translation.csv' preview in 603 usec
+Generated 'res://addons/psd_to_layer_scene/translation/translation.en.translation' preview in 637 usec
+Generated 'res://addons/psd_to_layer_scene/translation/translation.ja_JP.translation' preview in 282 usec
+Generated 'res://addons/psd_to_layer_scene/execute_panel.tscn' preview in 89 usec
+Generated 'res://addons/psd_to_layer_scene/plugin.cfg' preview in 467 usec
+Generated 'res://addons/psd_to_layer_scene/psd_layer_scene_native.gdextension' preview in 471 usec
+Generated 'res://asset/BG/main.tscn' preview in 41 usec
+Generated 'res://asset/Character/Adel/layers/Adel spine action use/doc.json' preview in 589 usec
+Generated 'res://asset/Character/Adel/layers/Adel spine action use/groups.json' preview in 630 usec
+Generated 'res://asset/Character/Adel/layers/Adel spine action use/layers.json' preview in 564 usec
+Generated 'res://asset/Character/Adel/adel spine action use.tscn' preview in 45 usec
+Generated 'res://asset/Character/Adel/gude-2026-05-30.log' preview in 554 usec
+Generated 'res://asset/Map/background/p_hud.gd' preview in 1073 usec
+Generated 'res://asset/Map/background/thewworldrudooo.tscn' preview in 43 usec
+Generated 'res://asset/UI/dialogueUI/DialogueUI.tscn' preview in 43 usec
+Generated 'res://asset/UI/dialogueUI/dialogue_ui2.tscn' preview in 45 usec
+Generated 'res://asset/UI/dialogueUI/dialogue_ui.tscn' preview in 31 usec
+Generated 'res://asset/UI/dialogueUI/main.tscn' preview in 31 usec
+Generated 'res://bin/spine_godot_extension.gdextension' preview in 433 usec
+Generated 'res://scenes/adel/Adel1.tscn' preview in 79 usec
+Generated 'res://scenes/adel/playable_adel.tscn' preview in 51 usec
+Generated 'res://scenes/effect/fade_trans.tscn' preview in 43 usec
+Generated 'res://scenes/effect/screen_effects.tscn' preview in 46 usec
+Generated 'res://scenes/effect/screen_shake.gdshader' preview in 16 usec
+Generated 'res://scenes/enemy/s1e1.tscn' preview in 40 usec
+Generated 'res://scenes/Item/collectible_item_prefab.tscn' preview in 53 usec
+Generated 'res://scenes/Item/interactable_item.tscn' preview in 92 usec
+Generated 'res://scenes/Map 1/main.tscn' preview in 79 usec
+Generated 'res://scenes/Map 1/map_1_scene_2.tscn' preview in 58 usec
+Generated 'res://scenes/Mechanic/campfire.tscn' preview in 75 usec
+Generated 'res://scenes/Mechanic/safe_zone.tscn' preview in 48 usec
+Generated 'res://scenes/testing/Enemies/enemy.tscn' preview in 68 usec
+Generated 'res://scenes/testing/Enemies/slime.tscn' preview in 46 usec
+Generated 'res://scenes/UI/campfire_upgrade_menu.tscn' preview in 46 usec
+Generated 'res://scenes/UI/character_menu.tscn' preview in 54 usec
+Generated 'res://scenes/UI/equipment_menu.tscn' preview in 68 usec
+Generated 'res://scenes/UI/flask_shake.gdshader' preview in 26 usec
+Generated 'res://scenes/UI/hud.tscn' preview in 90 usec
+Generated 'res://scenes/UI/main.gdshader' preview in 18 usec
+Generated 'res://scenes/UI/master_menu.tscn' preview in 110 usec
+Generated 'res://scenes/UI/menu (2).tscn' preview in 98 usec
+Generated 'res://scenes/UI/pause.tscn' preview in 43 usec
+Generated 'res://scenes/UI/settings_menu.tscn' preview in 71 usec
+Generated 'res://scenes/UI/soul_flask.gdshader' preview in 20 usec
+Generated 'res://scenes/UI/status_icon_slot.tscn' preview in 49 usec
+Generated 'res://scenes/UI/ui.tscn' preview in 50 usec
+Generated 'res://scenes/default_bus_layout.tres' preview in 320 usec
+Generated 'res://soujournAudio/Metadata/Asset/{69606fe1-a6f8-46d0-8902-589ae89df911}.xml' preview in 630 usec
+Generated 'res://soujournAudio/Metadata/Bank/{f140f706-16ba-4a3f-87db-198bb6c2a847}.xml' preview in 604 usec
+Generated 'res://soujournAudio/Metadata/BankFolder/{86d7811f-e706-4502-99ce-f67060a068c7}.xml' preview in 499 usec
+Generated 'res://soujournAudio/Metadata/EffectPresetFolder/{b40d1a3e-507c-47aa-b36e-9d848621b527}.xml' preview in 436 usec
+Generated 'res://soujournAudio/Metadata/EncodingSetting/{5f963e40-0dcb-42e7-a061-b2df73983bb5}.xml' preview in 1042 usec
+Generated 'res://soujournAudio/Metadata/EventFolder/{4c746d32-82bc-4236-9ae4-299079ce17a5}.xml' preview in 717 usec
+Generated 'res://soujournAudio/Metadata/ParameterPresetFolder/{73f47703-522c-4b34-bb54-cd3563407694}.xml' preview in 707 usec
+Generated 'res://soujournAudio/Metadata/Platform/{a9282597-196d-47b4-85b4-e11a17ae17af}.xml' preview in 722 usec
+Generated 'res://soujournAudio/Metadata/ProfilerFolder/{d516179b-6f5b-4744-b2f3-bd9304a91286}.xml' preview in 485 usec
+Generated 'res://soujournAudio/Metadata/Return/{fc3bfb83-1899-4efd-a893-aa9898a56b11}.xml' preview in 614 usec
+Generated 'res://soujournAudio/Metadata/SandboxFolder/{ef39f846-3032-4711-95ab-1092dbb92928}.xml' preview in 596 usec
+Generated 'res://soujournAudio/Metadata/SnapshotGroup/{fe57c311-310d-4517-8301-fee9e8521e87}.xml' preview in 692 usec
+Generated 'res://soujournAudio/Metadata/Master.xml' preview in 409 usec
+Generated 'res://soujournAudio/Metadata/Mixer.xml' preview in 407 usec
+Generated 'res://soujournAudio/Metadata/Tags.xml' preview in 779 usec
+Generated 'res://soujournAudio/Metadata/Workspace.xml' preview in 664 usec
+Generated 'res://editor-session-cmd.log' preview in 387 usec
+Generated 'res://editor-session.err.log' preview in 248 usec
+Generated 'res://editor-session.out.log' preview in 301 usec
+Generated 'res://export_presets.cfg' preview in 339 usec
+Generated 'res://godot-editor-startup.log' preview in 244 usec
+Generated 'res://PROJECT_SUMMARY.txt' preview in 427 usec
+MCP | [recv] run_project({"mode":"current"})
+Loading resource: res://addons/godot_ai/handlers/project_handler.gd remapped: res://addons/godot_ai/handlers/project_handler.gd
+Completed load for: 'res://addons/godot_ai/handlers/project_handler.gd' remapped 'res://addons/godot_ai/handlers/project_handler.gd' at thread -1
+MCP | [debug] game capture pending run token 1 (run r37828-1)
+Running: D:/Godot_v4.7-stable_win64.exe --verbose --path D:/Godot%20Project/soujourn--echoes-of-the-soul.worktrees/combat-system-enhancement-steps --remote-debug tcp://127.0.0.1:6007 --editor-pid 9324 --position 0,0 --scene res://scenes/adel/playable_adel.tscn
+MCP | [defer] run_project (request 8124760242bb46caa4831f03e9496209)
+MCP | [event] play_state_changed -> playing
+MCP | [recv] get_editor_state({})
+Loading resource: res://addons/godot_ai/handlers/editor_handler.gd remapped: res://addons/godot_ai/handlers/editor_handler.gd
+Completed load for: 'res://addons/godot_ai/handlers/editor_handler.gd' remapped 'res://addons/godot_ai/handlers/editor_handler.gd' at thread -1
+MCP | [send] get_editor_state -> ok
+MCP | [debug] <- mcp:hello from game_helper (run r37828-1)
+MCP | [recv] game_command({"op":"get_node_info","params":{"include_properties":true,"path":"/root/PlayableAdel/WeaponPivot/SaberHitbox/Hitbox/CollisionShape2D"}})
+MCP | [debug] -> mcp:game_command get_node_info (7303a85164b54366a0643f94f3375e24)
+MCP | [defer] game_command (request 7303a85164b54366a0643f94f3375e24)
+MCP | [recv] game_command({"op":"get_scene_tree","params":{"depth":5.0}})
+MCP | [debug] -> mcp:game_command get_scene_tree (648c2ef7bfa94b1fb58681b4da0ab999)
+MCP | [defer] game_command (request 648c2ef7bfa94b1fb58681b4da0ab999)
+MCP | [debug] <- mcp:game_command_response (7303a85164b54366a0643f94f3375e24)
+MCP | [debug] <- mcp:game_command_response (648c2ef7bfa94b1fb58681b4da0ab999)
+MCP | [recv] list_actions({})
+Loading resource: res://addons/godot_ai/handlers/input_handler.gd remapped: res://addons/godot_ai/handlers/input_handler.gd
+Completed load for: 'res://addons/godot_ai/handlers/input_handler.gd' remapped 'res://addons/godot_ai/handlers/input_handler.gd' at thread -1
+MCP | [send] list_actions -> ok
+MCP | [recv] take_screenshot({"max_resolution":900.0,"source":"game","user_prompt":"Inspect the running playable Adel scene for the player, saber visual, and any enemy placement."})
+MCP | [debug] -> mcp:take_screenshot (941e5ddda0d049c99d300a01c55fcd38)
+MCP | [defer] take_screenshot (request 941e5ddda0d049c99d300a01c55fcd38)
+MCP | [debug] <- mcp:screenshot_response (941e5ddda0d049c99d300a01c55fcd38)
+MCP | [recv] game_command({"op":"input_action","params":{"action":"attack","pressed":true,"strength":1.0}})
+MCP | [debug] -> mcp:game_command input_action (ae79dec8f3aa446ca51f503063f84426)
+MCP | [defer] game_command (request ae79dec8f3aa446ca51f503063f84426)
+MCP | [debug] <- mcp:game_command_response (ae79dec8f3aa446ca51f503063f84426)
+MCP | [recv] get_logs({"count":40.0,"include_details":true,"offset":0.0,"source":"game"})
+MCP | [send] get_logs -> ok
+MCP | [recv] game_command({"op":"input_action","params":{"action":"attack","pressed":false,"strength":1.0}})
+MCP | [debug] -> mcp:game_command input_action (5fb3271f21da4c5eb56eaf8d9ad3788a)
+MCP | [defer] game_command (request 5fb3271f21da4c5eb56eaf8d9ad3788a)
+MCP | [debug] <- mcp:game_command_response (5fb3271f21da4c5eb56eaf8d9ad3788a)
+MCP | [recv] game_eval({"code":"var p = get_tree().current_scene; var visual = p.get_node(\"SpinePivot/SpineRig/AnimationPlayer\"); var hit_anim = p.get_node(\"WeaponPivot/SaberHitbox/AnimationPlayer\"); var shape = p.get_node(\"WeaponPivot/SaberHitbox/Hitbox/CollisionShape2D\"); var sprite = p.get_node(\"SpinePivot/SpineRig/TestAttackSprite\"); var samples = []; for i in range(14): await get_tree().process_frame; samples.append({\"frame\": i, \"visual_animation\": visual.current_animation, \"visual_time\": visual.current_animation_position, \"sprite_frame\": sprite.frame, \"hit_animation\": hit_anim.current_animation, \"hit_time\": hit_anim.current_animation_position, \"disabled\": shape.disabled, \"global_position\": shape.global_position, \"global_rotation\": shape.global_rotation}); return samples"})
+MCP | [debug] -> mcp:eval_liveness (6077d9531e0948f09490ae385849d175)
+MCP | [defer] game_eval (request 6077d9531e0948f09490ae385849d175)
+MCP | [debug] -> mcp:eval (6077d9531e0948f09490ae385849d175)
+MCP | [debug] <- mcp:eval_ack (6077d9531e0948f09490ae385849d175)
+MCP | [debug] <- mcp:eval_compiled (6077d9531e0948f09490ae385849d175)
+MCP | [debug] <- mcp:eval_response (6077d9531e0948f09490ae385849d175)
+MCP | [recv] game_command({"op":"input_action","params":{"action":"attack","pressed":true,"strength":1.0}})
+MCP | [debug] -> mcp:game_command input_action (c76a2ca3fe314ce696cc1d25c4d1eaad)
+MCP | [defer] game_command (request c76a2ca3fe314ce696cc1d25c4d1eaad)
+MCP | [debug] <- mcp:game_command_response (c76a2ca3fe314ce696cc1d25c4d1eaad)
+MCP | [recv] game_eval({"code":"var p = get_tree().current_scene\nvar visual = p.get_node(\"SpinePivot/SpineRig/AnimationPlayer\")\nvar hit_anim = p.get_node(\"WeaponPivot/SaberHitbox/AnimationPlayer\")\nvar shape = p.get_node(\"WeaponPivot/SaberHitbox/Hitbox/CollisionShape2D\")\nvar sprite = p.get_node(\"SpinePivot/SpineRig/TestAttackSprite\")\nvar samples = []\nfor i in range(14):\n    await get_tree().process_frame\n    samples.append({\"frame\": i, \"visual_animation\": visual.current_animation, \"visual_time\": visual.current_animation_position, \"sprite_frame\": sprite.frame, \"hit_animation\": hit_anim.current_animation, \"hit_time\": hit_anim.current_animation_position, \"disabled\": shape.disabled, \"global_position\": shape.global_position, \"global_rotation\": shape.global_rotation})\nreturn samples"})
+MCP | [debug] -> mcp:eval_liveness (e327ace2ec5f4e53bbb90729208264e3)
+MCP | [defer] game_eval (request e327ace2ec5f4e53bbb90729208264e3)
+MCP | [debug] -> mcp:eval (e327ace2ec5f4e53bbb90729208264e3)
+MCP | [debug] <- mcp:eval_ack (e327ace2ec5f4e53bbb90729208264e3)
+MCP | [debug] debugger break (pre_live=false can_debug=false)
+Loading resource: gdscript://-9223371954562529487.gd remapped: gdscript://-9223371954562529487.gd
+Completed load for: 'gdscript://-9223371954562529487.gd' remapped 'gdscript://-9223371954562529487.gd' at thread -1
+MCP | [debug] !! eval compile error (e327ace2ec5f4e53bbb90729208264e3)
+MCP | [recv] game_eval({"code":"var p = get_tree().current_scene\nvar visual = p.get_node(\"SpinePivot/SpineRig/AnimationPlayer\")\nvar hit_anim = p.get_node(\"WeaponPivot/SaberHitbox/AnimationPlayer\")\nvar shape = p.get_node(\"WeaponPivot/SaberHitbox/Hitbox/CollisionShape2D\")\nvar sprite = p.get_node(\"SpinePivot/SpineRig/TestAttackSprite\")\nawait get_tree().process_frame\nvar s0 = {\"visual\": visual.current_animation, \"visual_time\": visual.current_animation_position, \"sprite_frame\": sprite.frame, \"hit\": hit_anim.current_animation, \"hit_time\": hit_anim.current_animation_position, \"disabled\": shape.disabled}\nawait get_tree().process_frame\nvar s1 = {\"visual\": visual.current_animation, \"visual_time\": visual.current_animation_position, \"sprite_frame\": sprite.frame, \"hit\": hit_anim.current_animation, \"hit_time\": hit_anim.current_animation_position, \"disabled\": shape.disabled}\nawait get_tree().process_frame\nvar s2 = {\"visual\": visual.current_animation, \"visual_time\": visual.current_animation_position, \"sprite_frame\": sprite.frame, \"hit\": hit_anim.current_animation, \"hit_time\": hit_anim.current_animation_position, \"disabled\": shape.disabled}\nawait get_tree().process_frame\nvar s3 = {\"visual\": visual.current_animation, \"visual_time\": visual.current_animation_position, \"sprite_frame\": sprite.frame, \"hit\": hit_anim.current_animation, \"hit_time\": hit_anim.current_animation_position, \"disabled\": shape.disabled}\nreturn [s0, s1, s2, s3]"})
+MCP | [debug] -> mcp:eval_liveness (3e1cb9f8ebcc41e2a8b27ea0cf7056f2)
+MCP | [defer] game_eval (request 3e1cb9f8ebcc41e2a8b27ea0cf7056f2)
+MCP | [recv] get_editor_state({})
+MCP | [send] get_editor_state -> ok
+MCP | [recv] game_debug_control({"action":"debug_status"})
+MCP | [defer] game_debug_control (request 03cd955b86f14caa81fc879b7bb617cb)
+MCP | [recv] take_screenshot({"max_resolution":600.0,"source":"game"})
+MCP | [debug] -> mcp:take_screenshot (25a0af47a11c4432ae672636a9f59488)
+MCP | [defer] take_screenshot (request 25a0af47a11c4432ae672636a9f59488)
+MCP | [debug] <- mcp:screenshot_response (25a0af47a11c4432ae672636a9f59488)
+MCP | [recv] stop_project({})
+MCP | [defer] stop_project (request a4680ae1942e4a7da49a09460b9bf054)
+MCP | [event] play_state_changed -> stopped
+MCP | [recv] get_editor_state({})
+MCP | [send] get_editor_state -> ok
+MCP | [recv] get_logs({"count":20.0,"include_details":true,"offset":0.0,"source":"editor"})
+MCP | [send] get_logs -> ok
+Unloading addon: res://addons/fmod/plugin.cfg
+Unloading addon: res://addons/godot_ai/plugin.cfg
+MCP | server start blocked: Authenticated server endpoint was lost. Re-probing in 1s (attempt 1 of 5).
+MCP | server endpoint lost (Authenticated server endpoint was lost.); re-probing in 1s (attempt 1 of 5)
+Accessibility: window 1 adapter destroyed.
+MCP | plugin unloaded
+Unloading addon: res://addons/psd_to_layer_scene/plugin.cfg
+EditorSettings: Save OK!
+XR: Clearing primary interface
+FMOD Sound System: System released
+XR: Removed interface "Native mobile"
+XR: Removed interface "OpenXR"
+ERROR: 6 RID allocations of type 'N5GLES37TextureE' were leaked at exit.
+Accessibility: window 0 adapter destroyed.
+Leaked instance: GDScriptNativeClass:9223372045243384200 - Reference count: 2
+Leaked instance: GDScriptNativeClass:9223372045646037408 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372046367457739 - Reference count: 2
+Leaked instance: GDScriptNativeClass:9223372047105655287 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372047256650240 - Reference count: 2
+Leaked instance: GDScriptNativeClass:9223372047340536325 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372047357313542 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372047994847788 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372048061956656 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372048246506043 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372048565273166 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372049605460620 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372050024891045 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372050041668262 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372050058445479 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372050125554347 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372050142331564 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372050293326517 - Reference count: 3
+Leaked instance: GDScriptNativeClass:9223372050343658168 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372050813420244 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372050846974678 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372050897306329 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372051434177273 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372051853607698 - Reference count: 5
+Leaked instance: GDScriptNativeClass:9223372053279671143 - Reference count: 3
+Leaked instance: GDScriptNativeClass:9223372055024501711 - Reference count: 4
+Leaked instance: GDScriptNativeClass:9223372056115020816 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372058547717281 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372059067811008 - Reference count: 1
+Leaked instance: GDScriptNativeClass:9223372061685056860 - Reference count: 1
+Leaked instance: GDScript:9223373706103952904 - Reference count: 1
+Leaked instance: GDScript:9223373706439497226 - Reference count: 2
+Leaked instance: GDScript:9223373706707932684 - Reference count: 1
+Leaked instance: GDScript:9223373706976368142 - Reference count: 2
+Leaked instance: GDScript:9223373707261580816 - Reference count: 2
+Leaked instance: GDScript:9223373707832006162 - Reference count: 2
+Leaked instance: GDScript:9223373708536649241 - Reference count: 4
+Leaked instance: GDScript:9223373708637312538 - Reference count: 2
+Leaked instance: GDScript:9223373708737975835 - Reference count: 2
+Leaked instance: GDScript:9223373708838639132 - Reference count: 2
+Leaked instance: GDScript:9223373708972856861 - Reference count: 3
+Leaked instance: CompressedTexture2D:9223373709409064481 - Reference count: 1
+Leaked instance: CompressedTexture2D:9223373709744608805 - Reference count: 1
+Leaked instance: CompressedTexture2D:9223373710080153129 - Reference count: 1
+Leaked instance: CompressedTexture2D:9223373710415697453 - Reference count: 1
+Leaked instance: CompressedTexture2D:9223373710751241777 - Reference count: 1
+Leaked instance: CompressedTexture2D:9223373711086786101 - Reference count: 1
+Leaked instance: GDScript:9223373711388775991 - Reference count: 1
+Leaked instance: GDScript:9223373712277968447 - Reference count: 1
+Leaked instance: GDScript:9223373712563181121 - Reference count: 2
+Leaked instance: PackedScene:9223373712781284934 - Reference count: 1
+Leaked instance: SceneState:9223373712798062151 - Reference count: 1
+Hint: Leaked instances typically happen when nodes are removed from the scene tree (with `remove_child()`) but not freed (with `free()` or `queue_free()`).
+Resource still in use: res://addons/godot_ai/utils/log_backtrace.gd (GDScript)
+Resource still in use: res://addons/godot_ai/runtime/game_logger.gd (GDScript)
+Resource still in use: res://addons/godot_ai/utils/error_codes.gd (GDScript)
+Resource still in use: res://addons/godot_ai/utils/screenshot_encode.gd (GDScript)
+Resource still in use: res://addons/godot_ai/runtime/game_helper.gd (GDScript)
+Resource still in use: res://addons/fmod/tool/FmodBankDatabase.gd (GDScript)
+Resource still in use: res://addons/fmod/icons/fmod_icon.svg (CompressedTexture2D)
+Resource still in use: res://addons/fmod/icons/vca_icon.svg (CompressedTexture2D)
+Resource still in use: res://addons/fmod/icons/bank_icon.svg (CompressedTexture2D)
+Resource still in use: res://addons/fmod/icons/event_icon.svg (CompressedTexture2D)
+Resource still in use: res://addons/fmod/icons/bus_icon.svg (CompressedTexture2D)
+Resource still in use: res://addons/fmod/icons/snapshot_icon.svg (CompressedTexture2D)
+Resource still in use: res://addons/fmod/tool/ui/FmodBankExplorer.gd (GDScript)
+Resource still in use: res://addons/fmod/FmodAndroidExportPlugin.gd (GDScript)
+Resource still in use: res://addons/fmod/tool/inspectors/FmodEmitterPropertyInspectorPlugin.gd (GDScript)
+Resource still in use: res://addons/fmod/tool/property_editors/FmodBankPathEditorProperty.gd (GDScript)
+Resource still in use: res://addons/fmod/tool/inspectors/FmodBankLoaderPropertyInspectorPlugin.gd (GDScript)
+Resource still in use: res://addons/fmod/FmodPlugin.gd (GDScript)
+Resource still in use: res://addons/fmod/tool/ui/ParameterDisplay.gd (GDScript)
+Resource still in use: res://addons/fmod/tool/ui/ParameterDisplay.tscn (PackedScene)
+Resource still in use: res://addons/fmod/tool/ui/EventParametersDisplay.gd (GDScript)
+Orphan StringName: %PathLabel (static: 0, total: 6)
+Orphan StringName: insert (static: 0, total: 1)
+Orphan StringName: call (static: 0, total: 2)
+Orphan StringName: CAPTURE_PREFIX (static: 0, total: 2)
+Orphan StringName: _on_copy_name_button (static: 0, total: 4)
+Orphan StringName: _on_copy_path_button (static: 0, total: 4)
+Orphan StringName: get_frame_file (static: 0, total: 1)
+Orphan StringName: res://addons/fmod/tool/inspectors/FmodEmitterPropertyInspectorPlugin.gd (static: 0, total: 5)
+Orphan StringName: CurrentValueTitleLabel (static: 0, total: 1)
+Orphan StringName: event_description (static: 0, total: 3)
+Orphan StringName: slice (static: 0, total: 1)
+Orphan StringName: FLUSH_BATCH_LIMIT (static: 0, total: 2)
+Orphan StringName: EVAL_HUNG (static: 0, total: 2)
+Orphan StringName: _enter_tree (static: 1, total: 4)
+Orphan StringName: anchor_top (static: 0, total: 2)
+Orphan StringName: @static_initializer (static: 1, total: 6)
+Orphan StringName: print (static: 0, total: 2)
+Orphan StringName: %ValueSetterContainer (static: 0, total: 2)
+Orphan StringName: name (static: 0, total: 5)
+Orphan StringName: FmodEventDescription (static: 0, total: 7)
+Orphan StringName: path_property_name (static: 0, total: 4)
+Orphan StringName: _ready (static: 1, total: 10)
+Orphan StringName: device (static: 0, total: 1)
+Orphan StringName: JSON (static: 0, total: 1)
+Orphan StringName: plugin_name (static: 0, total: 4)
+Orphan StringName: EVAL_COMPILE_ERROR (static: 0, total: 2)
+Orphan StringName: script (static: 0, total: 1)
+Orphan StringName: _pending (static: 0, total: 3)
+Orphan StringName: Tree (static: 22, total: 25)
+Orphan StringName: _last_loop_tick_msec (static: 0, total: 4)
+Orphan StringName: search (static: 1, total: 5)
+Orphan StringName: _exit_tree (static: 1, total: 7)
+Orphan StringName: EDITOR_NOT_READY (static: 0, total: 2)
+Orphan StringName: _control_disabled (static: 0, total: 4)
+Orphan StringName: PROPERTY_NOT_ON_CLASS (static: 0, total: 2)
+Orphan StringName: LineEdit (static: 9, total: 10)
+Orphan StringName: _property_name_cache (static: 0, total: 2)
+Orphan StringName: line (static: 0, total: 1)
+Orphan StringName: _variant_to_json (static: 0, total: 10)
+Orphan StringName: ATTACH_LOCK_TIMEOUT (static: 0, total: 2)
+Orphan StringName: %EventPlayControls (static: 0, total: 4)
+Orphan StringName: columns (static: 0, total: 1)
+Orphan StringName: _on_default_value_button (static: 0, total: 4)
+Orphan StringName: anchors_preset (static: 0, total: 2)
+Orphan StringName: INVALID_PARAMS (static: 0, total: 2)
+Orphan StringName: last_selected_index (static: 0, total: 4)
+Orphan StringName: res://addons/fmod/FmodPlugin.gd (static: 0, total: 14)
+Orphan StringName: DefaultValueLabel (static: 0, total: 1)
+Orphan StringName: _bank_icon (static: 0, total: 2)
+Orphan StringName: _LogBacktrace (static: 0, total: 2)
+Orphan StringName: base_color (static: 1, total: 4)
+Orphan StringName: _supports_platform (static: 1, total: 4)
+Orphan StringName: _script_error_seq (static: 0, total: 4)
+Orphan StringName: bank_loader_inspector_plugin (static: 0, total: 3)
+Orphan StringName: res://addons/fmod/tool/ui/EventParametersDisplay.gd (static: 0, total: 3)
+Orphan StringName: _handle_take_screenshot (static: 0, total: 4)
+Orphan StringName: NameTitle (static: 0, total: 1)
+Orphan StringName: error (static: 0, total: 1)
+Orphan StringName: set_event_description (static: 0, total: 4)
+Orphan StringName: echo (static: 0, total: 1)
+Orphan StringName: size_flags_vertical (static: 0, total: 11)
+Orphan StringName: _on_text_edit_text_submitted (static: 0, total: 3)
+Orphan StringName: _frame_waiter (static: 0, total: 4)
+Orphan StringName: offset_top (static: 0, total: 2)
+Orphan StringName: Label (static: 14, total: 26)
+Orphan StringName: path (static: 0, total: 1)
+Orphan StringName: McpScreenshotEncode (static: 0, total: 3)
+Orphan StringName: EDITED_SCENE_MISMATCH (static: 0, total: 2)
+Orphan StringName: EditorProperty (static: 8, total: 10)
+Orphan StringName: typeof (static: 0, total: 7)
+Orphan StringName: _get_android_libraries (static: 0, total: 3)
+Orphan StringName: _logger (static: 0, total: 3)
+Orphan StringName: BACKEND_START_TIMEOUT (static: 0, total: 2)
+Orphan StringName: background_color (static: 0, total: 3)
+Orphan StringName: _popup_project_explorer (static: 0, total: 5)
+Orphan StringName: _on_copy_id_button (static: 0, total: 4)
+Orphan StringName: _reply_input_sequence_ok (static: 0, total: 4)
+Orphan StringName: substr (static: 0, total: 1)
+Orphan StringName: theme_override_constants/margin_left (static: 0, total: 1)
+Orphan StringName: _last_frames_drawn_seen (static: 0, total: 4)
+Orphan StringName: _last_game_command_reply (static: 0, total: 3)
+Orphan StringName: _event_editor_property_scene (static: 0, total: 3)
+Orphan StringName: FmodEmitterPropertyInspectorPlugin (static: 0, total: 5)
+Orphan StringName: paused (static: 0, total: 1)
+Orphan StringName: "addons/godot_ai/runtime/game_logger.gd" (static: 0, total: 1)
+Orphan StringName: EventParametersDisplay (static: 0, total: 3)
+Orphan StringName: _on_project_explorer_button_clicked (static: 0, total: 4)
+Orphan StringName: EditorExportPlugin (static: 0, total: 2)
+Orphan StringName: _update_property (static: 0, total: 3)
+Orphan StringName: PORT_OCCUPIED (static: 0, total: 2)
+Orphan StringName: should_display_copy_buttons (static: 0, total: 6)
+Orphan StringName: max_value (static: 0, total: 1)
+Orphan StringName: BackToDefaultButton (static: 0, total: 1)
+Orphan StringName: function (static: 0, total: 1)
+Orphan StringName: res://addons/godot_ai/runtime/game_helper.gd (static: 0, total: 52)
+Orphan StringName: res://addons/fmod/tool/ui/ParameterDisplay.gd (static: 0, total: 9)
+Orphan StringName: Control (static: 3, total: 13)
+Orphan StringName: bank_explorer (static: 0, total: 3)
+Orphan StringName: anchor_bottom (static: 0, total: 2)
+Orphan StringName: MASTER_BANK_NAME (static: 0, total: 2)
+Orphan StringName: push_warning (static: 0, total: 1)
+Orphan StringName: disconnect (static: 1, total: 2)
+Orphan StringName: %IdCopyButton (static: 0, total: 2)
+Orphan StringName: _runtime_path (static: 0, total: 8)
+Orphan StringName: _handle_game_command (static: 0, total: 4)
+Orphan StringName: message (static: 0, total: 1)
+Orphan StringName: SUB_EDITOR_TEST_RUNNING (static: 0, total: 2)
+Orphan StringName: EVAL_RESULT_TOO_LARGE (static: 0, total: 2)
+Orphan StringName: _mcp_game_helper (static: 0, total: 1)
+Orphan StringName: process_mode (static: 0, total: 2)
+Orphan StringName: EditorExportPlatformAndroid (static: 0, total: 1)
+Orphan StringName: _logger_attached (static: 0, total: 4)
+Orphan StringName: RESOURCE_NOT_FOUND (static: 0, total: 2)
+Orphan StringName: _event_icon (static: 0, total: 2)
+Orphan StringName: RangeLabel (static: 0, total: 1)
+Orphan StringName: McpErrorCodes (static: 0, total: 3)
+Orphan StringName: UNKNOWN_COMMAND (static: 0, total: 2)
+Orphan StringName: CUSTOM_TOOL_NOT_UNDOABLE (static: 0, total: 2)
+Orphan StringName: split (static: 0, total: 2)
+Orphan StringName: offset_left (static: 0, total: 2)
+Orphan StringName: %RemoveButton (static: 0, total: 2)
+Orphan StringName: _should_capture_stale_sync (static: 0, total: 4)
+Orphan StringName: append (static: 0, total: 12)
+Orphan StringName: _resolve_runtime_node (static: 0, total: 6)
+Orphan StringName: Button (static: 2, total: 10)
+Orphan StringName: grow_vertical (static: 0, total: 2)
+Orphan StringName: _game_get_ui_elements (static: 0, total: 4)
+Orphan StringName: IdCopyButton (static: 0, total: 1)
+Orphan StringName: _snapshot_icon (static: 0, total: 2)
+Orphan StringName: TRANSPORT_OVERLOADED (static: 0, total: 2)
+Orphan StringName: axis (static: 0, total: 1)
+Orphan StringName: FmodBankDatabase (static: 0, total: 3)
+Orphan StringName: downscale_and_encode (static: 0, total: 4)
+Orphan StringName: FmodParameterDescription (static: 0, total: 5)
+Orphan StringName: _object_has_property (static: 0, total: 5)
+Orphan StringName: connect (static: 1, total: 6)
+Orphan StringName: original_height (static: 0, total: 1)
+Orphan StringName: get_frame_line (static: 0, total: 1)
+Orphan StringName: emit (static: 0, total: 1)
+Orphan StringName: _resolve_mouse_position (static: 0, total: 4)
+Orphan StringName: process_frame (static: 1, total: 4)
+Orphan StringName: _reply_game_command_error (static: 0, total: 4)
+Orphan StringName: FmodAndroidExportPlugin (static: 0, total: 4)
+Orphan StringName: _error_type_name (static: 0, total: 4)
+Orphan StringName: generate_tree (static: 0, total: 6)
+Orphan StringName: is_empty (static: 0, total: 2)
+Orphan StringName: %ManualAddButton (static: 0, total: 2)
+Orphan StringName: GAME_HELPER_TIMEOUT (static: 0, total: 2)
+Orphan StringName: _mouse_button_index (static: 0, total: 4)
+Orphan StringName: _on_item_selected (static: 0, total: 4)
+Orphan StringName: display_value_selector (static: 0, total: 3)
+Orphan StringName: emit_path_and_guid_callable (static: 0, total: 1)
+Orphan StringName: _game_input_state (static: 0, total: 4)
+Orphan StringName: parameter_display_scene (static: 0, total: 2)
+Orphan StringName: stop_event (static: 0, total: 1)
+Orphan StringName: icon (static: 3, total: 6)
+Orphan StringName: value (static: 0, total: 2)
+Orphan StringName: _main_loop_appears_stalled (static: 0, total: 6)
+Orphan StringName: PropertyHint (static: 0, total: 2)
+Orphan StringName: set_fmod_event (static: 0, total: 4)
+Orphan StringName: _game_input_mouse (static: 0, total: 4)
+Orphan StringName: _on_remove_button (static: 0, total: 4)
+Orphan StringName: InputEventJoypadMotion (static: 1, total: 2)
+Orphan StringName: VBoxContainer (static: 0, total: 41)
+Orphan StringName: _set_path_and_guid (static: 0, total: 5)
+Orphan StringName: get_metadata (static: 0, total: 1)
+Orphan StringName: _log_error (static: 1, total: 4)
+Orphan StringName: _bus_icon (static: 0, total: 2)
+Orphan StringName: SUB_EDITOR_VIEWPORT_UNAVAILABLE (static: 0, total: 2)
+Orphan StringName: _is_number (static: 0, total: 5)
+Orphan StringName: InputEventJoypadButton (static: 0, total: 1)
+Orphan StringName: ATTACH_LOCK_ERROR (static: 0, total: 2)
+Orphan StringName: MASTER_STRINGS_BANK_NAME (static: 0, total: 2)
+Orphan StringName: %RangeLabel (static: 0, total: 2)
+Orphan StringName: _current_select_callable (static: 0, total: 3)
+Orphan StringName: source_code (static: 0, total: 1)
+Orphan StringName: EVAL_GAME_NOT_READY (static: 0, total: 2)
+Orphan StringName: HSeparator (static: 0, total: 3)
+Orphan StringName: script_error_seq (static: 0, total: 4)
+Orphan StringName: rsplit (static: 0, total: 1)
+Orphan StringName: _try_report_eval_runtime_error (static: 0, total: 5)
+Orphan StringName: theme_override_constants/margin_top (static: 0, total: 1)
+Orphan StringName: get_godot_res_path (static: 0, total: 1)
+Orphan StringName: _reply_input_sequence_error (static: 0, total: 4)
+Orphan StringName: SUB_EDITOR_PLAYING (static: 0, total: 2)
+Orphan StringName: %IdLabel (static: 0, total: 4)
+Orphan StringName: ValueSlider (static: 0, total: 1)
+Orphan StringName: res://addons/fmod/tool/ui/FmodBankExplorer.gd (static: 0, total: 18)
+Orphan StringName: should_display_select_button (static: 0, total: 6)
+Orphan StringName: %UpButton (static: 0, total: 2)
+Orphan StringName: SUB_EDITOR_UNAVAILABLE (static: 0, total: 2)
+Orphan StringName: ToDisplayFlags (static: 0, total: 2)
+Orphan StringName: _run_input_sequence (static: 0, total: 4)
+Orphan StringName: physical_keycode (static: 0, total: 1)
+Orphan StringName: _game_input_gamepad (static: 0, total: 4)
+Orphan StringName: text (static: 0, total: 19)
+Orphan StringName: IdTitle (static: 0, total: 1)
+Orphan StringName: FmodBankExplorer (static: 0, total: 4)
+Orphan StringName: FmodBank (static: 0, total: 2)
+Orphan StringName: sort_custom (static: 0, total: 1)
+Orphan StringName: %GuidLabel (static: 0, total: 8)
+Orphan StringName: FmodEventEmitter2D (static: 0, total: 1)
+Orphan StringName: FmodEventEmitter3D (static: 0, total: 1)
+Orphan StringName: %SelectButton (static: 0, total: 6)
+Orphan StringName: Image (static: 0, total: 2)
+Orphan StringName: _append (static: 0, total: 5)
+Orphan StringName: GDScript (static: 0, total: 1)
+Orphan StringName: offset_bottom (static: 0, total: 3)
+Orphan StringName: _inflight_evals (static: 0, total: 3)
+Orphan StringName: FmodManager (static: 0, total: 1)
+Orphan StringName: TRANSPORT_OUTCOME_UNKNOWN (static: 0, total: 2)
+Orphan StringName: export_plugin (static: 0, total: 3)
+Orphan StringName: MISSING_REQUIRED_PARAM (static: 0, total: 2)
+Orphan StringName: emit_path_and_guid (static: 0, total: 4)
+Orphan StringName: unique_name_in_owner (static: 0, total: 11)
+Orphan StringName: _indent_eval_code (static: 0, total: 4)
+Orphan StringName: banks (static: 0, total: 5)
+Orphan StringName: item_selected (static: 0, total: 1)
+Orphan StringName: _add_explorer_button (static: 0, total: 4)
+Orphan StringName: %RefreshBanksButton (static: 0, total: 2)
+Orphan StringName: Viewport (static: 0, total: 2)
+Orphan StringName: _last_eval_reply (static: 0, total: 3)
+Orphan StringName: get (static: 2, total: 20)
+Orphan StringName: _eval_token_counter (static: 0, total: 4)
+Orphan StringName: ItemList (static: 1, total: 2)
+Orphan StringName: %ParameterDisplaysContainer (static: 0, total: 2)
+Orphan StringName: RENDER_STALL_MSEC (static: 0, total: 2)
+Orphan StringName: SUB_EDITOR_VIEWPORT_EMPTY (static: 0, total: 2)
+Orphan StringName: root (static: 0, total: 2)
+Orphan StringName: normal (static: 7, total: 8)
+Orphan StringName: keys (static: 0, total: 1)
+Orphan StringName: ui (static: 0, total: 3)
+Orphan StringName: has (static: 0, total: 7)
+Orphan StringName: position (static: 0, total: 2)
+Orphan StringName: EditorInterface (static: 0, total: 1)
+Orphan StringName: GameLogger (static: 0, total: 2)
+Orphan StringName: _capture_and_reply (static: 0, total: 4)
+Orphan StringName: anchor_left (static: 0, total: 2)
+Orphan StringName: disabled (static: 0, total: 1)
+Orphan StringName: find_script_error_since (static: 0, total: 4)
+Orphan StringName: _rendering_appears_stalled (static: 0, total: 4)
+Orphan StringName: min_value (static: 0, total: 1)
+Orphan StringName: ADDON_PATH (static: 0, total: 2)
+Orphan StringName: make (static: 0, total: 5)
+Orphan StringName: get_path (static: 0, total: 5)
+Orphan StringName: Variant.Type (static: 0, total: 2)
+Orphan StringName: _debug_status_snapshot (static: 0, total: 4)
+Orphan StringName: size_flags_horizontal (static: 0, total: 6)
+Orphan StringName: HSlider (static: 0, total: 1)
+Orphan StringName: NameCopyButton (static: 0, total: 1)
+Orphan StringName: _registered (static: 0, total: 4)
+Orphan StringName: Mutex (static: 0, total: 3)
+Orphan StringName: fmod_bank_explorer_window (static: 0, total: 3)
+Orphan StringName: %PathsBG (static: 0, total: 2)
+Orphan StringName: CUSTOM_TOOL_DISABLED (static: 0, total: 2)
+Orphan StringName: %BackToDefaultButton (static: 0, total: 2)
+Orphan StringName: height (static: 0, total: 1)
+Orphan StringName: open_project_explorer_event (static: 0, total: 1)
+Orphan StringName: basis (static: 0, total: 1)
+Orphan StringName: WRONG_TYPE (static: 0, total: 2)
+Orphan StringName: instantiate (static: 0, total: 1)
+Orphan StringName: _add_elements_as_tree (static: 0, total: 4)
+Orphan StringName: ErrorCodes (static: 0, total: 2)
+Orphan StringName: close_window (static: 0, total: 5)
+Orphan StringName: SUB_EDITOR_GAME_NOT_RUNNING (static: 0, total: 2)
+Orphan StringName: res://addons/fmod/tool/inspectors/FmodBankLoaderPropertyInspectorPlugin.gd (static: 0, total: 6)
+Orphan StringName: %Tree (static: 0, total: 2)
+Orphan StringName: _collect_ui_elements (static: 0, total: 5)
+Orphan StringName: android_export_plugin (static: 0, total: 3)
+Orphan StringName: visible (static: 0, total: 10)
+Orphan StringName: _init (static: 0, total: 12)
+Orphan StringName: emitter_inspector_plugin (static: 0, total: 3)
+Orphan StringName: CanvasItem (static: 0, total: 2)
+Orphan StringName: mcp (static: 0, total: 2)
+Orphan StringName: original_width (static: 0, total: 1)
+Orphan StringName: DefaultValueTitle (static: 0, total: 1)
+Orphan StringName: _plan_input_sequence (static: 0, total: 4)
+Orphan StringName: _reply_error (static: 0, total: 5)
+Orphan StringName: global_position (static: 0, total: 1)
+Orphan StringName: HBoxContainer2 (static: 0, total: 3)
+Orphan StringName: data (static: 0, total: 1)
+Orphan StringName: _on_debug_message (static: 0, total: 4)
+Orphan StringName: new (static: 4, total: 13)
+Orphan StringName: _last_debug_status_reply (static: 0, total: 3)
+Orphan StringName: _property_cache_key (static: 0, total: 4)
+Orphan StringName: _get_name (static: 0, total: 3)
+Orphan StringName: %CurrentValueLabel (static: 0, total: 2)
+Orphan StringName: execute (static: 0, total: 2)
+Orphan StringName: %NameCopyButton (static: 0, total: 2)
+Orphan StringName: ActionCopy (static: 12, total: 14)
+Orphan StringName: NODE_NOT_FOUND (static: 0, total: 2)
+Orphan StringName: bind (static: 0, total: 1)
+Orphan StringName: prefix_message (static: 0, total: 3)
+Orphan StringName: theme_override_constants/margin_bottom (static: 0, total: 1)
+Orphan StringName: _process (static: 3, total: 6)
+Orphan StringName: MAX_SEQUENCE_STEPS (static: 0, total: 2)
+Orphan StringName: _ui_element_info (static: 0, total: 4)
+Orphan StringName: EVAL_RUNTIME_ERROR (static: 0, total: 2)
+Orphan StringName: casecmp_to (static: 0, total: 1)
+Orphan StringName: _reply_eval_liveness (static: 0, total: 4)
+Orphan StringName: tree (static: 0, total: 3)
+Orphan StringName: ScrollContainer (static: 0, total: 1)
+Orphan StringName: res://addons/fmod/tool/FmodBankDatabase.gd (static: 0, total: 3)
+Orphan StringName: base64 (static: 0, total: 1)
+Orphan StringName: SUB_EDITOR_VIEWPORT_NOT_3D (static: 0, total: 2)
+Orphan StringName: time_scale (static: 0, total: 1)
+Orphan StringName: open_project_explorer_bank (static: 0, total: 4)
+Orphan StringName: remove_at (static: 0, total: 2)
+Orphan StringName: DEFERRED_TIMEOUT (static: 0, total: 2)
+Orphan StringName: InputEventMouseMotion (static: 0, total: 1)
+Orphan StringName: _on_slider_value_changed (static: 0, total: 4)
+Orphan StringName: ValueSetterContainer (static: 0, total: 10)
+Orphan StringName: MAX_SEQUENCE_FRAMES (static: 0, total: 2)
+Orphan StringName: _ERROR_TYPE_SCRIPT (static: 0, total: 2)
+Orphan StringName: flags (static: 0, total: 5)
+Orphan StringName: res://addons/godot_ai/utils/error_codes.gd (static: 0, total: 4)
+Orphan StringName: InputEventMouseButton (static: 0, total: 1)
+Orphan StringName: open_project_explorer_events (static: 0, total: 4)
+Orphan StringName: FmodPlugin (static: 0, total: 6)
+Orphan StringName: _frames_from_backtrace (static: 0, total: 4)
+Orphan StringName: ParameterDisplay (static: 0, total: 4)
+Orphan StringName: FIRST_FRAME_WAIT_SEC (static: 0, total: 2)
+Orphan StringName: _mutex (static: 0, total: 3)
+Orphan StringName: str (static: 0, total: 23)
+Orphan StringName: set_icon (static: 0, total: 1)
+Orphan StringName: NameLabel (static: 0, total: 2)
+Orphan StringName: FmodBankLoaderPropertyInspectorPlugin (static: 0, total: 5)
+Orphan StringName: res://addons/fmod (static: 0, total: 1)
+Orphan StringName: _MAX_RECENT_SCRIPT_ERRORS (static: 0, total: 2)
+Orphan StringName: MarginContainer (static: 0, total: 2)
+Orphan StringName: VALUE_OUT_OF_RANGE (static: 0, total: 2)
+Orphan StringName: res://addons/godot_ai/runtime/game_logger.gd (static: 0, total: 8)
+Orphan StringName: ContentContainer (static: 0, total: 7)
+Orphan StringName: ATTACH_RUNTIME_DIR_ERROR (static: 0, total: 2)
+Orphan StringName: width (static: 0, total: 1)
+Orphan StringName: use_hdr_2d (static: 0, total: 1)
+Orphan StringName: EVAL_TIMEOUT_SEC (static: 0, total: 2)
+Orphan StringName: %AddButton (static: 0, total: 2)
+Orphan StringName: _last_frames_advance_msec (static: 0, total: 4)
+Orphan StringName: CurrentValueLabel (static: 0, total: 1)
+Orphan StringName: reset_search (static: 0, total: 4)
+Orphan StringName: contrast (static: 0, total: 3)
+Orphan StringName: . (static: 1, total: 25)
+Orphan StringName: a (static: 0, total: 1)
+Orphan StringName: b (static: 0, total: 1)
+Orphan StringName: d (static: 0, total: 1)
+Orphan StringName: g (static: 0, total: 1)
+Orphan StringName: r (static: 0, total: 1)
+Orphan StringName: w (static: 0, total: 1)
+Orphan StringName: x (static: 0, total: 1)
+Orphan StringName: y (static: 0, total: 1)
+Orphan StringName: z (static: 0, total: 1)
+Orphan StringName: _enable_plugin (static: 0, total: 3)
+Orphan StringName: SUB_EDITOR_IMPORTING (static: 0, total: 2)
+Orphan StringName: _on_move_button (static: 0, total: 4)
+Orphan StringName: current_scene (static: 0, total: 2)
+Orphan StringName: %ParametersContainer (static: 0, total: 2)
+Orphan StringName: TEST_RUN_TIMEOUT (static: 0, total: 2)
+Orphan StringName: FmodBankPathEditorProperty (static: 0, total: 4)
+Orphan StringName: RangeTitle (static: 0, total: 1)
+Orphan StringName: Node (static: 10, total: 32)
+Orphan StringName: resolve_error (static: 0, total: 4)
+Orphan StringName: _reply_debug_status (static: 0, total: 4)
+Orphan StringName: set_metadata (static: 0, total: 1)
+Orphan StringName: ERROR_TYPE_NAMES (static: 0, total: 2)
+Orphan StringName: level (static: 0, total: 1)
+Orphan StringName: %ManualAddLineEdit (static: 0, total: 2)
+Orphan StringName: set_text (static: 0, total: 1)
+Orphan StringName: copy_guid_button (static: 0, total: 3)
+Orphan StringName: _parse_category (static: 0, total: 6)
+Orphan StringName: @implicit_ready (static: 0, total: 2)
+Orphan StringName: res://addons/fmod/tool/property_editors/FmodBankPathEditorProperty.gd (static: 0, total: 8)
+Orphan StringName: get_frame_count (static: 0, total: 3)
+Orphan StringName: EditorIcons (static: 3, total: 5)
+Orphan StringName: drain (static: 0, total: 4)
+Orphan StringName: anchor_right (static: 0, total: 2)
+Orphan StringName: FmodBankLoader (static: 0, total: 1)
+Orphan StringName: _disable_plugin (static: 0, total: 3)
+Orphan StringName: grow_horizontal (static: 0, total: 2)
+Orphan StringName: initialize (static: 0, total: 1)
+Orphan StringName: RefCounted (static: 1, total: 2)
+Orphan StringName: set_parameter (static: 0, total: 4)
+Orphan StringName: res://addons/fmod/FmodAndroidExportPlugin.gd (static: 0, total: 4)
+Orphan StringName: sort_by_path (static: 0, total: 4)
+Orphan StringName: _collect_runtime_nodes (static: 0, total: 5)
+Orphan StringName: _get_icon_for_fmod_path (static: 0, total: 5)
+Orphan StringName: EditorPlugin (static: 1, total: 5)
+Orphan StringName: close_requested (static: 1, total: 2)
+Orphan StringName: %CloseButton (static: 0, total: 2)
+Orphan StringName: Object (static: 5, total: 21)
+Orphan StringName: MAIN_LOOP_STALL_MSEC (static: 0, total: 2)
+Orphan StringName: find (static: 0, total: 2)
+Orphan StringName: theme_override_constants/margin_right (static: 0, total: 1)
+Orphan StringName: %ParametersLabel (static: 0, total: 2)
+Orphan StringName: _on_copy_guid_button (static: 0, total: 4)
+Orphan StringName: _recent_script_errors (static: 0, total: 3)
+Orphan StringName: _parse_property (static: 0, total: 6)
+Orphan StringName: keycode (static: 0, total: 1)
+Orphan StringName: regenerate_tree (static: 0, total: 5)
+Orphan StringName: Theme (static: 0, total: 2)
+Orphan StringName: _open_project_explorer (static: 0, total: 5)
+Orphan StringName: _mcp_runtime_process_ticks (static: 0, total: 4)
+Orphan StringName: _add_elements_as_items (static: 0, total: 4)
+Orphan StringName: _game_get_node_info (static: 0, total: 4)
+Orphan StringName: NEW_CLIENT_SESSION_REQUIRED (static: 0, total: 2)
+Orphan StringName: SUB_EDITOR_NO_SCENE (static: 0, total: 2)
+Orphan StringName: _pending_outbound (static: 0, total: 3)
+Orphan StringName: %RangeTitle (static: 0, total: 2)
+Orphan StringName: _can_handle (static: 1, total: 7)
+Orphan StringName: HBoxContainer (static: 0, total: 7)
+Orphan StringName: _game_input_key (static: 0, total: 4)
+Orphan StringName: _game_get_scene_tree (static: 0, total: 4)
+Orphan StringName: fmod_button (static: 0, total: 3)
+Orphan StringName: value_changed (static: 0, total: 1)
+Orphan StringName: InputEventKey (static: 0, total: 1)
+Orphan StringName: _add_bank_explorer_window (static: 0, total: 4)
+Orphan StringName: erase (static: 0, total: 2)
+Orphan StringName: _on_manual_add_button (static: 0, total: 4)
+Orphan StringName: INTERNAL_ERROR (static: 0, total: 2)
+Orphan StringName: %DownButton (static: 0, total: 2)
+Orphan StringName: get_edited_scene_root (static: 0, total: 1)
+Orphan StringName: axis_value (static: 0, total: 1)
+Orphan StringName: _vca_icon (static: 0, total: 2)
+Orphan StringName: is_instance_valid (static: 0, total: 3)
+Orphan StringName: theme (static: 0, total: 4)
+Orphan StringName: BACKEND_START_FAILED (static: 0, total: 2)
+Orphan StringName: _reply_eval_error (static: 0, total: 5)
+Orphan StringName: %ValueSlider (static: 0, total: 4)
+Orphan StringName: _game_input_action (static: 0, total: 5)
+Orphan StringName: hide (static: 0, total: 1)
+Orphan StringName: parameter (static: 0, total: 3)
+Orphan StringName: button_index (static: 0, total: 2)
+Orphan StringName: layout_mode (static: 0, total: 24)
+Orphan StringName: EVAL_RESULT_MAX_BYTES (static: 0, total: 2)
+Orphan StringName: origin (static: 0, total: 1)
+Orphan StringName: _drive_eval (static: 0, total: 4)
+Orphan StringName: get_guid (static: 0, total: 2)
+Orphan StringName: _last_eval_liveness_reply (static: 0, total: 3)
+Orphan StringName: _handle_eval_check (static: 0, total: 4)
+Orphan StringName: PackedScene (static: 1, total: 8)
+Orphan StringName: @implicit_new (static: 0, total: 14)
+Orphan StringName: TreeItem (static: 0, total: 4)
+Orphan StringName: EditorInspectorPlugin (static: 0, total: 5)
+Orphan StringName: resource_path (static: 0, total: 1)
+Orphan StringName: _handle_eval (static: 0, total: 4)
+Orphan StringName: show (static: 0, total: 1)
+Orphan StringName: McpLogBacktrace (static: 0, total: 3)
+Orphan StringName: _log_message (static: 1, total: 4)
+Orphan StringName: offset_right (static: 0, total: 3)
+Orphan StringName: Texture2D (static: 0, total: 3)
+Orphan StringName: Window (static: 5, total: 7)
+Orphan StringName: %SearchField (static: 0, total: 2)
+Orphan StringName: _open_project_explorer_callable (static: 0, total: 6)
+Orphan StringName: bank_icon (static: 0, total: 2)
+Orphan StringName: reload_all_banks (static: 0, total: 5)
+Orphan StringName: _reply_eval_response (static: 0, total: 4)
+Orphan StringName: FmodEditorExportPlugin (static: 0, total: 3)
+Orphan StringName: size (static: 0, total: 2)
+Orphan StringName: make_not_ready (static: 0, total: 3)
+Orphan StringName: has_pending (static: 0, total: 4)
+Orphan StringName: get_instance_id (static: 0, total: 1)
+Orphan StringName: res://addons/godot_ai/utils/screenshot_encode.gd (static: 0, total: 2)
+Orphan StringName: Logger (static: 0, total: 3)
+Orphan StringName: ScreenshotEncode (static: 0, total: 2)
+Orphan StringName: TitleContainer (static: 0, total: 5)
+Orphan StringName: IdLabel (static: 0, total: 2)
+Orphan StringName: %BankList (static: 0, total: 6)
+Orphan StringName: res://addons/godot_ai/utils/log_backtrace.gd (static: 0, total: 4)
+Orphan StringName: copy_path_button (static: 0, total: 3)
+Orphan StringName: _current_scene_root (static: 0, total: 5)
+Orphan StringName: _actions_pressed_at_end (static: 0, total: 4)
+Orphan StringName: _last_screenshot_reply (static: 0, total: 3)
+Orphan StringName: _control_visible_in_tree (static: 0, total: 4)
+Orphan StringName: _runtime_node_properties (static: 0, total: 4)
+Orphan StringName: FmodManager_Autoload_Name (static: 0, total: 2)
+Orphan StringName: pressed (static: 0, total: 7)
+Orphan StringName: _fmod_icon (static: 0, total: 2)
+Orphan StringName: theme_override_constants/separation (static: 0, total: 2)
+Orphan StringName: %NameLabel (static: 0, total: 4)
+Orphan StringName: %EventParametersDisplay (static: 0, total: 2)
+Orphan StringName: get_frame_function (static: 0, total: 2)
+Orphan StringName: %DefaultValueLabel (static: 0, total: 2)
+Orphan StringName: on_refresh_banks_button_pressed (static: 0, total: 4)
+StringName: 483 unclaimed string names at exit.
+ERROR: Texture with GL ID of 434: leaked 1364 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 435: leaked 2200 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 436: leaked 2200 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 437: leaked 2152 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 438: leaked 2200 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+ERROR: Texture with GL ID of 439: leaked 2152 bytes.
+   at: ~Utilities (drivers/gles3/storage/utilities.cpp:82)
+WARNING: 52 ObjectDB instances were leaked at exit (run with `--verbose` for details).
+   at: cleanup (core/object/object.cpp:2535)
+ERROR: 21 resources still in use at exit.
+   at: clear (core/io/resource.cpp:817)
