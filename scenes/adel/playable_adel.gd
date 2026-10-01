@@ -3,6 +3,8 @@ extends CharacterBody2D
 @onready var spine_rig = $SpinePivot/SpineRig
 @onready var spine_anim = $SpinePivot/SpineRig/AnimationPlayer
 @onready var spine_pivot = $SpinePivot
+@onready var weapon_pivot: Node2D = $WeaponPivot
+@onready var saber_hitbox: SaberHitbox = $WeaponPivot/SaberHitbox
 @onready var weapon: WeaponData = $WeaponHolder/Saber
 @onready var attack_hitbox: Area2D = $AttackHitbox
 @onready var attack_hitbox_shape: CollisionShape2D = $AttackHitbox/CollisionShape2D
@@ -184,9 +186,7 @@ func enter_rest(face_left: bool) -> void:
 	can_move = false
 	velocity = Vector2.ZERO
 	_playing_land_anim = false
-	var current_scale = abs(spine_pivot.scale.x)
-	spine_pivot.scale.x = -current_scale if face_left else current_scale
-	facing_direction = -1 if face_left else 1
+	_set_facing_direction(-1 if face_left else 1)
 	spine_anim.play("idle")
 
 func play_rest_animation() -> void:
@@ -240,7 +240,7 @@ func _play_combo_step() -> void:
 		velocity.y = 0.0
 
 	spine_anim.play(combat.get_attack_anim_name())
-	combat.start_attack_hitbox_window()
+	saber_hitbox.play_attack_window(combat.get_attack_anim_name())
 func _reset_combo() -> void:
 	combat.reset_combo_if_idle(is_doing_action)
 
@@ -322,10 +322,14 @@ func _set_enemy_collision_enabled(enabled: bool) -> void:
 func _update_facing(direction: float) -> void:
 	if direction == 0.0:
 		return
-	facing_direction = -1 if direction < 0 else 1
-	var current_scale := absf(spine_pivot.scale.x)
-	spine_pivot.scale.x = -current_scale if direction < 0 else current_scale
+	_set_facing_direction(-1 if direction < 0 else 1)
 
+func _set_facing_direction(direction: int) -> void:
+	facing_direction = direction
+	var spine_scale := absf(spine_pivot.scale.x)
+	var weapon_scale := absf(weapon_pivot.scale.x)
+	spine_pivot.scale.x = -spine_scale if direction < 0 else spine_scale
+	weapon_pivot.scale.x = -weapon_scale if direction < 0 else weapon_scale
 func _play_jump_start() -> void:
 	_playing_land_anim = false
 	spine_rig.visible = true
@@ -483,6 +487,8 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 		can_move = true
 		is_doing_action = false
 		_update_ground_animation(Input.get_axis("move_left", "move_right"))
+	elif anim_name == "saber_ready":
+		spine_anim.play("idle")
 	elif anim_name.begins_with(combat.equipped_weapon.animation_prefix + "_attack_"):
 		match combat.on_attack_anim_finished():
 			CombatComponent.AttackAction.START_COMBO:
@@ -491,7 +497,7 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 				can_move = true
 				is_doing_action = false
 				spine_rig.visible = true
-				_update_ground_animation(Input.get_axis("move_left", "move_right"))
+				spine_anim.play("saber_ready")
 				get_tree().create_timer(0.4).timeout.connect(_reset_combo, CONNECT_ONE_SHOT)
 		
 func _on_dodge_cooldown_timeout() -> void:
@@ -500,6 +506,7 @@ func _on_dodge_cooldown_timeout() -> void:
 func _on_damage_staggered(knockback_velocity: Vector2) -> void:
 	is_doing_action = false
 	combat.interrupt()
+	saber_hitbox.stop_attack_window()
 	can_move = false
 	velocity = knockback_velocity
 	_playing_land_anim = false
