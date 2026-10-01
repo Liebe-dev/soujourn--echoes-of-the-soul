@@ -469,6 +469,8 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 		can_move = true
 		is_doing_action = false
 		_update_ground_animation(Input.get_axis("move_left", "move_right"))
+	elif anim_name == "saber_ready":
+		spine_anim.play("idle")
 	elif anim_name.begins_with(combat.current_weapon + "_attack_"):
 		match combat.on_attack_anim_finished():
 			CombatComponent.AttackAction.START_COMBO:
@@ -477,7 +479,7 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 				can_move = true
 				is_doing_action = false
 				spine_rig.visible = true
-				_update_ground_animation(Input.get_axis("move_left", "move_right"))
+				spine_anim.play("saber_ready")
 				get_tree().create_timer(0.4).timeout.connect(_reset_combo, CONNECT_ONE_SHOT)
 		
 func _on_dodge_cooldown_timeout() -> void:
