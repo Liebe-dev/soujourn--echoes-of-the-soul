@@ -6,7 +6,7 @@
 [ext_resource type="PackedScene" uid="uid://moo3202hyjoh" path="res://scenes/UI/hud.tscn" id="4_aphpq"]
 [ext_resource type="PackedScene" uid="uid://ri1fqqgxpl6v" path="res://scenes/UI/master_menu.tscn" id="5_57033"]
 [ext_resource type="PackedScene" uid="uid://4egogosl1we3" path="res://asset/Character/Adel/adel spine action use.tscn" id="69_73q5r"]
-[ext_resource type="Script" path="res://scenes/adel/components/saber_hitbox.gd" id="70_saber_hitbox"]
+[ext_resource type="Script" uid="uid://ceoihsyanr3kn" path="res://scenes/adel/components/saber_hitbox.gd" id="70_saber_hitbox"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]
 radius = 7.652174
@@ -230,7 +230,6 @@ script = ExtResource("70_saber_hitbox")
 [node name="Hitbox" type="Area2D" parent="WeaponPivot/SaberHitbox" unique_id=1440821768]
 collision_layer = 8
 collision_mask = 4
-monitoring = true
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WeaponPivot/SaberHitbox/Hitbox" unique_id=154312721]
 position = Vector2(42, -18)
@@ -266,5 +265,5 @@ visible = false
 wait_time = 0.5
 one_shot = true
 
-[connection signal="timeout" from="DodgeCooldown" to="." method="_on_dodge_cooldown_timeout"]
 [connection signal="body_entered" from="WeaponPivot/SaberHitbox/Hitbox" to="WeaponPivot/SaberHitbox" method="_on_hitbox_body_entered"]
+[connection signal="timeout" from="DodgeCooldown" to="." method="_on_dodge_cooldown_timeout"]

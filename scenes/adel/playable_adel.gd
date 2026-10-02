@@ -16,13 +16,16 @@ const ANIM_JUMP_LAND := "jump_land"
 const DEBUG_DAMAGE_AMOUNT := 10
 const KNOCKBACK_FORCE := 500
 const ENEMY_CONTACT_DAMAGE := 1
-
+const ATTACK_INTERRUPT_TIME := 0.40
+const ATTACK_4_INTERRUPT_TIME := 0.55
 signal player_attacked
 
 var locomotion: LocomotionComponent
 var combat: CombatComponent
 var damage: DamageComponent
 var dash: DashComponent
+var _attack_interrupt_ready: bool = false
+var _attack_interrupt_token: int = 0
 
 var can_move: bool = true
 var is_locked: bool = false
@@ -75,6 +78,10 @@ func _unhandled_input(event: InputEvent) -> void:
 			CombatComponent.AttackAction.START_COMBO:
 				_play_combo_step()
 
+			CombatComponent.AttackAction.QUEUE_COMBO:
+				if _attack_interrupt_ready:
+					_advance_queued_combo()
+
 			_:
 				pass
 
@@ -97,6 +104,17 @@ func _physics_process(delta: float) -> void:
 		if combat.jump_attack_land_timer >= 0.3 and Input.get_axis("move_left", "move_right") != 0.0:
 			_cancel_jump_attack_land()
 
+	var attack_direction: float = Input.get_axis("move_left", "move_right")
+	if (
+		_attack_interrupt_ready
+		and is_doing_action
+		and spine_anim.current_animation.begins_with(
+			combat.equipped_weapon.animation_prefix + "_attack_"
+		)
+		and attack_direction != 0.0
+		and not combat.attack_queued
+	):
+		_cancel_combo_for_movement(attack_direction)
 	if is_locked or not can_move:
 		if not combat.apply_combat_air_physics(delta):
 			locomotion.apply_vertical_physics(delta)
@@ -230,6 +248,10 @@ func play_pickup_animation() -> void:
 
 #hàm nội bộ nhóm combat
 func _play_combo_step() -> void:
+	var attack_direction: float = Input.get_axis("move_left", "move_right")
+	if attack_direction != 0.0:
+		_update_facing(attack_direction)
+
 	can_move = false
 	is_doing_action = true
 	velocity.x = 0
@@ -239,8 +261,70 @@ func _play_combo_step() -> void:
 	if not is_on_floor():
 		velocity.y = 0.0
 
-	spine_anim.play(combat.get_attack_anim_name())
-	saber_hitbox.play_attack_window(combat.get_attack_anim_name())
+	var attack_animation: StringName = combat.get_attack_anim_name()
+	spine_anim.play(attack_animation)
+	saber_hitbox.play_attack_window(attack_animation)
+	_arm_attack_interrupt(attack_animation)
+
+func _advance_queued_combo() -> void:
+	_attack_interrupt_token += 1
+	_attack_interrupt_ready = false
+
+	if combat.on_attack_anim_finished() == CombatComponent.AttackAction.START_COMBO:
+		_play_combo_step()
+
+func _cancel_combo_for_movement(direction: float) -> void:
+	_attack_interrupt_token += 1
+	_attack_interrupt_ready = false
+
+	combat.interrupt()
+	get_tree().create_timer(0.3).timeout.connect(
+		_reset_combo,
+		CONNECT_ONE_SHOT
+	)
+
+	can_move = true
+	is_doing_action = false
+
+	_update_facing(direction)
+	_update_ground_animation(direction)
+
+func _arm_attack_interrupt(attack_animation: StringName) -> void:
+	_attack_interrupt_token += 1
+	_attack_interrupt_ready = false
+
+	var token: int = _attack_interrupt_token
+	var interrupt_time: float = ATTACK_INTERRUPT_TIME
+	if combat.combo_step == 4:
+		interrupt_time = ATTACK_4_INTERRUPT_TIME
+
+	get_tree().create_timer(interrupt_time).timeout.connect(
+		_on_attack_interrupt_ready.bind(token, attack_animation),
+		CONNECT_ONE_SHOT
+	)
+
+func _on_attack_interrupt_ready(
+	token: int,
+	attack_animation: StringName
+) -> void:
+	if token != _attack_interrupt_token:
+		return
+
+	if spine_anim.current_animation != attack_animation:
+		return
+
+	if not is_doing_action:
+		return
+
+	_attack_interrupt_ready = true
+	if combat.attack_queued:
+		_advance_queued_combo()
+		return
+
+	var direction: float = Input.get_axis("move_left", "move_right")
+	if direction != 0.0:
+		_cancel_combo_for_movement(direction)
+
 func _reset_combo() -> void:
 	combat.reset_combo_if_idle(is_doing_action)
 
@@ -248,11 +332,9 @@ func _play_jump_attack() -> void:
 	can_move = false
 	is_doing_action = true
 	combat.start_jump_attack()
-	velocity.x = 0 # Triệt tiêu đà ngang để cắm thẳng xuống
+	velocity.x = 0
 	velocity.y = 0.0
 	spine_anim.play("jump_attack(air)")
-	# Lưu ý: Chỉ cần tắt nút Loop (Vòng lặp) trong bảng AnimationPlayer cho 
-	# animation "jump_attack(air)", nó sẽ tự động đóng băng ở frame cuối cùng khi đang rơi.
 
 func _play_jump_attack_land() -> void:
 	combat.begin_jump_attack_land()
@@ -347,9 +429,13 @@ func _on_locomotion_jumped() -> void:
 func _on_locomotion_landed() -> void:
 	dash.reset_air_dash()
 	combat.has_air_comboed = false
+	if spine_anim.current_animation == "saber_ready":
+		return
 	_play_jump_land()
 
 func _update_ground_animation(direction: float) -> void:
+	if spine_anim.current_animation == "saber_ready" and direction == 0.0:
+		return
 	if not is_on_floor() or _playing_land_anim:
 		return
 	spine_rig.visible = true
@@ -474,7 +560,8 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 	if anim_name == "jump_attack(land)":
 		if combat.is_jump_attack_landing:
 			_cancel_jump_attack_land()
-			_update_ground_animation(Input.get_axis("move_left", "move_right"))
+			spine_rig.visible = true
+			spine_anim.play("saber_ready")
 	elif anim_name == ANIM_JUMP_START and not is_on_floor():
 		spine_anim.play(ANIM_JUMP_AIR)
 	elif anim_name == ANIM_JUMP_LAND:
@@ -490,6 +577,8 @@ func _on_spine_anim_finished(anim_name: StringName) -> void:
 	elif anim_name == "saber_ready":
 		spine_anim.play("idle")
 	elif anim_name.begins_with(combat.equipped_weapon.animation_prefix + "_attack_"):
+		_attack_interrupt_token += 1
+		_attack_interrupt_ready = false
 		match combat.on_attack_anim_finished():
 			CombatComponent.AttackAction.START_COMBO:
 				_play_combo_step()
@@ -504,6 +593,8 @@ func _on_dodge_cooldown_timeout() -> void:
 	dash.on_cooldown_timeout()
 
 func _on_damage_staggered(knockback_velocity: Vector2) -> void:
+	_attack_interrupt_token += 1
+	_attack_interrupt_ready = false
 	is_doing_action = false
 	combat.interrupt()
 	saber_hitbox.stop_attack_window()

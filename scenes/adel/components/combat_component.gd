@@ -21,7 +21,7 @@ enum AttackAction {
 
 # --- Combat tuning ---
 const JUMP_ATTACK_HANG_TIME := 0.15
-const JUMP_ATTACK_FALL_MULT := 4.7
+const JUMP_ATTACK_FALL_SPEED := 1500.0
 
 # --- Combat state owned by CombatComponent ---
 
@@ -138,8 +138,7 @@ func apply_combat_air_physics(delta: float) -> bool:
 			if jump_attack_hang_timer <= 0.0:
 				is_jump_attack_hanging = false
 		else:
-			_body.velocity.y += _body.get_gravity().y * JUMP_ATTACK_FALL_MULT * delta
-			_body.velocity.y = minf(_body.velocity.y, _locomotion.MAX_FALL_SPEED * JUMP_ATTACK_FALL_MULT)
+			_body.velocity.y = JUMP_ATTACK_FALL_SPEED
 		return true
 
 	return false
