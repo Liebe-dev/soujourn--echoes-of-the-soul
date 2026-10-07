@@ -36,10 +36,6 @@ var _position_before_rest: Vector2 = Vector2.ZERO
 var facing_direction: int = 1
 var is_doing_action: bool = false
 var _playing_land_anim := false
-# ===== TEMP DASH DEBUG — remove after diagnosis =====
-var _dbg_last_anim: StringName = &""
-var _dbg_last_dodging: bool = false
-var _dbg_ground_blocked: bool = false
 var is_skidding: bool = false 
 
 #hàm hệ thống
@@ -173,11 +169,6 @@ func _physics_process(delta: float) -> void:
 				continue
 			take_damage(ENEMY_CONTACT_DAMAGE, collider.global_position)
 			break
-
-	if dash.is_dodging != _dbg_last_dodging or spine_anim.current_animation != _dbg_last_anim:
-		_dbg("phys")
-		_dbg_last_dodging = dash.is_dodging
-		_dbg_last_anim = spine_anim.current_animation
 
 #hàm công khai
 func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
@@ -373,7 +364,6 @@ func _get_move_speed_multiplier() -> float:
 
 func _perform_dash(dash_direction: float) -> void:
 		var dash_info: Dictionary = dash.start_dash(dash_direction, is_on_floor(), facing_direction)
-		_dbg("start_dash")
 		_playing_land_anim = false
 		damage.is_invulnerable = true
 		_set_enemy_collision_enabled(false)
@@ -390,7 +380,6 @@ func _perform_dash(dash_direction: float) -> void:
 		velocity.x = dash_info["initial_speed"] * dash_dir
 		dodge_tween.tween_property(self, "velocity:x", dash_dir * dash_info["target_speed"], DashComponent.DASH_TWEEN_DURATION)
 		await dodge_tween.finished
-		_dbg("tween_done")
 		if not is_instance_valid(self):
 			return
 		_set_enemy_collision_enabled(true)
@@ -403,9 +392,7 @@ func _perform_dash(dash_direction: float) -> void:
 				return
 		else:
 			velocity.x = 0
-		_dbg("before_end_dash")
 		dash.end_dash()
-		_dbg("after_end_dash")
 
 func _capsule_half_height(col: CollisionShape2D) -> float:
 	var capsule := col.shape as CapsuleShape2D
@@ -451,13 +438,6 @@ func _on_locomotion_landed() -> void:
 	_play_jump_land()
 
 func _update_ground_animation(direction: float) -> void:
-	if (not is_on_floor() or _playing_land_anim) and direction != 0.0 and not _dbg_ground_blocked:
-		_dbg_ground_blocked = true
-		_dbg("ground_anim_BLOCKED")
-	if is_on_floor() and not _playing_land_anim and _dbg_ground_blocked:
-		_dbg_ground_blocked = false
-		_dbg("ground_anim_UNBLOCKED")
-
 	if spine_anim.current_animation == "saber_ready" and direction == 0.0:
 		return
 	if not is_on_floor() or _playing_land_anim:
@@ -580,17 +560,6 @@ func _ghost_trail_loop(duration: float) -> void:
 		elapsed += GHOST_TRAIL_INTERVAL
 
 #hàm tín hiệu
-func _dbg(tag: String) -> void:
-	print("[DASHDBG] ", tag,
-		" | dodging=", dash.is_dodging,
-		" anim=", spine_anim.current_animation,
-		" can_move=", can_move,
-		" land=", _playing_land_anim,
-		" skidding=", is_skidding,
-		" on_floor=", is_on_floor(),
-		" dir=", Input.get_axis("move_left", "move_right"),
-		" vx=", snappedf(velocity.x, 0.1))
-
 func _on_spine_anim_finished(anim_name: StringName) -> void:
 	if anim_name == "jump_attack(land)":
 		if combat.is_jump_attack_landing:
