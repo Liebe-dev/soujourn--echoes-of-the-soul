@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://dbb13hnd8sscl" path="res://scenes/UI/character_menu.gd" id="1_2xj6r"]
 [ext_resource type="Texture2D" uid="uid://d4k6omo0cq2lq" path="res://asset/UI/Menu screen/menu character.png" id="2_rcbb7"]
-[ext_resource type="Texture2D" uid="uid://d0ejm28eurdok" path="res://asset/Character/Adel/idle/Adel spine action-idle_00.png" id="3_rcbb7"]
+[ext_resource type="Texture2D" uid="uid://okn0pgctqgs8" path="res://asset/Character/Adel/adel base color.png" id="3_ugtkc"]
 [ext_resource type="Texture2D" uid="uid://7710im4bwmya" path="res://asset/UI/Menu screen/symbol.png" id="4_30n82"]
 [ext_resource type="Texture2D" uid="uid://n8w0p83ina0s" path="res://asset/UI/Menu screen/chapter.png" id="5_wr4pq"]
 [ext_resource type="Texture2D" uid="uid://dqsei3g6qhvje" path="res://asset/UI/Menu screen/weapon bar e.png" id="6_6xnrf"]
@@ -1375,15 +1375,17 @@ layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="CharacterAnchor" type="Control" parent="MainPanel/MarginContainer/HBoxContainer/RightColumn" unique_id=1049925920]
+z_index = -1
 layout_mode = 2
 
 [node name="TextureRect" type="TextureRect" parent="MainPanel/MarginContainer/HBoxContainer/RightColumn/CharacterAnchor" unique_id=1747468107]
 layout_mode = 0
-offset_left = -553.0
-offset_top = -391.0
-offset_right = -275.0
-offset_bottom = 487.0
-texture = ExtResource("3_rcbb7")
+offset_left = -765.0
+offset_top = -366.5
+offset_right = -27.0
+offset_bottom = 1218.5
+scale = Vector2(0.78, 0.78)
+texture = ExtResource("3_ugtkc")
 
 [node name="game progress" type="Control" parent="MainPanel/MarginContainer/HBoxContainer/RightColumn" unique_id=1954635626]
 layout_mode = 2

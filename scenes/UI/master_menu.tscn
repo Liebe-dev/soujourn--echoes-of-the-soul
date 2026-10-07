@@ -18,6 +18,9 @@ height = 79
 fill_from = Vector2(1, 1)
 
 [sub_resource type="FontFile" id="FontFile_of1rb"]
+subpixel_positioning = 0
+msdf_pixel_range = 14
+msdf_size = 128
 cache/0/variation_coordinates = {}
 cache/0/face_index = 0
 cache/0/embolden = 0.0
@@ -228,6 +231,7 @@ stretch_mode = 5
 
 [node name="Character" type="MarginContainer" parent="topbar/TopBar" unique_id=1898277842]
 layout_mode = 2
+mouse_filter = 0
 theme_override_constants/margin_left = 23
 theme_override_constants/margin_top = -14
 theme_override_constants/margin_right = 23
@@ -235,6 +239,7 @@ theme_override_constants/margin_right = 23
 [node name="GlowEffect" type="TextureRect" parent="topbar/TopBar/Character" unique_id=1574178761]
 layout_mode = 2
 size_flags_horizontal = 8
+mouse_filter = 2
 texture = ExtResource("3_mxqv6")
 stretch_mode = 5
 
@@ -247,6 +252,7 @@ horizontal_alignment = 1
 
 [node name="Equipment" type="MarginContainer" parent="topbar/TopBar" unique_id=794649809]
 layout_mode = 2
+mouse_filter = 0
 theme_override_constants/margin_left = 23
 theme_override_constants/margin_top = -14
 theme_override_constants/margin_right = 23
@@ -254,6 +260,7 @@ theme_override_constants/margin_right = 23
 [node name="GlowEffect" type="TextureRect" parent="topbar/TopBar/Equipment" unique_id=228340787]
 layout_mode = 2
 size_flags_horizontal = 8
+mouse_filter = 2
 texture = ExtResource("3_mxqv6")
 stretch_mode = 5
 
@@ -266,6 +273,7 @@ horizontal_alignment = 1
 
 [node name="Arts" type="MarginContainer" parent="topbar/TopBar" unique_id=1215619755]
 layout_mode = 2
+mouse_filter = 0
 theme_override_constants/margin_left = 23
 theme_override_constants/margin_top = -14
 theme_override_constants/margin_right = 23
@@ -273,6 +281,7 @@ theme_override_constants/margin_right = 23
 [node name="GlowEffect" type="TextureRect" parent="topbar/TopBar/Arts" unique_id=1133696469]
 layout_mode = 2
 size_flags_horizontal = 8
+mouse_filter = 2
 texture = ExtResource("3_mxqv6")
 stretch_mode = 5
 
@@ -285,6 +294,7 @@ horizontal_alignment = 1
 
 [node name="Inventory" type="MarginContainer" parent="topbar/TopBar" unique_id=334370486]
 layout_mode = 2
+mouse_filter = 0
 theme_override_constants/margin_left = 23
 theme_override_constants/margin_top = -14
 theme_override_constants/margin_right = 23
@@ -292,6 +302,7 @@ theme_override_constants/margin_right = 23
 [node name="GlowEffect" type="TextureRect" parent="topbar/TopBar/Inventory" unique_id=2124210866]
 layout_mode = 2
 size_flags_horizontal = 8
+mouse_filter = 2
 texture = ExtResource("3_mxqv6")
 stretch_mode = 5
 
@@ -304,6 +315,7 @@ horizontal_alignment = 1
 
 [node name="Record" type="MarginContainer" parent="topbar/TopBar" unique_id=50423434]
 layout_mode = 2
+mouse_filter = 0
 theme_override_constants/margin_left = 23
 theme_override_constants/margin_top = -14
 theme_override_constants/margin_right = 23
@@ -311,6 +323,7 @@ theme_override_constants/margin_right = 23
 [node name="GlowEffect" type="TextureRect" parent="topbar/TopBar/Record" unique_id=2084248542]
 layout_mode = 2
 size_flags_horizontal = 8
+mouse_filter = 2
 texture = ExtResource("3_mxqv6")
 stretch_mode = 5
 
@@ -324,6 +337,7 @@ horizontal_alignment = 1
 [node name="Map" type="MarginContainer" parent="topbar/TopBar" unique_id=51776583]
 layout_mode = 2
 size_flags_horizontal = 3
+mouse_filter = 0
 theme_override_constants/margin_left = 23
 theme_override_constants/margin_top = -14
 theme_override_constants/margin_right = 23
@@ -331,6 +345,7 @@ theme_override_constants/margin_right = 23
 [node name="GlowEffect" type="TextureRect" parent="topbar/TopBar/Map" unique_id=317110092]
 layout_mode = 2
 size_flags_horizontal = 8
+mouse_filter = 2
 texture = ExtResource("3_mxqv6")
 stretch_mode = 5
 

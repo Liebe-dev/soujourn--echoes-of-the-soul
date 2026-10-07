@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgduuvs32iy81"
-path="res://.godot/imported/from idle.png-9793cc55945248a9d3bd44a25bed106d.ctex"
+uid="uid://okn0pgctqgs8"
+path="res://.godot/imported/adel base color.png-550660c4822dded966613a34cb730d37.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://asset/Character/from idle.png"
-dest_files=["res://.godot/imported/from idle.png-9793cc55945248a9d3bd44a25bed106d.ctex"]
+source_file="res://asset/Character/Adel/adel base color.png"
+dest_files=["res://.godot/imported/adel base color.png-550660c4822dded966613a34cb730d37.ctex"]
 
 [params]
 
