@@ -66,17 +66,36 @@ func _unhandled_input(event: InputEvent) -> void:
 			_close_menu()
 		get_viewport().set_input_as_handled()
 		return
+		
 	if not visible:
 		return
-	if event.is_action_pressed("ui_page_down"): # Nút E
+		
+	# Nút E (Tab tiếp theo)
+	if event.is_action_pressed("ui_page_down"): 
 		var next_tab = (current_tab_index + 1) % tabs.size()
 		switch_tab(next_tab)
 		get_viewport().set_input_as_handled()
 		
-	elif event.is_action_pressed("ui_page_up"): # Nút Q
+	# Nút Q (Tab trước đó)
+	elif event.is_action_pressed("ui_page_up"): 
 		var prev_tab = (current_tab_index - 1 + tabs.size()) % tabs.size()
 		switch_tab(prev_tab)
 		get_viewport().set_input_as_handled()
+		
+# Thêm hàm này để bắt click chuột xuyên qua mọi lớp UI
+func _input(event: InputEvent) -> void:
+	if not visible:
+		return
+		
+	# Bắt sự kiện click chuột trái
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		# Quét qua mảng tabs của bạn
+		for i in range(tabs.size()):
+			# get_global_rect().has_point(event.position) kiểm tra xem chuột có nằm trong ô chữ không
+			if tabs[i].get_global_rect().has_point(event.position):
+				switch_tab(i)
+				get_viewport().set_input_as_handled() # Đánh dấu là đã xử lý xong
+				break
 
 # --- Fade & freeze logic ---
 
