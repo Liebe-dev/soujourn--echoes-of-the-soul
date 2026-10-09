@@ -33,15 +33,28 @@ func _ready() -> void:
 
 @export var exp_reward: int = 30
 
-func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
+var is_dead: bool = false
+
+func take_damage(
+	dmg: int,
+	hit_from_global: Vector2 = Vector2.INF
+) -> void:
+	if is_dead:
+		return
+
 	current_health = max(current_health - dmg, 0)
-	print("Enemy took %d damage (%d/%d)" % [dmg, current_health, max_health])
+
 	if current_health <= 0:
 		die()
 
 func die() -> void:
+	if is_dead:
+		return
+
+	is_dead = true
 	PlayerProgress.add_exp(exp_reward)
 	queue_free()
+
 
 func _physics_process(delta: float) -> void:
 	if not is_in_scene:
@@ -89,10 +102,14 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 
 func _set_animation(state: String) -> void:
-	if animated_sprite:
-		match state:
-			"idle":
-				animated_sprite.play("idle")
+	if not animated_sprite:
+		return
+
+	match state:
+		"idle":
+			animated_sprite.play("idle")
+		"walk":
+			animated_sprite.play("walk")
 
 func chase_player() -> void:
 	pass
