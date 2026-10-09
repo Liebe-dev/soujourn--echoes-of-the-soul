@@ -1,0 +1,53 @@
+{ "skeleton": { "images": "D:/Adobe Photoshop/Sojourn Echoes of the Soul/Project enemy/images/" },
+"PhotoshopToSpine": { "scale": 1, "padding": 3, "trim": true },
+"bones": [
+	{ "name": "root" }
+],
+"slots": [
+	{ "name": "right hand", "bone": "root", "attachment": "right hand" },
+	{ "name": "right palm", "bone": "root", "attachment": "right palm" },
+	{ "name": "right bicep", "bone": "root", "attachment": "right bicep" },
+	{ "name": "right leg", "bone": "root", "attachment": "right leg" },
+	{ "name": "tail", "bone": "root", "attachment": "tail" },
+	{ "name": "body", "bone": "root", "attachment": "body" },
+	{ "name": "lef leg", "bone": "root", "attachment": "lef leg" },
+	{ "name": "left hand", "bone": "root", "attachment": "left hand" },
+	{ "name": "head", "bone": "root", "attachment": "head" },
+	{ "name": "left palm", "bone": "root", "attachment": "left palm" }
+],
+"skins": {
+	"default": {
+		"right hand": {
+			"right hand": { "x": 169.5, "y": -243.5, "width": 163, "height": 131 }
+		},
+		"right palm": {
+			"right palm": { "x": 69, "y": -322.5, "width": 144, "height": 85 }
+		},
+		"right bicep": {
+			"right bicep": { "x": 224, "y": -164, "width": 128, "height": 106 }
+		},
+		"right leg": {
+			"right leg": { "x": 348, "y": -259.5, "width": 148, "height": 191 }
+		},
+		"tail": {
+			"tail": { "x": 535.5, "y": -164, "width": 361, "height": 232 }
+		},
+		"body": {
+			"body": { "x": 320.5, "y": -128.5, "width": 303, "height": 263 }
+		},
+		"lef leg": {
+			"lef leg": { "x": 435.5, "y": -240.5, "width": 181, "height": 229 }
+		},
+		"left hand": {
+			"left hand": { "x": 249.5, "y": -267, "width": 139, "height": 208 }
+		},
+		"head": {
+			"head": { "x": 147.5, "y": -176, "width": 99, "height": 188 }
+		},
+		"left palm": {
+			"left palm": { "x": 162.5, "y": -346.5, "width": 159, "height": 79 }
+		}
+	}
+},
+"animations": { "animation": {} }
+}
