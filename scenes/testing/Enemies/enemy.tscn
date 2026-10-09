@@ -44,7 +44,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_km7ka")
 }],
-"loop": true,
+"loop": 1,
 "name": &"idle",
 "speed": 5.0
 }]
@@ -59,10 +59,21 @@ size = Vector2(113, 113)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_xwcbe"]
 size = Vector2(144, 144)
 
+[sub_resource type="ConvexPolygonShape2D" id="ConvexPolygonShape2D_cjoin"]
+points = PackedVector2Array(0, 0, -212.13203, -212.13203, -233.1438, -188.79611, -251.60117, -163.39171, -267.30197, -136.19714, -280.07413, -107.51038, -289.77774, -77.64571, -296.30652, -46.93034, -299.58887, -15.700787, -299.58887, 15.700787, -296.30652, 46.93034, -289.77774, 77.64571, -280.07413, 107.51038, -267.30197, 136.19714, -251.60117, 163.39171, -233.1438, 188.79611, -212.13203, 212.13203)
+
 [node name="Enemy" type="CharacterBody2D" unique_id=1852725077 groups=["Enemy"]]
 texture_filter = 1
 collision_layer = 4
 script = ExtResource("1_5gqqg")
+max_health = null
+attack_damage = null
+speed = null
+hurt_damage = null
+patrol_range = null
+walk_duration = null
+idle_duration = null
+exp_reward = null
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1557654021]
 sprite_frames = SubResource("SpriteFrames_7u0va")
@@ -99,7 +110,8 @@ position = Vector2(-96, 16)
 shape = SubResource("RectangleShape2D_xwcbe")
 
 [node name="VisionShape" type="ShapeCast2D" parent="WeaponPivot" unique_id=1255186544]
-target_position = Vector2(-32, 0)
+shape = SubResource("ConvexPolygonShape2D_cjoin")
+target_position = Vector2(0, 0)
 collision_mask = 3
 script = ExtResource("5_cjoin")
 
