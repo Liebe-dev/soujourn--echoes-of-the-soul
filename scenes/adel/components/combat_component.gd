@@ -22,6 +22,7 @@ enum AttackAction {
 # --- Combat tuning ---
 const JUMP_ATTACK_HANG_TIME := 0.15
 const JUMP_ATTACK_FALL_SPEED := 1500.0
+const JUMP_ATTACK_LAND_UNLOCK := 0.3
 
 # --- Combat state owned by CombatComponent ---
 
@@ -105,8 +106,11 @@ func begin_jump_attack_land() -> void:
 func cancel_jump_attack_land() -> void:
 	is_jump_attack_landing = false
 
+func is_jump_attack_land_unlocked() -> bool:
+	return is_jump_attack_landing and jump_attack_land_timer >= JUMP_ATTACK_LAND_UNLOCK
+
 func should_cancel_jump_attack_land() -> bool:
-	return is_jump_attack_landing and jump_attack_land_timer >= 0.3
+	return is_jump_attack_land_unlocked()
 
 # --- Interruption boundary ---
 # Clears transient attack state when an external interruption (e.g. stagger)

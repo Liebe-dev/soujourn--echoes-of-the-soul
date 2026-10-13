@@ -104,8 +104,9 @@ func _physics_process(delta: float) -> void:
 		return
 	if combat.is_jump_attack_landing:
 		combat.jump_attack_land_timer += delta
-		if combat.jump_attack_land_timer >= 0.3 and Input.get_axis("move_left", "move_right") != 0.0:
-			_cancel_jump_attack_land()
+		if combat.is_jump_attack_land_unlocked():
+			can_move = true
+			is_doing_action = false
 
 	var attack_direction: float = Input.get_axis("move_left", "move_right")
 	if (
@@ -363,6 +364,8 @@ func _get_move_speed_multiplier() -> float:
 	return 1.0
 
 func _perform_dash(dash_direction: float) -> void:
+		if combat.is_jump_attack_landing:
+			_cancel_jump_attack_land()
 		var dash_info: Dictionary = dash.start_dash(dash_direction, is_on_floor(), facing_direction)
 		_playing_land_anim = false
 		damage.is_invulnerable = true
@@ -417,6 +420,8 @@ func _set_facing_direction(direction: int) -> void:
 	spine_pivot.scale.x = -spine_scale if direction < 0 else spine_scale
 	weapon_pivot.scale.x = -weapon_scale if direction < 0 else weapon_scale
 func _play_jump_start() -> void:
+	if combat.is_jump_attack_landing:
+		_cancel_jump_attack_land()
 	_playing_land_anim = false
 	spine_rig.visible = true
 	spine_anim.play(ANIM_JUMP_START, 0.05)
@@ -435,9 +440,15 @@ func _on_locomotion_landed() -> void:
 	combat.has_air_comboed = false
 	if spine_anim.current_animation == "saber_ready":
 		return
+	if combat.is_jump_attack_landing or combat.is_jump_attacking:
+		return
 	_play_jump_land()
 
 func _update_ground_animation(direction: float) -> void:
+	if combat.is_jump_attack_landing:
+		if direction == 0.0:
+			return
+		_cancel_jump_attack_land()
 	if spine_anim.current_animation == "saber_ready" and direction == 0.0:
 		return
 	if not is_on_floor() or _playing_land_anim:
