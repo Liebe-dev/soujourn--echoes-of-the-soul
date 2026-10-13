@@ -1,0 +1,47 @@
+[gd_scene format=3 uid="uid://b6k8msxxkeswk"]
+
+[ext_resource type="Script" uid="uid://oqdbjv3o7cv0" path="res://scenes/enemy/spine_enemy.gd" id="1"]
+[ext_resource type="PackedScene" uid="uid://b28r5lcenlxdj" path="res://scenes/enemy/enemy_spine.tscn" id="2"]
+
+[sub_resource type="CapsuleShape2D" id="Body"]
+radius = 32.0
+height = 140.0
+
+[sub_resource type="RectangleShape2D" id="Weapon"]
+size = Vector2(130, 130)
+
+[node name="SpineEnemy" type="CharacterBody2D" unique_id=1072287283]
+collision_layer = 4
+script = ExtResource("1")
+animation_offsets = Dictionary[StringName, Vector2]({
+&"attack1_1": Vector2(0, 0),
+&"attack1_3": Vector2(0, 0),
+&"attack2": Vector2(0, 0),
+&"attack3": Vector2(0, 0),
+&"run": Vector2(0, 0),
+&"walk": Vector2(0, 0)
+})
+max_health = 100
+speed = 80.0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1611191386]
+position = Vector2(0, -22)
+shape = SubResource("Body")
+
+[node name="VisualPivot" type="Node2D" parent="." unique_id=3242916]
+
+[node name="EnemyRig" parent="VisualPivot" unique_id=320255462 instance=ExtResource("2")]
+position = Vector2(-267, -236.9)
+scale = Vector2(0.3, 0.3)
+
+[node name="WeaponPivot" type="Node2D" parent="." unique_id=1550469434]
+
+[node name="Hitbox" type="Area2D" parent="WeaponPivot" unique_id=1635062976]
+collision_layer = 16
+collision_mask = 2
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WeaponPivot/Hitbox" unique_id=1255359008]
+position = Vector2(65, 0)
+shape = SubResource("Weapon")
+disabled = true

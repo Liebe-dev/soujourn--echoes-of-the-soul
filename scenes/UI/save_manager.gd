@@ -220,7 +220,12 @@ func apply_continue_state() -> void:
 
 func respawn_at_checkpoint() -> void:
 	if not has_save() or str(_data.get("scene_path", "")).is_empty():
-		get_tree().change_scene_to_file("res://opening.tscn")
+		var tree := get_tree()
+		if ResourceLoader.exists("res://opening.tscn"):
+			tree.change_scene_to_file("res://opening.tscn")
+		else:
+			# The legacy opening scene may be absent; restart this level instead.
+			tree.reload_current_scene()
 		return
 
 	var scene_path: String = _data["scene_path"]

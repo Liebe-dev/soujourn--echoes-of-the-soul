@@ -33,6 +33,7 @@ shape = SubResource("RectangleShape2D_kj3p2")
 position = Vector2(43, 869)
 
 [node name="Enemy" parent="." unique_id=1852725077 instance=ExtResource("5_88nui")]
+visible = false
 position = Vector2(1232, 792)
 
 [node name="Wall" type="StaticBody2D" parent="." unique_id=439899073]

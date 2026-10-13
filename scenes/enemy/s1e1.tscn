@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://cewpn5rhropd5"]
 
 [ext_resource type="Script" uid="uid://b60y6cqe0a1a7" path="res://scenes/enemy/s_1e_1.gd" id="1_awyoy"]
-[ext_resource type="Texture2D" uid="uid://cw746h78nudy7" path="res://asset/Enemies/Wobtear_attack.png" id="2_ypnm1"]
-[ext_resource type="Texture2D" uid="uid://boe6okl4teibl" path="res://asset/Enemies/Wobtear1.png" id="3_axoie"]
-[ext_resource type="Texture2D" uid="uid://cleya4qc2jpjx" path="res://asset/Enemies/Wobtear2.png" id="4_dafhg"]
+[ext_resource type="Texture2D" uid="uid://cx550qwivdcds" path="res://asset/Enemies/sample/attack/attack1_1.png" id="2_ypnm1"]
+[ext_resource type="Texture2D" uid="uid://ccfdmexue57lv" path="res://asset/Enemies/sample/attack/attack1_2.png" id="3_axoie"]
+[ext_resource type="Texture2D" uid="uid://b2gfbua3bpty" path="res://asset/Enemies/sample/attack/attack1_3.png" id="4_dafhg"]
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_f1xpd"]
 atlas = ExtResource("2_ypnm1")

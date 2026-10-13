@@ -15,25 +15,40 @@ extends RefCounted
 
 signal staggered(knockback_velocity: Vector2)
 signal stagger_recovered
+signal knockback_finished
 
 # --- Damage/stagger tuning ---
 const STAGGER_STUN_SEC := 0.45
 const STAGGER_INVULN_SEC := 1.0
-const STAGGER_KNOCKBACK := 300.0
+const STAGGER_KNOCKBACK_DISTANCE := 72.0
+const STAGGER_KNOCKBACK_DURATION := 0.3
 const HIT_INVULN_SEC := 0.2
 
 # --- Hit-reaction state owned by DamageComponent ---
 var is_stunned: bool = false
+var is_knocking_back: bool = false
 var is_invulnerable: bool = false
 var is_touched_enemy: bool = false
 
 var _body: CharacterBody2D
 
-func _init(body: CharacterBody2D) -> void:
+var knockback_distance: float = STAGGER_KNOCKBACK_DISTANCE
+var knockback_duration: float = STAGGER_KNOCKBACK_DURATION
+var stun_duration: float = STAGGER_STUN_SEC
+
+func _init(
+	body: CharacterBody2D,
+	distance: float = STAGGER_KNOCKBACK_DISTANCE,
+	push_time: float = STAGGER_KNOCKBACK_DURATION,
+	stun_time: float = STAGGER_STUN_SEC
+) -> void:
 	_body = body
+	knockback_distance = maxf(distance, 0.0)
+	knockback_duration = maxf(push_time, 0.01)
+	stun_duration = maxf(stun_time, 0.0)
 
 func can_take_damage() -> bool:
-	return not is_invulnerable and not is_stunned
+	return _has_live_body() and not is_invulnerable and not is_stunned
 
 # --- Knockback direction (was _knockback_dir) ---
 func compute_knockback_dir(hit_from_global: Vector2, facing_direction: int) -> Vector2:
@@ -49,24 +64,50 @@ func compute_knockback_dir(hit_from_global: Vector2, facing_direction: int) -> V
 
 # --- Stagger reaction (was _apply_stagger) ---
 func apply_stagger(knockback_dir: Vector2) -> void:
+	if not _has_live_body():
+		return
 	is_stunned = true
+	is_knocking_back = true
 	is_invulnerable = true
-	staggered.emit(knockback_dir * STAGGER_KNOCKBACK)
-	_body.get_tree().create_timer(STAGGER_STUN_SEC).timeout.connect(_on_stagger_stun_end, CONNECT_ONE_SHOT)
+	staggered.emit(knockback_dir * (knockback_distance / knockback_duration))
+	_connect_timeout(knockback_duration, _on_knockback_end)
 
 # --- Invulnerability window (was _start_invulnerability) ---
 func start_invulnerability(duration: float) -> void:
+	if not _has_live_body():
+		return
 	is_invulnerable = true
-	_body.get_tree().create_timer(duration).timeout.connect(_end_invulnerability, CONNECT_ONE_SHOT)
+	_connect_timeout(duration, _end_invulnerability)
 
 func _end_invulnerability() -> void:
+	if not _has_live_body():
+		return
 	is_invulnerable = false
 
+func _on_knockback_end() -> void:
+	if not _has_live_body():
+		return
+	is_knocking_back = false
+	knockback_finished.emit()
+	_connect_timeout(stun_duration, _on_stagger_stun_end)
+
 func _on_stagger_stun_end() -> void:
+	if not _has_live_body():
+		return
 	is_stunned = false
 	stagger_recovered.emit()
-	var remaining := maxf(STAGGER_INVULN_SEC - STAGGER_STUN_SEC, 0.0)
+	var remaining := maxf(STAGGER_INVULN_SEC - knockback_duration - stun_duration, 0.0)
 	if remaining > 0.0:
-		_body.get_tree().create_timer(remaining).timeout.connect(_end_invulnerability, CONNECT_ONE_SHOT)
+		_connect_timeout(remaining, _end_invulnerability)
 	else:
 		_end_invulnerability()
+
+
+func _has_live_body() -> bool:
+	return is_instance_valid(_body) and _body.is_inside_tree() and not _body.is_queued_for_deletion()
+
+func _connect_timeout(duration: float, callback: Callable) -> void:
+	# Signals can remove the body synchronously; check again after emitting them.
+	if not _has_live_body():
+		return
+	_body.get_tree().create_timer(duration).timeout.connect(callback, CONNECT_ONE_SHOT)

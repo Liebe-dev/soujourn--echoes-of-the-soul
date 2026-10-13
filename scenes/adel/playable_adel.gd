@@ -9,6 +9,12 @@ extends CharacterBody2D
 @onready var attack_hitbox: Area2D = $AttackHitbox
 @onready var attack_hitbox_shape: CollisionShape2D = $AttackHitbox/CollisionShape2D
 
+@export_group("Stagger Threshold")
+@export_range(0.0, 500.0, 1.0, "or_greater") var stagger_knockback_distance: float = 72.0
+@export_range(0.01, 2.0, 0.01, "or_greater") var stagger_knockback_duration: float = 0.3
+@export_range(0.0, 5.0, 0.01, "or_greater") var stagger_stun_duration: float = 0.45
+
+const ANIM_STAGGER: StringName = &"saber_stagger"
 const ENEMY_COLLISION_LAYER := 3
 const ANIM_JUMP_START := " jump_start"
 const ANIM_JUMP_AIR := "jump_air (fall)"
@@ -35,12 +41,15 @@ var holding_duration: float = 0.0
 var _position_before_rest: Vector2 = Vector2.ZERO
 var facing_direction: int = 1
 var is_doing_action: bool = false
+var _stagger_distance_left: float = 0.0
+var _stagger_push_direction: float = 1.0
 var _playing_land_anim := false
 var is_skidding: bool = false 
 
 #hàm hệ thống
 func _ready() -> void:
 	randomize()
+	_setup_enemy_passthrough()
 
 	locomotion = LocomotionComponent.new(self)
 	locomotion.jumped.connect(_on_locomotion_jumped)
@@ -54,9 +63,10 @@ func _ready() -> void:
 	)
 	configure_attack_hitbox(combat.equipped_weapon)
 
-	damage = DamageComponent.new(self)
+	damage = DamageComponent.new(self, stagger_knockback_distance, stagger_knockback_duration, stagger_stun_duration)
 	damage.staggered.connect(_on_damage_staggered)
 	damage.stagger_recovered.connect(_on_damage_stagger_recovered)
+	damage.knockback_finished.connect(_on_damage_knockback_finished)
 
 	dash = DashComponent.new(locomotion, dodge_cooldown)
 
@@ -90,7 +100,14 @@ func _unhandled_input(event: InputEvent) -> void:
 
 func _physics_process(delta: float) -> void:
 	if damage.is_stunned or damage.is_touched_enemy:
-		velocity.x = move_toward(velocity.x, 0.0, 400.0 * delta)
+		if damage.is_knocking_back:
+			var travel := minf(_stagger_distance_left, damage.knockback_distance * delta / damage.knockback_duration)
+			velocity.x = _stagger_push_direction * travel / maxf(delta, 0.000001)
+			_stagger_distance_left = maxf(_stagger_distance_left - travel, 0.0)
+		elif damage.is_stunned:
+			velocity.x = 0.0
+		else:
+			velocity.x = move_toward(velocity.x, 0.0, 400.0 * delta)
 		locomotion.apply_vertical_physics(delta)
 		move_and_slide()
 
@@ -181,6 +198,9 @@ func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 		return
 
 	var hit: Dictionary = hud.apply_damage(dmg, hit_from_global)
+	# Damage can synchronously respawn or remove this Player from the tree.
+	if hit.get("died", false) or not is_inside_tree() or is_queued_for_deletion():
+		return
 	if hit.get("staggered", false) and not hit.get("skip_player_stagger", false):
 		damage.apply_stagger(damage.compute_knockback_dir(hit_from_global, facing_direction))
 	elif hit.get("damage_taken", 0) > 0:
@@ -369,7 +389,6 @@ func _perform_dash(dash_direction: float) -> void:
 		var dash_info: Dictionary = dash.start_dash(dash_direction, is_on_floor(), facing_direction)
 		_playing_land_anim = false
 		damage.is_invulnerable = true
-		_set_enemy_collision_enabled(false)
 		var is_air_dodging: bool = dash_info["is_air"]
 		var dash_dir: float = dash_info["direction"]
 		if is_air_dodging:
@@ -385,7 +404,6 @@ func _perform_dash(dash_direction: float) -> void:
 		await dodge_tween.finished
 		if not is_instance_valid(self):
 			return
-		_set_enemy_collision_enabled(true)
 		damage.is_invulnerable = false
 		if not is_air_dodging:
 			velocity.x = 0
@@ -404,8 +422,28 @@ func _capsule_half_height(col: CollisionShape2D) -> float:
 	var scale_y := col.global_transform.get_scale().y
 	return capsule.height * 0.5 * scale_y
 
-func _set_enemy_collision_enabled(enabled: bool) -> void:
-	set_collision_mask_value(ENEMY_COLLISION_LAYER, enabled)
+func _setup_enemy_passthrough() -> void:
+	# Body collision stays off before, during, and after every dash.
+	set_collision_mask_value(ENEMY_COLLISION_LAYER, false)
+	get_tree().node_added.connect(_exclude_enemy_body)
+	_exclude_existing_enemy_bodies(get_tree().root)
+
+func _exclude_existing_enemy_bodies(node: Node) -> void:
+	_exclude_enemy_body(node)
+	for child in node.get_children():
+		_exclude_existing_enemy_bodies(child)
+
+func _exclude_enemy_body(node: Node) -> void:
+	var body := node as CharacterBody2D
+	if body == null or body == self or body.is_in_group("Player"):
+		return
+	var enemy_layer := 1 << (ENEMY_COLLISION_LAYER - 1)
+	# The damage API also identifies legacy enemies still on the world layer.
+	if (body.collision_layer & enemy_layer) == 0 and not body.is_in_group("Enemy") and not body.has_method("take_damage"):
+		return
+	# Both bodies ignore each other; their Area2D combat hitboxes remain active.
+	add_collision_exception_with(body)
+	body.add_collision_exception_with(self)
 
 #hàm nội bộ nhóm đồ họa
 func _update_facing(direction: float) -> void:
@@ -615,11 +653,32 @@ func _on_damage_staggered(knockback_velocity: Vector2) -> void:
 	saber_hitbox.stop_attack_window()
 	can_move = false
 	velocity = knockback_velocity
+	_stagger_push_direction = signf(knockback_velocity.x) if not is_zero_approx(knockback_velocity.x) else -float(facing_direction)
+	_stagger_distance_left = damage.knockback_distance
 	_playing_land_anim = false
-	spine_anim.play("idle", 0.1)
+	_show_stagger_frame(0)
+
+func _on_damage_knockback_finished() -> void:
+	velocity.x = 0.0
+	_stagger_distance_left = 0.0
+	_show_stagger_frame(1)
+
+func _show_stagger_frame(frame_index: int) -> void:
+	if not spine_anim.has_animation(ANIM_STAGGER):
+		return
+	# Apply the source clip's texture/visibility/transform, then hold its pose.
+	spine_anim.play(ANIM_STAGGER)
+	spine_anim.advance(0.0)
+	spine_anim.pause()
+	var pose := spine_rig.get_node_or_null("TestAttackSprite") as Sprite2D
+	if pose != null:
+		pose.frame = clampi(frame_index, 0, pose.hframes * pose.vframes - 1)
 
 func _on_damage_stagger_recovered() -> void:
 	can_move = true
+	_stagger_distance_left = 0.0
+	if spine_anim.assigned_animation == ANIM_STAGGER:
+		spine_anim.play("idle", 0.1)
 
 func configure_attack_hitbox(weapon: WeaponData) -> void:
 	attack_hitbox.position = weapon.hitbox_offset

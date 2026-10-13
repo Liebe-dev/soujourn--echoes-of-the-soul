@@ -10117,7 +10117,7 @@ texture = ExtResource("8_wu5lb")
 
 [node name="L_upper_arm" type="Bone2D" parent="Skeleton2D/hip/torso[merge]" unique_id=550548801]
 position = Vector2(44.817806, -67.62174)
-rotation = -0.01025102
+rotation = -0.010251018
 scale = Vector2(0.9998284, 0.9998284)
 rest = Transform2D(0.9999458, -0.010250827, 0.010250827, 0.9999458, 59.000057, -46.042194)
 
@@ -10204,7 +10204,7 @@ texture = ExtResource("4_g5fo1")
 visible = false
 position = Vector2(-26, 64)
 rotation = -0.11186957
-scale = Vector2(0.99984556, 0.99984074)
+scale = Vector2(0.9998456, 0.99984074)
 skew = -0.0004682541
 rest = Transform2D(0.99358183, -0.11178011, 0.11178011, 0.99358183, -26, 64)
 metadata/_local_pose_override_enabled_ = true
@@ -10212,7 +10212,7 @@ metadata/_local_pose_override_enabled_ = true
 [node name="R_foreleg" type="Bone2D" parent="Skeleton2D/hip/R_upper_leg" unique_id=1279377425]
 position = Vector2(21.04547, 146.99614)
 rotation = 0.19372971
-scale = Vector2(0.9998539, 0.9998539)
+scale = Vector2(0.99985397, 0.99985397)
 rest = Transform2D(0.98110306, 0.19275497, -0.19275497, 0.98110306, 21.04547, 146.99614)
 metadata/_local_pose_override_enabled_ = true
 
@@ -10243,7 +10243,7 @@ texture = ExtResource("6_xv1bw")
 visible = false
 position = Vector2(35, 16)
 rotation = -3.1018384
-scale = Vector2(0.9998315, 0.9998315)
+scale = Vector2(0.9998313, 0.9998313)
 rest = Transform2D(-0.9990432, -0.039737206, 0.039737206, -0.9990432, 35, 16)
 
 [node name="belly" type="Sprite2D" parent="Skeleton2D/hip/cloth_bone2" unique_id=1083849315]
@@ -10267,13 +10267,13 @@ texture = ExtResource("11_2pf0q")
 [node name="torso2" type="Bone2D" parent="Skeleton2D/hip" unique_id=824147936]
 visible = false
 rotation = 0.111567244
-scale = Vector2(0.9998592, 0.99986124)
+scale = Vector2(0.9998592, 0.99986106)
 rest = Transform2D(0.9979594, -0.06385192, 0.06385192, 0.9979594, 0, 0)
 
 [node name="torso1" type="Bone2D" parent="Skeleton2D/hip/torso2" unique_id=1007980366]
 position = Vector2(-0.22670937, -127.76924)
 rotation = 0.04238328
-scale = Vector2(0.99983424, 0.99983424)
+scale = Vector2(0.99983406, 0.99983406)
 rest = Transform2D(1, 0, 0, 1, -2, -128)
 
 [node name="head" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1" unique_id=1542034224]
@@ -10298,7 +10298,7 @@ texture = ExtResource("17_adx6m")
 [node name="hair_bone1" type="Bone2D" parent="Skeleton2D/hip/torso2/torso1/head" unique_id=2131901034]
 position = Vector2(31, -40)
 rotation = 1.8167881
-scale = Vector2(0.9998384, 0.9998384)
+scale = Vector2(0.9998386, 0.9998386)
 rest = Transform2D(-0.24348012, 0.9697441, -0.9697441, -0.24348012, 31, -40)
 
 [node name="hair1" type="Sprite2D" parent="Skeleton2D/hip/torso2/torso1/head/hair_bone1" unique_id=1251224613]

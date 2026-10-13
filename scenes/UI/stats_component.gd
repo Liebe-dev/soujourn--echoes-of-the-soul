@@ -74,7 +74,7 @@ func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF) -> Dictiona
 	var prev_hp := hp
 	var target_hp := prev_hp - scaled_dmg
 
-	if stagger_lock_timer > 0.0 and stagger_lock_hp >= 0 and not has_bleeding():
+	if stagger_lock_timer > 0.0 and stagger_lock_hp >= 0:
 		target_hp = maxi(target_hp, stagger_lock_hp)
 
 	for tier in STAGGER_THRESHOLD_FRACS.size():
@@ -282,16 +282,6 @@ func resolve_stagger_crossing(prev_hp: int, target_hp: int, tier: int) -> Dictio
 	out.triggered = true
 	stagger_tiers_ready[tier] = false
 	out.markers_changed = true
-
-	if has_bleeding():
-		out.target_hp = floor_hp
-		out.skip_player_stagger = true
-		stagger_lock_hp = -1
-		stagger_lock_timer = 0.0
-		var bleed := _apply_bleeding(2)
-		out.debuff_id = bleed["debuff_id"]
-		out.debuff_level = bleed["level"]
-		return out
 
 	out.target_hp = floor_hp
 	stagger_lock_hp = floor_hp
