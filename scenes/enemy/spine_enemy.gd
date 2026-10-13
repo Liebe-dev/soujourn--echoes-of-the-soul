@@ -252,7 +252,8 @@ func _update_facing() -> void:
 	if visual_pivot != null:
 		visual_pivot.scale.x = -1.0 if _direction > 0 else 1.0
 	if weapon_pivot != null:
-		weapon_pivot.scale.x = float(_direction)
+		# The source rig and authored attack box face left; mirror both together.
+		weapon_pivot.scale.x = -1.0 if _direction > 0 else 1.0
 
 
 func _set_animation(requested: StringName) -> void:

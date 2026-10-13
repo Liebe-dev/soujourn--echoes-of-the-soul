@@ -1,5 +1,13 @@
 extends Control
 
+@export_group("HUD Layout")
+@export_range(0.25, 3.0, 0.05) var hud_scale: float = 1.25
+@export var screen_margin: Vector2 = Vector2(24, 24)
+@export var show_numeric_values: bool = false
+
+const REFERENCE_SIZE := Vector2(629, 175)
+@onready var hud_art: Control = $ScreenSpace/bar
+
 signal stagger_triggered(tier: int, floor_hp: int)
 signal stagger_debuff_applied(debuff_id: String, level: int)
 
@@ -89,22 +97,22 @@ const SCREEN_SHAKE_FLASK := 0.5
 const SCREEN_SHAKE_STAGGER := 0.72
 const FLASK_SHAKE_DECAY := 3.5
 
-@onready var soul_flask: MarginContainer = $bar/soul_flask
-@onready var soul_main: TextureRect = $bar/soul_flask/soul_main
-@onready var soul_delay: TextureRect = $bar/soul_flask/soul_delay
-@onready var flask_border: TextureRect = $bar/soul_flask/border
-@onready var flask_uses_label: Label = $bar/soul_flask/flask_uses_label
-@onready var hp_bar: ProgressBar = $bar/hp_bar_panel/hp_bar_wrap/hp_bar
-@onready var hp_label: Label = $bar/hp_bar_panel/hp_label
-@onready var stagger_marker_66: ColorRect = $bar/hp_bar_panel/hp_bar_wrap/stagger_markers/marker_66
-@onready var stagger_marker_33: ColorRect = $bar/hp_bar_panel/hp_bar_wrap/stagger_markers/marker_33
-@onready var stamina_bar: ProgressBar = $bar/hp_bar_panel/stamina_bar
-@onready var stamina_label: Label = $bar/hp_bar_panel/stamina_label
-@onready var debuff_bar: HBoxContainer = $bar/hp_bar_panel/status_panel/debuff_bar
-@onready var buff_bar: HBoxContainer = $bar/hp_bar_panel/status_panel/buff_bar
+@onready var soul_flask: MarginContainer = $ScreenSpace/bar/soul_flask
+@onready var soul_main: TextureRect = $ScreenSpace/bar/soul_flask/soul_main
+@onready var soul_delay: TextureRect = $ScreenSpace/bar/soul_flask/soul_delay
+@onready var flask_border: TextureRect = $ScreenSpace/bar/soul_flask/border
+@onready var flask_uses_label: Label = $ScreenSpace/bar/soul_flask/flask_uses_label
+@onready var hp_bar: TextureProgressBar = $ScreenSpace/bar/hp_bar_panel/hp_bar_wrap/hp_bar
+@onready var hp_label: Label = $ScreenSpace/bar/hp_bar_panel/hp_label
+@onready var stagger_marker_66: ColorRect = $ScreenSpace/bar/hp_bar_panel/hp_bar_wrap/stagger_markers/marker_66
+@onready var stagger_marker_33: ColorRect = $ScreenSpace/bar/hp_bar_panel/hp_bar_wrap/stagger_markers/marker_33
+@onready var stamina_bar: TextureProgressBar = $ScreenSpace/bar/hp_bar_panel/stamina_bar
+@onready var stamina_label: Label = $ScreenSpace/bar/hp_bar_panel/stamina_label
+@onready var debuff_bar: HBoxContainer = $ScreenSpace/bar/hp_bar_panel/status_panel/debuff_bar
+@onready var buff_bar: HBoxContainer = $ScreenSpace/bar/hp_bar_panel/status_panel/buff_bar
 
-const STAGGER_MARKER_READY := Color(1, 0.82, 0.28, 0.95)
-const STAGGER_MARKER_USED := Color(0.42, 0.4, 0.48, 0.55)
+const STAGGER_MARKER_READY := Color.WHITE
+const STAGGER_MARKER_USED := Color(0.55, 0.55, 0.55, 0.45)
 
 var _flask_rest_position := Vector2.ZERO
 var _flask_shake_time := 0.0
@@ -123,6 +131,8 @@ var fade_tween: Tween
 
 #hàm hệ thống
 func _ready() -> void:
+	_layout_hud()
+	get_viewport().size_changed.connect(_layout_hud)
 	_flask_rest_position = soul_flask.position
 	_recalc_flask_heal_amount()
 	hp_bar.max_value = max_hp
@@ -143,6 +153,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
+	# CanvasLayer has its own canvas; transfer the existing fade/flash tint.
+	hud_art.modulate = modulate
 	var tick_result := _stats.tick(delta)
 	if tick_result.damage_taken > 0:
 		sync_hp_display()
@@ -340,6 +352,9 @@ func sync_stagger_markers() -> void:
 		stagger_marker_66.color = STAGGER_MARKER_READY if stagger_tiers_ready[0] else STAGGER_MARKER_USED
 	if stagger_marker_33:
 		stagger_marker_33.color = STAGGER_MARKER_READY if stagger_tiers_ready[1] else STAGGER_MARKER_USED
+	for marker in [stagger_marker_66, stagger_marker_33]:
+		if marker:
+			marker.get_node("Arrow").modulate = marker.color
 
 func update_shader_value(node: CanvasItem, value: float) -> void:
 	if node and node.material:
@@ -432,3 +447,19 @@ func _on_flask_drain_complete() -> void:
 	flash_heal()
 	enter_combat()
 	_trigger_impact_feedback(SCREEN_SHAKE_FLASK)
+
+
+func _layout_hud() -> void:
+	var viewport_size := get_viewport_rect().size
+	var margin := Vector2(maxf(screen_margin.x, 0.0), maxf(screen_margin.y, 0.0))
+	var available := (viewport_size - margin * 2.0).max(Vector2.ONE)
+	var fit := minf(available.x / REFERENCE_SIZE.x, available.y / REFERENCE_SIZE.y)
+	hud_art.scale = Vector2.ONE * minf(maxf(hud_scale, 0.25), fit)
+	hud_art.position = margin
+	hp_label.visible = show_numeric_values
+	stamina_label.visible = show_numeric_values
+	flask_uses_label.visible = show_numeric_values
+	hp_label.position = Vector2(8, -24)
+	stamina_label.position = Vector2(374, 31)
+	flask_uses_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	flask_uses_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM

@@ -2,12 +2,17 @@
 
 [ext_resource type="Script" uid="uid://dp4qa2v035qlo" path="res://scenes/UI/status_icon_slot.gd" id="1_slot"]
 
+[ext_resource type="Shader" path="res://scenes/UI/hud_assets/reference_key.gdshader" id="2_key"]
+
+[sub_resource type="ShaderMaterial" id="IconKey"]
+shader = ExtResource("2_key")
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_slot"]
-bg_color = Color(0.06, 0.05, 0.08, 0.9)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
+bg_color = Color(0, 0, 0, 0)
+border_width_left = 0
+border_width_top = 0
+border_width_right = 0
+border_width_bottom = 0
 border_color = Color(0.4, 0.38, 0.45, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
@@ -15,17 +20,17 @@ corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
 [node name="StatusIconSlot" type="PanelContainer"]
-custom_minimum_size = Vector2(26, 26)
+custom_minimum_size = Vector2(20, 20)
 theme_override_styles/panel = SubResource("StyleBoxFlat_slot")
 script = ExtResource("1_slot")
 mouse_filter = 0
 
 [node name="Margin" type="MarginContainer" parent="."]
 layout_mode = 2
-theme_override_constants/margin_left = 3
-theme_override_constants/margin_top = 3
-theme_override_constants/margin_right = 3
-theme_override_constants/margin_bottom = 3
+theme_override_constants/margin_left = 0
+theme_override_constants/margin_top = 0
+theme_override_constants/margin_right = 0
+theme_override_constants/margin_bottom = 0
 
 [node name="Icon" type="ColorRect" parent="Margin"]
 unique_name_in_owner = true
@@ -33,6 +38,7 @@ layout_mode = 2
 mouse_filter = 2
 
 [node name="EffectImage" type="TextureRect" parent="Margin/Icon"]
+material = SubResource("IconKey")
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -52,6 +58,6 @@ size_flags_vertical = 8
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
 theme_override_constants/outline_size = 2
-theme_override_font_sizes/font_size = 10
+theme_override_font_sizes/font_size = 9
 horizontal_alignment = 2
 vertical_alignment = 2
