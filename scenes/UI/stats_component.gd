@@ -14,6 +14,7 @@ var flask_charges: int = 3
 var max_stamina: float = 100.0
 var stamina: float = 100.0
 var flask_heal_per_use: int = 34
+var guard_damage_reduction: float = 0.5
 
 # Debuffs
 var bleeding_level: int = 0
@@ -30,8 +31,10 @@ var stagger_lock_hp: int = -1
 var stagger_lock_timer: float = 0.0
 var _bleed_tick_timer: float = 0.0
 
-const STAMINA_COST := {"attack": 20.0, "parry": 15.0, "deflect": 15.0}
-const STAMINA_REGEN_PER_SEC := 28.0
+var stamina_costs: Dictionary = {"dash": 20.0, "guard": 20.0, "deflect": 20.0}
+var stamina_regen_delay: float = 1.5
+var stamina_regen_per_second: float = 28.0
+var _stamina_regen_time_left: float = 0.0
 
 # --- Tick (thay cho khối stagger-lock + _process_bleeding trong _process của ui.gd) ---
 func tick(delta: float) -> Dictionary:
@@ -41,11 +44,20 @@ func tick(delta: float) -> Dictionary:
 			stagger_lock_hp = -1
 	return _process_bleeding(delta)
 
-func regen_stamina(delta: float) -> bool:
-	if stamina >= max_stamina:
+func regen_stamina(delta: float, blocked: bool = false) -> bool:
+	if blocked:
+		_stamina_regen_time_left = maxf(stamina_regen_delay, 0.0)
 		return false
-	stamina = minf(stamina + STAMINA_REGEN_PER_SEC * delta, max_stamina)
-	return true
+	var available_time := maxf(delta, 0.0)
+	if _stamina_regen_time_left > 0.0:
+		var wait_time := minf(available_time, _stamina_regen_time_left)
+		_stamina_regen_time_left -= wait_time
+		available_time -= wait_time
+	if stamina >= max_stamina or available_time <= 0.0:
+		return false
+	var before := stamina
+	stamina = minf(stamina + maxf(stamina_regen_per_second, 0.0) * available_time, max_stamina)
+	return stamina != before
 
 # --- Damage ---
 func heal_to_full() -> void:
@@ -55,7 +67,7 @@ func heal_to_full() -> void:
 	restore_flask_charges()
 	clear_all_debuffs()
 
-func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF) -> Dictionary:
+func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF, skip_stagger_thresholds: bool = false) -> Dictionary:
 	var result := {
 		"damage_taken": 0,
 		"staggered": false,
@@ -77,21 +89,21 @@ func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF) -> Dictiona
 	if stagger_lock_timer > 0.0 and stagger_lock_hp >= 0:
 		target_hp = maxi(target_hp, stagger_lock_hp)
 
-	for tier in STAGGER_THRESHOLD_FRACS.size():
-		if not stagger_tiers_ready[tier]:
-			continue
-		var cross := resolve_stagger_crossing(prev_hp, target_hp, tier)
-		if cross.triggered:
-			target_hp = cross.target_hp
-			result.staggered = true
-			result.stagger_tier = tier
-			result.floor_hp = cross.floor_hp
-			result.skip_player_stagger = cross.skip_player_stagger
-			result.markers_changed = cross.markers_changed
-			result.debuff_id = cross.debuff_id
-			result.debuff_level = cross.debuff_level
-			break
-
+	if not skip_stagger_thresholds:
+		for tier in STAGGER_THRESHOLD_FRACS.size():
+			if not stagger_tiers_ready[tier]:
+				continue
+			var cross := resolve_stagger_crossing(prev_hp, target_hp, tier)
+			if cross.triggered:
+				target_hp = cross.target_hp
+				result.staggered = true
+				result.stagger_tier = tier
+				result.floor_hp = cross.floor_hp
+				result.skip_player_stagger = cross.skip_player_stagger
+				result.markers_changed = cross.markers_changed
+				result.debuff_id = cross.debuff_id
+				result.debuff_level = cross.debuff_level
+				break
 	hp = clampi(target_hp, 0, max_hp)
 	result.damage_taken = prev_hp - hp
 	result.died = hp <= 0
@@ -165,26 +177,28 @@ func recalc_flask_heal_amount() -> void:
 
 # --- Stamina ---
 func has_stamina_cost(action: String) -> bool:
-	return STAMINA_COST.has(action)
+	return stamina_costs.has(action)
 
 func can_spend_stamina(action: String) -> bool:
-	if not has_stamina_cost(action):
-		return true
-	return stamina >= STAMINA_COST[action]
+	return stamina >= maxf(float(stamina_costs.get(action, 0.0)), 0.0)
 
-func spend_stamina(action: String) -> bool:
-	if not has_stamina_cost(action):
-		return true
-	var cost: float = STAMINA_COST[action]
-	if stamina < cost:
+func spend_stamina(action: String, allow_partial: bool = false) -> bool:
+	var cost := maxf(float(stamina_costs.get(action, 0.0)), 0.0)
+	if not allow_partial and stamina < cost:
 		return false
-	stamina -= cost
+	stamina = clampf(stamina - cost, 0.0, max_stamina)
+	if cost > 0.0:
+		_stamina_regen_time_left = maxf(stamina_regen_delay, 0.0)
 	return true
 
 func restore_stamina_full() -> void:
 	stamina = max_stamina
+	_stamina_regen_time_left = 0.0
 
 # --- Status effects ---
+func get_guard_damage_multiplier() -> float:
+	return 1.0 - clampf(guard_damage_reduction, 0.0, 1.0)
+
 func get_damage_taken_multiplier() -> float:
 	if fracture_level <= 0:
 		return 1.0

@@ -30,6 +30,11 @@ var is_knocking_back: bool = false
 var is_invulnerable: bool = false
 var is_touched_enemy: bool = false
 
+var active_knockback_distance: float
+var active_knockback_duration: float
+var _active_stun_duration: float
+var _active_invulnerability_duration: float
+
 var _body: CharacterBody2D
 
 var knockback_distance: float = STAGGER_KNOCKBACK_DISTANCE
@@ -63,14 +68,24 @@ func compute_knockback_dir(hit_from_global: Vector2, facing_direction: int) -> V
 	return Vector2(1.0 if facing_direction < 0 else -1.0, -0.2).normalized()
 
 # --- Stagger reaction (was _apply_stagger) ---
-func apply_stagger(knockback_dir: Vector2) -> void:
+func apply_stagger(
+	knockback_dir: Vector2,
+	distance_override: float = -1.0,
+	push_override: float = -1.0,
+	stun_override: float = -1.0,
+	invulnerability_override: float = -1.0
+) -> void:
 	if not _has_live_body():
 		return
+	active_knockback_distance = knockback_distance if distance_override < 0.0 else maxf(distance_override, 0.0)
+	active_knockback_duration = knockback_duration if push_override < 0.0 else maxf(push_override, 0.01)
+	_active_stun_duration = stun_duration if stun_override < 0.0 else maxf(stun_override, 0.0)
+	_active_invulnerability_duration = STAGGER_INVULN_SEC if invulnerability_override < 0.0 else maxf(invulnerability_override, 0.0)
 	is_stunned = true
 	is_knocking_back = true
 	is_invulnerable = true
-	staggered.emit(knockback_dir * (knockback_distance / knockback_duration))
-	_connect_timeout(knockback_duration, _on_knockback_end)
+	staggered.emit(knockback_dir * (active_knockback_distance / active_knockback_duration))
+	_connect_timeout(active_knockback_duration, _on_knockback_end)
 
 # --- Invulnerability window (was _start_invulnerability) ---
 func start_invulnerability(duration: float) -> void:
@@ -89,14 +104,17 @@ func _on_knockback_end() -> void:
 		return
 	is_knocking_back = false
 	knockback_finished.emit()
-	_connect_timeout(stun_duration, _on_stagger_stun_end)
+	if _active_stun_duration <= 0.0:
+		_on_stagger_stun_end()
+	else:
+		_connect_timeout(_active_stun_duration, _on_stagger_stun_end)
 
 func _on_stagger_stun_end() -> void:
 	if not _has_live_body():
 		return
 	is_stunned = false
 	stagger_recovered.emit()
-	var remaining := maxf(STAGGER_INVULN_SEC - knockback_duration - stun_duration, 0.0)
+	var remaining := maxf(_active_invulnerability_duration - active_knockback_duration - _active_stun_duration, 0.0)
 	if remaining > 0.0:
 		_connect_timeout(remaining, _end_invulnerability)
 	else:

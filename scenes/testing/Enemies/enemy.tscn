@@ -126,3 +126,5 @@ collision_mask = 3
 
 [connection signal="body_entered" from="WeaponPivot/EnemyWeapon/Hitbox" to="WeaponPivot/EnemyWeapon" method="_on_hitbox_body_entered"]
 [connection signal="timeout" from="WeaponPivot/EnemyWeapon/Timer" to="WeaponPivot/EnemyWeapon" method="_on_timer_timeout"]
+
+[connection signal="body_entered" from="WeaponPivot/EnemyWeapon/SpecialHitbox" to="WeaponPivot/EnemyWeapon" method="_on_hitbox_body_entered"]

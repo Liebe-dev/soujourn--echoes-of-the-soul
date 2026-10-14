@@ -194,6 +194,12 @@ _data = {
 [node name="PlayableAdel" type="CharacterBody2D" unique_id=1485460165 groups=["Player", "playableAdel"]]
 collision_layer = 3
 script = ExtResource("1_playable")
+stagger_knockback_distance = 200.0
+deflect_slow_motion_scale = 0.5
+deflect_slow_motion_duration = 0.45
+guard_knockback_distance = 20.0
+guard_knockback_duration = 0.09999999999999999
+stamina_regen_delay = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1090059515]
 position = Vector2(-5, -1.1920929e-07)
@@ -253,7 +259,6 @@ offset_right = -897.0
 offset_bottom = -719.0
 size_flags_horizontal = 0
 size_flags_vertical = 0
-mouse_filter = 2
 
 [node name="UI_Layer" type="CanvasLayer" parent="Camera2D" unique_id=473024919]
 

@@ -12,6 +12,7 @@ signal stagger_triggered(tier: int, floor_hp: int)
 signal stagger_debuff_applied(debuff_id: String, level: int)
 
 var _stats: StatsComponent = StatsComponent.new()
+var _stamina_actor: Node
 
 #     STATS (facade → StatsComponent)
 var max_hp: int:
@@ -55,6 +56,12 @@ var flask_heal_per_use: int:
 		return _stats.flask_heal_per_use
 	set(value):
 		_stats.flask_heal_per_use = value
+
+var guard_damage_reduction: float:
+	get:
+		return _stats.guard_damage_reduction
+	set(value):
+		_stats.guard_damage_reduction = clampf(value, 0.0, 1.0)
 
 # Debuffs
 var bleeding_level: int:
@@ -131,6 +138,12 @@ var fade_tween: Tween
 
 #hàm hệ thống
 func _ready() -> void:
+	var ancestor := get_parent()
+	while ancestor != null:
+		if ancestor.has_method("blocks_stamina_regeneration"):
+			_stamina_actor = ancestor
+			break
+		ancestor = ancestor.get_parent()
 	_layout_hud()
 	get_viewport().size_changed.connect(_layout_hud)
 	_flask_rest_position = soul_flask.position
@@ -163,10 +176,13 @@ func _process(delta: float) -> void:
 		enter_combat()
 	if tick_result.died:
 		SaveManager.respawn_at_checkpoint()
+		return
 
-	if not in_combat:
-		if _stats.regen_stamina(delta):
-			sync_stamina_display()
+	# Stamina timing follows actions, independently of HUD visibility/combat fade.
+	var regen_blocked: bool = is_instance_valid(_stamina_actor) and _stamina_actor.blocks_stamina_regeneration()
+	if _stats.regen_stamina(delta, regen_blocked):
+		sync_stamina_display()
+		enter_combat()
 
 	if in_combat:
 		hide_timer += delta
@@ -190,8 +206,8 @@ func heal_to_full() -> void:
 	sync_stamina_display()
 	fade_in()
 
-func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF) -> Dictionary:
-	var result := _stats.apply_damage(dmg, _hit_from_global)
+func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF, skip_stagger_thresholds: bool = false) -> Dictionary:
+	var result := _stats.apply_damage(dmg, _hit_from_global, skip_stagger_thresholds)
 
 	if result.markers_changed:
 		sync_stagger_markers()
@@ -269,8 +285,8 @@ func add_max_flask_charges(extra: int) -> void:
 func can_spend_stamina(action: String) -> bool:
 	return _stats.can_spend_stamina(action)
 
-func spend_stamina(action: String) -> bool:
-	var spent := _stats.spend_stamina(action)
+func spend_stamina(action: String, allow_partial: bool = false) -> bool:
+	var spent := _stats.spend_stamina(action, allow_partial)
 	if spent and _stats.has_stamina_cost(action):
 		sync_stamina_display()
 		enter_combat()
@@ -281,6 +297,9 @@ func restore_stamina_full() -> void:
 	sync_stamina_display()
 
 #hàm công khai nhóm hiệu ứng
+func get_guard_damage_multiplier() -> float:
+	return _stats.get_guard_damage_multiplier()
+
 func get_damage_taken_multiplier() -> float:
 	return _stats.get_damage_taken_multiplier()
 
@@ -463,3 +482,9 @@ func _layout_hud() -> void:
 	stamina_label.position = Vector2(374, 31)
 	flask_uses_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	flask_uses_label.vertical_alignment = VERTICAL_ALIGNMENT_BOTTOM
+
+
+func configure_stamina(costs: Dictionary, delay: float, rate: float) -> void:
+	_stats.stamina_costs = costs.duplicate()
+	_stats.stamina_regen_delay = maxf(delay, 0.0)
+	_stats.stamina_regen_per_second = maxf(rate, 0.0)

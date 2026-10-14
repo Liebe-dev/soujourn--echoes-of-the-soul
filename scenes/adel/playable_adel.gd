@@ -14,6 +14,26 @@ extends CharacterBody2D
 @export_range(0.01, 2.0, 0.01, "or_greater") var stagger_knockback_duration: float = 0.3
 @export_range(0.0, 5.0, 0.01, "or_greater") var stagger_stun_duration: float = 0.45
 
+@export_group("Defense")
+@export_range(0.0, 1.0, 0.01) var deflect_window: float = 0.2
+@export_range(0.05, 1.0, 0.01, "or_greater") var defense_hit_pose_duration: float = 0.2
+@export_range(0.05, 1.0, 0.05) var deflect_slow_motion_scale: float = 0.6
+@export_range(0.01, 1.0, 0.01, "or_greater") var deflect_slow_motion_duration: float = 0.2
+
+@export_group("Guard Knockback")
+@export_range(0.0, 500.0, 1.0, "or_greater") var guard_knockback_distance: float = 50.0
+@export_range(0.01, 2.0, 0.01, "or_greater") var guard_knockback_duration: float = 0.2
+
+@export_group("Stamina")
+@export_range(0.0, 1000.0, 1.0, "or_greater") var dash_stamina_cost: float = 20.0
+@export_range(0.0, 1000.0, 1.0, "or_greater") var guard_stamina_cost: float = 20.0
+@export_range(0.0, 1000.0, 1.0, "or_greater") var deflect_stamina_cost: float = 20.0
+@export_range(0.0, 10.0, 0.05, "or_greater") var stamina_regen_delay: float = 1.5
+@export_range(0.0, 1000.0, 1.0, "or_greater") var stamina_regen_per_second: float = 28.0
+
+const ANIM_DEFENSE: StringName = &"saber_defense"
+const ANIM_DEFLECT: StringName = &"saber_deflect"
+const ANIM_GUARD: StringName = &"saber_guard"
 const ANIM_STAGGER: StringName = &"saber_stagger"
 const ENEMY_COLLISION_LAYER := 3
 const ANIM_JUMP_START := " jump_start"
@@ -26,31 +46,70 @@ const ATTACK_INTERRUPT_TIME := 0.40
 const ATTACK_4_INTERRUPT_TIME := 0.55
 signal player_attacked
 
+var presentation: AdelAnimationComponent
 var locomotion: LocomotionComponent
 var combat: CombatComponent
 var damage: DamageComponent
+var _defense_hit_pose_time_left: float = 0.0
+var deflect_slow_motion: DeflectSlowMotion
+var defense: DefenseComponent
 var dash: DashComponent
 var _attack_interrupt_ready: bool = false
 var _attack_interrupt_token: int = 0
 
-var can_move: bool = true
-var is_locked: bool = false
-var is_resting: bool = false
-var is_guarding: bool = false
-var holding_duration: float = 0.0
+var state_machine: AdelStateMachine
+var ghost_trail: AdelGhostTrail
+var _external_movement_enabled := true
+var _external_lock := false
+# Compatibility properties for map scripts and SaveManager; action ownership is HFSM.
+var can_move: bool:
+	get:
+		return state_machine.can_move() if state_machine != null else _external_movement_enabled
+	set(value):
+		_external_movement_enabled = value
+		if state_machine != null: state_machine.movement_enabled = value
+var is_locked: bool:
+	get:
+		return state_machine.externally_locked if state_machine != null else _external_lock
+	set(value):
+		_external_lock = value
+		if state_machine != null: state_machine.externally_locked = value
+var is_resting: bool:
+	get:
+		return state_machine != null and state_machine.is_in(AdelStateMachine.State.REST)
+var is_guarding: bool:
+	get:
+		return defense != null and defense.is_guarding
+var holding_duration: float:
+	get:
+		return defense.holding_duration if defense != null else 0.0
 var _position_before_rest: Vector2 = Vector2.ZERO
 var facing_direction: int = 1
-var is_doing_action: bool = false
+var is_doing_action: bool:
+	get:
+		return state_machine != null and state_machine.is_doing_action()
 var _stagger_distance_left: float = 0.0
 var _stagger_push_direction: float = 1.0
-var _playing_land_anim := false
-var is_skidding: bool = false 
+var _dash_info: Dictionary = {}
+var _dash_tween: Tween
+var _dash_timer := 0.0
+var _ready_final_frame := false
+var _combo_reset_timer := 0.0
+var _playing_land_anim: bool:
+	get: return presentation != null and presentation.playing_land
+	set(value):
+		if presentation != null: presentation.playing_land = value
+var is_skidding: bool:
+	get: return presentation != null and presentation.skidding
+	set(value):
+		if presentation != null: presentation.skidding = value
 
 #hàm hệ thống
 func _ready() -> void:
 	randomize()
 	_setup_enemy_passthrough()
 
+	presentation = AdelAnimationComponent.new(self, spine_rig, spine_anim)
 	locomotion = LocomotionComponent.new(self)
 	locomotion.jumped.connect(_on_locomotion_jumped)
 	locomotion.landed.connect(_on_locomotion_landed)
@@ -68,96 +127,88 @@ func _ready() -> void:
 	damage.stagger_recovered.connect(_on_damage_stagger_recovered)
 	damage.knockback_finished.connect(_on_damage_knockback_finished)
 
+	deflect_slow_motion = DeflectSlowMotion.new()
+	deflect_slow_motion.name = "DeflectSlowMotion"
+	add_child(deflect_slow_motion)
+	deflect_slow_motion.finished.connect(_on_deflect_slow_motion_finished)
+	defense = DefenseComponent.new(deflect_window)
 	dash = DashComponent.new(locomotion, dodge_cooldown)
 
+	ghost_trail = AdelGhostTrail.new()
+	ghost_trail.name = "GhostTrailComponent"
+	add_child(ghost_trail)
+	ghost_trail.setup(spine_rig)
+	state_machine = AdelStateMachine.new(self)
+	state_machine.movement_enabled = _external_movement_enabled
+	state_machine.externally_locked = _external_lock
+	state_machine.resume_locomotion()
+	_configure_stamina()
 	spine_anim.animation_finished.connect(_on_spine_anim_finished)
 	spine_anim.play("idle")
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("debug_take_damage"):
 		take_damage(DEBUG_DAMAGE_AMOUNT, global_position + Vector2(80.0, 0.0))
 		get_viewport().set_input_as_handled()
+		return
+	state_machine.handle_input(event)
 
-	if event.is_action_pressed("attack"):
-		# Stagger owns the held pose; its next phase would overwrite a new attack.
-		if dash.is_dodging or damage.is_stunned:
-			return
-
-		if combat.should_cancel_jump_attack_land():
-			_cancel_jump_attack_land()
-
-		match combat.handle_attack_input(is_doing_action):
-			CombatComponent.AttackAction.START_JUMP_ATTACK:
-				_play_jump_attack()
-
-			CombatComponent.AttackAction.START_COMBO:
-				_play_combo_step()
-
-			CombatComponent.AttackAction.QUEUE_COMBO:
-				if _attack_interrupt_ready:
-					_advance_queued_combo()
-
-			_:
-				pass
+func _handle_attack_input() -> void:
+	if combat.should_cancel_jump_attack_land():
+		_cancel_jump_attack_land()
+	match combat.handle_attack_input(is_doing_action):
+		CombatComponent.AttackAction.START_JUMP_ATTACK: _play_jump_attack()
+		CombatComponent.AttackAction.START_COMBO: _play_combo_step()
+		CombatComponent.AttackAction.QUEUE_COMBO:
+			if _attack_interrupt_ready: _advance_queued_combo()
 
 func _physics_process(delta: float) -> void:
-	if damage.is_stunned or damage.is_touched_enemy:
-		if damage.is_knocking_back:
-			var travel := minf(_stagger_distance_left, damage.knockback_distance * delta / damage.knockback_duration)
-			velocity.x = _stagger_push_direction * travel / maxf(delta, 0.000001)
-			_stagger_distance_left = maxf(_stagger_distance_left - travel, 0.0)
-		elif damage.is_stunned:
-			velocity.x = 0.0
-		else:
-			velocity.x = move_toward(velocity.x, 0.0, 400.0 * delta)
-		locomotion.apply_vertical_physics(delta)
-		move_and_slide()
+	if _combo_reset_timer > 0.0:
+		_combo_reset_timer = maxf(_combo_reset_timer - delta, 0.0)
+		if _combo_reset_timer <= 0.0: _reset_combo()
+	state_machine.physics_update(delta)
 
-		if damage.is_touched_enemy and is_on_floor():
-			can_move = true
-			damage.is_touched_enemy = false
-			damage.is_invulnerable = false
-		return
-	if is_resting:
-		velocity = Vector2.ZERO
-		return
+func _physics_hit_reaction(delta: float) -> void:
+	if damage.is_knocking_back:
+		var travel := minf(_stagger_distance_left, damage.active_knockback_distance * delta / damage.active_knockback_duration)
+		velocity.x = _stagger_push_direction * travel / maxf(delta, 0.000001)
+		_stagger_distance_left = maxf(_stagger_distance_left - travel, 0.0)
+	elif damage.is_stunned: velocity.x = 0.0
+	else: velocity.x = move_toward(velocity.x, 0.0, 400.0 * delta)
+	locomotion.apply_vertical_physics(delta)
+	move_and_slide()
+	if damage.is_touched_enemy and is_on_floor():
+		damage.is_touched_enemy = false
+		damage.is_invulnerable = false
+		state_machine.resume_locomotion()
+
+func _physics_defense(delta: float) -> void:
+	velocity.x = defense.consume_guard_push(delta)
+	locomotion.apply_vertical_physics(delta)
+	move_and_slide()
+	locomotion.update_ground_state()
+
+func _physics_attack(delta: float) -> void:
 	if combat.is_jump_attack_landing:
 		combat.jump_attack_land_timer += delta
-		if combat.is_jump_attack_land_unlocked():
-			can_move = true
-			is_doing_action = false
-
-	var attack_direction: float = Input.get_axis("move_left", "move_right")
-	if (
-		_attack_interrupt_ready
-		and is_doing_action
-		and spine_anim.current_animation.begins_with(
-			combat.equipped_weapon.animation_prefix + "_attack_"
-		)
-		and attack_direction != 0.0
-		and not combat.attack_queued
-	):
-		_cancel_combo_for_movement(attack_direction)
-	if is_locked or not can_move:
-		if not combat.apply_combat_air_physics(delta):
-			locomotion.apply_vertical_physics(delta)
-			
-		velocity.x = move_toward(velocity.x, 0.0, locomotion.GROUND_FRICTION * delta)
-		move_and_slide()
-		
-		if is_on_floor() and combat.is_jump_attacking:
-			_play_jump_attack_land()
+		if combat.is_jump_attack_land_unlocked() and can_move:
+			_physics_locomotion(delta)
+			return
+	var direction := Input.get_axis("move_left", "move_right")
+	if _attack_interrupt_ready and state_machine.current == AdelStateMachine.State.COMBO and direction != 0.0 and not combat.attack_queued:
+		_cancel_combo_for_movement(direction)
+		_physics_locomotion(delta)
 		return
+	_physics_locked(delta)
+	if state_machine.is_in(AdelStateMachine.State.JUMP_ATTACK):
+		state_machine.transition(AdelStateMachine.State.JUMP_HANG if combat.is_jump_attack_hanging else AdelStateMachine.State.JUMP_FALL)
 
-	if Input.is_action_just_pressed("guard and deflect") and not is_doing_action:
-		is_guarding = true
-		holding_duration = 0.0
-		is_doing_action = true
-	if is_guarding:
-		holding_duration += delta
-	if Input.is_action_just_released("guard and deflect") and is_doing_action and is_guarding:
-		is_guarding = false
-		is_doing_action = false
+func _physics_locked(delta: float) -> void:
+	if not combat.apply_combat_air_physics(delta): locomotion.apply_vertical_physics(delta)
+	velocity.x = move_toward(velocity.x, 0.0, locomotion.GROUND_FRICTION * delta)
+	move_and_slide()
+	if is_on_floor() and combat.is_jump_attacking: _play_jump_attack_land()
 
+func _physics_locomotion(delta: float) -> void:
 	locomotion.update_run_state(delta)
 
 	var direction := Input.get_axis("move_left", "move_right")
@@ -177,8 +228,12 @@ func _physics_process(delta: float) -> void:
 		locomotion.apply_vertical_physics(delta)
 
 	move_and_slide()
-	_update_air_animation()
+	if not state_machine.is_in(AdelStateMachine.State.DASH):
+		_update_air_animation()
 	locomotion.update_ground_state()
+	if state_machine.is_in(AdelStateMachine.State.LOCOMOTION):
+		if state_machine.current != AdelStateMachine.State.READY or direction != 0.0 or not is_on_floor():
+			state_machine.resume_locomotion()
 
 	for i in get_slide_collision_count():
 		var collision = get_slide_collision(i)
@@ -189,21 +244,70 @@ func _physics_process(delta: float) -> void:
 			take_damage(ENEMY_CONTACT_DAMAGE, collider.global_position)
 			break
 
-#hàm công khai
+func _physics_dash(delta: float) -> void:
+	_dash_timer += delta
+	velocity.y = 0.0
+	move_and_slide()
+	locomotion.update_ground_state()
+	if state_machine.current == AdelStateMachine.State.DASH_ACTIVE and _dash_timer >= DashComponent.DASH_TWEEN_DURATION:
+		velocity.x = 0.0
+		damage.is_invulnerable = false
+		if _dash_info.is_air: state_machine.resume_locomotion()
+		else: state_machine.transition(AdelStateMachine.State.DASH_SKID)
+	elif state_machine.current == AdelStateMachine.State.DASH_SKID and _dash_timer >= DashComponent.DASH_SKID_DURATION:
+		state_machine.resume_locomotion()
+
 func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
-	if not damage.can_take_damage():
+	if dmg <= 0 or not damage.can_take_damage():
 		return
 
 	var hud := _find_hud()
 	if hud == null or not hud.has_method("apply_damage"):
 		return
 
-	var hit: Dictionary = hud.apply_damage(dmg, hit_from_global)
+	# A depleted held stance cannot classify another hit before the next physics tick.
+	if is_guarding and not has_action_stamina(): defense.end_guard(false)
+	var defense_result := defense.classify_hit(global_position, facing_direction, hit_from_global)
+	var exhausted := false
+	if defense_result != DefenseComponent.HitResult.NONE:
+		var action := "deflect" if defense_result == DefenseComponent.HitResult.DEFLECT else "guard"
+		exhausted = not hud.can_spend_stamina(action)
+		hud.spend_stamina(action, true)
+		# Finish this accepted reaction, but remove protection as soon as energy hits zero.
+		if not has_action_stamina(): defense.end_guard(false)
+	match defense_result:
+		DefenseComponent.HitResult.DEFLECT:
+			hud.enter_combat()
+			if exhausted:
+				_apply_stamina_exhaustion(hit_from_global)
+			else:
+				deflect_slow_motion.start(deflect_slow_motion_scale, deflect_slow_motion_duration)
+				_play_defense_hit_pose(ANIM_DEFLECT)
+			return
+		DefenseComponent.HitResult.GUARD:
+			if not exhausted:
+				defense.start_guard_push(guard_knockback_distance, guard_knockback_duration, -float(facing_direction))
+				_play_defense_hit_pose(ANIM_GUARD)
+			dmg = maxi(0, int(round(float(dmg) * hud.get_guard_damage_multiplier())))
+			if dmg == 0:
+				hud.enter_combat()
+				if exhausted: _apply_stamina_exhaustion(hit_from_global)
+				return
+	var hit: Dictionary = hud.apply_damage(dmg, hit_from_global, exhausted)
 	# Damage can synchronously respawn or remove this Player from the tree.
-	if hit.get("died", false) or not is_inside_tree() or is_queued_for_deletion():
+	if hit.get("died", false):
+		defense.end_guard()
+		if is_inside_tree() and not is_queued_for_deletion():
+			deflect_slow_motion.cancel()
+			state_machine.resume_locomotion()
 		return
-	if hit.get("staggered", false) and not hit.get("skip_player_stagger", false):
-		damage.apply_stagger(damage.compute_knockback_dir(hit_from_global, facing_direction))
+	if not is_inside_tree() or is_queued_for_deletion():
+		return
+	if exhausted:
+		_apply_stamina_exhaustion(hit_from_global)
+	elif hit.get("staggered", false) and not hit.get("skip_player_stagger", false):
+		var direction := Vector2(-float(facing_direction), 0.0) if defense_result == DefenseComponent.HitResult.GUARD else damage.compute_knockback_dir(hit_from_global, facing_direction)
+		damage.apply_stagger(direction)
 	elif hit.get("damage_taken", 0) > 0:
 		damage.start_invulnerability(DamageComponent.HIT_INVULN_SEC)
 
@@ -223,14 +327,13 @@ func get_attack_speed_multiplier() -> float:
 	return 1.0
 
 func enter_rest(face_left: bool) -> void:
+	deflect_slow_motion.cancel()
 	_position_before_rest = global_position
-	is_resting = true
-	is_locked = true
-	can_move = false
+	state_machine.transition(AdelStateMachine.State.REST)
 	velocity = Vector2.ZERO
 	_playing_land_anim = false
 	_set_facing_direction(-1 if face_left else 1)
-	spine_anim.play("idle")
+	presentation.play(&"idle")
 
 func play_rest_animation() -> void:
 	spine_anim.play("RESET", 0.0, 1.0, true)
@@ -238,9 +341,7 @@ func play_rest_animation() -> void:
 	spine_anim.play("rest", 0.0)
 
 func exit_rest() -> void:
-	is_resting = false
-	is_locked = false
-	can_move = true
+	state_machine.resume_locomotion()
 	velocity = Vector2.ZERO
 	global_position = _position_before_rest
 	snap_feet_to_floor()
@@ -264,21 +365,17 @@ func snap_feet_to_floor(max_drop: float = 96.0) -> void:
 	global_position.y += hit.position.y - feet.y
 
 func play_pickup_animation() -> void:
-	if not is_on_floor() or dash.is_dodging or damage.is_stunned or is_doing_action:
-		return 
-	can_move = false
-	is_doing_action = true
-	velocity.x = 0 
-	spine_anim.play("loot")
+	if not is_on_floor() or not state_machine.can_begin_action(): return
+	state_machine.transition(AdelStateMachine.State.PICKUP)
+	velocity.x = 0.0
+	presentation.play(&"loot")
 
-#hàm nội bộ nhóm combat
 func _play_combo_step() -> void:
 	var attack_direction: float = Input.get_axis("move_left", "move_right")
 	if attack_direction != 0.0:
 		_update_facing(attack_direction)
 
-	can_move = false
-	is_doing_action = true
+	state_machine.transition(AdelStateMachine.State.COMBO)
 	velocity.x = 0
 	_playing_land_anim = false 
 	is_skidding = false
@@ -299,18 +396,8 @@ func _advance_queued_combo() -> void:
 		_play_combo_step()
 
 func _cancel_combo_for_movement(direction: float) -> void:
-	_attack_interrupt_token += 1
-	_attack_interrupt_ready = false
-
-	combat.interrupt()
-	get_tree().create_timer(0.3).timeout.connect(
-		_reset_combo,
-		CONNECT_ONE_SHOT
-	)
-
-	can_move = true
-	is_doing_action = false
-
+	state_machine.resume_locomotion()
+	_combo_reset_timer = 0.3
 	_update_facing(direction)
 	_update_ground_animation(direction)
 
@@ -335,7 +422,7 @@ func _on_attack_interrupt_ready(
 	if token != _attack_interrupt_token:
 		return
 
-	if spine_anim.current_animation != attack_animation:
+	if state_machine.current != AdelStateMachine.State.COMBO:
 		return
 
 	if not is_doing_action:
@@ -354,24 +441,25 @@ func _reset_combo() -> void:
 	combat.reset_combo_if_idle(is_doing_action)
 
 func _play_jump_attack() -> void:
-	can_move = false
-	is_doing_action = true
 	combat.start_jump_attack()
-	velocity.x = 0
-	velocity.y = 0.0
-	spine_anim.play("jump_attack(air)")
+	state_machine.transition(AdelStateMachine.State.JUMP_HANG)
+	velocity = Vector2.ZERO
+	presentation.play(&"jump_attack(air)")
 
 func _play_jump_attack_land() -> void:
 	combat.begin_jump_attack_land()
+	state_machine.transition(AdelStateMachine.State.JUMP_LAND)
 	_playing_land_anim = false
 	spine_anim.play("jump_attack(land)")
 
 func _cancel_jump_attack_land() -> void:
 	combat.cancel_jump_attack_land()
-	can_move = true
-	is_doing_action = false
+	state_machine.resume_locomotion()
 
 func _find_hud() -> Node:
+	var own_hud := get_node_or_null("Camera2D/hud")
+	if own_hud != null: return own_hud
+	if not is_inside_tree(): return null
 	var root := get_tree().current_scene
 	if root == null:
 		return null
@@ -385,36 +473,20 @@ func _get_move_speed_multiplier() -> float:
 	return 1.0
 
 func _perform_dash(dash_direction: float) -> void:
-		if combat.is_jump_attack_landing:
-			_cancel_jump_attack_land()
-		var dash_info: Dictionary = dash.start_dash(dash_direction, is_on_floor(), facing_direction)
-		_playing_land_anim = false
-		damage.is_invulnerable = true
-		var is_air_dodging: bool = dash_info["is_air"]
-		var dash_dir: float = dash_info["direction"]
-		if is_air_dodging:
-			spine_anim.play("dash_air")
-		else:
-			spine_anim.play("dash")
-		_ghost_trail_loop(0.25)
-		var dodge_tween = create_tween()
-		dodge_tween.set_trans(Tween.TRANS_QUAD)
-		dodge_tween.set_ease(Tween.EASE_OUT)
-		velocity.x = dash_info["initial_speed"] * dash_dir
-		dodge_tween.tween_property(self, "velocity:x", dash_dir * dash_info["target_speed"], DashComponent.DASH_TWEEN_DURATION)
-		await dodge_tween.finished
-		if not is_instance_valid(self):
-			return
-		damage.is_invulnerable = false
-		if not is_air_dodging:
-			velocity.x = 0
-			spine_anim.play("dash skid")
-			await get_tree().create_timer(DashComponent.DASH_SKID_DURATION).timeout
-			if not is_instance_valid(self):
-				return
-		else:
-			velocity.x = 0
-		dash.end_dash()
+	if not has_action_stamina(): return
+	var hud := _find_hud()
+	if hud != null: hud.spend_stamina("dash", true)
+	if combat.is_jump_attack_landing: _cancel_jump_attack_land()
+	_dash_info = dash.start_dash(dash_direction, is_on_floor(), facing_direction)
+	state_machine.transition(AdelStateMachine.State.DASH_ACTIVE)
+	_playing_land_anim = false
+	damage.is_invulnerable = true
+	presentation.play(&"dash_air" if _dash_info.is_air else &"dash")
+	ghost_trail.start()
+	velocity.x = _dash_info.initial_speed * _dash_info.direction
+	_dash_tween = create_tween()
+	_dash_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_dash_tween.tween_property(self, "velocity:x", _dash_info.direction * _dash_info.target_speed, DashComponent.DASH_TWEEN_DURATION)
 
 func _capsule_half_height(col: CollisionShape2D) -> float:
 	var capsule := col.shape as CapsuleShape2D
@@ -453,233 +525,89 @@ func _update_facing(direction: float) -> void:
 	_set_facing_direction(-1 if direction < 0 else 1)
 
 func _set_facing_direction(direction: int) -> void:
-	facing_direction = direction
-	var spine_scale := absf(spine_pivot.scale.x)
-	var weapon_scale := absf(weapon_pivot.scale.x)
-	spine_pivot.scale.x = -spine_scale if direction < 0 else spine_scale
-	weapon_pivot.scale.x = -weapon_scale if direction < 0 else weapon_scale
+	presentation.face(direction)
+
 func _play_jump_start() -> void:
-	if combat.is_jump_attack_landing:
-		_cancel_jump_attack_land()
-	_playing_land_anim = false
-	spine_rig.visible = true
-	spine_anim.play(ANIM_JUMP_START, 0.05)
+	presentation.jump_start()
 
 func _play_jump_land() -> void:
-	_playing_land_anim = true
-	spine_rig.visible = true
-	spine_anim.play(ANIM_JUMP_LAND, 0.1)
+	presentation.jump_land()
 
 func _on_locomotion_jumped() -> void:
+	if state_machine.is_in(AdelStateMachine.State.LOCOMOTION): state_machine.resume_locomotion()
 	dash.reset_air_dash()
 	_play_jump_start()
 
 func _on_locomotion_landed() -> void:
 	dash.reset_air_dash()
 	combat.has_air_comboed = false
-	if spine_anim.current_animation == "saber_ready":
+	if is_guarding or deflect_slow_motion.is_active:
+		return
+	if state_machine.current == AdelStateMachine.State.READY:
 		return
 	if combat.is_jump_attack_landing or combat.is_jump_attacking:
 		return
 	_play_jump_land()
 
 func _update_ground_animation(direction: float) -> void:
-	if combat.is_jump_attack_landing:
-		if direction == 0.0:
-			return
-		_cancel_jump_attack_land()
-	if spine_anim.current_animation == "saber_ready" and direction == 0.0:
-		return
-	if not is_on_floor() or _playing_land_anim:
-		return
-	spine_rig.visible = true
-
-	var current_speed := absf(velocity.x)
-
-	if direction != 0.0:
-		if is_skidding:
-			is_skidding = false
-			spine_anim.play("skid")
-			spine_anim.seek(spine_anim.current_animation_length, true)
-
-		if locomotion.is_running and current_speed > locomotion.WALK_SPEED:
-			if spine_anim.current_animation != "run":
-				spine_anim.play("run")
-		else:
-			if spine_anim.current_animation != "walk":
-				spine_anim.play("walk")
-				
-	else:
-		if _playing_land_anim:
-			return
-
-		if current_speed > locomotion.WALK_SPEED * 0.8:
-			if not is_skidding:
-				is_skidding = true
-				spine_anim.play("skid")
-		elif current_speed < 10.0 and not is_skidding:
-			if spine_anim.current_animation != "idle":
-				spine_anim.play("idle")
+	presentation.ground(direction)
 
 func _update_air_animation() -> void:
-	if is_on_floor() or _playing_land_anim or dash.is_dodging:
-		return
-	var current_anim: StringName = spine_anim.current_animation
-	if current_anim == ANIM_JUMP_START or current_anim == ANIM_JUMP_AIR:
-		return
-	spine_rig.visible = true
-	spine_anim.play(ANIM_JUMP_AIR)
+	presentation.air()
 
-func _get_all_visible_sprites(node: Node, arr: Array) -> void:
-	if node is Sprite2D and node.visible:
-		arr.append(node)
-	for child in node.get_children():
-		_get_all_visible_sprites(child, arr)
-
-const GHOST_TRAIL_INTERVAL := 0.05
-const GHOST_TRAIL_MAX := 24
-const GHOST_FADE_DURATION := 0.15
-
-var _ghost_pool: Array[Node2D] = []
-
-func _spawn_ghost_trail() -> void:
-	var sprites: Array = []
-	_get_all_visible_sprites(spine_rig, sprites)
-	if sprites.is_empty():
-		return
-
-	var ghost_parent := _get_pooled_ghost()
-	if ghost_parent == null:
-		ghost_parent = Node2D.new()
-		ghost_parent.name = "GhostTrail"
-		var current_scene = get_tree().current_scene
-		if current_scene:
-			current_scene.add_child(ghost_parent)
-
-	ghost_parent.visible = true
-	ghost_parent.modulate = Color(1, 1, 1, 0.6)
-
-	for i in sprites.size():
-		var src: Sprite2D = sprites[i]
-		var dst: Sprite2D
-		if i < ghost_parent.get_child_count():
-			dst = ghost_parent.get_child(i) as Sprite2D
-		else:
-			dst = Sprite2D.new()
-			dst.modulate = Color(0.2, 0.2, 0.2, 1.0)
-			ghost_parent.add_child(dst)
-		dst.visible = true
-		dst.texture = src.texture
-		dst.hframes = src.hframes
-		dst.vframes = src.vframes
-		dst.frame = src.frame
-		dst.flip_h = src.flip_h
-		dst.flip_v = src.flip_v
-		dst.global_transform = src.global_transform
-
-	for i in range(sprites.size(), ghost_parent.get_child_count()):
-		var extra := ghost_parent.get_child(i) as Sprite2D
-		if extra:
-			extra.visible = false
-
-	var tween := get_tree().create_tween()
-	tween.tween_property(ghost_parent, "modulate:a", 0.0, GHOST_FADE_DURATION).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	tween.tween_callback(_recycle_ghost.bind(ghost_parent))
-
-func _get_pooled_ghost() -> Node2D:
-	while not _ghost_pool.is_empty():
-		var ghost: Node2D = _ghost_pool.pop_back()
-		if is_instance_valid(ghost):
-			return ghost
-	return null
-
-func _recycle_ghost(ghost_parent: Node2D) -> void:
-	if not is_instance_valid(ghost_parent):
-		return
-	ghost_parent.visible = false
-	if _ghost_pool.size() < GHOST_TRAIL_MAX:
-		_ghost_pool.append(ghost_parent)
-	else:
-		ghost_parent.queue_free()
-
-func _ghost_trail_loop(duration: float) -> void:
-	var elapsed := 0.0
-	while elapsed < duration and is_instance_valid(self):
-		_spawn_ghost_trail()
-		await get_tree().create_timer(GHOST_TRAIL_INTERVAL).timeout
-		elapsed += GHOST_TRAIL_INTERVAL
-
-#hàm tín hiệu
 func _on_spine_anim_finished(anim_name: StringName) -> void:
-	if anim_name == "jump_attack(land)":
-		if combat.is_jump_attack_landing:
-			_cancel_jump_attack_land()
-			spine_rig.visible = true
-			spine_anim.play("saber_ready")
+	if state_machine.is_in(AdelStateMachine.State.DEFENSE) or deflect_slow_motion.is_active or state_machine.is_in(AdelStateMachine.State.STAGGER): return
+	if anim_name == "jump_attack(land)" and state_machine.current == AdelStateMachine.State.JUMP_LAND:
+		_play_ready()
 	elif anim_name == ANIM_JUMP_START and not is_on_floor():
-		spine_anim.play(ANIM_JUMP_AIR)
+		presentation.play(ANIM_JUMP_AIR)
 	elif anim_name == ANIM_JUMP_LAND:
 		_playing_land_anim = false
 		_update_ground_animation(Input.get_axis("move_left", "move_right"))
 	elif anim_name == "skid":
 		is_skidding = false
 		_update_ground_animation(Input.get_axis("move_left", "move_right"))
-	elif anim_name == "loot":
-		can_move = true
-		is_doing_action = false
+	elif anim_name == "loot" and state_machine.current == AdelStateMachine.State.PICKUP:
+		state_machine.resume_locomotion()
 		_update_ground_animation(Input.get_axis("move_left", "move_right"))
-	elif anim_name == "saber_ready":
-		spine_anim.play("idle")
-	elif anim_name.begins_with(combat.equipped_weapon.animation_prefix + "_attack_"):
+	elif anim_name == "saber_ready" and state_machine.current == AdelStateMachine.State.READY:
+		state_machine.resume_locomotion()
+		presentation.play(&"idle")
+	elif anim_name.begins_with(combat.equipped_weapon.animation_prefix + "_attack_") and state_machine.current == AdelStateMachine.State.COMBO:
 		_attack_interrupt_token += 1
 		_attack_interrupt_ready = false
 		match combat.on_attack_anim_finished():
-			CombatComponent.AttackAction.START_COMBO:
-				_play_combo_step()
+			CombatComponent.AttackAction.START_COMBO: _play_combo_step()
 			CombatComponent.AttackAction.FINISH_COMBO:
-				can_move = true
-				is_doing_action = false
-				spine_rig.visible = true
-				spine_anim.play("saber_ready")
-				get_tree().create_timer(0.4).timeout.connect(_reset_combo, CONNECT_ONE_SHOT)
-		
+				_play_ready()
+				_combo_reset_timer = 0.4
+
 func _on_dodge_cooldown_timeout() -> void:
 	dash.on_cooldown_timeout()
 
 func _on_damage_staggered(knockback_velocity: Vector2) -> void:
-	_attack_interrupt_token += 1
-	_attack_interrupt_ready = false
-	is_doing_action = false
-	combat.interrupt()
-	saber_hitbox.stop_attack_window()
-	can_move = false
+	state_machine.transition(AdelStateMachine.State.KNOCKBACK)
 	velocity = knockback_velocity
 	_stagger_push_direction = signf(knockback_velocity.x) if not is_zero_approx(knockback_velocity.x) else -float(facing_direction)
-	_stagger_distance_left = damage.knockback_distance
+	_stagger_distance_left = damage.active_knockback_distance
 	_playing_land_anim = false
 	_show_stagger_frame(0)
 
 func _on_damage_knockback_finished() -> void:
+	state_machine.transition(AdelStateMachine.State.STUN)
 	velocity.x = 0.0
 	_stagger_distance_left = 0.0
 	_show_stagger_frame(1)
 
 func _show_stagger_frame(frame_index: int) -> void:
-	if not spine_anim.has_animation(ANIM_STAGGER):
-		return
-	# Apply the source clip's texture/visibility/transform, then hold its pose.
-	spine_anim.play(ANIM_STAGGER)
-	spine_anim.advance(0.0)
-	spine_anim.pause()
-	var pose := spine_rig.get_node_or_null("TestAttackSprite") as Sprite2D
-	if pose != null:
-		pose.frame = clampi(frame_index, 0, pose.hframes * pose.vframes - 1)
+	if not deflect_slow_motion.is_active: presentation.stagger(frame_index)
 
 func _on_damage_stagger_recovered() -> void:
-	can_move = true
 	_stagger_distance_left = 0.0
-	if spine_anim.assigned_animation == ANIM_STAGGER:
-		spine_anim.play("idle", 0.1)
+	if deflect_slow_motion.is_active:
+		state_machine.transition(AdelStateMachine.State.DEFLECT_REACTION)
+	else:
+		_play_ready(true)
 
 func configure_attack_hitbox(weapon: WeaponData) -> void:
 	attack_hitbox.position = weapon.hitbox_offset
@@ -693,3 +621,131 @@ func enable_attack_hitbox() -> void:
 
 func disable_attack_hitbox() -> void:
 	combat.disable_attack_hitbox()
+
+
+func _try_begin_guard() -> void:
+	if has_action_stamina() and state_machine.can_begin_action(): state_machine.transition(AdelStateMachine.State.DEFENSE_HOLD)
+
+func _end_guard(play_release: bool = true) -> void:
+	defense.end_guard()
+	_defense_hit_pose_time_left = 0.0
+	if deflect_slow_motion.is_active: return
+	if state_machine.is_in(AdelStateMachine.State.STAGGER) or is_resting: return
+	if play_release and not is_locked and state_machine.movement_enabled: _play_ready(true)
+	else: state_machine.resume_locomotion()
+
+func _update_defense(delta: float) -> void:
+	if is_guarding and not has_action_stamina(): defense.end_guard(false)
+	if not is_guarding:
+		# A paid hit may consume the final point: keep its pose/recoil, without protection.
+		if state_machine.is_in(AdelStateMachine.State.DEFENSE) and not deflect_slow_motion.is_active:
+			_defense_hit_pose_time_left = maxf(_defense_hit_pose_time_left - delta, 0.0)
+			if is_locked or damage.is_stunned or damage.is_touched_enemy:
+				_end_guard(false)
+			elif _defense_hit_pose_time_left <= 0.0 and not defense.guard_push_active:
+				_end_guard()
+		return
+	# Poll release before movement locks; also recover when focus/input is lost.
+	if damage.is_stunned or damage.is_touched_enemy or is_resting or is_locked:
+		_end_guard(false)
+		return
+	if not Input.is_action_pressed("guard and deflect"):
+		_end_guard()
+		return
+	defense.tick(delta)
+	if deflect_slow_motion.is_active:
+		return
+	_defense_hit_pose_time_left = maxf(_defense_hit_pose_time_left - delta, 0.0)
+	if _defense_hit_pose_time_left <= 0.0 and not defense.guard_push_active and state_machine.current != AdelStateMachine.State.DEFENSE_HOLD:
+		state_machine.transition(AdelStateMachine.State.DEFENSE_HOLD)
+
+func _play_defense_hit_pose(clip: StringName) -> void:
+	if deflect_slow_motion.is_active and clip != ANIM_DEFLECT:
+		return
+	# Reaction timing is separate from the window measured since guard began.
+	_defense_hit_pose_time_left = maxf(defense_hit_pose_duration, 0.05)
+	state_machine.transition(AdelStateMachine.State.DEFLECT_REACTION if clip == ANIM_DEFLECT else AdelStateMachine.State.GUARD_REACTION)
+	_show_defense_pose(clip)
+
+func _show_defense_pose(clip: StringName) -> void:
+	presentation.hold(clip)
+
+func _on_deflect_slow_motion_finished() -> void:
+	_defense_hit_pose_time_left = 0.0
+	if damage.is_stunned:
+		_show_stagger_frame(0 if damage.is_knocking_back else 1)
+		return
+	if damage.is_touched_enemy or is_resting:
+		return
+	if is_locked:
+		_end_guard(false)
+		return
+	if is_guarding and has_action_stamina() and Input.is_action_pressed("guard and deflect"):
+		if defense.guard_push_active:
+			state_machine.transition(AdelStateMachine.State.GUARD_REACTION)
+			_show_defense_pose(ANIM_GUARD)
+		else:
+			state_machine.transition(AdelStateMachine.State.DEFENSE_HOLD)
+	else:
+		_end_guard()
+
+func _play_ready(final_frame_only: bool = false) -> void:
+	_ready_final_frame = final_frame_only
+	if state_machine.current == AdelStateMachine.State.READY:
+		presentation.ready_pose(final_frame_only)
+	else:
+		state_machine.transition(AdelStateMachine.State.READY)
+
+func _enter_player_state(state: AdelStateMachine.State) -> void:
+	match state:
+		AdelStateMachine.State.READY: presentation.ready_pose(_ready_final_frame)
+		AdelStateMachine.State.DEFENSE:
+			if not deflect_slow_motion.is_active: defense.begin_guard()
+			_playing_land_anim = false
+			is_skidding = false
+			velocity.x = 0.0
+		AdelStateMachine.State.DEFENSE_HOLD:
+			_defense_hit_pose_time_left = 0.0
+			_show_defense_pose(ANIM_DEFENSE)
+		AdelStateMachine.State.DASH_ACTIVE: _dash_timer = 0.0
+		AdelStateMachine.State.DASH_SKID:
+			_dash_timer = 0.0
+			presentation.play(&"dash skid")
+
+func _exit_player_state(state: AdelStateMachine.State) -> void:
+	match state:
+		AdelStateMachine.State.ATTACK:
+			_attack_interrupt_token += 1
+			_attack_interrupt_ready = false
+			combat.interrupt()
+			saber_hitbox.stop_attack_window()
+			combat.disable_attack_hitbox()
+		AdelStateMachine.State.DEFENSE:
+			velocity.x = 0.0
+			defense.end_guard()
+			_defense_hit_pose_time_left = 0.0
+		AdelStateMachine.State.DASH:
+			if _dash_tween != null and _dash_tween.is_valid(): _dash_tween.kill()
+			ghost_trail.stop()
+			dash.end_dash()
+			if not damage.is_stunned: damage.is_invulnerable = false
+
+
+func _configure_stamina() -> void:
+	var hud := _find_hud()
+	if hud != null:
+		hud.configure_stamina({"dash": dash_stamina_cost, "guard": guard_stamina_cost, "deflect": deflect_stamina_cost}, stamina_regen_delay, stamina_regen_per_second)
+
+func blocks_stamina_regeneration() -> bool:
+	return state_machine != null and (state_machine.is_in(AdelStateMachine.State.ATTACK) or state_machine.is_in(AdelStateMachine.State.DEFENSE) or deflect_slow_motion.is_active)
+
+func _apply_stamina_exhaustion(hit_from_global: Vector2) -> void:
+	# Share the full threshold reaction (push, stun, frames and iframe), without firing an HP threshold.
+	deflect_slow_motion.cancel()
+	var direction := signf(global_position.x - hit_from_global.x)
+	if is_zero_approx(direction): direction = -float(facing_direction)
+	damage.apply_stagger(Vector2(direction, 0.0))
+
+func has_action_stamina() -> bool:
+	var hud := _find_hud()
+	return hud != null and hud.stamina > 0.0

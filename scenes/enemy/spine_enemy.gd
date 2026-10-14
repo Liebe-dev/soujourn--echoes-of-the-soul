@@ -44,6 +44,9 @@ enum State { WALK, RUN, WINDUP, LEAP, LAND, MELEE, RECOVERY }
 @onready var hitbox: Area2D = get_node_or_null("WeaponPivot/Hitbox")
 @onready var hitbox_shape: CollisionShape2D = get_node_or_null("WeaponPivot/Hitbox/CollisionShape2D")
 
+@onready var leap_hitbox: Area2D = get_node_or_null("LeapHitbox")
+@onready var leap_hitbox_shape: CollisionShape2D = get_node_or_null("LeapHitbox/CollisionShape2D")
+
 var state: State = State.WALK
 var attack_animation: StringName = &""
 var target: Node2D
@@ -53,6 +56,9 @@ var _lost_time: float = 0.0
 var _leap_velocity_x: float = 0.0
 var _has_left_floor: bool = false
 var _window_open: bool = false
+var _active_hitbox: Area2D
+var _leap_opening_check_pending := false
+var _leap_query := PhysicsShapeQueryParameters2D.new()
 var _swing_damage: int = 0
 var _hit_targets: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
@@ -64,8 +70,8 @@ func _ready() -> void:
 		_rig_origin = rig.position
 	super._ready()
 	_rng.randomize()
-	if animation_player == null or visual_pivot == null or weapon_pivot == null or hitbox_shape == null or hitbox == null:
-		push_warning("SpineEnemy needs VisualPivot/EnemyRig/AnimationPlayer and WeaponPivot/Hitbox/CollisionShape2D.")
+	if animation_player == null or visual_pivot == null or weapon_pivot == null or hitbox_shape == null or hitbox == null or leap_hitbox == null or leap_hitbox_shape == null or leap_hitbox_shape.shape == null:
+		push_warning("SpineEnemy needs its rig, WeaponPivot/Hitbox and LeapHitbox with collision shapes.")
 		set_physics_process(false)
 		return
 	for clip in [&"walk", &"run", &"attack1_1", &"attack1_2", &"attack1_3", &"attack2", &"attack3"]:
@@ -79,6 +85,10 @@ func _ready() -> void:
 		if node != null:
 			node.hide()
 	hitbox_shape.disabled = true
+	leap_hitbox_shape.disabled = true
+	_leap_query.collide_with_areas = false
+	_leap_query.collide_with_bodies = true
+	_leap_query.exclude = [get_rid()]
 	_enter_state(State.WALK)
 
 
@@ -129,6 +139,16 @@ func _physics_process(delta: float) -> void:
 			if _elapsed >= maxf(recovery_time, 0.01):
 				_enter_state(State.RUN if is_instance_valid(target) else State.WALK)
 	move_and_slide()
+	# Resolve this frame's active swing before LAND closes its window.
+	_apply_swing_damage()
+	if state == State.LEAP and _window_open:
+		# Area overlap lists update on physics ticks. Query only at opening/landing
+		# to include an existing overlap and contact on the final flight frame.
+		if _leap_opening_check_pending or (_has_left_floor and is_on_floor()):
+			_apply_leap_contact_damage()
+		_leap_opening_check_pending = false
+	if not is_inside_tree() or is_queued_for_deletion() or is_dead:
+		return
 	if state == State.LEAP:
 		if not is_on_floor():
 			_has_left_floor = true
@@ -140,7 +160,6 @@ func _physics_process(delta: float) -> void:
 	elif state == State.WALK and is_on_wall():
 		_direction *= -1
 		_update_facing()
-	_apply_swing_damage()
 
 
 func _refresh_target(delta: float) -> void:
@@ -215,32 +234,60 @@ func _enter_state(next: State) -> void:
 		State.WALK: _set_animation(&"walk")
 		State.RUN: _set_animation(&"run")
 		State.WINDUP: _set_animation(&"attack1_1")
-		State.LEAP: _set_animation(&"attack1_2")
+		State.LEAP:
+			_set_animation(&"attack1_2")
+			_set_damage_window(is_instance_valid(target))
 		State.LAND: _set_animation(&"attack1_3")
 		State.MELEE: _set_animation(attack_animation)
 		State.RECOVERY: pass
 
 
 func _set_damage_window(active: bool) -> void:
-	if _window_open == active:
+	var selected: Area2D = null
+	if active:
+		if state == State.LEAP: selected = leap_hitbox
+		elif state == State.MELEE: selected = hitbox
+	active = active and selected != null
+	if _window_open == active and _active_hitbox == selected:
 		return
 	_window_open = active
+	_active_hitbox = selected
+	_leap_opening_check_pending = active and selected == leap_hitbox
 	if hitbox_shape != null:
-		hitbox_shape.set_deferred("disabled", not active)
+		hitbox_shape.set_deferred("disabled", not active or selected != hitbox)
+	if leap_hitbox_shape != null:
+		leap_hitbox_shape.set_deferred("disabled", not active or selected != leap_hitbox)
 
 
 func _apply_swing_damage() -> void:
-	if is_dead or not _window_open or hitbox == null:
+	if is_dead or not _window_open or _active_hitbox == null or not is_inside_tree():
 		return
-	for body in hitbox.get_overlapping_bodies():
-		if not is_instance_valid(body) or body.is_queued_for_deletion():
-			continue
-		if not body.is_in_group("Player") or not body.has_method("take_damage"):
-			continue
-		var id := body.get_instance_id()
-		if not _hit_targets.has(id):
-			_hit_targets[id] = true
-			body.take_damage(_swing_damage, global_position)
+	for body in _active_hitbox.get_overlapping_bodies():
+		_try_hit_body(body)
+
+
+func _apply_leap_contact_damage() -> void:
+	if is_dead or not _window_open or _active_hitbox != leap_hitbox or not is_inside_tree():
+		return
+	_leap_query.shape = leap_hitbox_shape.shape
+	_leap_query.transform = leap_hitbox_shape.global_transform
+	_leap_query.collision_mask = leap_hitbox.collision_mask
+	for contact in get_world_2d().direct_space_state.intersect_shape(_leap_query):
+		_try_hit_body(contact.get("collider") as Node2D)
+
+
+func _try_hit_body(body: Node2D) -> void:
+	if is_dead or not _window_open or not is_inside_tree():
+		return
+	if not is_instance_valid(body) or body.is_queued_for_deletion():
+		return
+	if not body.is_in_group("Player") or not body.has_method("take_damage"):
+		return
+	var id := body.get_instance_id()
+	if not _hit_targets.has(id):
+		# Count the contact even if Guard/Deflect/dash rejects its HP damage.
+		_hit_targets[id] = true
+		body.take_damage(_swing_damage, global_position)
 
 
 func die() -> void:

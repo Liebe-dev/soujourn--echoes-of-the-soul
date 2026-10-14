@@ -34,17 +34,6 @@ func _on_timer_timeout() -> void:
 		decided = false
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
-	if "is_doing_action" in body and "is_guarding" in body:
-		var enemy_direction = global_position.x - body.global_position.x
-		var is_facing_enemy = false
-		if (enemy_direction > 0 and body.facing_direction > 0):
-			is_facing_enemy = true
-		elif (enemy_direction <= 0 and body.facing_direction < 0):
-			is_facing_enemy = true
-		if body.is_guarding == true and is_facing_enemy and body.holding_duration <= 0.2 and decision == 0:
-			print("player deflected the hit")
-		elif body.is_guarding == true and is_facing_enemy and body.holding_duration > 0.2 and decision == 0:
-			print("player blocked the hit")
-		else:
-			body.take_damage(20, global_position)
-		body.is_doing_action = false
+	# Normal and special attacks share Player-owned defense rules.
+	if body.is_in_group("Player") and body.has_method("take_damage"):
+		body.take_damage(20, global_position)
