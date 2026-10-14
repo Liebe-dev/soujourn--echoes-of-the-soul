@@ -6,7 +6,8 @@ extends Node2D
 @export var display_name: String = "Saber"
 
 @export_category("Combat")
-@export var damage: int = 1
+@export_range(0, 10000, 1, "or_greater") var damage: int = 1
+@export_range(0.0, 10.0, 0.05, "or_greater") var combo_finisher_multiplier: float = 1.2
 @export var stamina_cost: int = 0
 @export var combo_length: int = 4
 

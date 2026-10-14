@@ -197,6 +197,10 @@ func _process(delta: float) -> void:
 	update_shader_value(soul_delay, _flask_shader_percent)
 
 #hàm công khai nhóm sát thương
+func set_campfire_hidden(hidden: bool) -> void:
+	# ScreenSpace has a separate canvas; keep stats ticking while hiding its art.
+	$ScreenSpace.visible = not hidden
+
 func heal_to_full() -> void:
 	_stats.heal_to_full()
 	sync_stagger_markers()

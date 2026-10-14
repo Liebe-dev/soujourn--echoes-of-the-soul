@@ -255,8 +255,8 @@ func _run() -> void:
 	hud.in_combat = true
 	hud.hide_delay = 20
 	hud.set_process(true)
-	await wait(1.35)
-	check(hud.stamina == 80 and hud.stamina_bar.value == 80, "actual HUD waits 1.5 seconds after expenditure")
+	await wait(maxf(0.05, p.stamina_regen_delay - 0.15))
+	check(hud.stamina == 80 and hud.stamina_bar.value == 80, "actual HUD waits the configured delay after expenditure")
 	await wait(0.3)
 	check(hud.stamina > 80 and hud.stamina < 87 and hud.in_combat, "actual green bar regens at configured rate while HUD combat flag remains true")
 	await wait(0.8)
@@ -266,8 +266,8 @@ func _run() -> void:
 	await wait(1.7)
 	check(hud.stamina == 80 and p.spine_anim.assigned_animation == &"saber_defense", "holding neutral defense indefinitely prevents regen")
 	await button(&"guard and deflect", false)
-	await wait(1.35)
-	check(hud.stamina == 80, "releasing defense starts fresh 1.5s wait")
+	await wait(maxf(0.05, p.stamina_regen_delay - 0.15))
+	check(hud.stamina == 80, "releasing defense starts fresh configured wait")
 	await wait(0.3)
 	check(hud.stamina > 80, "regen resumes after defense idle delay")
 	hud.restore_stamina_full()
@@ -279,7 +279,7 @@ func _run() -> void:
 	for i in 120:
 		if not p.blocks_stamina_regeneration(): break
 		await frames(1)
-	await wait(1.35)
+	await wait(maxf(0.05, p.stamina_regen_delay - 0.15))
 	check(hud.stamina == 80, "attack completion starts fresh recovery delay")
 	await wait(0.3)
 	check(hud.stamina > 80, "idle after attacking regains stamina")

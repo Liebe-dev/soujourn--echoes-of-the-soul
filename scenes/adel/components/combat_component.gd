@@ -61,6 +61,10 @@ func change_weapon(new_weapon: WeaponData) -> void:
 func get_attack_anim_name() -> String:
 	return equipped_weapon.animation_prefix + "_attack_" + str(combo_step)
 
+func get_combo_damage() -> int:
+	var multiplier := equipped_weapon.combo_finisher_multiplier if combo_step == 4 else 1.0
+	return maxi(0, int(round(float(equipped_weapon.damage) * maxf(multiplier, 0.0))))
+
 # --- Attack input (was inline in _unhandled_input) ---
 func handle_attack_input(is_doing_action: bool) -> AttackAction:
 	if not _body.is_on_floor() and (has_air_comboed or combo_step >= 4 or Input.is_action_pressed("move_down")):
@@ -91,6 +95,7 @@ func on_attack_anim_finished() -> AttackAction:
 	return AttackAction.FINISH_COMBO
 # --- Jump attack state transitions ---
 func start_jump_attack() -> void:
+	attack_queued = false
 	is_jump_attacking = true
 	is_jump_attack_hanging = true
 	jump_attack_hang_timer = JUMP_ATTACK_HANG_TIME

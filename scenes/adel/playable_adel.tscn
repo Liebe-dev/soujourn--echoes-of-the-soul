@@ -8,12 +8,19 @@
 [ext_resource type="PackedScene" uid="uid://4egogosl1we3" path="res://asset/Character/Adel/adel spine action use.tscn" id="69_73q5r"]
 [ext_resource type="Script" uid="uid://ceoihsyanr3kn" path="res://scenes/adel/components/saber_hitbox.gd" id="70_saber_hitbox"]
 
+[ext_resource type="Script" path="res://scenes/adel/components/jump_attack_hitbox.gd" id="71_jump_hitbox"]
+
+[ext_resource type="PackedScene" path="res://scenes/UI/game_pause_menu.tscn" id="pause_flow"]
+
+[sub_resource type="RectangleShape2D" id="JumpAttackShape"]
+size = Vector2(150, 100)
+
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]
 radius = 7.652174
 height = 112.49183
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pvmv5"]
-size = Vector2(163.2899, 75)
+size = Vector2(163.2899, 97)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_saber"]
 radius = 18.0
@@ -198,7 +205,7 @@ stagger_knockback_distance = 200.0
 deflect_slow_motion_scale = 0.5
 deflect_slow_motion_duration = 0.45
 guard_knockback_distance = 20.0
-guard_knockback_duration = 0.09999999999999999
+guard_knockback_duration = 0.1
 stamina_regen_delay = 1.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1090059515]
@@ -225,7 +232,7 @@ collision_layer = 8
 monitoring = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitbox" unique_id=729430378]
-position = Vector2(99.35505, 4.5)
+position = Vector2(99.35505, 15.5)
 shape = SubResource("RectangleShape2D_pvmv5")
 
 [node name="WeaponPivot" type="Node2D" parent="." unique_id=118253140]
@@ -247,6 +254,18 @@ debug_color = Color(0.9764706, 0.03137255, 0.1764706, 0.41960785)
 [node name="AnimationPlayer" type="AnimationPlayer" parent="WeaponPivot/SaberHitbox" unique_id=2255557]
 libraries/ = SubResource("AnimationLibrary_saber_hitbox")
 
+[node name="JumpAttackHitbox" type="Area2D" parent="WeaponPivot"]
+position = Vector2(65, 20)
+collision_layer = 8
+collision_mask = 4
+monitoring = false
+monitorable = false
+script = ExtResource("71_jump_hitbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WeaponPivot/JumpAttackHitbox"]
+shape = SubResource("JumpAttackShape")
+disabled = true
+
 [node name="Camera2D" type="Camera2D" parent="." unique_id=591595691]
 offset = Vector2(0, -234.71)
 zoom = Vector2(1.05, 1.05)
@@ -265,6 +284,9 @@ size_flags_vertical = 0
 [node name="master_menu" parent="Camera2D/UI_Layer" unique_id=1898121624 instance=ExtResource("5_57033")]
 process_mode = 3
 visible = false
+
+[node name="PauseMenu" parent="Camera2D/UI_Layer" instance=ExtResource("pause_flow")]
+process_mode = 3
 
 [node name="DodgeCooldown" type="Timer" parent="." unique_id=982212932]
 wait_time = 0.5

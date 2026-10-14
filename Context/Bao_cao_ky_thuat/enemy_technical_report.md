@@ -11,7 +11,7 @@
 Hệ thống hiện có hai enemy được triển khai theo hai bước phát triển khác nhau:
 
 1. **Wobtear M1:** enemy tối thiểu dùng `AnimatedSprite2D`, có tuần tra walk/idle, vật lý sàn/tường, nhận sát thương, chết và thưởng EXP. Mục tiêu của M1 là kiểm chứng nền tảng tương tác chiến đấu; Wobtear này chưa có phát hiện Player hoặc chủ động tấn công.
-2. **SpineEnemy:** enemy chiến đấu dùng rig có sẵn trong `enemy_spine.tscn`, kế thừa phần HP/chết/EXP từ EnemyBase. Hành vi gồm walk, run đuổi Player, nhảy vồ mở đầu bằng ba pose `attack1_*`, sau đó dùng `attack2` và đôi khi `attack3`.
+2. **SpineEnemy:** enemy chiến đấu dùng rig có sẵn trong `enemy_spine.tscn`, kế thừa phần HP/chết/EXP từ EnemyBase. Hành vi gồm walk, chuyển tiếp detect player, run đuổi Player, nhảy vồ mở đầu bằng ba pose `attack1_*`, sau đó dùng `attack2` và đôi khi `attack3`.
 
 Các lần chỉnh sửa sau đó đã xử lý hitbox phía trước VFX, hitbox riêng cho nhảy vồ, cho Player đi/dash xuyên thân quái, đặt toàn bộ hình quái phía trước Player, và tập trung quyết định Guard/Deflect ở phía Player. Chi tiết hệ thống phòng thủ, stamina, stagger và các sửa lỗi trạng thái Player được tách sang báo cáo riêng dẫn ở mục 10; báo cáo này giữ phần giao tiếp enemy–Player.
 
@@ -64,7 +64,7 @@ Enemy attack area → PlayableAdel.take_damage()
 SaberHitbox → EnemyBase.take_damage() → EnemyBase.die() → PlayerProgress.add_exp()
 ```
 
-SpineEnemy dùng **FSM phẳng gồm bảy trạng thái**, chưa phải HFSM. EnemyBase cũng chưa được chia thành các component health/perception/combat độc lập; nó là lớp nền tối thiểu, còn SpineEnemy điều phối AI, presentation và damage window trong một script. HFSM/component đã có phía Adel không đồng nghĩa với enemy đã sử dụng cùng kiến trúc.
+SpineEnemy dùng **FSM phẳng gồm tám trạng thái**, chưa phải HFSM. EnemyBase cũng chưa được chia thành các component health/perception/combat độc lập; nó là lớp nền tối thiểu, còn SpineEnemy điều phối AI, presentation và damage window trong một script. HFSM/component đã có phía Adel không đồng nghĩa với enemy đã sử dụng cùng kiến trúc.
 
 Cách triển khai hiện tại giữ hợp đồng giao tiếp nhỏ: enemy cần có `take_damage(dmg, hit_from_global)` để nhận đòn; Player cần thuộc group `Player` và có `take_damage()` để nhận damage từ SpineEnemy. Phòng thủ thuộc quyền quyết định của bên nhận đòn, giúp một quy tắc áp dụng được cho mọi kiểu attack của enemy.
 
@@ -126,14 +126,16 @@ HP lưu trong wrapper là **100**, ghi đè default 20 của EnemyBase. Walk spe
 
 Rig instance có Position **(-267, -236.9)**, Scale **(0.3, 0.3)**. Scale này áp dụng cho nhánh hiển thị; collider và hai hitbox nằm ngoài nhánh EnemyRig nên không tự giảm còn 30% theo scale rig.
 
-Khi khởi tạo, script kiểm tra rig/AnimationPlayer, WeaponPivot/Hitbox và LeapHitbox, cùng bảy clip combat cần thiết. Thiếu cấu trúc hoặc clip thì cảnh báo và tắt AI. Hai node hỗ trợ authoring `Sprite2D` / `Sprite2D2` ở rig nguồn được ẩn trên instance gameplay nếu có.
+Khi khởi tạo, script kiểm tra rig/AnimationPlayer, WeaponPivot/Hitbox và LeapHitbox, cùng tám clip walk/detect/run/combat cần thiết. Thiếu cấu trúc hoặc clip thì cảnh báo và tắt AI. Hai node hỗ trợ authoring `Sprite2D` / `Sprite2D2` ở rig nguồn được ẩn trên instance gameplay nếu có.
 
 ## 6. FSM và hành vi chiến đấu của SpineEnemy
 
 ```mermaid
 stateDiagram-v2
     [*] --> WALK
-    WALK --> RUN: Có Player trong vùng phát hiện
+    WALK --> DETECT: Có Player trong vùng phát hiện
+    DETECT --> RUN: detect player phát xong
+    DETECT --> WALK: Mất mục tiêu
     RUN --> WALK: Mất mục tiêu
     RUN --> WINDUP: Opener còn, trong tầm vồ, đứng sàn, đúng độ cao
     WINDUP --> LEAP: Đủ thời gian lấy đà và đang đứng sàn
@@ -156,6 +158,22 @@ Phát `walk`, đi liên tục trong vùng tuần tra quanh `_anchor_x`. SpineEne
 `_refresh_target()` chọn Node2D gần nhất thuộc group `Player` trong **500** đơn vị. Phát hiện dùng khoảng cách Euclid giữa hai origin, chưa có kiểm tra đường nhìn hoặc góc nhìn, nên có thể phát hiện xuyên tường.
 
 Khi đã có mục tiêu, enemy giữ mục tiêu trong phạm vi **650** đơn vị. Nếu mục tiêu ở ngoài phạm vi này liên tục **1.5 giây game time**, target bị bỏ; quay lại gần trong khoảng đó sẽ reset bộ đếm. Ngưỡng bỏ mục tiêu thực tế dùng `max(disengage_distance, detection_distance)` để không nhỏ hơn vùng phát hiện.
+
+Khi WALK phát hiện target, enemy chuyển sang **DETECT**, nhìn về phía Player và
+phát `detect player` một lần. Trong pha này vận tốc ngang bằng 0; gravity/world
+collision vẫn chạy, cả hai vùng damage đều đóng và opener chưa bị tiêu thụ.
+Không bỏ qua pha detect kể cả khi Player đã đứng trong tầm leap/melee.
+
+Clip hiện dài **0.7 giây game**. Chuyển sang RUN dựa trên signal
+`AnimationPlayer.animation_finished` của chính clip này, nên đổi độ dài,
+speed_scale, pause/resume hoặc global time scale sẽ giữ nhịp theo playback thực.
+Clip chuyển tiếp cần giữ non-loop để có sự kiện kết thúc.
+
+Mất/freed target theo luật target hiện tại trong DETECT thì trở về WALK, không
+đợi hết clip và không chạy tiếp theo một target không hợp lệ. Khi giao chiến mới
+được phát hiện từ WALK, detect phát lại; RECOVERY trong cùng giao chiến vẫn về RUN
+trực tiếp và không phát detect cho mỗi đòn. Callback chỉ xử lý khi enemy còn sống,
+ở trong tree và vẫn thuộc DETECT, tránh completion cũ ghi đè trạng thái khác.
 
 RUN phát `run`, quay về phía target, đuổi ngang với speed **240**. Chuyển sang đòn đánh còn yêu cầu đứng sàn và chênh lệch độ cao giữa hai origin không quá **100**. Vì không có pathfinding, RUN không tự nhảy qua tường, mép vực hoặc tìm đường đến Player ở nền cao khác.
 
@@ -193,7 +211,7 @@ Các clip nguồn đã được đọc lại bằng Godot:
 - `attack1_1`, `attack1_2`, `attack1_3`: mỗi clip 0.05 giây, không loop; dùng như pose của từng pha lấy đà/bay/đáp. Độ dài clip không quyết định thời gian lấy đà hoặc thời gian bay.
 - `attack2`: 0.7 giây, không loop.
 - `attack3`: 0.9 giây, không loop.
-- `detect player`: 0.7 giây; có trong rig nhưng chưa được FSM sử dụng.
+- `detect player`: 0.7 giây, không loop; được dùng trong DETECT để chuyển WALK → RUN.
 - `death`: 10.0 giây; có trong rig nhưng enemy hiện không chờ/phát clip này trước khi giải phóng.
 - `RESET`: clip reset 0.001 giây của rig; không phải một state AI combat.
 
@@ -201,7 +219,7 @@ Rig và hitbox melee được author ở hướng trái. `_update_facing()` đ�
 
 **Dụng ý đã chốt của người dùng:** hình run nhanh đến mức không chạm đất. Không tự hạ hình xuống để ép chân chạm sàn. Thân vật lý vẫn chịu trọng lực và đứng sàn; vị trí hình có thể cao hơn collider theo mỹ thuật.
 
-`animation_offsets` trong **scene hiện tại đều bằng (0,0)** cho walk, run, attack1_1, attack1_3, attack2, attack3. Script vẫn có dictionary default chứa offset Y khác 0 từ phương án căn chỉnh cũ; scene override mới là giá trị có hiệu lực trên instance này. Nếu tạo scene khác chỉ gắn script mà không mang override, các default cũ có thể có hiệu lực lại. `attack1_2` không có entry và nhận offset mặc định ZERO qua `.get()`.
+`animation_offsets` trong **scene hiện tại đều bằng (0,0)** cho walk, run, attack1_1, attack1_3, attack2, attack3. Script vẫn có dictionary default chứa offset Y khác 0 từ phương án căn chỉnh cũ; scene override mới là giá trị có hiệu lực trên instance này. Nếu tạo scene khác chỉ gắn script mà không mang override, các default cũ có thể có hiệu lực lại. `attack1_2` và `detect player` không có entry và nhận offset mặc định ZERO qua `.get()`.
 
 `_set_animation()` đặt `rig.position = _rig_origin + offset` và `advance(0)` để áp pose ngay khi đổi state. Do vậy, không nên chỉ kéo Position của EnemyRig qua Remote Inspector giữa lúc chạy: lần đổi clip tiếp theo có thể ghi lại vị trí theo origin đã lưu và dictionary. Hãy chỉnh scene được lưu hoặc các offset theo clip.
 
@@ -272,7 +290,7 @@ Giải pháp hiện tại dùng `PhysicsShapeQueryParameters2D` với shape/tran
 
 ### 9.3. Player đánh enemy, chết và EXP
 
-SaberHitbox có `_attack_active` và registry riêng, gọi `body.take_damage(20, global_position)` trên body trong active window. **Đường Saber hiện đang gửi 20 cố định** trong callback này; không được suy diễn rằng thay WeaponData sẽ tự thay mọi đường damage. Đây là điểm cần rà soát nếu triển khai scaling damage về sau.
+SaberHitbox có `_attack_active` và registry riêng, gửi lượng damage được chốt từ WeaponData khi bắt đầu swing. Saber hiện lưu Damage=20; combo 1/2/3 dùng damage cơ bản, combo 4 nhân Combo Finisher Multiplier=1.2 (24 mặc định). Player jump attack dùng hitbox riêng và default damage 20, một lần cho mỗi enemy trong cả fall/land. Xem `Context/Bao_cao_ky_thuat/combat_damage_tuning.md` để chỉnh damage và HP. Các hệ số damage gây của Fracture chưa tự được áp thêm trong đường này.
 
 EnemyBase bỏ qua damage ≤0 hoặc khi `is_dead`, giảm HP tối thiểu về 0, gọi `die()` khi hết HP. Tham số origin được giữ để tương thích API nhưng enemy chưa dùng nó để knockback/hit reaction.
 
@@ -395,7 +413,7 @@ Những mục dưới đây là **đề xuất, chưa được triển khai ho�
 2. **Đồng bộ animation/damage window khi retime:** quyết định tiếp tục dùng giây FSM hay chuyển marker/callback theo clip. Hiện thay speed_scale riêng cần căn lại; window đầu ≥ cuối hoặc cuối vượt độ dài clip chưa có validate đầy đủ trong editor.
 3. **Death/hit reaction cho enemy:** rig có death nhưng hiện queue_free ngay. Nếu dùng death animation cần giữ death guard, đóng damage ngay và bảo đảm EXP chỉ một lần, rồi mới free theo clip/timer an toàn.
 4. **Perception/navigation:** nếu cần, thêm line of sight, kiểm tra mép vực, giải pháp tường/nền cao và điều kiện mất mục tiêu. Không thêm tự động chỉ vì đã có RUN.
-5. **Damage scaling của Player:** rà soát giá trị Saber hard-coded 20 trước khi triển khai vũ khí/nâng cấp sát thương. Enemy damage đã có export riêng; hai luồng phải được kiểm tra độc lập.
+5. **Damage scaling của Player:** Saber đã đọc WeaponData.damage và có hệ số combo thứ 4; jump có damage export riêng. Rà soát các hệ số debuff/nâng cấp trước khi nối thêm scaling. Enemy damage có export riêng; các luồng cần được kiểm tra độc lập.
 6. **Hurtbox độc lập nếu cần:** chỉ tách Area2D Hurtbox khi gameplay cần khác body collider, nhiều vùng/bone hoặc armor. Khi tách, phải cập nhật Saber query/API thay vì chỉ thêm node mà giữ truy vấn body cũ.
 7. **Độ tin cậy tốc độ cao:** đánh giá swept collision cho leap nếu tăng tốc độ hoặc thu nhỏ collider. Direct query tại opening/landing hiện không bao phủ liên tục toàn quãng bay.
 8. **Nhiều enemy:** profiler trước khi tối ưu. Target acquisition hiện duyệt group Player khi target trống; active melee/leap dùng overlap list và registry, direct shape query thường hai lần/leap. `intersect_shape()` hiện không truyền max_results riêng; trường hợp nhiều collider/Player đông cần kiểm tra giới hạn truy vấn thay vì giả định nhận đủ mọi body.
@@ -405,11 +423,22 @@ Những mục dưới đây là **đề xuất, chưa được triển khai ho�
 ## 15. Chỉ mục source và tài liệu đối chiếu
 
 - [EnemyBase — nhận damage](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/enemy_base.gd:79>) và [chết/EXP](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/enemy_base.gd:88>).
-- [SpineEnemy — physics/FSM](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.gd:95>), [phát hiện target](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.gd:165>) và [phóng leap](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.gd:210>).
-- [Chọn damage area](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.gd:245>), [query biên leap](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.gd:269>), [registry và gửi damage](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.gd:279>).
+- [SpineEnemy — physics/FSM](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.gd:96>), [phát hiện target](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.gd:169>) và [phóng leap](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.gd:214>).
+- [Chọn damage area](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.gd:262>), [query biên leap](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.gd:286>), [registry và gửi damage](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.gd:296>).
 - [Wrapper gameplay](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/spine_enemy.tscn>), [rig nguồn](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/enemy_spine.tscn>), [Wobtear](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/enemy/wobtear_enemy.tscn>).
-- [Saber gửi damage](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/components/saber_hitbox.gd:37>), [Player nhận damage](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/playable_adel.gd:260>) và [thiết lập passthrough](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/playable_adel.gd:498>).
+- [Saber gửi damage](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/components/saber_hitbox.gd:37>), [Player nhận damage](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/playable_adel.gd:271>) và [thiết lập passthrough](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/playable_adel.gd:518>).
 - [Vũ khí legacy dùng chung Defense](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/testing/Enemies/enemy_weapon.gd:36>), [test leap lưu trong repo](<D:/Godot Project/soujourn--echoes-of-the-soul/tests/enemy/leap_hitbox_validation.gd>).
 - Tài liệu liên quan: `Context/Bao_cao_ky_thuat/leap_hitbox.md`, `defense_guard_deflect_stagger_stamina_report.md`, `guard_stamina.md`, `adel_hfsm.md`. `guard_def.md` là báo cáo/kế hoạch ở thời điểm trước triển khai; các mô tả animation và luật cũ trong đó không được dùng thay cho code/scene hiện tại.
 
 Các line number và giá trị trong báo cáo là ảnh chụp source ngày 14/10/2026. Khi code tiếp tục thay đổi, ưu tiên nội dung file và override scene mới nhất; cập nhật báo cáo cùng các test tương ứng.
+
+### Cập nhật chuyển tiếp phát hiện — 14/10/2026
+
+Thêm state DETECT và dùng clip nguồn `detect player`, WALK → DETECT → RUN.
+Giữ nguyên scene wrapper/rig nguồn, run floating, collider, hitbox, HP và damage.
+Test `tests/enemy/enemy_detect_validation.tscn` kiểm tra hai hướng, hết clip,
+slow motion, tốc độ clip, pause/resume, target loss/free, tái giao chiến và death.
+Suite leap đã bổ sung DETECT vào các state phải không gây damage. Các kết quả
+chạy lại nằm trong gói Enemy-detect-transition-verification.zip của workspace.
+
+Kiểm chứng cập nhật DETECT: Godot 4.7 chạy thực trong bản sao dùng user data riêng; 183 checks headless và 33 checks có render, 0 failures. Các cảnh báo Bone2D hiện có và cảnh báo thiếu clip của fixture kiểm thử cấu hình sai được ghi nhận; không sửa rig/asset trong lượt này.

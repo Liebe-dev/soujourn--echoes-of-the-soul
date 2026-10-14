@@ -4,5 +4,6 @@
 
 [node name="Saber" type="Node2D" unique_id=2053763636]
 script = ExtResource("1_s0jpl")
+damage = 20
 hitbox_offset = Vector2(166, 0)
 hitbox_size = Vector2(152.58, 124.5)

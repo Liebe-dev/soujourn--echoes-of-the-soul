@@ -224,7 +224,7 @@ Mỗi threshold thật hiện chọn bleeding hoặc fracture theo xác suất *
 - Soul Flask giảm một cấp fracture; full heal/clear debuffs xóa toàn bộ.
 - Icon: `res://asset/UI/Menu screen/fracture.png`.
 
-Các hệ số damage gây/tốc tấn công là dữ liệu/getter model; không suy diễn mọi đường gây damage hoặc mọi animation đều đã sử dụng getter. Ví dụ callback Saber đang có đường gửi 20 cố định. Theo phạm vi đã thống nhất, không tự hoàn thiện thêm fracture trong các lượt chỉnh animation/icon/stamina hoặc lượt viết báo cáo này.
+Các hệ số damage gây/tốc tấn công là dữ liệu/getter model; không suy diễn mọi đường gây damage hoặc mọi animation đều đã sử dụng getter. Saber hiện đã đọc WeaponData.damage, nhưng chưa tự nối thêm các hệ số damage gây của Fracture; jump attack có damage export riêng. Theo phạm vi đã thống nhất, không tự hoàn thiện thêm fracture trong các lượt chỉnh animation/icon/stamina hoặc lượt viết báo cáo này.
 
 HUD đồng bộ icon qua `sync_status_icons()` và status slots; marker threshold ready trắng, đã dùng mờ/xám. Thanh xanh phản ánh stamina, không phải một thanh stagger riêng.
 
@@ -304,10 +304,12 @@ Các mục sau là đề xuất để chọn scope sau, không tự triển khai
 
 ## 14. Source đối chiếu và liên kết báo cáo
 
-- [Luồng nhận damage Player](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/playable_adel.gd:260>).
+- [Luồng nhận damage Player](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/playable_adel.gd:271>).
 - [DefenseComponent](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/components/defense_component.gd>), [HFSM](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/components/adel_state_machine.gd>).
 - [DamageComponent](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/components/damage_component.gd>), [slow motion](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/components/deflect_slow_motion.gd>), [animation component](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/components/adel_animation_component.gd>).
 - [StatsComponent](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/UI/stats_component.gd>), [HUD facade](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/UI/ui.gd>), [icon](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/UI/status_icon_slot.gd>), [PlayerProgress](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/Mechanic/player_progress.gd>).
 - [Báo cáo enemy](<D:/Godot Project/soujourn--echoes-of-the-soul/Context/Bao_cao_ky_thuat/enemy_technical_report.md>): AI, rig, collider, hitbox, damage và EXP của enemy.
 
 `guard_def.md` và `guard_stamina.md` được giữ lại làm tài liệu ở các thời điểm trước, không xóa legacy báo cáo. Các giá trị cũ như delay 1.5 hoặc bản kế hoạch animation ban đầu không thay thế source/scene hiện tại. Báo cáo độc lập này là bản tổng hợp được đối chiếu lại tại ngày lập; tiếp tục cập nhật khi gameplay thay đổi.
+
+Bổ sung damage Player: xem `Context/Bao_cao_ky_thuat/combat_damage_tuning.md` cho combo 20/24, jump attack và vị trí chỉnh HP/enemy skill damage. Không thêm chi phí stamina cho attack trong thay đổi đó.

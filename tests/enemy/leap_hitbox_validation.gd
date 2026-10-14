@@ -125,7 +125,7 @@ func _run() -> void:
 			enemy._set_damage_window(false)
 			await frames(2)
 			a.position = enemy.position + Vector2(direction * 200, -55)
-	for phase in [enemy.State.WALK, enemy.State.RUN, enemy.State.WINDUP, enemy.State.LAND, enemy.State.RECOVERY]:
+	for phase in [enemy.State.WALK, enemy.State.DETECT, enemy.State.RUN, enemy.State.WINDUP, enemy.State.LAND, enemy.State.RECOVERY]:
 		a.position = enemy.position + Vector2(0, -25)
 		a.calls = 0
 		enemy._enter_state(phase)

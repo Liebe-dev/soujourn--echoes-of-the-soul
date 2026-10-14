@@ -44,6 +44,7 @@ func _on_stamina_upgrade_pressed() -> void:
 		SaveManager.sync_progress_to_active_slot()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_instance_valid(_campfire) and _campfire.has_method("is_ui_active") and _campfire.is_ui_active(): return
 	if not visible:
 		return
 	if event.is_action_pressed("ui_cancel"):

@@ -1,7 +1,7 @@
 extends EnemyBase
 ## Uses EnemyBase's health/death contract; this enemy owns its combat decisions.
 
-enum State { WALK, RUN, WINDUP, LEAP, LAND, MELEE, RECOVERY }
+enum State { WALK, RUN, WINDUP, LEAP, LAND, MELEE, RECOVERY, DETECT }
 
 @export_group("Detection")
 @export_range(1.0, 2000.0) var detection_distance: float = 500.0
@@ -74,11 +74,12 @@ func _ready() -> void:
 		push_warning("SpineEnemy needs its rig, WeaponPivot/Hitbox and LeapHitbox with collision shapes.")
 		set_physics_process(false)
 		return
-	for clip in [&"walk", &"run", &"attack1_1", &"attack1_2", &"attack1_3", &"attack2", &"attack3"]:
+	for clip in [&"walk", &"detect player", &"run", &"attack1_1", &"attack1_2", &"attack1_3", &"attack2", &"attack3"]:
 		if not animation_player.has_animation(clip):
 			push_warning("SpineEnemy is missing animation: " + clip)
 			set_physics_process(false)
 			return
+	animation_player.animation_finished.connect(_on_animation_finished)
 	# Authoring helpers in the source rig are not part of the character.
 	for helper in ["Sprite2D", "Sprite2D2"]:
 		var node := get_node_or_null("VisualPivot/EnemyRig/" + helper) as CanvasItem
@@ -103,9 +104,12 @@ func _physics_process(delta: float) -> void:
 	match state:
 		State.WALK:
 			if is_instance_valid(target):
-				_enter_state(State.RUN)
+				_enter_state(State.DETECT)
 			else:
 				_walk_patrol(delta)
+		State.DETECT:
+			if not is_instance_valid(target):
+				_enter_state(State.WALK)
 		State.RUN:
 			if not is_instance_valid(target):
 				_enter_state(State.WALK)
@@ -232,6 +236,9 @@ func _enter_state(next: State) -> void:
 	_elapsed = 0.0
 	match state:
 		State.WALK: _set_animation(&"walk")
+		State.DETECT:
+			_face_target()
+			_set_animation(&"detect player")
 		State.RUN: _set_animation(&"run")
 		State.WINDUP: _set_animation(&"attack1_1")
 		State.LEAP:
@@ -240,6 +247,16 @@ func _enter_state(next: State) -> void:
 		State.LAND: _set_animation(&"attack1_3")
 		State.MELEE: _set_animation(attack_animation)
 		State.RECOVERY: pass
+
+
+func _on_animation_finished(clip: StringName) -> void:
+	# Only the live detection transition owns this completion signal.
+	if clip != &"detect player" or state != State.DETECT:
+		return
+	if is_dead or not is_inside_tree() or is_queued_for_deletion():
+		return
+	var has_target := is_instance_valid(target) and not target.is_queued_for_deletion()
+	_enter_state(State.RUN if has_target else State.WALK)
 
 
 func _set_damage_window(active: bool) -> void:

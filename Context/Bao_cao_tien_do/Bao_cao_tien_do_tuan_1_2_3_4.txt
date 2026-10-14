@@ -1,0 +1,276 @@
+Báo cáo tiến độ NCKH tuần 1
+I.	Những gì đã làm
+1.	Xây dựng được môi trường Testbed với kiến trúc FSM:
+Đã thiết lập thực thể người chơi cơ sở mang cấu trúc nguyên khối, khung cấu trúc vật lý và UI của đối tượng Campfire để làm mẫu đối chứng:
+   
+-	Thành phần Chủ thể: Đã thiết lập thực thể người chơi cơ sở (Baseline Player) mang cấu trúc Máy trạng thái nguyên khối (Monolithic FSM) để làm mẫu đối chứng.
+-	Thành phần Môi trường: Xây dựng ranh giới vật lý cơ bản để kiểm thử logic nội suy chuyển động (Movement Interpolation) và giới hạn trọng lực.
+-	Thành phần Tương tác: Thiết lập các trạm kiểm tra trạng thái (như Campfire.gd) nhằm chuẩn bị kịch bản đo lường tần suất gọi hàm và xử lý va chạm.
+
+2.	Phân tích lưu đồ thuật toán kiểm tra trạng thái (Baseline):
+Sơ đồ dưới đây minh họa luồng xử lý của cơ chế trạm tương tác trong phiên bản đối chứng. Toàn bộ thuật toán được đặt bên trong hàm _physics_process(delta). Điều này đồng nghĩa với việc cứ mỗi khung hình, CPU phải thực hiện kiểm tra biến _player, tính toán vector khoảng cách, hoặc tệ hơn là gọi hàm _find_nearby_candidate() để quét toàn bộ mảng đối tượng trong nhóm "Player". Việc lạm dụng cơ chế Polling để kiểm tra các trạng thái tĩnh sinh ra một lượng lớn các phép toán dư thừa. Đây là một điểm nghẽn hiệu năng đặc trưng của cấu trúc nguyên khối, đòi hỏi phải được tái cấu trúc sang kiến trúc Hướng sự kiện Event-driven.
+
+ 	
+Luồng chạy thực tế của cơ chế Polling
+II.	Các vướng mắc
+1.	Hàm _physics_process(delta) trong Campfire.gd thực hiện kiểm tra trạng thái và khoảng cách của Player ở mỗi physics frame. Khi Player chưa nằm trong phạm vi, mỗi Campfire tiếp tục gọi _find_nearby_candidate(), hàm này duyệt các node thuộc group "Player" và trong trường hợp không tìm thấy còn duyệt qua cây Scene. Vì vậy, khi số lượng Campfire tăng, chi phí tính toán lặp lại theo từng Campfire và từng physics frame, dẫn đến lượng xử lý dư thừa và có thể ảnh hưởng đáng kể đến hiệu năng. Trong khi đó, Area2D đã cung cấp các signal body_entered và body_exited để phát hiện Player vào/ra vùng tương tác, do đó có thể tận dụng cơ chế sự kiện này thay cho việc quét liên tục.
+ Giải pháp đề xuất: Sử dụng hệ thống Vật lý của Godot thông qua Area2D, CollisionShape2D và Signals để phát hiện Player trong vùng tương tác. Mỗi Campfire được thiết lập một Area2D với CollisionShape2D tương ứng với bán kính phát hiện. Khi Player đi vào hoặc rời khỏi vùng này, Godot tự động phát các signal body_entered và body_exited, cho phép Campfire cập nhật trạng thái tương tác mà không cần liên tục quét khoảng cách trong _physics_process(). Cách tiếp cận này chuyển từ cơ chế polling liên tục sang event-driven, giúp giảm lượng xử lý dư thừa khi bản đồ có nhiều Campfire.
+2.	Lớp đối tượng God Class và Kiến trúc FSM tại Playable_adel.gd: toàn bộ logic của nhân vật chính bao gồm: nhận tín hiệu nhập liệu (_unhandled_input), xử lý vật lý/di chuyển, xử lý chuỗi combo chiến đấu, quản lý vũ khí và tính toán hất văng (Stagger) đều bị nhồi nhét vào một script duy nhất. Điều này tạo ra một Máy trạng thái nguyên khối FSM. Mã nguồn bị liên kết chặt, dẫn đến việc mỗi khi cần thêm một kỹ năng mới, lập trình viên phải sửa đổi cấu trúc lệnh if/else chằng chịt, tiềm ẩn rủi ro sinh ra lỗi chéo.
+ Giải pháp đề xuất: tái cấu trúc mã nguồn sang mô hình Kiến trúc thành phần kết hợp Máy trạng thái phân cấp HFSM. Tách biệt các chức năng thành các Node độc lập. Nhân vật chính chỉ đóng vai trò một Container nhận tín hiệu và điều phối các thành phần này.
+3.	Xử lý logic sai vị trí tại Ui.gd: Tệp Ui.gd hiện đang đảm nhận cả việc tính toán sát thương rút máu, quản lý thuật toán khóa mốc Stagger 66%/33% và theo dõi thời gian hồi thể lực. Theo chuẩn kiến trúc MVC trong phát triển game, Giao diện chỉ nên có nhiệm vụ hiển thị dữ liệu, không được phép tính toán logic sống còn của hệ thống. Việc đặt logic sai chỗ khiến mã nguồn khó tái sử dụng cho các nhân vật hoặc kẻ địch khác.
+ Giải pháp đề xuất: Di dời toàn bộ thuật toán tính toán sát thương, máu và thể lực vào một Node chuyên trách. Tập lệnh Ui.gd sẽ chỉ sử dụng hệ thống Signal để lắng nghe sự thay đổi biến số từ StatsComponent và cập nhật thanh Progress Bar tương ứng.
+4. Vấn đề "Code Smells" và quản lý tài nguyên bộ nhớ tại Playable_adel.gd: Bên cạnh lỗi kiến trúc God Class, mã nguồn hiện tại đang tồn tại các đoạn mã chết và lạm dụng ràng buộc bằng chuỗi tĩnh cho các hằng số. Đáng chú ý, hệ thống hiệu ứng Ghost Trail VFX đang liên tục cấp phát và khởi tạo tài nguyên mới mỗi khi hoạt động, tạo ra gánh nặng dọn rác bộ nhớ không đáng có. Lệnh tìm kiếm node find_child cũng được gọi thiếu kiểm soát gây lãng phí tài nguyên CPU.
+ Giải pháp đề xuất:
+•	Loại bỏ mã chết và quy chuẩn hóa các chuỗi hằng số thành enum.
+•	Áp dụng kỹ thuật Object Pooling cho hệ thống VFX để cấp phát sẵn Sprite từ đầu, tránh khởi tạo mới liên tục.
+•	Inject hoặc lưu trữ cache tham chiếu của Node UI/HUD ngay từ hàm _ready() thay vì quét tìm trên Scene Tree nhiều lần.
+III.	Kế hoạch trong tuần tới
+1.	Tái cấu trúc mã nguồn (Refactoring):
+•	Hệ thống tương tác (Campfire): Triển khai thay thế luồng vòng lặp _physics_process bằng các Signals từ Area2D (body_entered, body_exited) để triệt tiêu tình trạng thắt cổ chai hiệu năng.
+•	Hệ thống Giao diện và Chỉ số: Tiến hành bóc tách logic tính toán sát thương, thể lực từ Ui.gd sang một node StatsComponent độc lập, thiết lập liên kết thụ động qua Signal theo chuẩn MVC.
+•	Tối ưu hóa Bộ nhớ (VFX): Xây dựng lớp Object Pool cơ bản để quản lý bộ nhớ cho hiệu ứng Ghost Trail, loại bỏ việc khởi tạo và hủy Node liên tục.
+
+BÁO CÁO TIẾN ĐỘ NCKH TUẦN 2
+I. NHỮNG CÔNG VIỆC ĐÃ LÀM ĐƯỢC
+1.1. Tách quản lý trạng thái nhân vật
+Nhóm xây dựng StatsComponent nhằm tách việc quản lý trạng thái nhân vật khỏi ui.gd. Các logic liên quan đến HP, Stamina, Soul Flask, Bleeding, Fracture, Stagger và Buff/Debuff được chuyển về thành phần quản lý trạng thái tập trung. StatsComponent chịu trách nhiệm xử lý và cập nhật gameplay state, trong khi ui.gd tiếp nhận kết quả để thực hiện các xử lý liên quan đến giao diện và hiệu ứng.
+1.2. Tách gameplay logic khỏi UI
+Để hạn chế ảnh hưởng đến các hệ thống hiện có, nhóm duy trì cơ chế Facade trong ui.gd. Các thuộc tính và API đang được sử dụng bởi các hệ thống khác tiếp tục được cung cấp thông qua ui.gd, nhưng dữ liệu thực tế được quản lý bởi StatsComponent. Qua đó, gameplay state được tách khỏi presentation, giúp ui.gd tập trung hơn vào cập nhật giao diện, animation, Tween và các hiệu ứng liên quan.
+1.3. Kiểm tra tương thích và cleanup
+Sau khi refactor, nhóm rà soát các signal, dependency và caller liên quan để đảm bảo các hệ thống bên ngoài vẫn tương thích với API hiện có. Những signal, phương thức và hằng số không còn được sử dụng được xác định và loại bỏ sau khi kiểm tra caller nhằm hạn chế ảnh hưởng ngoài phạm vi refactor.
+1.4. kiến trúc sau khi tái cấu trúc
+Kiến trúc sau refactor được tổ chức theo nguyên tắc tách biệt giữa gameplay state và presentation. StatsComponent trở thành nơi quản lý trạng thái nhân vật, trong khi ui.gd đóng vai trò Facade và điều phối giao diện. Các hệ thống hiện có tiếp tục giao tiếp với ui.gd thông qua API cũ.
+Mô hình tổng quát:
+Các hệ thống hiện có → ui.gd (Facade) → StatsComponent → Character Gameplay State
+Đồng thời: ui.gd → UI nodes / Animation / Tween / Effects
+1.5. kiểm tra tính tương thích
+Sau khi thay đổi cấu trúc, nhóm kiểm tra các hệ thống có liên quan trực tiếp đến ui.gd gồm playable_adel.gd, player_progress.gd, safe_zone.gd và save_manager.gd. Các phương thức và thuộc tính mà những hệ thống này sử dụng tiếp tục được duy trì thông qua Facade của ui.gd. Kết quả kiểm tra cho thấy các integration point được phân giải đúng và không phát sinh lỗi API do quá trình refactor trong phạm vi đã kiểm tra.
+2.1. Kiểm tra mã nguồn
+StatsComponent và các dependency liên quan được kiểm tra cú pháp. Kết quả ghi nhận EXIT = 0, cho thấy tiến trình kiểm tra kết thúc thành công.
+2.2. Kiểm tra scene HUD
+Scene res://scenes/UI/hud.tscn được chạy ở chế độ headless. Kết quả EXIT = 0. Trong quá trình kiểm tra không phát hiện Parse Error, Compile Error, Script Error, Invalid call, Invalid property hoặc Identifier not found.
+2.3. Kiểm tra integration
+Các luồng chính được kiểm tra:
+•	Damage → Stagger → Debuff → HP.
+•	Soul Flask → Heal → Cure Debuff → Restore Stagger.
+•	Bleeding → HP loss → UI update → Respawn.
+•	Stamina regeneration.
+•	Heal to full.
+•	Restore Stagger threshold.
+•	Clear Debuff.
+•	Save/Load và Safe Zone.
+Kết quả kiểm tra cuối cùng xác nhận D1 hoàn thành và không phát hiện regression thuộc phạm vi refactor.
+3. Kết quả đạt được
+Kết quả chính của quá trình cải tiến là trách nhiệm giữa quản lý trạng thái gameplay và hệ thống giao diện được phân tách rõ ràng hơn. StatsComponent tập trung vào dữ liệu và logic trạng thái nhân vật, trong khi ui.gd đảm nhiệm presentation, animation, signal và các side effect cần thiết. Cơ chế Facade cho phép duy trì các API cũ, qua đó hạn chế tác động của refactor tới những hệ thống đang phụ thuộc vào ui.gd.
+ 
+Bên cạnh đó, các luồng xử lý quan trọng như Stagger, Bleeding, Stamina và Soul Flask được tổ chức lại theo hướng một nguồn xử lý gameplay state rõ ràng hơn. Việc thực hiện caller audit trước cleanup cũng giúp giảm nguy cơ loại bỏ nhầm mã nguồn còn được sử dụng.
+4.1 Đánh giá
+Về mặt kiến trúc, giải pháp đã đạt được mục tiêu phân tách trách nhiệm ở mức thành phần: gameplay state được đưa vào StatsComponent, còn ui.gd giữ vai trò Facade và presentation layer. Về khả năng tương thích, các integration point chính được giữ nguyên thông qua API trung gian. Về kiểm thử, các kiểm tra cú pháp, scene HUD và integration trong phạm vi đã thực hiện đều không ghi nhận lỗi regression.
+Tuy nhiên, các kết quả hiện tại chủ yếu chứng minh tính đúng đắn và tương thích trong phạm vi test đã thực hiện. Chưa nên kết luận định lượng rằng maintainability hoặc performance đã được cải thiện nếu chưa có các chỉ số đo trước và sau. Đây là nội dung có thể được bổ sung ở các tuần tiếp theo thông qua phân tích LOC, số lượng dependency, độ phức tạp mã nguồn hoặc các thước đo phù hợp khác.
+II. KHÓ KHĂN ĐẶT RA
+2.1	Hạn chế và hướng phát triển:
+Phạm vi tuần 2 tập trung vào refactor hệ thống trạng thái nhân vật và xác nhận compatibility. Vì vậy, báo cáo chưa đưa ra benchmark hiệu năng hoặc đánh giá định lượng về maintainability dựa trên người dùng. Ngoài ra, việc tách StatsComponent mới là một bước trong quá trình tái cấu trúc tổng thể.
+Trong giai đoạn tiếp theo, nhóm có thể tiếp tục phân tích và tách các thành phần khác của nhân vật, đặc biệt là playable_adel.gd. Đồng thời, nhóm có thể bổ sung test tự động, mở rộng regression test và thu thập các chỉ số trước/sau refactor để đánh giá định lượng tác động của giải pháp.
+2.2	Khó khăn trong quá trình refactor: 
+ui.gd có nhiều hệ thống phụ thuộc nên nhóm phải duy trì Facade và kiểm tra các dependency, caller để đảm bảo tính tương thích.
+2.3	Chưa có đánh giá định lượng: 
+Nhóm chưa thực hiện benchmark hiệu năng và chưa thu thập đầy đủ các chỉ số trước/sau refactor để đánh giá định lượng về maintainability và performance.
+2.4	Phạm vi tái cấu trúc còn giới hạn: 
+StatsComponent mới là một bước trong quá trình tái cấu trúc tổng thể; các thành phần khác như playable_adel.gd và hệ thống test tự động chưa được tiếp tục thực hiện trong tuần này.
+III. KẾ HOẠCH THỰC HIỆN TUẦN SAU
+3.1	Tiếp tục tái cấu trúc kiến trúc nhân vật: 
+Phân tích và từng bước tách playable_adel.gd theo hướng Component kết hợp HFSM, đồng thời duy trì các chức năng gameplay hiện có.
+3.2	Tiếp tục phát triển testbed: 
+Hoàn thiện và mở rộng các hệ thống gameplay, nhân vật, enemy, level và các thành phần cần thiết để xây dựng môi trường kiểm thử thực tế cho kiến trúc.
+3.3	Kiểm thử và ổn định hệ thống: 
+Thực hiện regression test sau các thay đổi kiến trúc, ưu tiên bảo đảm các cơ chế gameplay hiện có hoạt động ổn định.
+3.4	Chuẩn bị dữ liệu đánh giá: 
+xác định và ghi nhận các chỉ số, dependency và chi phí thay đổi trong quá trình phát triển để phục vụ đánh giá kiến trúc ở các giai đoạn sau.
+
+IV. KẾT LUẬN TUẦN 2
+Trong tuần 2, nhóm đã hoàn thành việc tái cấu trúc trọng tâm đối với hệ thống quản lý trạng thái nhân vật bằng cách tách StatsComponent khỏi ui.gd và áp dụng Facade để duy trì khả năng tương thích với hệ thống hiện có. Các logic HP, Stamina, Soul Flask, Bleeding, Fracture, Stagger và Buff/Debuff được tổ chức lại theo hướng tập trung vào một thành phần quản lý trạng thái, trong khi ui.gd tập trung hơn vào giao diện và điều phối.
+Kết quả kiểm tra cho thấy các bước kiểm tra cú pháp và scene HUD đều có EXIT = 0, các integration point chính tiếp tục hoạt động trong phạm vi kiểm tra, và không phát hiện regression thuộc phạm vi refactor. Kết quả này tạo nền tảng cho các bước nghiên cứu và tái cấu trúc tiếp theo.
+PHỤ LỤC A — DANH SÁCH HỆ THỐNG ĐƯỢC RÀ SOÁT
+•	ui.gd
+•	StatsComponent
+•	playable_adel.gd
+•	player_progress.gd
+•	safe_zone.gd
+•	save_manager.gd
+•	res://scenes/UI/hud.tscn
+PHỤ LỤC B — CÁC LUỒNG KIỂM THỬ CHÍNH
+Luồng	Mục tiêu	Kết quả ghi nhận
+Damage → Stagger → Debuff → HP	Kiểm tra thứ tự xử lý và cập nhật state	Không phát hiện regression trong phạm vi kiểm tra
+Soul Flask → Heal → Cure Debuff	Kiểm tra heal, Flask và xóa trạng thái	Không ghi nhận tiêu hao/hồi nhiều lần
+Bleeding → HP loss → Respawn	Kiểm tra tick theo thời gian	Luồng được kiểm tra
+Stamina regeneration	Kiểm tra phục hồi Stamina	Luồng được kiểm tra
+Save/Load + Safe Zone	Kiểm tra integration với state	Các integration point được kiểm tra
+
+
+
+
+
+BÁO CÁO TIẾN ĐỘ NCKH TUẦN 3
+I. MỤC TIÊU VÀ PHẠM VI CÔNG VIỆC TRONG TUẦN
+Trong tuần 3, nhóm tập trung vào nhiệm vụ tái cấu trúc script playable_adel.gd theo định hướng Component hóa. Mục tiêu của quá trình này là phân tách các nhóm gameplay responsibility thành các Component độc lập hơn, đồng thời duy trì playable_adel.gd với vai trò Player coordinator nhằm bảo toàn các cơ chế giao tiếp và behavior hiện có.
+Phạm vi thực hiện tập trung vào bốn nhóm responsibility chính: Locomotion, Combat, Damage và Dash. Các trách nhiệm liên quan trực tiếp đến CharacterBody2D, velocity, animation, collision, tween, Ghost Trail, FSM coordination và Component coordination tiếp tục được duy trì tại playable_adel.gd theo phạm vi refactor đã xác định.
+II. NỘI DUNG CÔNG VIỆC ĐÃ THỰC HIỆN
+2.1. Tái cấu trúc LocomotionComponent
+Nhóm xây dựng scenes/adel/components/locomotion_component.gd và chuyển các responsibility liên quan đến locomotion ra khỏi playable_adel.gd. Component này đảm nhiệm các logic liên quan đến chuyển động và trạng thái vận động của nhân vật, trong khi Player vẫn giữ quyền sở hữu CharacterBody2D.velocity để bảo đảm CharacterBody2D là đối tượng thực hiện chuyển động vật lý thực tế.
+Xử lý chuyển động ngang.
+Xử lý nhảy.
+Xử lý chuyển động theo trục dọc.
+Xác định các trạng thái liên quan đến quá trình nhảy và tiếp đất.
+Phát signal khi nhân vật thực hiện Jump và Land.
+Cơ chế giao tiếp được duy trì thông qua signal từ LocomotionComponent về playable_adel.gd. Theo đó, Player tiếp tục thực hiện vai trò coordinator giữa gameplay logic và các hệ thống animation/FSM, thay vì để Component trực tiếp quản lý toàn bộ Actor.
+2.2. Tái cấu trúc CombatComponent
+Nhóm xây dựng scenes/adel/components/combat_component.gd và chuyển các responsibility liên quan đến combat sang Component này. Việc phân tách tập trung vào logic điều khiển combo và xử lý input attack, trong khi playable_adel.gd tiếp tục tiếp nhận kết quả để điều phối animation, movement lock và các trạng thái liên quan của Player.
+Quản lý trạng thái combo.
+Xác định combo step.
+Xử lý input attack.
+Queue đòn đánh tiếp theo trong combo.
+Xác định attack action.
+Xử lý chuyển tiếp giữa các đòn combo.
+Xác định animation tương ứng với đòn đánh.
+Xử lý logic liên quan đến Jump Attack.
+Luồng xử lý sau tái cấu trúc được tổ chức theo mô hình: Input → CombatComponent → AttackAction / Combat State → playable_adel.gd → Animation / Player State. Cách tổ chức này làm giảm lượng combat logic nằm trực tiếp trong Player coordinator nhưng vẫn duy trì cơ chế giao tiếp với hệ thống animation hiện tại.
+2.3. Tái cấu trúc Damage, Stagger và Invulnerability
+Nhóm xây dựng scenes/adel/components/damage_component.gd và chuyển các logic liên quan đến phản ứng khi nhân vật nhận damage sang DamageComponent. API take_damage() vẫn được duy trì tại playable_adel.gd nhằm bảo đảm Player tiếp tục đóng vai trò coordinator.
+Các nhóm logic được phân tách gồm:
+Damage Reaction: xử lý phản ứng khi nhân vật nhận damage.
+Stagger: chuyển các constant STAGGER_STUN_SEC, STAGGER_INVULN_SEC, STAGGER_KNOCKBACK và HIT_INVULN_SEC sang Component.
+Invulnerability: DamageComponent quản lý is_invulnerable và các trạng thái liên quan đến damage reaction.
+Knockback: logic phản ứng Knockback được tách khỏi Player coordinator; CharacterBody2D vẫn sở hữu và áp dụng velocity.
+HP và Stats: tiếp tục được duy trì tại StatsComponent, không chuyển sang DamageComponent nhằm bảo đảm ranh giới trách nhiệm giữa quản lý trạng thái nhân vật và xử lý phản ứng khi nhận damage.
+Sau khi thực hiện, playable_adel.gd giảm từ 531 dòng xuống 501 dòng. Các responsibility liên quan đến Damage, Stagger, Invulnerability và Knockback reaction được phân tách thành DamageComponent.
+2.4. Tái cấu trúc Dash/Dodge
+Nhóm xây dựng scenes/adel/components/dash_component.gd. Các trạng thái và logic liên quan đến Dash/Dodge được tách khỏi playable_adel.gd theo phạm vi đã xác định.
+Chuyển ba state is_dodging, able_to_dodge và has_air_dashed sang DashComponent.
+Gom các điều kiện wants_dash, can_ground_dash và can_air_dash thành hàm can_dash() để xác định khả năng thực hiện Dash.
+Chuyển logic xác định hướng Dash vào start_dash(), bao gồm xác định Dash trên không/dưới đất, hướng Dash, hướng facing khi không có input và tốc độ Dash.
+Chuyển giá trị tốc độ Dash thành constant DASH_SPEED_MULTIPLIER thay cho magic number, đồng thời giữ nguyên giá trị tương ứng với implementation trước refactor.
+Tách quản lý cooldown thành end_dash() và on_cooldown_timeout().
+Tách logic khôi phục khả năng Air Dash thành reset_air_dash().
+Các logic _ghost_trail_loop(), _spawn_ghost_trail() và _ghost_pool chưa được chuyển sang DashComponent. Đây là giới hạn phạm vi có chủ đích nhằm tránh mở rộng refactor sang responsibility của Object Pool và Ghost Trail.
+Sau khi hoàn thành phần Dash/Dodge, playable_adel.gd giảm từ 501 dòng xuống 493 dòng.
+III. KIẾN TRÚC SAU TÁI CẤU TRÚC
+Sau khi hoàn thành phạm vi refactor, kiến trúc được tổ chức theo hướng Component + Coordinator. playable_adel.gd đóng vai trò Player coordinator, trong khi các Component đảm nhiệm các nhóm gameplay responsibility tương ứng.
+Thành phần	Responsibility chính	Vai trò trong kiến trúc
+LocomotionComponent	Movement, Jump, Land và trạng thái vận động	Tách gameplay logic về locomotion
+CombatComponent	Combo, Attack, Attack Queue, Jump Attack	Tách gameplay logic về combat
+DamageComponent	Damage Reaction, Stagger, Invulnerability, Knockback reaction	Tách gameplay logic về damage
+DashComponent	Dash/Dodge state, direction, speed, cooldown, Air Dash reset	Tách gameplay logic về dash
+playable_adel.gd	CharacterBody2D, Velocity, Animation, Collision, Tween, Ghost Trail, FSM/Component Coordination	Player coordinator
+Ranh giới trách nhiệm được duy trì theo nguyên tắc: Component chịu trách nhiệm về nhóm gameplay logic chuyên biệt; Player coordinator chịu trách nhiệm điều phối và sở hữu các thành phần gắn trực tiếp với Actor/CharacterBody2D. Việc giữ velocity, animation và collision tại Player giúp duy trì separation of concerns trong phạm vi refactor.
+IV. KIỂM TRA VÀ XÁC NHẬN SAU TÁI CẤU TRÚC
+4.1. Kiểm tra từng Component
+Sau khi tách Component, nhóm tiến hành kiểm tra nhằm xác nhận khả năng tích hợp và tính đúng đắn của các thành phần mới. Các nội dung kiểm tra gồm:
+Script có thể được load/parse.
+Constructor và dependency được truyền đúng.
+Các method được gọi đúng từ playable_adel.gd.
+Signal giữa Component và Player vẫn hoạt động.
+Các API cần thiết của Player vẫn được duy trì.
+4.2. Kiểm tra integration point
+Nhóm rà soát các integration point giữa playable_adel.gd và các Component, tập trung vào các luồng tương tác chính:
+Movement → LocomotionComponent.
+Jump → LocomotionComponent → Player.
+Attack → CombatComponent → Animation.
+Combo Queue → CombatComponent → Next Attack.
+Damage → DamageComponent → Player reaction.
+Stagger → DamageComponent → Animation/State.
+Dash → DashComponent → Player movement.
+Cooldown → DashComponent → Player state.
+4.3. Kiểm tra behavior
+Sau refactor, nhóm kiểm tra các behavior chính nhằm xác nhận việc phân tách Component không làm thay đổi behavior đã có của Player. Phạm vi kiểm tra bao gồm:
+Movement.
+Jump/Land.
+Combo Attack.
+Attack Queue.
+Jump Attack.
+Damage Reaction.
+Stagger.
+Invulnerability.
+Ground Dash.
+Air Dash.
+Dash Cooldown.
+Air Dash Reset.
+Kết quả kiểm tra trong phạm vi thực hiện cho thấy các luồng chính vẫn hoạt động theo behavior hiện tại sau quá trình tái cấu trúc.
+V. KẾT QUẢ ĐẠT ĐƯỢC
+Kết quả chính của tuần 3 là hoàn thành việc tái cấu trúc playable_adel.gd theo hướng Component + Coordinator, trong đó bốn nhóm gameplay responsibility được phân tách thành LocomotionComponent, CombatComponent, DamageComponent và DashComponent.
+Về thay đổi mã nguồn, playable_adel.gd được giảm từ 531 dòng ban đầu xuống 493 dòng sau khi hoàn thành phạm vi refactor. Trong đó, sau khi tách Damage/Stagger/Invulnerability/Knockback reaction, số dòng giảm còn 501; sau khi tiếp tục tách Dash/Dodge, số dòng giảm còn 493.
+Về tính tương thích, Player vẫn giữ vai trò coordinator; dependency giữa Component và playable_adel.gd được duy trì thông qua constructor injection, signal và các API điều phối cần thiết. Các behavior chính được kiểm tra trong phạm vi A15 và kết quả hiện tại cho thấy behavior đã kiểm tra không bị thay đổi.
+Tuy nhiên, mức giảm số dòng mã nguồn chỉ là một chỉ báo về mức độ thay đổi của source code. Chỉ số này chưa đủ để kết luận định lượng rằng maintainability hoặc coupling đã được cải thiện. Các chỉ số về dependency, integration point, change cost và performance cần được thu thập ở các giai đoạn đánh giá tiếp theo.
+VI. KHÓ KHĂN, HẠN CHẾ VÀ VẤN ĐỀ ĐẶT RA
+6.1. Khó khăn trong quá trình refactor
+playable_adel.gd chứa nhiều responsibility và dependency liên kết với animation, FSM, CharacterBody2D, collision và các hệ thống gameplay khác. Do đó, quá trình tách Component phải đồng thời duy trì dependency và behavior hiện tại, đồng thời kiểm soát ranh giới responsibility để tránh chuyển nhầm logic sang Component.
+Một số logic như velocity, animation và Ghost Trail được giữ lại tại Player nhằm tránh mở rộng phạm vi refactor ngoài mục tiêu A15. Đặc biệt, Ghost Trail chưa được chuyển sang DashComponent vì có liên quan đến Object Pool và việc mở rộng phạm vi có thể làm tăng số biến thay đổi trong quá trình thực nghiệm.
+6.2. Chưa có đánh giá định lượng đầy đủ
+Trong tuần 3, nhóm chưa thực hiện đầy đủ benchmark hiệu năng và chưa thu thập hệ thống chỉ số trước/sau để đánh giá định lượng các khía cạnh Coupling, Change Cost, Maintainability và Runtime Performance. Vì vậy, kết quả hiện tại chủ yếu xác nhận tính đúng đắn về mặt cấu trúc và khả năng duy trì behavior, chưa phải là kết luận định lượng về hiệu quả của kiến trúc Component + Coordinator.
+6.3. Phạm vi refactor còn giới hạn
+A15 tập trung vào bốn nhóm responsibility: Locomotion, Combat, Damage và Dash. Các hệ thống Animation, Ghost Trail, Collision và FSM coordination vẫn được giữ tại playable_adel.gd theo phạm vi đã xác định. Việc giới hạn phạm vi là có chủ đích nhằm kiểm soát các biến thay đổi giữa các giai đoạn nghiên cứu và bảo đảm khả năng đánh giá kết quả ở các bước tiếp theo.
+VII. KẾT LUẬN
+Trong tuần 3, nhóm đã tập trung tái cấu trúc playable_adel.gd theo định hướng Component hóa, hoàn thành việc phân tách các nhóm responsibility Locomotion, Combat, Damage và Dash thành các Component tương ứng. playable_adel.gd tiếp tục giữ vai trò Player coordinator và duy trì các trách nhiệm liên quan trực tiếp đến CharacterBody2D, velocity, animation, collision, tween, Ghost Trail, FSM coordination và Component coordination.
+Quá trình kiểm tra sau refactor cho thấy các integration point và behavior chính trong phạm vi thực hiện vẫn hoạt động theo behavior hiện tại. playable_adel.gd giảm từ 531 dòng xuống 493 dòng sau khi hoàn thành các bước refactor thuộc phạm vi A15.
+Mặc dù vậy, kết quả hiện tại chưa đủ để kết luận định lượng về hiệu quả của kiến trúc mới. Việc đánh giá coupling, change cost, maintainability và runtime performance cần được tiếp tục bằng các phép đo và benchmark có kiểm soát. Do đó, giai đoạn tiếp theo sẽ tập trung vào mở rộng regression test và xây dựng cơ sở dữ liệu đo lường phục vụ so sánh kiến trúc.
+PHỤ LỤC: TÓM TẮT THAY ĐỔI MÃ NGUỒN
+Giai đoạn	Thành phần được tách	Số dòng playable_adel.gd
+Trước refactor	Chưa tách các responsibility chính	531
+Sau Damage/Stagger/Invulnerability/Knockback	DamageComponent	501
+Sau Dash/Dodge	DashComponent	493
+
+BÁO CÁO TIẾN ĐỘ NCKH TUẦN 4
+I. NHỮNG CÔNG VIỆC ĐÃ LÀM ĐƯỢC
+1.1. Định hướng chuẩn bị môi trường kiểm thử cho prototype game
+Tiến hành xác định các hạng mục cần chuẩn bị nhằm phục vụ quá trình kiểm thử prototype trên Godot Engine. Trọng tâm của giai đoạn này là xây dựng quy trình kiểm thử có thể tái hiện, quan sát và đánh giá hành vi của các cơ chế gameplay trước khi tích hợp và kiểm thử các hệ thống lớn hơn.
+Môi trường kiểm thử dự kiến cần hỗ trợ việc kiểm tra trạng thái nhân vật, animation, luồng xử lý sát thương, tương tác giữa các thành phần và kết quả sau mỗi thao tác. Việc tách các tình huống kiểm thử khỏi luồng chơi chính sẽ giúp quá trình xác định lỗi và đánh giá tính đúng đắn của từng cơ chế được thực hiện có hệ thống hơn.
+Định hướng này cũng tạo cơ sở để mở rộng kiểm thử tích hợp đối với các cơ chế tương tác và kể chuyện thuộc trọng tâm đề tài, bao gồm Observe, Dialogue và logic tiến triển cốt truyện.
+1.2. Phân tích và lập kế hoạch kiểm thử cơ chế Guard/Deflect
+Rà soát luồng nhận sát thương của nhân vật Adel và cơ chế phòng thủ hiện tại nhằm xác định các thành phần cần phối hợp khi triển khai và kiểm thử Guard/Deflect.
+Qua phân tích, xác định PlayableAdel.take_damage() là điểm tiếp nhận sát thương tập trung của nhân vật, trong khi một phần logic phòng thủ vẫn nằm ở phía vũ khí kẻ địch. Cách phân chia này có thể khiến quy tắc phòng thủ phụ thuộc vào từng nguồn gây sát thương và gây khó khăn khi kiểm thử tính nhất quán của hệ thống.
+Trên cơ sở đó, đề xuất kiến trúc DefenseComponent để quản lý trạng thái phòng thủ và phân loại kết quả của đòn đánh. Thiết kế dự kiến gồm ba trường hợp:
+•	None: Nhân vật không phòng thủ hoặc đòn đánh đến từ phía sau.
+•	Deflect: Đòn đánh hợp lệ xảy ra trong 0,2 giây đầu của thao tác phòng thủ.
+•	Guard: Nhân vật tiếp tục giữ phòng thủ sau cửa sổ Deflect và nhận sát thương đã được giảm theo quy tắc thiết kế.
+Kế hoạch tích hợp hướng đến việc tập trung quy tắc xử lý phòng thủ tại phía nhân vật, hạn chế logic trùng lặp ở phía kẻ địch và giữ nguyên các trách nhiệm hiện có về HP, animation, knockback và stagger.
+1.3. Xác định các trường hợp kiểm thử cho Guard/Deflect
+Xây dựng danh sách các tình huống cần kiểm tra sau khi cơ chế được triển khai. Các trường hợp dự kiến bao gồm:
+1.	Nhận đòn trong cửa sổ Deflect: kiểm tra kết quả phòng thủ, lượng HP thay đổi và animation tương ứng.
+2.	Giữ Guard quá cửa sổ Deflect: kiểm tra mức sát thương nhận vào và trạng thái animation.
+3.	Nhận đòn từ phía sau: kiểm tra việc xử lý sát thương theo quy tắc thiết kế.
+4.	Thả nút phòng thủ trước khi nhận đòn: kiểm tra luồng nhận sát thương thông thường.
+5.	Đang Guard: kiểm tra khả năng di chuyển, nhảy và Dash.
+6.	Đang thực hiện hành động khác: kiểm tra điều kiện bắt đầu Guard.
+7.	Kết thúc Guard: kiểm tra khả năng khôi phục điều khiển và chuyển trạng thái animation.
+8.	Nhận sát thương từ nhiều nguồn: kiểm tra tính nhất quán của quy tắc phòng thủ.
+Các trường hợp trên sẽ được dùng làm cơ sở cho việc ghi nhận kết quả kiểm thử, so sánh kết quả thực tế với kết quả mong đợi và phát hiện lỗi khi tích hợp các thành phần.
+1.4. Định hướng mở rộng quy trình kiểm thử đối với hệ thống Enemy
+Xác định hệ thống Enemy là một nhóm cơ chế gameplay có thể dùng để kiểm tra sự phối hợp giữa trạng thái kẻ địch, hành vi AI, animation, vũ khí và luồng nhận sát thương của nhân vật.
+Trong giai đoạn tiếp theo, dự kiến phân tích kiến trúc node và trách nhiệm của từng thành phần để xác định phạm vi kiểm thử phù hợp. Nội dung này đóng vai trò hỗ trợ quá trình xây dựng và kiểm thử prototype, không thay thế trọng tâm nghiên cứu về tương tác và logic kể chuyện của đề tài.
+II. KHÓ KHĂN ĐẶT RA
+2.1. Khó khăn trong việc xác định ranh giới trách nhiệm giữa các thành phần
+Các cơ chế gameplay có thể liên quan đến nhiều thành phần như nhân vật, animation, vũ khí và AI. Nếu trách nhiệm xử lý bị phân tán hoặc trùng lặp, việc xác định nguyên nhân lỗi và kiểm thử tính nhất quán sẽ trở nên phức tạp hơn.
+2.2. Khó khăn trong việc xây dựng môi trường kiểm thử có thể tái hiện
+Một số lỗi chỉ xuất hiện khi các trạng thái hoặc hành động xảy ra theo thứ tự cụ thể. Vì vậy, môi trường kiểm thử cần cho phép thiết lập tình huống, quan sát trạng thái và ghi nhận kết quả một cách rõ ràng, thay vì chỉ dựa vào việc chơi thử toàn bộ màn chơi.
+2.3. Giới hạn về thời gian thực hiện
+Tuần này trùng với lịch thi nên thời gian dành cho NCKH bị hạn chế. Do đó, công việc được ưu tiên theo hướng rà soát hệ thống, xác định phạm vi và lập kế hoạch kiểm thử trước; việc triển khai và xác nhận kết quả thực tế sẽ được thực hiện ở các giai đoạn tiếp theo.
+2.4. Bảo đảm sự liên hệ với trọng tâm đề tài
+Các cơ chế Guard/Deflect và Enemy thuộc phần gameplay hỗ trợ cho prototype. Vì vậy, việc chuẩn bị môi trường kiểm thử cần hướng đến mục tiêu rộng hơn là đánh giá sự phối hợp giữa các thành phần của game, đồng thời ưu tiên các cơ chế tương tác và kể chuyện như Observe, Dialogue và logic tiến triển cốt truyện.
+2.5. Kết quả đạt được
+•	Xác định định hướng chuẩn bị môi trường kiểm thử cho prototype game.
+•	Phân tích luồng nhận sát thương và các vấn đề về phân chia trách nhiệm trong cơ chế Guard/Deflect.
+•	Đề xuất hướng tổ chức DefenseComponent và quy tắc phối hợp với luồng nhận sát thương hiện có.
+•	Xây dựng danh sách các tình huống cần kiểm thử sau khi triển khai.
+•	Xác định hướng mở rộng phân tích sang hệ thống Enemy và kiểm thử tích hợp giữa các thành phần.
+2.6. Kết quả dự kiến
+•	Xây dựng được quy trình kiểm thử có thể tái hiện và ghi nhận kết quả.
+•	Kiểm tra được tính đúng đắn của các cơ chế gameplay đã lựa chọn thông qua những trường hợp cụ thể.
+•	Tạo cơ sở để kiểm thử tích hợp các thành phần của prototype, tiến tới áp dụng quy trình tương tự cho Observe, Dialogue và logic tiến triển cốt truyện.
+•	Ghi nhận được các lỗi và vấn đề tích hợp để làm căn cứ điều chỉnh kiến trúc hoặc cách triển khai.
+	Các kết quả kiểm thử chỉ được xác nhận sau khi cơ chế tương ứng được triển khai và chạy thử. Những nội dung mới dừng ở mức phân tích hoặc lập kế hoạch chưa được xem là kết quả kiểm thử thực tế.
+IV. KẾ HOẠCH THỰC HIỆN TUẦN TIẾP THEO
+1.	Hoàn thiện tài liệu phân tích kiến trúc Enemy và xác định các trường hợp kiểm thử phù hợp.
+2.	Tổng hợp yêu cầu tối thiểu cho môi trường kiểm thử, bao gồm cách thiết lập tình huống, quan sát trạng thái và ghi nhận kết quả.
+3.	Tiếp tục triển khai hoặc tích hợp các hạng mục đã được ưu tiên theo tiến độ dự án.
+4.	Xây dựng và kiểm tra các trường hợp kiểm thử cho những cơ chế đã triển khai, phân biệt rõ kết quả đạt được với các lỗi hoặc vấn đề chưa xử lý.
+5.	Từng bước áp dụng quy trình kiểm thử cho các cơ chế thuộc trọng tâm đề tài, đặc biệt là Observe, Dialogue và logic tiến triển cốt truyện.
+

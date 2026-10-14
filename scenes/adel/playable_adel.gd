@@ -5,9 +5,14 @@ extends CharacterBody2D
 @onready var spine_pivot = $SpinePivot
 @onready var weapon_pivot: Node2D = $WeaponPivot
 @onready var saber_hitbox: SaberHitbox = $WeaponPivot/SaberHitbox
+@onready var jump_hitbox: JumpAttackHitbox = $WeaponPivot/JumpAttackHitbox
 @onready var weapon: WeaponData = $WeaponHolder/Saber
 @onready var attack_hitbox: Area2D = $AttackHitbox
 @onready var attack_hitbox_shape: CollisionShape2D = $AttackHitbox/CollisionShape2D
+
+@export_group("Jump Attack")
+@export_range(0, 10000, 1, "or_greater") var jump_attack_damage: int = 20
+@export_range(0.0, 1.0, 0.01, "or_greater") var jump_attack_landing_active_time: float = 0.15
 
 @export_group("Stagger Threshold")
 @export_range(0.0, 500.0, 1.0, "or_greater") var stagger_knockback_distance: float = 72.0
@@ -84,6 +89,9 @@ var holding_duration: float:
 	get:
 		return defense.holding_duration if defense != null else 0.0
 var _position_before_rest: Vector2 = Vector2.ZERO
+var _campfire_ui_owner: Node
+var _campfire_cursor_ready := false
+
 var facing_direction: int = 1
 var is_doing_action: bool:
 	get:
@@ -145,6 +153,7 @@ func _ready() -> void:
 	_configure_stamina()
 	spine_anim.animation_finished.connect(_on_spine_anim_finished)
 	spine_anim.play("idle")
+	refresh_gameplay_cursor()
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("debug_take_damage"):
 		take_damage(DEBUG_DAMAGE_AMOUNT, global_position + Vector2(80.0, 0.0))
@@ -190,6 +199,7 @@ func _physics_defense(delta: float) -> void:
 func _physics_attack(delta: float) -> void:
 	if combat.is_jump_attack_landing:
 		combat.jump_attack_land_timer += delta
+		jump_hitbox.set_damage_window(combat.jump_attack_land_timer < minf(jump_attack_landing_active_time, CombatComponent.JUMP_ATTACK_LAND_UNLOCK))
 		if combat.is_jump_attack_land_unlocked() and can_move:
 			_physics_locomotion(delta)
 			return
@@ -204,8 +214,13 @@ func _physics_attack(delta: float) -> void:
 
 func _physics_locked(delta: float) -> void:
 	if not combat.apply_combat_air_physics(delta): locomotion.apply_vertical_physics(delta)
+	if combat.is_jump_attacking:
+		jump_hitbox.set_damage_window(not combat.is_jump_attack_hanging)
 	velocity.x = move_toward(velocity.x, 0.0, locomotion.GROUND_FRICTION * delta)
 	move_and_slide()
+	if combat.is_jump_attacking or combat.is_jump_attack_landing:
+		# Sample the last flight contact before switching to the landing window.
+		jump_hitbox.sample_damage(combat.is_jump_attacking and is_on_floor())
 	if is_on_floor() and combat.is_jump_attacking: _play_jump_attack_land()
 
 func _physics_locomotion(delta: float) -> void:
@@ -326,6 +341,54 @@ func get_attack_speed_multiplier() -> float:
 		return hud.get_attack_speed_multiplier()
 	return 1.0
 
+func begin_campfire_ui(owner: Node) -> bool:
+	if is_campfire_ui_active() or get_tree().paused or not state_machine.can_begin_action(): return false
+	_campfire_ui_owner = owner
+	_campfire_cursor_ready = false
+	var hud := _find_hud()
+	if hud != null and hud.has_method("set_campfire_hidden"): hud.set_campfire_hidden(true)
+	refresh_gameplay_cursor()
+	return true
+
+func is_campfire_ui_active() -> bool:
+	return is_instance_valid(_campfire_ui_owner)
+
+func is_in_rest_state() -> bool:
+	return state_machine.current == AdelStateMachine.State.REST
+
+func set_campfire_cursor_ready(owner: Node, ready: bool) -> void:
+	if _campfire_ui_owner != owner: return
+	_campfire_cursor_ready = ready
+	refresh_gameplay_cursor()
+
+func end_campfire_ui(owner: Node) -> void:
+	if _campfire_ui_owner != owner: return
+	_campfire_ui_owner = null
+	_campfire_cursor_ready = false
+	var hud := _find_hud()
+	if hud != null and hud.has_method("set_campfire_hidden"): hud.set_campfire_hidden(false)
+	# Scene removal can run after another screen has selected its cursor mode.
+	var scene := get_tree().current_scene if is_inside_tree() else null
+	if scene != null and (scene == self or scene.is_ancestor_of(self)): refresh_gameplay_cursor()
+
+func refresh_gameplay_cursor() -> void:
+	if not is_inside_tree(): return
+	if is_campfire_ui_active():
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE if _campfire_cursor_ready else Input.MOUSE_MODE_HIDDEN)
+		return
+	var visible_menu := false
+	for path in ["Camera2D/UI_Layer/master_menu", "Camera2D/UI_Layer/PauseMenu"]:
+		var menu := get_node_or_null(path) as Control
+		visible_menu = visible_menu or (menu != null and menu.visible)
+	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE if visible_menu else Input.MOUSE_MODE_HIDDEN)
+
+func prepare_to_exit_rest() -> void:
+	# Keep Rest ownership through the exit fade, but restore position/camera now.
+	global_position = _position_before_rest
+	velocity = Vector2.ZERO
+	presentation.play(&"idle")
+	snap_feet_to_floor()
+
 func enter_rest(face_left: bool) -> void:
 	deflect_slow_motion.cancel()
 	_position_before_rest = global_position
@@ -344,6 +407,19 @@ func exit_rest() -> void:
 	state_machine.resume_locomotion()
 	velocity = Vector2.ZERO
 	global_position = _position_before_rest
+	snap_feet_to_floor()
+
+func restore_checkpoint_state(saved_position: Vector2, face_left: bool, keep_resting: bool = false) -> void:
+	# exit_rest restores this anchor; update it before leaving the old state.
+	_position_before_rest = saved_position
+	global_position = saved_position
+	if keep_resting:
+		enter_rest(face_left)
+	else:
+		exit_rest()
+		_set_facing_direction(-1 if face_left else 1)
+		presentation.play(&"idle")
+	velocity = Vector2.ZERO
 	snap_feet_to_floor()
 
 func snap_feet_to_floor(max_drop: float = 96.0) -> void:
@@ -371,6 +447,7 @@ func play_pickup_animation() -> void:
 	presentation.play(&"loot")
 
 func _play_combo_step() -> void:
+	jump_hitbox.end_attack()
 	var attack_direction: float = Input.get_axis("move_left", "move_right")
 	if attack_direction != 0.0:
 		_update_facing(attack_direction)
@@ -385,7 +462,7 @@ func _play_combo_step() -> void:
 
 	var attack_animation: StringName = combat.get_attack_anim_name()
 	spine_anim.play(attack_animation)
-	saber_hitbox.play_attack_window(attack_animation)
+	saber_hitbox.play_attack_window(attack_animation, combat.get_combo_damage())
 	_arm_attack_interrupt(attack_animation)
 
 func _advance_queued_combo() -> void:
@@ -441,6 +518,12 @@ func _reset_combo() -> void:
 	combat.reset_combo_if_idle(is_doing_action)
 
 func _play_jump_attack() -> void:
+	# Switching within ATTACK must also invalidate the preceding combo swing.
+	_attack_interrupt_token += 1
+	_attack_interrupt_ready = false
+	saber_hitbox.stop_attack_window()
+	combat.disable_attack_hitbox()
+	jump_hitbox.begin_attack(jump_attack_damage)
 	combat.start_jump_attack()
 	state_machine.transition(AdelStateMachine.State.JUMP_HANG)
 	velocity = Vector2.ZERO
@@ -451,6 +534,8 @@ func _play_jump_attack_land() -> void:
 	state_machine.transition(AdelStateMachine.State.JUMP_LAND)
 	_playing_land_anim = false
 	spine_anim.play("jump_attack(land)")
+	jump_hitbox.set_damage_window(jump_attack_landing_active_time > 0.0)
+	jump_hitbox.sample_damage()
 
 func _cancel_jump_attack_land() -> void:
 	combat.cancel_jump_attack_land()
@@ -719,6 +804,7 @@ func _exit_player_state(state: AdelStateMachine.State) -> void:
 			_attack_interrupt_ready = false
 			combat.interrupt()
 			saber_hitbox.stop_attack_window()
+			jump_hitbox.end_attack()
 			combat.disable_attack_hitbox()
 		AdelStateMachine.State.DEFENSE:
 			velocity.x = 0.0

@@ -56,7 +56,30 @@ func switch_tab(index: int) -> void:
 			if i < contents.size() and contents[i] != null:
 				contents[i].hide()
 
+func _ui_actor() -> Node:
+	var node := get_parent()
+	while node != null:
+		if node.has_method("is_campfire_ui_active"): return node
+		node = node.get_parent()
+	return null
+
+func _campfire_blocks_menu() -> bool:
+	var actor := _ui_actor()
+	return actor != null and actor.is_campfire_ui_active()
+
+func _refresh_cursor() -> void:
+	var actor := _ui_actor()
+	if actor != null:
+		actor.refresh_gameplay_cursor()
+	else:
+		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE if visible else Input.MOUSE_MODE_HIDDEN)
+
 func _unhandled_input(event: InputEvent) -> void:
+	if _campfire_blocks_menu(): return
+	if visible and event.is_action_pressed("ui_cancel"):
+		if not _is_transitioning: _close_menu()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("toggle_master_menu"):
 		if _is_transitioning:
 			return  # Chặn spam B trong khi đang fade
@@ -100,9 +123,11 @@ func _input(event: InputEvent) -> void:
 # --- Fade & freeze logic ---
 
 func _open_menu() -> void:
+	if _is_transitioning or _campfire_blocks_menu(): return
 	_is_transitioning = true
 	modulate.a = 0.0
-	show()                        # Hiện trước khi freeze để Godot render frame đầu tiên
+	show()
+	_refresh_cursor()            # Hiện trước khi freeze để Godot render frame đầu tiên
 	get_tree().paused = true      # Freeze NGAY lập tức, không chờ fade xong
 	var tween = create_tween()
 	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)  # Tween vẫn chạy khi paused
@@ -116,5 +141,6 @@ func _close_menu() -> void:
 	tween.tween_property(self, "modulate:a", 0.0, 0.2).set_trans(Tween.TRANS_SINE)
 	tween.tween_callback(func():
 		hide()
+		_refresh_cursor()
 		_is_transitioning = false
 	)
