@@ -78,7 +78,8 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 	if event.is_action_pressed("attack"):
-		if dash.is_dodging:
+		# Stagger owns the held pose; its next phase would overwrite a new attack.
+		if dash.is_dodging or damage.is_stunned:
 			return
 
 		if combat.should_cancel_jump_attack_land():

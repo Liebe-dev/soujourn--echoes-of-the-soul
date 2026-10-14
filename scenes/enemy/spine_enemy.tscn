@@ -8,9 +8,10 @@ radius = 32.0
 height = 140.0
 
 [sub_resource type="RectangleShape2D" id="Weapon"]
-size = Vector2(200, 170)
+size = Vector2(231, 170)
 
 [node name="SpineEnemy" type="CharacterBody2D" unique_id=1072287283]
+z_index = 100
 collision_layer = 4
 script = ExtResource("1")
 animation_offsets = Dictionary[StringName, Vector2]({
@@ -42,6 +43,6 @@ collision_mask = 2
 monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="WeaponPivot/Hitbox" unique_id=1255359008]
-position = Vector2(-130, -55)
+position = Vector2(-114.5, -55)
 shape = SubResource("Weapon")
 disabled = true
