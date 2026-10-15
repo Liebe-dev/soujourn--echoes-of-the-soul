@@ -76,13 +76,14 @@ func _physics_process(delta: float) -> void:
 
 
 @warning_ignore("unused_parameter")
-func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
+func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> bool:
 	# Kept for the SaberHitbox API; knockback belongs to a later milestone.
 	if is_dead or dmg <= 0:
-		return
+		return false
 	current_health = maxi(current_health - dmg, 0)
 	if current_health == 0:
 		die()
+	return true
 
 
 func die() -> void:

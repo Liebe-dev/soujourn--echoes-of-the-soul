@@ -27,6 +27,7 @@ func _run() -> void:
 	get_tree().root.add_child(scene)
 	get_tree().current_scene = scene
 	var p = scene.get_node("PlayableAdel")
+	p.hit_stop_enabled = false
 	scene.get_node("Enemy").set_physics_process(false)
 	await frames(65)
 	var hud = p.get_node("Camera2D/hud")
@@ -35,7 +36,7 @@ func _run() -> void:
 	check(fsm.current == S.GROUNDED and fsm.is_in(S.LOCOMOTION) and not fsm.is_in(S.ATTACK), "grounded is a locomotion child")
 	await button(&"guard and deflect", true)
 	check(fsm.current == S.DEFENSE_HOLD and fsm.is_in(S.DEFENSE) and not p.can_move, "guard enters defense hierarchy and owns movement")
-	await wait(0.24)
+	await wait(0.34)
 	var duration: float = p.holding_duration
 	p.take_damage(20, p.global_position + Vector2(80, 0))
 	check(fsm.current == S.GUARD_REACTION and p.holding_duration >= duration and p.is_guarding, "sibling defense transition does not exit parent or reset timing")
@@ -45,6 +46,7 @@ func _run() -> void:
 	check(fsm.current == S.READY and fsm.is_in(S.LOCOMOTION) and not p.is_guarding, "release exits defense parent and enters interruptible ready")
 	await click(&"attack")
 	check(fsm.current == S.COMBO and fsm.is_in(S.ATTACK) and p.is_doing_action, "attack input enters combo child")
+	await wait(0.24)
 	await click(&"attack")
 	check(p.combat.attack_queued, "input queues real combo")
 	p.damage.is_invulnerable = false
@@ -109,6 +111,7 @@ func _run() -> void:
 	hud.restore_stagger_thresholds()
 	p.damage.is_invulnerable = false
 	await button(&"guard and deflect", true)
+	await wait(0.12)
 	p.take_damage(20, p.global_position + Vector2(80, 0))
 	await button(&"guard and deflect", false)
 	p.is_locked = true

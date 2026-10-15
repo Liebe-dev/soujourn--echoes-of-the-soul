@@ -37,12 +37,12 @@ var stamina_regen_per_second: float = 28.0
 var _stamina_regen_time_left: float = 0.0
 
 # --- Tick (thay cho khối stagger-lock + _process_bleeding trong _process của ui.gd) ---
-func tick(delta: float) -> Dictionary:
+func tick(delta: float, block_damage: bool = false) -> Dictionary:
 	if stagger_lock_timer > 0.0:
 		stagger_lock_timer = maxf(stagger_lock_timer - delta, 0.0)
 		if stagger_lock_timer <= 0.0:
 			stagger_lock_hp = -1
-	return _process_bleeding(delta)
+	return _process_bleeding(delta, block_damage)
 
 func regen_stamina(delta: float, blocked: bool = false) -> bool:
 	if blocked:
@@ -252,7 +252,7 @@ func _apply_raw_hp_loss(amount: int, from_bleed: bool = false) -> Dictionary:
 	out.died = hp <= 0
 	return out
 
-func _process_bleeding(delta: float) -> Dictionary:
+func _process_bleeding(delta: float, block_damage: bool = false) -> Dictionary:
 	var out := {"damage_taken": 0, "died": false, "flash_red": false}
 	if bleeding_level <= 0:
 		_bleed_tick_timer = 0.0
@@ -260,6 +260,7 @@ func _process_bleeding(delta: float) -> Dictionary:
 	_bleed_tick_timer += delta
 	if _bleed_tick_timer >= BLEED_TICK_INTERVAL:
 		_bleed_tick_timer = 0.0
+		if block_damage: return out
 		var dps: int = BLEED_DPS.get(bleeding_level, 3)
 		return _apply_raw_hp_loss(dps, true)
 	return out

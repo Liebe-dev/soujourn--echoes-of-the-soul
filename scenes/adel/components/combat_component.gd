@@ -28,6 +28,8 @@ const JUMP_ATTACK_LAND_UNLOCK := 0.3
 
 var combo_step: int = 0
 var attack_queued: bool = false
+var attack_buffer_duration := 0.18
+var _attack_buffer_left := 0.0
 var has_air_comboed: bool = false
 var is_jump_attacking: bool = false
 var is_jump_attack_hanging: bool = false
@@ -80,9 +82,19 @@ func handle_attack_input(is_doing_action: bool) -> AttackAction:
 		attack_queued = false
 		return AttackAction.START_COMBO
 	elif combo_step > 0 and combo_step < 4:
-		attack_queued = true
+		attack_queued = attack_buffer_duration > 0.0
+		_attack_buffer_left = attack_buffer_duration
 		return AttackAction.QUEUE_COMBO
 	return AttackAction.NONE
+
+func tick_input_buffer(delta: float) -> void:
+	if not attack_queued: return
+	_attack_buffer_left = maxf(_attack_buffer_left - delta, 0.0)
+	if _attack_buffer_left <= 0.0: clear_attack_buffer()
+
+func clear_attack_buffer() -> void:
+	attack_queued = false
+	_attack_buffer_left = 0.0
 
 # --- Combo progression on attack animation finish (was inline in _on_spine_anim_finished) ---
 func on_attack_anim_finished() -> AttackAction:
@@ -122,7 +134,7 @@ func should_cancel_jump_attack_land() -> bool:
 # cancels an in-progress attack. Does NOT reset combo_step — combo progression
 # is deliberately preserved.
 func interrupt() -> void:
-	attack_queued = false
+	clear_attack_buffer()
 	is_jump_attacking = false
 	is_jump_attack_hanging = false
 	is_jump_attack_landing = false

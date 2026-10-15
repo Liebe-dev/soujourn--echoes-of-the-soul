@@ -124,6 +124,8 @@ func _input(event: InputEvent) -> void:
 
 func _open_menu() -> void:
 	if _is_transitioning or _campfire_blocks_menu(): return
+	var actor := _ui_actor()
+	if actor != null: actor.clear_combat_input()
 	_is_transitioning = true
 	modulate.a = 0.0
 	show()

@@ -53,7 +53,7 @@ func _init(
 	stun_duration = maxf(stun_time, 0.0)
 
 func can_take_damage() -> bool:
-	return _has_live_body() and not is_invulnerable and not is_stunned
+	return _has_live_body() and not is_invulnerable and not is_stunned and not (_body.has_method("is_skill_damage_immune") and _body.is_skill_damage_immune())
 
 # --- Knockback direction (was _knockback_dir) ---
 func compute_knockback_dir(hit_from_global: Vector2, facing_direction: int) -> Vector2:
@@ -75,7 +75,7 @@ func apply_stagger(
 	stun_override: float = -1.0,
 	invulnerability_override: float = -1.0
 ) -> void:
-	if not _has_live_body():
+	if not _has_live_body() or (_body.has_method("is_skill_damage_immune") and _body.is_skill_damage_immune()):
 		return
 	active_knockback_distance = knockback_distance if distance_override < 0.0 else maxf(distance_override, 0.0)
 	active_knockback_duration = knockback_duration if push_override < 0.0 else maxf(push_override, 0.01)
@@ -128,4 +128,4 @@ func _connect_timeout(duration: float, callback: Callable) -> void:
 	# Signals can remove the body synchronously; check again after emitting them.
 	if not _has_live_body():
 		return
-	_body.get_tree().create_timer(duration).timeout.connect(callback, CONNECT_ONE_SHOT)
+	_body.get_node("/root/CombatTime").actor_timeout(_body, duration, callback)

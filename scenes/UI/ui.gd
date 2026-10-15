@@ -166,9 +166,11 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 
 func _process(delta: float) -> void:
+	if is_instance_valid(_stamina_actor): delta = CombatTime.actor_delta(_stamina_actor, delta)
+	var skill_immune: bool = is_instance_valid(_stamina_actor) and _stamina_actor.has_method("is_skill_damage_immune") and _stamina_actor.is_skill_damage_immune()
 	# CanvasLayer has its own canvas; transfer the existing fade/flash tint.
 	hud_art.modulate = modulate
-	var tick_result := _stats.tick(delta)
+	var tick_result := _stats.tick(delta, skill_immune)
 	if tick_result.damage_taken > 0:
 		sync_hp_display()
 		if tick_result.flash_red:
@@ -211,6 +213,8 @@ func heal_to_full() -> void:
 	fade_in()
 
 func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF, skip_stagger_thresholds: bool = false) -> Dictionary:
+	if is_instance_valid(_stamina_actor) and _stamina_actor.has_method("is_skill_damage_immune") and _stamina_actor.is_skill_damage_immune():
+		return {"damage_taken": 0, "staggered": false, "died": false, "flash_red": false}
 	var result := _stats.apply_damage(dmg, _hit_from_global, skip_stagger_thresholds)
 
 	if result.markers_changed:

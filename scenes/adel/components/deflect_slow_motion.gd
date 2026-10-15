@@ -1,41 +1,27 @@
 class_name DeflectSlowMotion
 extends Node
-## Owns a global time-scale pulse and restores it on completion or owner removal.
-
+## Deflect pose lifetime; CombatTime arbitrates its scale with hit-stop.
 signal finished
-
 var is_active := false
-var _previous_scale := 1.0
-var _generation := 0
+var _time: Node
 
-func start(scale: float = 0.6, duration: float = 0.2) -> void:
-	if not is_inside_tree() or is_queued_for_deletion():
-		return
-	if not is_active:
-		_previous_scale = Engine.time_scale
+func _ready() -> void:
+	_time = get_node("/root/CombatTime")
+	_time.effect_finished.connect(_on_effect_finished)
+
+func start(scale: float = 0.6, duration: float = 0.2, delay: float = 0.0) -> void:
+	if not is_inside_tree() or is_queued_for_deletion(): return
 	is_active = true
-	_generation += 1
-	Engine.time_scale = clampf(scale, 0.05, 1.0)
-	# Duration is wall time, independent of the time scale this pulse changes.
-	get_tree().create_timer(maxf(duration, 0.01), true, false, true).timeout.connect(
-		_on_timeout.bind(_generation), CONNECT_ONE_SHOT
-	)
+	_time.request(self, &"deflect", scale, maxf(duration, 0.01), delay)
 
 func cancel() -> void:
-	_generation += 1
-	_restore_scale()
-
-func _on_timeout(generation: int) -> void:
-	if generation != _generation or not is_active:
-		return
-	_restore_scale()
-	finished.emit()
-
-func _restore_scale() -> void:
-	if not is_active:
-		return
-	Engine.time_scale = _previous_scale
 	is_active = false
+	if is_instance_valid(_time): _time.remove(self, &"deflect")
+
+func _on_effect_finished(owner: Object, lane: StringName) -> void:
+	if owner != self or lane != &"deflect" or not is_active: return
+	is_active = false
+	finished.emit()
 
 func _exit_tree() -> void:
 	cancel()

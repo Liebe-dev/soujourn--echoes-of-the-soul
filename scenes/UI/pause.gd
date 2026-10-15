@@ -26,6 +26,9 @@ func _refresh_cursor() -> void:
 
 func pause_and_unpause() -> void:
 	if _is_transitioning or _campfire_blocks_menu(): return
+	if not get_tree().paused:
+		var actor := _ui_actor()
+		if actor != null: actor.clear_combat_input()
 	get_tree().paused = not get_tree().paused
 	visible = get_tree().paused
 	_refresh_cursor()

@@ -7,6 +7,7 @@ enum State {
 	ROOT, LOCOMOTION, GROUNDED, AIRBORNE, READY,
 	ATTACK, COMBO, JUMP_ATTACK, JUMP_HANG, JUMP_FALL, JUMP_LAND,
 	DEFENSE, DEFENSE_HOLD, GUARD_REACTION, DEFLECT_REACTION,
+	SKILL, SKILL_CHARGE, SKILL_RELEASE, SKILL_DASH, SKILL_IMPACT, SKILL_RECOVERY,
 	DASH, DASH_ACTIVE, DASH_SKID,
 	STAGGER, KNOCKBACK, STUN, CONTACT_REACTION, REST, PICKUP,
 }
@@ -17,6 +18,8 @@ const PARENT := {
 	State.ATTACK: State.ROOT, State.COMBO: State.ATTACK,
 	State.JUMP_ATTACK: State.ATTACK, State.JUMP_HANG: State.JUMP_ATTACK,
 	State.JUMP_FALL: State.JUMP_ATTACK, State.JUMP_LAND: State.ATTACK,
+	State.SKILL: State.ATTACK, State.SKILL_CHARGE: State.SKILL, State.SKILL_RELEASE: State.SKILL,
+	State.SKILL_DASH: State.SKILL, State.SKILL_IMPACT: State.SKILL, State.SKILL_RECOVERY: State.SKILL,
 	State.DEFENSE: State.ROOT, State.DEFENSE_HOLD: State.DEFENSE,
 	State.GUARD_REACTION: State.DEFENSE, State.DEFLECT_REACTION: State.DEFENSE,
 	State.DASH: State.ROOT, State.DASH_ACTIVE: State.DASH, State.DASH_SKID: State.DASH,
@@ -76,14 +79,20 @@ func can_begin_action() -> bool:
 	return is_in(State.LOCOMOTION) and can_move() and not _body.damage.is_touched_enemy and not _body.damage.is_stunned
 
 func handle_input(event: InputEvent) -> void:
+	if event.is_action("weapon_skill"):
+		if event.is_action_pressed("weapon_skill") and not event.is_echo(): _body.saber_skill.begin()
+		elif event.is_action_released("weapon_skill"): _body.saber_skill.release()
+		_body.get_viewport().set_input_as_handled()
+		return
 	if event.is_action("guard and deflect"):
 		if event.is_action_pressed("guard and deflect") and not event.is_echo():
 			_body._try_begin_guard()
-		elif event.is_action_released("guard and deflect") and _body.is_guarding:
-			_body._end_guard()
+		elif event.is_action_released("guard and deflect"):
+			_body._release_guard_input()
 		_body.get_viewport().set_input_as_handled()
 		return
-	if event.is_action_pressed("attack"):
+	if event.is_action_pressed("attack") and not event.is_echo():
+		if is_in(State.SKILL): return
 		if externally_locked or not movement_enabled or _body.deflect_slow_motion.is_active or _body.damage.is_stunned:
 			return
 		if is_in(State.LOCOMOTION) or is_in(State.ATTACK):
@@ -104,6 +113,8 @@ func physics_update(delta: float) -> void:
 		_body._physics_defense(delta)
 	elif is_in(State.DASH):
 		_body._physics_dash(delta)
+	elif is_in(State.SKILL):
+		_body.saber_skill.physics_update(delta)
 	elif is_in(State.ATTACK):
 		_body._physics_attack(delta)
 	elif current == State.PICKUP or externally_locked or not movement_enabled:

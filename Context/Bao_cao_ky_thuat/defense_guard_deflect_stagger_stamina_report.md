@@ -7,11 +7,13 @@
 
 Trong lượt tách báo cáo chỉ sửa tài liệu. Không thay đổi code, tuning, asset, rig, audio hoặc gameplay. Các kết quả chạy Godot ở mục 12 thuộc những lượt kiểm thử trước; không chạy lại game trong lượt tách tài liệu này.
 
+> Cập nhật 15/10/2026: Attack → Defense, buffer và hit-stop đã triển khai. Hướng dẫn Inspector và kết quả mới: [combat_feel_report.md](combat_feel_report.md). Các kết quả kiểm thử cũ bên dưới là lịch sử, không phải kết quả lượt này.
+
 ## 1. Các khái niệm và luật hiện tại
 
 - **Defense:** trạng thái giữ phòng thủ. Nhấn nút sẽ giữ pose `saber_defense`; bản thân việc giữ chưa phải Guard/Deflect thành công và không trừ stamina.
-- **Deflect:** nhận một đòn hợp lệ từ phía trước trong 0.2 giây đầu kể từ bắt đầu Defense, gồm mốc đúng 0.2 giây. Đủ stamina thì không mất HP, phát `saber_deflect` và slow motion.
-- **Guard:** nhận đòn hợp lệ từ phía trước sau cửa sổ Deflect, khi Defense vẫn có bảo vệ. Giảm damage cơ bản 50%, trừ stamina, phát `saber_guard` và bật lùi ngang nhẹ.
+- **Deflect:** nhận một đòn hợp lệ từ phía trước trong [0.10; 0.30) giây kể từ lần nhấn giữ Defense, sau startup Guard 0.10 giây. Đủ stamina thì không mất HP, phát `saber_deflect` và slow motion.
+- **Guard:** nhận đòn hợp lệ từ phía trước trong 0.10 giây đầu hoặc từ mốc 0.30 giây trở đi, khi Defense vẫn có bảo vệ. Giảm damage cơ bản 50%, trừ stamina, phát `saber_guard` và bật lùi ngang nhẹ.
 - **Stagger threshold:** mốc 66% và 33% max HP. Đòn trực tiếp vượt/chạm mốc còn sẵn sẽ chặn HP tại mốc, tiêu marker, gây phản ứng bật lùi/stun và áp debuff.
 - **Stagger do thiếu stamina:** dùng cùng phản ứng vật lý/animation/i-frame, nhưng không tiêu marker HP, không áp debuff ngẫu nhiên và không tự kích hoạt khóa HP mới.
 - **Stamina:** thanh xanh lục dưới HP. Tốn khi bắt đầu Dash hoặc khi một đòn được xử lý là Guard/Deflect. Attack chưa có chi phí stamina trong phạm vi hiện tại.
@@ -72,17 +74,17 @@ Thứ tự xử lý chính:
 6. Kiểm tra chết/respawn/rời tree sau khi apply damage, trước khi tạo phản ứng/timer tiếp theo.
 7. Nếu sống: thiếu stamina → stagger vật lý; threshold thật → stagger threshold; damage thường >0 → i-frame nhận đòn ngắn.
 
-Để bắt đầu Defense, HFSM phải cho phép bắt đầu hành động từ LOCOMOTION, không bị external lock/stun/contact reaction/slow-motion lock và stamina phải **>0**. Defense không được bắt đầu giữa ATTACK hoặc DASH. Điều kiện không yêu cầu luôn đứng sàn: có thể Defense trong AIRBORNE; gravity vẫn được áp theo nhánh vật lý tương ứng.
+Để bắt đầu Defense, HFSM phải cho phép bắt đầu hành động từ LOCOMOTION, không bị external lock/stun/contact reaction/slow-motion lock và stamina phải **>0**. Giữ Defense trong COMBO được ghi nhận: Attack 1–3 mở Defense từ 0.60 giây, Attack 4 từ 0.75 giây, mặc định sau khi hết animation. Không thêm cancel trong jump attack hoặc DASH. Điều kiện không yêu cầu luôn đứng sàn: có thể Defense trong AIRBORNE; gravity vẫn được áp theo nhánh vật lý tương ứng.
 
 Hướng đỡ dùng dấu của `(hit_from.x - player.x) × facing_direction`. Giá trị phải >0. Đòn phía sau, cùng x hoặc origin không hữu hạn không được coi là frontal hit. Như vậy, một VFX đi qua trước mặt nhưng origin enemy ở sau vẫn không được đỡ theo định nghĩa hiện tại.
 
-Sau khi bắt đầu Defense, `_update_defense()` kiểm tra release/lock/stamina trước nhánh xử lý chuyển động, giúp tránh giữ bảo vệ do mất hoặc bị tiêu thụ sự kiện release. Thời gian Deflect được đo từ **lần bắt đầu Defense**, không reset bởi mỗi lần Guard/Deflect hay mỗi lần đổi reaction pose.
+Sau khi bắt đầu Defense, `_update_defense()` kiểm tra release/lock/stamina trước nhánh xử lý chuyển động, giúp tránh giữ bảo vệ do mất hoặc bị tiêu thụ sự kiện release. Thời gian Deflect được đo từ **lần nhấn giữ chuột phải**, kể cả phần còn cam kết của combo, không reset bởi mỗi lần Guard/Deflect hay mỗi lần đổi reaction pose.
 
 ## 4. Defense và Guard đủ stamina
 
 ### 4.1. Defense không nhận đòn
 
-Giữ `saber_defense` cả khi đã quá 0.2 giây nếu chưa có hit. Không tự chuyển `saber_guard` chỉ vì hết cửa sổ Deflect. Không trừ stamina khi chỉ giữ nút, nhưng trạng thái Defense vẫn chặn hồi stamina.
+Giữ `saber_defense` cả khi đã quá 0.2 giây nếu chưa có hit. Không tự chuyển `saber_guard` chỉ vì hết cửa sổ Deflect; vẫn chỉ đổi pose khi nhận hit hợp lệ. Không trừ stamina khi chỉ giữ nút, nhưng trạng thái Defense vẫn chặn hồi stamina.
 
 Trong Defense, di chuyển ngang chủ động, tấn công, nhảy mới và Dash không được xử lý như trạng thái locomotion bình thường. Gravity/chuyển động dọc đang có vẫn được xử lý, tránh treo nhân vật trên không.
 
@@ -102,11 +104,11 @@ Nếu damage đã Guard chạm threshold HP thật, phản ứng threshold ưu t
 
 ## 5. Deflect đủ stamina và slow motion
 
-Deflect hợp lệ trong cửa sổ đầu trừ **20 stamina**, không trừ HP và không tạo debuff/tiêu marker threshold. Giữ pose `saber_deflect` trong pulse.
+Deflect hợp lệ sau Delay=0.10 trong Window=0.20 giây trừ **20 stamina**, không trừ HP và không tạo debuff/tiêu marker threshold. Giữ pose `saber_deflect` trong pulse.
 
 Tuning scene hiện tại: **time scale 0.5x, thời lượng 0.45 giây thực**. Default trong script là 0.6x / 0.2 giây; chỉ đọc default sẽ không phản ánh nhân vật đang được lưu.
 
-DeflectSlowMotion lưu scale trước pulse, đặt `Engine.time_scale`, và dùng timer `ignore_time_scale = true` để thời lượng pulse không kéo dài do chính hiệu ứng slow motion. Hết pulse hoặc node rời tree thì khôi phục scale đã lưu. Token generation ngăn callback cũ kết thúc nhầm pulse mới khi một pulse được khởi động lại.
+Autoload CombatTime là nơi duy nhất điều phối Engine.time_scale cho combat. DeflectSlowMotion quản lý vòng đời pose và gửi yêu cầu; hit-stop 0.065 giây thực chạy trước slow motion 0.45 giây thực đang lưu. Nhiều hiệu ứng dùng mức chậm mạnh nhất; pause giữ thời lượng còn lại và trả scale nền cho UI. Khi owner rời tree/cancel, khôi phục hiệu ứng còn hiệu lực hoặc scale nền. Không dùng nhiều timer riêng tự khôi phục scale đè nhau.
 
 Physics/FSM/animation dùng thời gian game sẽ cùng chậm; timer hồi stamina/stagger dùng thời gian game cũng bị kéo theo. Không tuyên bố rằng âm thanh, shader dùng đồng hồ thực hoặc một hệ thống tự bỏ qua time scale đều được giảm đúng tốc độ chỉ bằng thay Engine.time_scale. Không có thay đổi audio trong phần triển khai này.
 

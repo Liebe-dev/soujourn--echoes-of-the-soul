@@ -54,12 +54,13 @@ func fresh_guard(p, hud, late: bool) -> void:
 	hud.restore_stagger_thresholds()
 	p.damage.is_invulnerable = false
 	await button(&"guard and deflect", true)
-	if late: await wait(0.24)
+	await wait(0.34 if late else 0.12)
 func _run() -> void:
 	var scene = load("res://scenes/enemy/spine_enemy_test.tscn").instantiate()
 	get_tree().root.add_child(scene)
 	get_tree().current_scene = scene
 	var p = scene.get_node("PlayableAdel")
+	p.hit_stop_enabled = false
 	var enemy = scene.get_node("Enemy")
 	enemy.speed = 0.0
 	enemy.patrol_range = 0.0

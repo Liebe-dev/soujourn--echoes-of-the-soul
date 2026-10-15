@@ -26,6 +26,8 @@ buses/default_bus_layout=""
 
 [autoload]
 
+CombatTime="*res://scenes/adel/components/combat_time_effects.gd"
+
 SaveManager="*res://scenes/UI/save_manager.gd"
 PlayerProgress="*res://scenes/Mechanic/player_progress.gd"
 FmodManager="*uid://cds10pm7hwn3p"
@@ -43,6 +45,12 @@ window/stretch/mode="viewport"
 enabled=PackedStringArray("res://addons/fmod/plugin.cfg", "res://addons/godot_ai/plugin.cfg", "res://addons/psd_to_layer_scene/plugin.cfg")
 
 [input]
+
+weapon_skill={
+"deadzone": 0.2,
+"events": [Object(InputEventKey,"physical_keycode":81)]
+}
+
 
 ui_page_up={
 "deadzone": 0.5,

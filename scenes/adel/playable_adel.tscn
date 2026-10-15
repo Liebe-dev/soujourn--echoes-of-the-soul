@@ -1,5 +1,6 @@
 [gd_scene format=3 uid="uid://dhhn1rh24dtco"]
 
+[ext_resource type="Script" path="res://scenes/adel/components/saber_weapon_skill.gd" id="saber_skill"]
 [ext_resource type="Script" uid="uid://xl1mn1dbt32k" path="res://scenes/adel/playable_adel.gd" id="1_playable"]
 [ext_resource type="PackedScene" uid="uid://c2j1ldt5uvdn7" path="res://scenes/adel/weapon/saber.tscn" id="3_5ku1i"]
 [ext_resource type="Script" uid="uid://jti2ptpyhs8u" path="res://scenes/camera_2d.gd" id="3_67loa"]
@@ -7,13 +8,8 @@
 [ext_resource type="PackedScene" uid="uid://ri1fqqgxpl6v" path="res://scenes/UI/master_menu.tscn" id="5_57033"]
 [ext_resource type="PackedScene" uid="uid://4egogosl1we3" path="res://asset/Character/Adel/adel spine action use.tscn" id="69_73q5r"]
 [ext_resource type="Script" uid="uid://ceoihsyanr3kn" path="res://scenes/adel/components/saber_hitbox.gd" id="70_saber_hitbox"]
-
-[ext_resource type="Script" path="res://scenes/adel/components/jump_attack_hitbox.gd" id="71_jump_hitbox"]
-
+[ext_resource type="Script" uid="uid://bhyw5qdkhk5en" path="res://scenes/adel/components/jump_attack_hitbox.gd" id="71_jump_hitbox"]
 [ext_resource type="PackedScene" path="res://scenes/UI/game_pause_menu.tscn" id="pause_flow"]
-
-[sub_resource type="RectangleShape2D" id="JumpAttackShape"]
-size = Vector2(150, 100)
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]
 radius = 7.652174
@@ -198,6 +194,9 @@ _data = {
 &"saber_attack_4": SubResource("Animation_saber_attack_4")
 }
 
+[sub_resource type="RectangleShape2D" id="JumpAttackShape"]
+size = Vector2(150, 100)
+
 [node name="PlayableAdel" type="CharacterBody2D" unique_id=1485460165 groups=["Player", "playableAdel"]]
 collision_layer = 3
 script = ExtResource("1_playable")
@@ -254,7 +253,7 @@ debug_color = Color(0.9764706, 0.03137255, 0.1764706, 0.41960785)
 [node name="AnimationPlayer" type="AnimationPlayer" parent="WeaponPivot/SaberHitbox" unique_id=2255557]
 libraries/ = SubResource("AnimationLibrary_saber_hitbox")
 
-[node name="JumpAttackHitbox" type="Area2D" parent="WeaponPivot"]
+[node name="JumpAttackHitbox" type="Area2D" parent="WeaponPivot" unique_id=1473049919]
 position = Vector2(65, 20)
 collision_layer = 8
 collision_mask = 4
@@ -262,7 +261,7 @@ monitoring = false
 monitorable = false
 script = ExtResource("71_jump_hitbox")
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WeaponPivot/JumpAttackHitbox"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="WeaponPivot/JumpAttackHitbox" unique_id=31382205]
 shape = SubResource("JumpAttackShape")
 disabled = true
 
@@ -285,12 +284,15 @@ size_flags_vertical = 0
 process_mode = 3
 visible = false
 
-[node name="PauseMenu" parent="Camera2D/UI_Layer" instance=ExtResource("pause_flow")]
-process_mode = 3
+[node name="PauseMenu" parent="Camera2D/UI_Layer" unique_id=183142544 instance=ExtResource("pause_flow")]
 
 [node name="DodgeCooldown" type="Timer" parent="." unique_id=982212932]
 wait_time = 0.5
 one_shot = true
+
+
+[node name="SaberSkill" type="Node" parent="."]
+script = ExtResource("saber_skill")
 
 [connection signal="body_entered" from="WeaponPivot/SaberHitbox/Hitbox" to="WeaponPivot/SaberHitbox" method="_on_hitbox_body_entered"]
 [connection signal="timeout" from="DodgeCooldown" to="." method="_on_dodge_cooldown_timeout"]

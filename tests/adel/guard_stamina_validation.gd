@@ -40,7 +40,7 @@ func fresh(p, hud, late: bool, stamina: float = 100.0) -> void:
 	hud.sync_stamina_display()
 	p._set_facing_direction(1)
 	await button(&"guard and deflect", true)
-	if late: await wait(0.24)
+	await wait(0.34 if late else 0.12)
 func hit(p, amount: int = 20, y: float = 0.0) -> void:
 	p.take_damage(amount, p.global_position + Vector2(p.facing_direction * 80, y))
 func _run() -> void:
@@ -68,6 +68,7 @@ func _run() -> void:
 	get_tree().root.add_child(scene)
 	get_tree().current_scene = scene
 	var p = scene.get_node("PlayableAdel")
+	p.hit_stop_enabled = false
 	var enemy = scene.get_node("Enemy")
 	enemy.set_physics_process(false)
 	await frames(70)

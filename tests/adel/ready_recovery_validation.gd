@@ -24,6 +24,7 @@ func _run() -> void:
 	get_tree().root.add_child(scene)
 	get_tree().current_scene = scene
 	var p = scene.get_node("PlayableAdel")
+	p.hit_stop_enabled = false
 	scene.get_node("Enemy").set_physics_process(false)
 	await frames(65)
 	var hud = p.get_node("Camera2D/hud")
@@ -36,9 +37,10 @@ func _run() -> void:
 		p.damage.is_invulnerable = false
 		await button(&"guard and deflect", true)
 		if origin == "guard":
-			await wait(0.24)
+			await wait(0.34)
 			p.take_damage(20, p.global_position + Vector2(80, 0))
 		elif origin == "deflect":
+			await wait(0.12)
 			p.take_damage(20, p.global_position + Vector2(80, 0))
 		elif origin == "stagger":
 			hud.hp = 70
