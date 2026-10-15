@@ -33,7 +33,7 @@ const CameraTargetLock = preload("res://scenes/camera/camera_target_lock.gd")
 
 @export_category("Hit Stop Zoom")
 @export var hit_stop_zoom_enabled: bool = true
-@export_range(1.1, 1.2, 0.01) var hit_stop_zoom_multiplier: float = 1.15
+@export_range(1.0, 1.2, 0.01) var hit_stop_zoom_multiplier: float = 1.05
 @export_range(0.0, 0.2, 0.005) var hit_stop_zoom_in_duration: float = 0.025
 @export_range(0.0, 0.3, 0.005) var hit_stop_zoom_out_duration: float = 0.09
 

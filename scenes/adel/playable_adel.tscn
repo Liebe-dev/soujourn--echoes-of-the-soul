@@ -279,6 +279,9 @@ horizontal_center_snap_distance = 0.2
 mouse_pan_max_distance = Vector2(120, 75)
 mouse_pan_deadzone = 0.15
 mouse_pan_follow_speed = 6.699999999999999
+hit_stop_zoom_multiplier = 1.02
+hit_stop_zoom_in_duration = 0.035
+hit_stop_zoom_out_duration = 0.08
 
 [node name="hud" parent="Camera2D" unique_id=558584565 instance=ExtResource("4_aphpq")]
 offset_left = -897.0

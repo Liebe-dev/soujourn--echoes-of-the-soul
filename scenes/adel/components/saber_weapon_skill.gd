@@ -159,7 +159,9 @@ func _lunge(delta: float) -> void:
 		_start_recovery()
 
 func _valid_enemy(node) -> bool:
-	return is_instance_valid(node) and node != _body and not node.is_queued_for_deletion() and not node.is_in_group("Player") and node.has_method("take_damage")
+	if not is_instance_valid(node) or node == _body or node.is_queued_for_deletion() or node.is_in_group("Player") or not node.has_method("take_damage"): return false
+	if "is_dead" in node and node.is_dead: return false
+	return not ("current_health" in node and node.current_health <= 0)
 
 func _first_enemy_contact(motion: Vector2) -> Dictionary:
 	var shape: CollisionShape2D = _body.get_node("CollisionShape2D")

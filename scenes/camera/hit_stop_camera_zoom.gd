@@ -41,7 +41,7 @@ func _process(_delta: float) -> void:
 	if _elapsed >= rise + fall:
 		cancel()
 		return
-	var peak: float = clampf(_camera.hit_stop_zoom_multiplier, 1.1, 1.2)
+	var peak: float = clampf(_camera.hit_stop_zoom_multiplier, 1.0, 1.2)
 	if _elapsed < rise:
 		var progress := clampf(_elapsed / maxf(rise, 0.000001), 0.0, 1.0)
 		_current_multiplier = lerpf(_start_multiplier, peak, 1.0 - pow(1.0 - progress, 3.0))

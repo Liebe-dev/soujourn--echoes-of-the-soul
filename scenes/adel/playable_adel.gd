@@ -830,17 +830,17 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT: clear_combat_input()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_IN and is_node_ready(): refresh_gameplay_cursor.call_deferred(true)
 
-func _request_hit_stop(duration: float) -> float:
+func _request_hit_stop(duration: float, camera_zoom: bool = true) -> float:
 	if not hit_stop_enabled or duration <= 0.0: return 0.0
 	var accepted := CombatTime.request(self, &"hit_stop", hit_stop_scale, duration)
-	if accepted > 0.0:
+	if accepted > 0.0 and camera_zoom:
 		var camera := get_node_or_null("Camera2D") as Camera2D
 		if camera != null and camera.has_method("play_hit_stop_zoom"): camera.play_hit_stop_zoom()
 	return accepted
 
 func _on_saber_hit_confirmed(attack_name: StringName) -> void:
 	if attack_name == &"saber_skill": return
-	_request_hit_stop(finisher_hit_stop_duration if attack_name == &"saber_attack_4" else attack_hit_stop_duration)
+	_request_hit_stop(finisher_hit_stop_duration if attack_name == &"saber_attack_4" else attack_hit_stop_duration, false)
 
 func _exit_tree() -> void:
 	CombatTime.remove(self)

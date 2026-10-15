@@ -104,6 +104,11 @@ func die() -> void:
 	velocity = Vector2.ZERO
 	set_physics_process(false)
 	PlayerProgress.add_exp(exp_reward)
+	_finish_death()
+
+
+func _finish_death() -> void:
+	# Animated enemies override this final step; prototypes keep immediate removal.
 	queue_free()
 
 

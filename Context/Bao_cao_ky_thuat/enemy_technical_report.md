@@ -212,7 +212,7 @@ Các clip nguồn đã được đọc lại bằng Godot:
 - `attack2`: 0.7 giây, không loop.
 - `attack3`: 0.9 giây, không loop.
 - `detect player`: 0.7 giây, không loop; được dùng trong DETECT để chuyển WALK → RUN.
-- `death`: 10.0 giây; có trong rig nhưng enemy hiện không chờ/phát clip này trước khi giải phóng.
+- `death`: 10.0 giây; phát ngay khi HP về 0, giữ fade gốc và giải phóng enemy khi clip kết thúc (cập nhật 2026-10-15).
 - `RESET`: clip reset 0.001 giây của rig; không phải một state AI combat.
 
 Rig và hitbox melee được author ở hướng trái. `_update_facing()` đặt Scale X của cả VisualPivot và WeaponPivot thành +1 khi nhìn trái, -1 khi nhìn phải. Nhờ mirror hai nhánh cùng nhau, hitbox phía trước đổi phía theo hình quái. LeapHitbox nằm ở root và giữ offset của thân, không mirror qua WeaponPivot.
@@ -294,7 +294,7 @@ SaberHitbox có `_attack_active` và registry riêng, gửi lượng damage đư
 
 EnemyBase bỏ qua damage ≤0 hoặc khi `is_dead`, giảm HP tối thiểu về 0, gọi `die()` khi hết HP. Tham số origin được giữ để tương thích API nhưng enemy chưa dùng nó để knockback/hit reaction.
 
-`die()` đặt `is_dead = true` trước khi thưởng EXP và `queue_free()`, tránh damage/death lặp trong cùng frame thưởng nhiều lần. SpineEnemy đóng damage window trước khi gọi `super.die()`. Enemy được giải phóng deferred, không tự respawn. `PlayerProgress.add_exp(30)` có thể tiêu EXP vào tăng cấp, nên số EXP còn hiển thị sau khi chết không luôn tăng đúng 30 nếu vừa qua ngưỡng level.
+`die()` đặt `is_dead = true`, HP 0, dừng physics rồi thưởng EXP một lần. Bước `_finish_death()` mặc định vẫn queue_free ngay cho EnemyBase/Wobtear. SpineEnemy ghi đè bước này: vào DEAD, đóng damage, tắt hurtbox/hitbox/collision/AI, bỏ lock-on và phát death gốc 10 giây; chỉ queue_free khi clip hoàn tất. Stun Q không được bật lại corpse. Reset/reload map tạo enemy mới, không lưu death vào save. Chi tiết tại [enemy_death_report.md](enemy_death_report.md). `PlayerProgress.add_exp(30)` có thể tiêu EXP vào tăng cấp nên EXP còn hiển thị không nhất thiết tăng đúng 30.
 
 ## 10. Giao tiếp với hệ thống phòng thủ của Player
 
@@ -411,7 +411,7 @@ Những mục dưới đây là **đề xuất, chưa được triển khai ho�
 
 1. **Nghiệm thu cảm giác combat:** người thiết kế chốt tầm phát hiện, nhịp lấy đà, vùng vồ, tầm VFX, xác suất attack3 và cooldown. Các giá trị export hiện tại là tuning cấu hình, không phải chứng minh cân bằng đã hoàn thành.
 2. **Đồng bộ animation/damage window khi retime:** quyết định tiếp tục dùng giây FSM hay chuyển marker/callback theo clip. Hiện thay speed_scale riêng cần căn lại; window đầu ≥ cuối hoặc cuối vượt độ dài clip chưa có validate đầy đủ trong editor.
-3. **Death/hit reaction cho enemy:** rig có death nhưng hiện queue_free ngay. Nếu dùng death animation cần giữ death guard, đóng damage ngay và bảo đảm EXP chỉ một lần, rồi mới free theo clip/timer an toàn.
+3. **Hit reaction cho enemy:** death đã được nối với clip gốc 10 giây, tắt collider và giữ EXP một lần (2026-10-15); các phản ứng trúng đòn chưa có yêu cầu riêng vẫn là phần việc tiếp theo.
 4. **Perception/navigation:** nếu cần, thêm line of sight, kiểm tra mép vực, giải pháp tường/nền cao và điều kiện mất mục tiêu. Không thêm tự động chỉ vì đã có RUN.
 5. **Damage scaling của Player:** Saber đã đọc WeaponData.damage và có hệ số combo thứ 4; jump có damage export riêng. Rà soát các hệ số debuff/nâng cấp trước khi nối thêm scaling. Enemy damage có export riêng; các luồng cần được kiểm tra độc lập.
 6. **Hurtbox độc lập nếu cần:** chỉ tách Area2D Hurtbox khi gameplay cần khác body collider, nhiều vùng/bone hoặc armor. Khi tách, phải cập nhật Saber query/API thay vì chỉ thêm node mà giữ truy vấn body cũ.

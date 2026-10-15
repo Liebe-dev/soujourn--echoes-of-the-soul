@@ -1,7 +1,7 @@
 extends EnemyBase
 ## Uses EnemyBase's health/death contract; this enemy owns its combat decisions.
 
-enum State { WALK, RUN, WINDUP, LEAP, LAND, MELEE, RECOVERY, DETECT }
+enum State { WALK, RUN, WINDUP, LEAP, LAND, MELEE, RECOVERY, DETECT, DEAD }
 
 @export_group("Detection")
 @export_range(1.0, 2000.0) var detection_distance: float = 500.0
@@ -231,6 +231,7 @@ func _begin_melee() -> void:
 
 
 func _enter_state(next: State) -> void:
+	if is_dead: return
 	_set_damage_window(false)
 	state = next
 	_elapsed = 0.0
@@ -250,6 +251,9 @@ func _enter_state(next: State) -> void:
 
 
 func _on_animation_finished(clip: StringName) -> void:
+	if is_dead:
+		if clip == &"death": queue_free()
+		return
 	# Only the live detection transition owns this completion signal.
 	if clip != &"detect player" or state != State.DETECT:
 		return
@@ -260,6 +264,7 @@ func _on_animation_finished(clip: StringName) -> void:
 
 
 func _set_damage_window(active: bool) -> void:
+	active = active and not is_dead
 	var selected: Area2D = null
 	if active:
 		if state == State.LEAP: selected = leap_hitbox
@@ -307,9 +312,39 @@ func _try_hit_body(body: Node2D) -> void:
 		body.take_damage(_swing_damage, global_position)
 
 
-func die() -> void:
+func _finish_death() -> void:
+	if not is_inside_tree() or is_queued_for_deletion(): return
+	state = State.DEAD
+	target = null
+	attack_animation = &""
+	_swing_damage = 0
+	_hit_targets.clear()
 	_set_damage_window(false)
-	super.die()
+	set_process(false)
+	remove_from_group(&"camera_lock_targets")
+	remove_from_group(&"Enemy")
+	# A pre-existing Q stun must never move or re-enable this corpse.
+	var stun := get_node_or_null("WeaponSkillStun")
+	if stun != null:
+		stun.set_physics_process(false)
+		stun.queue_free()
+	var colliders: Array[Node] = [self]
+	colliders.append_array(find_children("*", "CollisionObject2D", true, false))
+	for collider in colliders:
+		collider.set_deferred("collision_layer", 0)
+		collider.set_deferred("collision_mask", 0)
+		if collider is Area2D:
+			collider.set_deferred("monitoring", false)
+			collider.set_deferred("monitorable", false)
+	for shape in find_children("*", "CollisionShape2D", true, false): shape.set_deferred("disabled", true)
+	for shape in find_children("*", "CollisionPolygon2D", true, false): shape.set_deferred("disabled", true)
+	if animation_player == null or not animation_player.has_animation(&"death"):
+		push_warning("SpineEnemy is missing death animation; removing immediately.")
+		queue_free()
+		return
+	# Keep the authored 10-second clip and its fading; no extra fade or wall-time timer.
+	animation_player.speed_scale = 1.0
+	_set_animation(&"death")
 
 
 func _update_facing() -> void:
@@ -321,6 +356,7 @@ func _update_facing() -> void:
 
 
 func _set_animation(requested: StringName) -> void:
+	if is_dead and requested != &"death": return
 	if animation_player == null:
 		return
 	var clip := requested if animation_player.has_animation(requested) else &"walk"
