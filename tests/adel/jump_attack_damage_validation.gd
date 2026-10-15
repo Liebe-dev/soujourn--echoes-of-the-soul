@@ -92,6 +92,7 @@ func _run() -> void:
 	await frames(70)
 	var hud = p.get_node("Camera2D/hud")
 	hud.set_process(false)
+	p.vitals.simulation_enabled = false
 	ground_y = p.position.y
 	enemy_ground_y = enemy.position.y
 	if not "jump_hitbox" in p or not p.has_node("WeaponPivot/JumpAttackHitbox"):

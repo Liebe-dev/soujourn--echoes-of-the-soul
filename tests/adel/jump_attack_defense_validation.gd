@@ -74,6 +74,7 @@ func _run() -> void:
 	floor_y = p.position.y
 	hud = p.get_node("Camera2D/hud")
 	hud.set_process(false)
+	p.vitals.simulation_enabled = false
 	p.hit_stop_enabled = false
 	for facing in [-1,1]:
 		await reset()

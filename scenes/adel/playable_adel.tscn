@@ -202,14 +202,17 @@ collision_layer = 3
 script = ExtResource("1_playable")
 stagger_knockback_distance = 220.0
 stagger_knockback_duration = 0.4
+stamina_exhaustion_zoom_multiplier = 1.1
 stagger_zoom_in_duration = 0.09
 stagger_zoom_return_lead = 0.25
 stagger_slow_motion_duration = 0.36
+deflect_delay = 0.03
 deflect_slow_motion_scale = 0.5
 deflect_slow_motion_duration = 0.45
 guard_knockback_distance = 20.0
 guard_knockback_duration = 0.1
-stamina_regen_delay = 1.0
+stamina_regen_delay = 0.8
+stamina_regen_per_second = 33.0
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1090059515]
 position = Vector2(-5, -1.1920929e-07)
@@ -300,7 +303,7 @@ visible = false
 [node name="PauseMenu" parent="Camera2D/UI_Layer" unique_id=183142544 instance=ExtResource("pause_flow")]
 
 [node name="DodgeCooldown" type="Timer" parent="." unique_id=982212932]
-wait_time = 0.5
+wait_time = 0.06
 one_shot = true
 
 [node name="SaberSkill" type="Node" parent="." unique_id=1870857445]

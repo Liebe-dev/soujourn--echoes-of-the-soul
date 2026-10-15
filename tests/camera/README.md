@@ -41,3 +41,8 @@ godot --path <copied-project> --rendering-method gl_compatibility res://tests/ca
 56 assertions in each mode cover the accepted-hit path for all four Saber swings, actual Guard/Deflect input, all three real Q skill tiers, pulse amplitude/return, rejected/zero/whiff hits, retriggers, pause, stagger arbitration, enable/disable controls, existing jump no-hit-stop behavior, camera changes, and Player deletion. This version verifies the current user scene tuning: stagger distance220, frame0 duration0.4 and zoom return lead0.25; it does not replace those scene values with script defaults.
 
 Native mode focuses a 1280x720 window and saves `hitstop-zoom-peak.png`. Timings are measured in unpaused real time; frame scheduling gives slight sampling differences at the short peak. Only the pulse duration is unscaled, not gameplay timers or animations.
+
+
+## Ground framing and shorter stamina-exhaustion slow motion
+
+Run `ground_framing_validation.tscn` only in a copied project with custom user directory containing `CodexGroundFraming20261015`. The suite checks the projected physical foot plane at 43/270 of viewport height above the bottom, across three viewport sizes and absolute zoom 1/1.5/2; horizontal delay; mouse pan; repeated zoom; and real exhausted guard/deflect versus normal threshold slow-motion duration. There are 35 checks in headless and native modes. Native mode captures the viewport at the three zoom levels and the real stagger peak. Tests never modify production camera or player scene tuning.

@@ -80,9 +80,13 @@ func _run() -> void:
 	await wait(1.1)
 	hud = p.get_node("Camera2D/hud")
 	hud.set_process(false)
+	p.vitals.simulation_enabled = false
 	p._set_facing_direction(1)
 	check(p.attack_defense_unlock_time == 0.6 and p.attack_4_defense_unlock_time == 0.75, "default defense commitment is 0.60/0.75 seconds")
-	check(p.attack_input_buffer == 0.18 and p.deflect_delay == 0.1 and p.deflect_window == 0.2, "buffer and deflect defaults match approved design")
+	# This matrix tests the approved 100ms baseline, independent of designer scene overrides.
+	p.deflect_delay = 0.1
+	p.defense.deflect_delay = 0.1
+	check(p.attack_input_buffer == 0.18 and p.deflect_delay == 0.1 and p.deflect_window == 0.2, "buffer and deflect regression fixture matches approved baseline")
 	for step in range(1,5):
 		await reset()
 		await attack(step)

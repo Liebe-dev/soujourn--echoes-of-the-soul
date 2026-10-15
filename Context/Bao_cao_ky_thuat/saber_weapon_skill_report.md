@@ -101,3 +101,10 @@ Tài liệu engine đối chiếu: [shape sweep và initial overlap](https://doc
 - SABER SKILL RESULT: 160 checks, 0 failures
 
 Không dùng save thật, không thay clip/texture gốc, không thêm audio. Những lỗi parser trong quá trình phát triển đã được sửa và chạy lại trước khi áp dụng. Không commit/push.
+
+
+## Cập nhật 2026-10-15 — đổi hướng khi tụ Q
+
+A/D đổi hướng trong cả ba tư thế tụ Q khi vẫn giữ nút, đồng bộ animation/WeaponPivot và hướng lao. Không di chuyển ngang hoặc reset charge_time/tier. Release lấy hướng input mới nhất ngay cả khi đổi hướng và thả Q cùng một frame; hướng khóa từ lúc thả đến hết release/lunge/impact/recovery. Q nhấn nhanh vẫn giữ thời gian lấy đà tối thiểu; không đổi hướng trong phần lấy đà còn lại sau khi thả. Full charge khóa hướng lúc tự lao. Không đổi thông số thời gian, khoảng cách, damage, i-frame hoặc stun.
+
+Test `res://tests/adel/facing_input_validation.tscn`: 29 check headless + 29 check có render. Có kiểm tra hitbox thật gây đúng sát thương cho enemy bên trái sau khi quay, các pose tụ, nhấn nhanh, release cùng frame và tự lao full charge. Chỉ chạy trên save riêng CodexFacingInput20261015.

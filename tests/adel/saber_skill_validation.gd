@@ -60,6 +60,7 @@ func reset() -> void:
 	p._set_facing_direction(1)
 	p.combat.combo_step = 0
 	hud.set_process(false)
+	p.vitals.simulation_enabled = false
 	hud.hp = 100
 	hud.clear_all_debuffs()
 	hud.restore_stagger_thresholds()
@@ -82,13 +83,20 @@ func _run() -> void:
 	get_tree().root.add_child(scene)
 	get_tree().current_scene = scene
 	p = scene.get_node("PlayableAdel")
+	# This suite asserts Q time cleanup; stagger camera/slow motion has its own suite.
+	p.stagger_zoom_enabled = false
+	p.stagger_slow_motion_enabled = false
 	skill = p.saber_skill
+	skill.lunge_speed = 900.0
+	skill.charge_level_1_time = 1.0
+	skill.charge_level_2_time = 2.0
 	enemy = scene.get_node("Enemy")
 	enemy.set_physics_process(false)
 	await frames(70)
 	floor_y = p.position.y
 	hud = p.get_node("Camera2D/hud")
 	hud.set_process(false)
+	p.vitals.simulation_enabled = false
 	check(InputMap.has_action(&"weapon_skill") and InputMap.action_get_events(&"weapon_skill")[0].physical_keycode == KEY_Q,"weapon skill is bound to physical Q")
 	check(skill.damage == 20 and skill.lunge_distance == 180 and skill.lunge_speed == 900,"configurable tap damage and lunge defaults")
 	check(skill.charge_level_1_time == 1.0 and skill.charge_level_2_time == 2.0 and skill.charged_release_windup == 0.1,"approved charge and release timing defaults")
@@ -192,7 +200,9 @@ func _run() -> void:
 	p.damage.apply_stagger(Vector2.LEFT)
 	hud.bleeding_level = 1
 	hud._stats._bleed_tick_timer = StatsComponent.BLEED_TICK_INTERVAL
-	hud._process(0.01)
+	p.vitals.simulation_enabled = true
+	p.vitals.tick(0.01, 0.01)
+	p.vitals.simulation_enabled = false
 	check(hud.hp==100 and not p.damage.is_stunned and skill.is_dashing(),"lunge rejects direct/HUD/bleed damage and stagger")
 	hud.clear_all_debuffs()
 	await finished()

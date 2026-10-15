@@ -1,5 +1,7 @@
 # BÁO CÁO KỸ THUẬT — DEFENSE / GUARD / DEFLECT / STAGGER / STAMINA
 
+> Cập nhật sau refactor 16/10/2026: đã sửa ownership i-frame, chuyển stats/đồng hồ sang Player, gom dash vào module và cho defense bắt đầu ngay sau skid, không chờ cooldown. Xem [player_runtime_refactor_report.md](player_runtime_refactor_report.md). Nội dung và kết quả trước đó bên dưới là snapshot lịch sử; i-frame bug đã nêu trong snapshot nay đã có regression và được sửa.
+
 **Dự án:** Sojourn: Echoes of the Soul  
 **Ngày lập:** 14/10/2026  
 **Phạm vi:** hệ thống phòng thủ, nhận đòn và stamina của PlayableAdel; tương tác với các nguồn damage.  
@@ -317,3 +319,35 @@ Các mục sau là đề xuất để chọn scope sau, không tự triển khai
 `guard_def.md` và `guard_stamina.md` được giữ lại làm tài liệu ở các thời điểm trước, không xóa legacy báo cáo. Các giá trị cũ như delay 1.5 hoặc bản kế hoạch animation ban đầu không thay thế source/scene hiện tại. Báo cáo độc lập này là bản tổng hợp được đối chiếu lại tại ngày lập; tiếp tục cập nhật khi gameplay thay đổi.
 
 Bổ sung damage Player: xem `Context/Bao_cao_ky_thuat/combat_damage_tuning.md` cho combo 20/24, jump attack và vị trí chỉnh HP/enemy skill damage. Không thêm chi phí stamina cho attack trong thay đổi đó.
+
+
+## Cập nhật 2026-10-15 — đổi hướng trong defense
+
+A/D đổi hướng tại chỗ trong defense hold, guard reaction và deflect reaction. Dùng đường face hiện có để đồng bộ facing_direction, SpinePivot và WeaponPivot. Phân loại hit trước/sau dựa theo hướng mới. Không reset thời gian giữ defense hoặc mở lại cửa sổ deflect; không đổi hướng world-space của cú bật lùi đã bắt đầu. Không đổi chi phí stamina hoặc animation/timing.
+
+Kiểm tra Godot: test facing_input_validation, 29 check headless và 29 check có render, bao gồm hit guard/deflect thật từ hướng vừa quay và giữ animation khi đổi hướng.
+
+
+## Cập nhật 2026-10-15 — zoom riêng khi thiếu stamina
+
+Guard/Deflect được chấp nhận với stamina còn ít hơn chi phí dùng `Stamina Exhaustion Zoom Multiplier = 1.3` (+30%). Chỉnh ở node gốc PlayableAdel trong playable_adel.tscn, Inspector → Stagger Impact. Stagger do ngưỡng HP vẫn dùng `Stagger Zoom Multiplier` (mặc định 1.5, +50%). Mức zoom tính so với zoom nền camera, không cộng dồn với hit-stop zoom.
+
+Chỉ tách cường độ zoom; giữ nguyên animation hai frame, quãng đường/thời gian bật lùi, stun, i-frame, slow motion và thời gian trả zoom. Ngữ cảnh thiếu stamina chỉ tồn tại trong lúc apply_stagger phát tín hiệu đồng bộ; không ảnh hưởng stagger thường xảy ra sau đó.
+
+Test `res://tests/adel/exhaustion_zoom_validation.tscn`: 27 kiểm tra headless và 27 có render trong Godot 4.7, trên save riêng CodexExhaustionZoom20261015. Kiểm tra Guard/Deflect với 10 stamina, HP/stamina/threshold không đổi luật, peak camera 1.3, trả zoom nền, stagger thường sau đó vẫn 1.5 và thay thông số riêng không đổi stagger thường.
+
+
+## Cập nhật 2026-10-16 — giảm thời lượng slow motion thiếu stamina
+
+Guard/Deflect thiếu stamina vẫn dùng zoom riêng và đầy đủ knockback/animation/stun/i-frame như hiện tại. Thời lượng slow motion riêng bằng `Stagger Slow Motion Duration * Stamina Exhaustion Slow Motion Duration Multiplier`; hệ số mặc định 0.5. Với scene hiện tại: 0.36s → 0.18s, giữ scale cũ. Chỉnh trên node gốc PlayableAdel → Stagger Impact. Stagger HP thường giữ toàn bộ thời lượng. Camera dùng ground framing 43/270; xem `camera_ground_framing_report.md`.
+
+
+## Cập nhật 2026-10-16 — giữ defense khi dash
+
+Nhấn giữ defense trong DASH_ACTIVE/DASH_SKID hoặc thời gian cooldown sẽ ghi nhận yêu cầu chờ. Defense chỉ bắt đầu khi đã thoát DASH, dash.able_to_dodge được Timer cooldown trả về true và có stamina. Không ngắt dash, rút ngắn cooldown hoặc thêm chi phí stamina cho thao tác giữ.
+
+Thả nút, clear_combat_input (menu, focus, rest, stagger...) hủy yêu cầu chờ. Nếu dash tiêu hết stamina, có thể giữ yêu cầu trong dash/cooldown; nếu stamina hồi về >0 trước lúc hết cooldown thì vẫn vào defense. Nếu đến lúc đó stamina vẫn bằng 0, yêu cầu bị hủy và không vào defense.
+
+Giữ cách tính _guard_press_age từ lúc nhấn nút: chờ qua dash/cooldown không cấp lại cửa sổ deflect. Không thay deflect_delay của scene (người dùng hiện đã đặt 0.03), cooldown dash, tốc độ dash hoặc animation.
+
+Test `res://tests/adel/dash_defense_validation.tscn`: 24 check headless + 24 check có render, gồm dash đất/trên không, toàn bộ cooldown, thả trong dash/cooldown, hủy do input cleanup, không cấp deflect mới, hết stamina và hồi stamina trước khi cooldown xong. Hồi quy combat_feel: 106 check headless. Bộ hồi quy cũ có fixture deflect_delay = 0.1 riêng để kiểm tra baseline thiết kế; scene chơi thật không bị sửa. Mọi test dùng save riêng CodexDashDefense/CodexCombatFeel.

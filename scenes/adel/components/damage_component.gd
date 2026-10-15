@@ -27,7 +27,16 @@ const HIT_INVULN_SEC := 0.2
 # --- Hit-reaction state owned by DamageComponent ---
 var is_stunned: bool = false
 var is_knocking_back: bool = false
-var is_invulnerable: bool = false
+# Compatibility setter is for legacy callers/test reset. Gameplay owns named sources.
+var is_invulnerable: bool:
+	get: return not _invulnerability_sources.is_empty()
+	set(value):
+		if value: grant_invulnerability(&"legacy")
+		else: _invulnerability_sources.clear()
+var _invulnerability_sources: Dictionary = {}
+var _next_immunity_token := 0
+var _stagger_generation := 0
+var _stagger_immunity_token := 0
 var is_touched_enemy: bool = false
 
 var active_knockback_distance: float
@@ -102,45 +111,55 @@ func apply_stagger(
 	_knockback_elapsed = 0.0
 	is_stunned = true
 	is_knocking_back = true
-	is_invulnerable = true
+	_stagger_generation += 1
+	_stagger_immunity_token = grant_invulnerability(&"stagger")
 	var direction := signf(knockback_dir.x)
 	if is_zero_approx(direction): direction = -float(_body.facing_direction) if "facing_direction" in _body else -1.0
 	var speed := active_knockback_distance / (active_knockback_duration + active_deceleration_duration / 3.0)
+	var generation := _stagger_generation
+	var duration := active_knockback_duration
 	staggered.emit(Vector2(direction * speed, 0.0))
-	_connect_timeout(active_knockback_duration, _on_knockback_end)
+	if generation == _stagger_generation: _connect_timeout(duration, _on_knockback_end.bind(generation))
 
 # --- Invulnerability window (was _start_invulnerability) ---
 func start_invulnerability(duration: float) -> void:
-	if not _has_live_body():
-		return
-	is_invulnerable = true
-	_connect_timeout(duration, _end_invulnerability)
+	grant_invulnerability(&"hit", duration)
 
-func _end_invulnerability() -> void:
-	if not _has_live_body():
-		return
-	is_invulnerable = false
+func grant_invulnerability(source: StringName, duration: float = -1.0) -> int:
+	if not _has_live_body(): return 0
+	_next_immunity_token += 1
+	var token := _next_immunity_token
+	_invulnerability_sources[source] = token
+	if duration >= 0.0: _connect_timeout(duration, release_invulnerability.bind(source, token))
+	return token
 
-func _on_knockback_end() -> void:
-	if not _has_live_body():
+func release_invulnerability(source: StringName, token: int) -> void:
+	if _invulnerability_sources.get(source, 0) == token: _invulnerability_sources.erase(source)
+
+
+
+func _on_knockback_end(generation: int) -> void:
+	if generation != _stagger_generation or not _has_live_body():
 		return
 	is_knocking_back = false
 	knockback_finished.emit()
+	if generation != _stagger_generation: return
 	if _active_stun_duration <= 0.0:
-		_on_stagger_stun_end()
+		_on_stagger_stun_end(generation)
 	else:
-		_connect_timeout(_active_stun_duration, _on_stagger_stun_end)
+		_connect_timeout(_active_stun_duration, _on_stagger_stun_end.bind(generation))
 
-func _on_stagger_stun_end() -> void:
-	if not _has_live_body():
+func _on_stagger_stun_end(generation: int) -> void:
+	if generation != _stagger_generation or not _has_live_body():
 		return
 	is_stunned = false
 	stagger_recovered.emit()
+	if generation != _stagger_generation: return
 	var remaining := maxf(_active_invulnerability_duration - active_knockback_duration - _active_stun_duration, 0.0)
 	if remaining > 0.0:
-		_connect_timeout(remaining, _end_invulnerability)
+		_connect_timeout(remaining, release_invulnerability.bind(&"stagger", _stagger_immunity_token))
 	else:
-		_end_invulnerability()
+		release_invulnerability(&"stagger", _stagger_immunity_token)
 
 
 func _has_live_body() -> bool:
@@ -151,3 +170,12 @@ func _connect_timeout(duration: float, callback: Callable) -> void:
 	if not _has_live_body():
 		return
 	_body.get_node("/root/CombatTime").actor_timeout(_body, duration, callback)
+
+func reset() -> void:
+	# Checkpoint/respawn invalidates callbacks from the previous life.
+	_stagger_generation += 1
+	_invulnerability_sources.clear()
+	is_stunned = false
+	is_knocking_back = false
+	is_touched_enemy = false
+	_knockback_elapsed = 0.0

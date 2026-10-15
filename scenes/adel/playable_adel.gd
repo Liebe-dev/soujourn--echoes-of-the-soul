@@ -1,4 +1,6 @@
 extends CharacterBody2D
+const PlayerVitals = preload("res://scenes/adel/components/player_vitals.gd")
+const DarkSentinelState = preload("res://scenes/adel/components/dark_sentinel_state.gd")
 const StaggerImpact = preload("res://scenes/adel/components/stagger_impact.gd")
 @onready var dodge_cooldown = $DodgeCooldown
 @onready var saber_skill: SaberWeaponSkill = $SaberSkill
@@ -11,6 +13,20 @@ const StaggerImpact = preload("res://scenes/adel/components/stagger_impact.gd")
 @onready var weapon: WeaponData = $WeaponHolder/Saber
 @onready var attack_hitbox: Area2D = $AttackHitbox
 @onready var attack_hitbox_shape: CollisionShape2D = $AttackHitbox/CollisionShape2D
+
+var stats: StatsComponent = StatsComponent.new()
+var vitals: RefCounted = PlayerVitals.new(self, stats)
+
+@export_group("Dash")
+@export_range(0.0, 5000.0, 10.0, "or_greater") var dash_speed: float = 2800.0
+@export_range(0.0, 1000.0, 10.0, "or_greater") var dash_end_speed: float = 140.0
+@export_range(0.01, 2.0, 0.01, "or_greater") var dash_active_duration: float = 0.3
+@export_range(0.0, 2.0, 0.01, "or_greater") var dash_skid_duration: float = 0.2
+@export var dash_iframe_window := Vector2(0.0, 0.3)
+
+@export_group("Dark Sentinel")
+@export_range(0.0, 100.0, 0.1, "or_greater", "suffix:%/s") var sentinel_hp_drain_percent: float = 2.0
+var sentinel_state: RefCounted
 
 @export_group("Jump Attack")
 @export_range(0, 10000, 1, "or_greater") var jump_attack_damage: int = 20
@@ -25,6 +41,8 @@ const StaggerImpact = preload("res://scenes/adel/components/stagger_impact.gd")
 @export_range(0.0, 1.0, 0.01, "or_greater") var stagger_knockback_deceleration_duration: float = 0.2
 @export var stagger_zoom_enabled: bool = true
 @export_range(1.0, 3.0, 0.05, "or_greater") var stagger_zoom_multiplier: float = 1.5
+@export_range(1.0, 3.0, 0.05, "or_greater") var stamina_exhaustion_zoom_multiplier: float = 1.3
+@export_range(0.0, 2.0, 0.05, "or_greater") var stamina_exhaustion_slow_motion_duration_multiplier: float = 0.5
 @export_range(0.0, 0.5, 0.01, "or_greater") var stagger_zoom_in_duration: float = 0.06
 @export_range(0.0, 1.0, 0.01, "or_greater") var stagger_zoom_return_lead: float = 0.2
 @export var stagger_slow_motion_enabled: bool = true
@@ -79,6 +97,7 @@ const ATTACK_4_INTERRUPT_TIME := 0.55
 signal player_attacked
 
 var stagger_impact: Node
+var _applying_stamina_exhaustion := false
 var presentation: AdelAnimationComponent
 var locomotion: LocomotionComponent
 var combat: CombatComponent
@@ -131,9 +150,6 @@ var is_doing_action: bool:
 		return state_machine != null and state_machine.is_doing_action()
 var _stagger_distance_left: float = 0.0
 var _stagger_push_direction: float = 1.0
-var _dash_info: Dictionary = {}
-var _dash_tween: Tween
-var _dash_timer := 0.0
 var _ready_final_frame := false
 var _combo_reset_timer := 0.0
 var _playing_land_anim: bool:
@@ -178,7 +194,7 @@ func _ready() -> void:
 	deflect_slow_motion.finished.connect(_on_deflect_slow_motion_finished)
 	defense = DefenseComponent.new(deflect_window, deflect_delay)
 	saber_hitbox.hit_confirmed.connect(_on_saber_hit_confirmed)
-	dash = DashComponent.new(locomotion, dodge_cooldown)
+	dash = DashComponent.new(self, dodge_cooldown)
 
 	ghost_trail = AdelGhostTrail.new()
 	ghost_trail.name = "GhostTrailComponent"
@@ -188,12 +204,24 @@ func _ready() -> void:
 	state_machine.movement_enabled = _external_movement_enabled
 	state_machine.externally_locked = _external_lock
 	state_machine.resume_locomotion()
+	sentinel_state = DarkSentinelState.new(self, vitals)
+	var hud := _find_hud()
+	if hud != null: sentinel_state.presentation_changed.connect(hud.present_sentinel)
 	saber_skill.setup(self)
 	_configure_stamina()
+	PlayerProgress.apply_to_stats(stats)
+	vitals.refresh()
 	spine_anim.animation_finished.connect(_on_spine_anim_finished)
 	spine_anim.play("idle")
 	refresh_gameplay_cursor()
+func get_player_vitals() -> RefCounted:
+	return vitals
+
 func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("soul_heal"):
+		vitals.begin_flask_use()
+		get_viewport().set_input_as_handled()
+		return
 	if event.is_action_pressed("debug_take_damage"):
 		take_damage(DEBUG_DAMAGE_AMOUNT, global_position + Vector2(80.0, 0.0))
 		get_viewport().set_input_as_handled()
@@ -201,7 +229,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	state_machine.handle_input(event)
 
 func _handle_attack_input() -> void:
-	if _guard_requested: return
+	if _guard_requested or is_sentinel_exit_pending(): return
 	combat.attack_buffer_duration = attack_input_buffer
 	if combat.should_cancel_jump_attack_land():
 		_cancel_jump_attack_land()
@@ -212,12 +240,16 @@ func _handle_attack_input() -> void:
 			if _attack_interrupt_ready: _advance_queued_combo()
 
 func _physics_process(delta: float) -> void:
+	if not get_tree().paused:
+		vitals.tick(delta, CombatTime.actor_delta(self, delta))
+		if not is_inside_tree() or is_queued_for_deletion(): return
+		sentinel_state.tick(delta)
 	delta = CombatTime.actor_delta(self, delta)
 	var input_delta := 0.0 if CombatTime.is_hit_stopping() else delta
 	combat.tick_input_buffer(input_delta)
 	_defense_lock_left = maxf(_defense_lock_left - delta, 0.0)
 	if _guard_requested:
-		if not Input.is_action_pressed("guard and deflect") or not has_action_stamina() or is_locked or not state_machine.movement_enabled:
+		if not Input.is_action_pressed("guard and deflect") or (not has_action_stamina() and not _dash_blocks_defense()) or is_locked or not state_machine.movement_enabled:
 			_clear_guard_request()
 		else:
 			_guard_press_age += input_delta
@@ -237,10 +269,10 @@ func _physics_hit_reaction(delta: float) -> void:
 	move_and_slide()
 	if damage.is_touched_enemy and is_on_floor():
 		damage.is_touched_enemy = false
-		damage.is_invulnerable = false
 		state_machine.resume_locomotion()
 
 func _physics_defense(delta: float) -> void:
+	_update_facing(Input.get_axis("move_left", "move_right"))
 	velocity.x = defense.consume_guard_push(delta)
 	locomotion.apply_vertical_physics(delta)
 	move_and_slide()
@@ -283,6 +315,9 @@ func _physics_locomotion(delta: float) -> void:
 	else:
 		if dash.can_dash(direction, is_on_floor()):
 			_perform_dash(direction)
+			if dash.is_dodging:
+				dash.physics_update(delta)
+				return
 
 		if can_move and not dash.is_dodging:
 			locomotion.apply_horizontal_movement(direction, delta)
@@ -310,25 +345,13 @@ func _physics_locomotion(delta: float) -> void:
 			break
 
 func _physics_dash(delta: float) -> void:
-	_dash_timer += delta
-	velocity.y = 0.0
-	move_and_slide()
-	locomotion.update_ground_state()
-	if state_machine.current == AdelStateMachine.State.DASH_ACTIVE and _dash_timer >= DashComponent.DASH_TWEEN_DURATION:
-		velocity.x = 0.0
-		damage.is_invulnerable = false
-		if _dash_info.is_air: state_machine.resume_locomotion()
-		else: state_machine.transition(AdelStateMachine.State.DASH_SKID)
-	elif state_machine.current == AdelStateMachine.State.DASH_SKID and _dash_timer >= DashComponent.DASH_SKID_DURATION:
-		state_machine.resume_locomotion()
+	dash.physics_update(delta)
 
 func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 	if dmg <= 0 or is_skill_damage_immune() or not damage.can_take_damage():
 		return
 
-	var hud := _find_hud()
-	if hud == null or not hud.has_method("apply_damage"):
-		return
+	var health = vitals
 
 	# A depleted held stance cannot classify another hit before the next physics tick.
 	if is_guarding and not has_action_stamina(): defense.end_guard(false)
@@ -336,13 +359,13 @@ func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 	var exhausted := false
 	if defense_result != DefenseComponent.HitResult.NONE:
 		var action := "deflect" if defense_result == DefenseComponent.HitResult.DEFLECT else "guard"
-		exhausted = not hud.can_spend_stamina(action)
-		hud.spend_stamina(action, true)
+		exhausted = not stats.can_spend_stamina(action)
+		health.spend_stamina(action, true)
 		# Finish this accepted reaction, but remove protection as soon as energy hits zero.
 		if not has_action_stamina(): defense.end_guard(false)
 	match defense_result:
 		DefenseComponent.HitResult.DEFLECT:
-			hud.enter_combat()
+			health.combat_activity.emit()
 			if exhausted:
 				_apply_stamina_exhaustion(hit_from_global)
 			else:
@@ -355,12 +378,12 @@ func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 			if not exhausted:
 				defense.start_guard_push(guard_knockback_distance, guard_knockback_duration, -float(facing_direction))
 				_play_defense_hit_pose(ANIM_GUARD)
-			dmg = maxi(0, int(round(float(dmg) * hud.get_guard_damage_multiplier())))
+			dmg = maxi(0, int(round(float(dmg) * stats.get_guard_damage_multiplier())))
 			if dmg == 0:
-				hud.enter_combat()
+				health.combat_activity.emit()
 				if exhausted: _apply_stamina_exhaustion(hit_from_global)
 				return
-	var hit: Dictionary = hud.apply_damage(dmg, hit_from_global, exhausted)
+	var hit: Dictionary = health.apply_damage(dmg, hit_from_global, exhausted)
 	# Damage can synchronously respawn or remove this Player from the tree.
 	if hit.get("died", false):
 		stagger_impact.cancel()
@@ -387,16 +410,10 @@ func change_weapon(new_weapon: WeaponData) -> void:
 	combat.change_weapon(new_weapon)
 
 func get_damage_dealt_multiplier() -> float:
-	var hud := _find_hud()
-	if hud and hud.has_method("get_damage_dealt_multiplier"):
-		return hud.get_damage_dealt_multiplier()
-	return 1.0
+	return stats.get_damage_dealt_multiplier()
 
 func get_attack_speed_multiplier() -> float:
-	var hud := _find_hud()
-	if hud and hud.has_method("get_attack_speed_multiplier"):
-		return hud.get_attack_speed_multiplier()
-	return 1.0
+	return stats.get_attack_speed_multiplier()
 
 func begin_campfire_ui(owner: Node) -> bool:
 	if is_campfire_ui_active() or get_tree().paused or not state_machine.can_begin_action(): return false
@@ -470,6 +487,9 @@ func exit_rest() -> void:
 	snap_feet_to_floor()
 
 func restore_checkpoint_state(saved_position: Vector2, face_left: bool, keep_resting: bool = false) -> void:
+	if damage != null: damage.reset()
+	vitals.cancel_transients()
+	end_sentinel()
 	# exit_rest restores this anchor; update it before leaving the old state.
 	_position_before_rest = saved_position
 	global_position = saved_position
@@ -528,7 +548,7 @@ func _play_combo_step() -> void:
 	_arm_attack_interrupt(attack_animation)
 
 func _advance_queued_combo() -> void:
-	if _guard_requested: return
+	if _guard_requested or is_sentinel_exit_pending(): return
 	_attack_interrupt_token += 1
 	_attack_interrupt_ready = false
 
@@ -617,26 +637,12 @@ func _find_hud() -> Node:
 
 #hàm nội bộ nhóm vật lý
 func _get_move_speed_multiplier() -> float:
-	var hud := _find_hud()
-	if hud and hud.has_method("get_move_speed_multiplier"):
-		return hud.get_move_speed_multiplier()
-	return 1.0
+	return stats.get_move_speed_multiplier()
 
 func _perform_dash(dash_direction: float) -> void:
-	if not has_action_stamina(): return
-	var hud := _find_hud()
-	if hud != null: hud.spend_stamina("dash", true)
+	if not dash.can_start(dash_direction, is_on_floor()) or not has_action_stamina() or is_sentinel_exit_pending(): return
 	if combat.is_jump_attack_landing: _cancel_jump_attack_land()
-	_dash_info = dash.start_dash(dash_direction, is_on_floor(), facing_direction)
-	state_machine.transition(AdelStateMachine.State.DASH_ACTIVE)
-	_playing_land_anim = false
-	damage.is_invulnerable = true
-	presentation.play(&"dash_air" if _dash_info.is_air else &"dash")
-	ghost_trail.start()
-	velocity.x = _dash_info.initial_speed * _dash_info.direction
-	_dash_tween = create_tween()
-	_dash_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
-	_dash_tween.tween_property(self, "velocity:x", _dash_info.direction * _dash_info.target_speed, DashComponent.DASH_TWEEN_DURATION)
+	if dash.start_dash(dash_direction, is_on_floor(), facing_direction): _playing_land_anim = false
 
 func _capsule_half_height(col: CollisionShape2D) -> float:
 	var capsule := col.shape as CapsuleShape2D
@@ -753,10 +759,11 @@ func _on_damage_staggered(knockback_velocity: Vector2) -> void:
 	_playing_land_anim = false
 	_show_stagger_frame(0)
 	stagger_impact.start(get_node_or_null("Camera2D"), damage.stagger_duration(), {
-		"zoom_enabled": stagger_zoom_enabled, "zoom_multiplier": stagger_zoom_multiplier,
+		"zoom_enabled": stagger_zoom_enabled, "zoom_multiplier": stamina_exhaustion_zoom_multiplier if _applying_stamina_exhaustion else stagger_zoom_multiplier,
 		"zoom_in_duration": stagger_zoom_in_duration, "return_lead": stagger_zoom_return_lead,
 		"slow_motion_enabled": stagger_slow_motion_enabled,
-		"slow_motion_scale": stagger_slow_motion_scale, "slow_motion_duration": stagger_slow_motion_duration,
+		"slow_motion_scale": stagger_slow_motion_scale,
+		"slow_motion_duration": stagger_slow_motion_duration * stamina_exhaustion_slow_motion_duration_multiplier if _applying_stamina_exhaustion else stagger_slow_motion_duration,
 	})
 
 func _on_damage_knockback_finished() -> void:
@@ -789,10 +796,13 @@ func disable_attack_hitbox() -> void:
 	combat.disable_attack_hitbox()
 
 
+func _dash_blocks_defense() -> bool:
+	return state_machine.is_in(AdelStateMachine.State.DASH)
+
 func _try_begin_guard() -> void:
 	if _guard_requested or is_guarding: return
-	if not has_action_stamina() or is_locked or not state_machine.movement_enabled or damage.is_stunned or damage.is_touched_enemy or deflect_slow_motion.is_active: return
-	if not state_machine.is_in(AdelStateMachine.State.LOCOMOTION) and state_machine.current not in [AdelStateMachine.State.COMBO, AdelStateMachine.State.JUMP_LAND] and not state_machine.is_in(AdelStateMachine.State.JUMP_ATTACK): return
+	if (not has_action_stamina() and not _dash_blocks_defense()) or is_locked or not state_machine.movement_enabled or damage.is_stunned or damage.is_touched_enemy or deflect_slow_motion.is_active: return
+	if not state_machine.is_in(AdelStateMachine.State.LOCOMOTION) and not state_machine.is_in(AdelStateMachine.State.DASH) and state_machine.current not in [AdelStateMachine.State.COMBO, AdelStateMachine.State.JUMP_LAND] and not state_machine.is_in(AdelStateMachine.State.JUMP_ATTACK): return
 	_guard_requested = true
 	_guard_press_age = 0.0
 	combat.clear_attack_buffer()
@@ -800,6 +810,8 @@ func _try_begin_guard() -> void:
 
 func _try_consume_guard() -> bool:
 	if not _guard_requested or is_guarding or not has_action_stamina() or is_locked or not state_machine.movement_enabled or damage.is_stunned or damage.is_touched_enemy or deflect_slow_motion.is_active: return false
+	# Hold through dash/skid only; cooldown restricts the next dash, not defense.
+	if _dash_blocks_defense(): return false
 	if state_machine.current == AdelStateMachine.State.COMBO:
 		var unlock := attack_4_defense_unlock_time if combat.combo_step == 4 else attack_defense_unlock_time
 		if not _combo_visual_finished and spine_anim.current_animation_position + 0.00001 < unlock: return false
@@ -930,10 +942,6 @@ func _enter_player_state(state: AdelStateMachine.State) -> void:
 		AdelStateMachine.State.DEFENSE_HOLD:
 			_defense_hit_pose_time_left = 0.0
 			_show_defense_pose(ANIM_DEFENSE)
-		AdelStateMachine.State.DASH_ACTIVE: _dash_timer = 0.0
-		AdelStateMachine.State.DASH_SKID:
-			_dash_timer = 0.0
-			presentation.play(&"dash skid")
 
 func _exit_player_state(state: AdelStateMachine.State) -> void:
 	match state:
@@ -951,16 +959,13 @@ func _exit_player_state(state: AdelStateMachine.State) -> void:
 			defense.end_guard()
 			_defense_hit_pose_time_left = 0.0
 		AdelStateMachine.State.DASH:
-			if _dash_tween != null and _dash_tween.is_valid(): _dash_tween.kill()
-			ghost_trail.stop()
 			dash.end_dash()
-			if not damage.is_stunned: damage.is_invulnerable = false
 
 
 func _configure_stamina() -> void:
-	var hud := _find_hud()
-	if hud != null:
-		hud.configure_stamina({"dash": dash_stamina_cost, "guard": guard_stamina_cost, "deflect": deflect_stamina_cost}, stamina_regen_delay, stamina_regen_per_second)
+	stats.stamina_costs = {"dash": dash_stamina_cost, "guard": guard_stamina_cost, "deflect": deflect_stamina_cost}
+	stats.stamina_regen_delay = stamina_regen_delay
+	stats.stamina_regen_per_second = stamina_regen_per_second
 
 func blocks_stamina_regeneration() -> bool:
 	return state_machine != null and (state_machine.is_in(AdelStateMachine.State.ATTACK) or state_machine.is_in(AdelStateMachine.State.DEFENSE) or deflect_slow_motion.is_active)
@@ -970,11 +975,22 @@ func _apply_stamina_exhaustion(hit_from_global: Vector2) -> void:
 	deflect_slow_motion.cancel()
 	var direction := signf(global_position.x - hit_from_global.x)
 	if is_zero_approx(direction): direction = -float(facing_direction)
+	# The staggered signal is synchronous; scope the visual override to this call.
+	_applying_stamina_exhaustion = true
 	damage.apply_stagger(Vector2(direction, 0.0))
+	_applying_stamina_exhaustion = false
 
 func has_action_stamina() -> bool:
-	var hud := _find_hud()
-	return hud != null and hud.stamina > 0.0
+	return stats.stamina > 0.0
+
+func begin_sentinel() -> bool:
+	return sentinel_state != null and sentinel_state.activate()
+
+func end_sentinel() -> void:
+	if sentinel_state != null: sentinel_state.finish()
+
+func is_sentinel_exit_pending() -> bool:
+	return sentinel_state != null and sentinel_state.exit_pending
 
 func is_skill_damage_immune() -> bool:
 	return saber_skill != null and saber_skill.is_dashing()

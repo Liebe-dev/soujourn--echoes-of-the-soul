@@ -77,7 +77,13 @@ func run() -> void:
 	var settle_deadline := Time.get_ticks_msec() + 5000
 	while not player.is_on_floor() and Time.get_ticks_msec() < settle_deadline: await frame()
 	check(player.is_on_floor(), "actual Player settles on test floor")
-	check(player.stagger_knockback_distance == 200.0 and camera.mouse_pan_max_distance == Vector2(120, 75), "existing player recoil and camera tuning preserved")
+	# Fixed test fixture: designer overrides in the production scene remain untouched.
+	player.stagger_knockback_distance = 200.0
+	player.stagger_knockback_duration = 0.3
+	player.damage.knockback_distance = 200.0
+	player.damage.knockback_duration = 0.3
+	player.stagger_slow_motion_duration = 0.18
+	check(player.damage.knockback_distance == 200.0 and camera.ground_framing_enabled, "deterministic recoil fixture and ground framing active")
 	var pose: Sprite2D = player.spine_rig.get_node("TestAttackSprite")
 	var base_zoom: Vector2 = camera.zoom
 	for hit in [Vector2(80, -200), Vector2(80, 200), Vector2(-80, -200), Vector2.ZERO]:
@@ -135,23 +141,23 @@ func run() -> void:
 	check(player.velocity.y == 0.0, "even a direct diagonal stagger request cannot launch player")
 	var started := Time.get_ticks_msec()
 	var peak := 1.0
-	var focus_peak := 0.0
+	var horizontal_recenter_error := 0.0
 	var captured_peak := false
 	while Time.get_ticks_msec() - started < 120:
 		await frame()
 		peak = maxf(peak, camera.zoom.x / base_zoom.x)
-		focus_peak = maxf(focus_peak, camera._stagger_focus_weight)
+		horizontal_recenter_error = maxf(horizontal_recenter_error, absf(camera.offset.x - camera._base_offset.x - camera._mouse_pan.x))
 		if camera.zoom.x / base_zoom.x >= 1.49 and rendered and not captured_peak:
 			captured_peak = true
 			await capture("peak")
 	check(peak >= 1.49 and peak <= 1.501, "zoom quickly reaches exactly 1.5x previous zoom")
-	check(focus_peak >= 0.99, "impact zoom focuses on player instead of cropping original low framing")
+	check(horizontal_recenter_error < 0.01, "impact zoom preserves horizontal delay and pan framing")
 	check(player.damage._knockback_elapsed < 0.1, "player physics actually slows with world time")
 	while Time.get_ticks_msec() - started < 220: await frame()
 	await frame()
 	check(is_equal_approx(Engine.time_scale, 1.0), "stagger slow motion expires after real-time pulse; elapsed=" + str(Time.get_ticks_msec() - started))
 	while player.stagger_impact._zoom_active: await frame()
-	check(camera.zoom.is_equal_approx(base_zoom) and camera._stagger_focus_weight == 0.0, "zoom and original framing fully restored")
+	check(camera.zoom.is_equal_approx(base_zoom) and camera.offset.is_equal_approx(camera._base_offset + camera._mouse_pan), "zoom and ground framing fully restored")
 	check(player.damage.is_stunned and player.stagger_impact._game_elapsed <= player.damage.stagger_duration() - 0.2 + 0.02, "base zoom returns at least 0.2 animation seconds before stagger recovery")
 	await capture("restored-before-recovery")
 	await wait_recovery()

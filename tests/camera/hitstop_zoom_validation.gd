@@ -94,6 +94,7 @@ func run() -> void:
 	enemy.set_physics_process(false)
 	hud = p.get_node("Camera2D/hud")
 	hud.set_process(false)
+	p.vitals.simulation_enabled = false
 	camera = p.get_node("Camera2D")
 	skill = p.saber_skill
 	var deadline := Time.get_ticks_msec() + 6000

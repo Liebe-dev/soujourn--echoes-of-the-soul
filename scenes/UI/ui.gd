@@ -5,6 +5,14 @@ extends Control
 @export var screen_margin: Vector2 = Vector2(24, 24)
 @export var show_numeric_values: bool = false
 
+@export_group("Sentinel HUD Layout")
+@export_range(0.25, 3.0, 0.05) var sentinel_loadout_scale: float = 1.0
+@export var sentinel_screen_margin := Vector2(24, 24)
+
+const SENTINEL_HP_FILL = preload("res://scenes/UI/sentinel/hp_sentinel_fill.svg")
+const SENTINEL_HP_TRACK = preload("res://scenes/UI/sentinel/hp_sentinel_track.svg")
+const SENTINEL_HP_RIM = preload("res://scenes/UI/sentinel/hp_sentinel_rim.svg")
+
 const REFERENCE_SIZE := Vector2(629, 175)
 @onready var hud_art: Control = $ScreenSpace/bar
 
@@ -13,6 +21,7 @@ signal stagger_debuff_applied(debuff_id: String, level: int)
 
 var _stats: StatsComponent = StatsComponent.new()
 var _stamina_actor: Node
+var _vitals: RefCounted
 
 #     STATS (facade → StatsComponent)
 var max_hp: int:
@@ -118,6 +127,13 @@ const FLASK_SHAKE_DECAY := 3.5
 @onready var debuff_bar: HBoxContainer = $ScreenSpace/bar/hp_bar_panel/status_panel/debuff_bar
 @onready var buff_bar: HBoxContainer = $ScreenSpace/bar/hp_bar_panel/status_panel/buff_bar
 
+@onready var sentinel_loadout = $ScreenSpace/SentinelLoadout
+@onready var ultimate_meter = $ScreenSpace/bar/hp_bar_panel/UltimateMeter
+@onready var _normal_hp_fill: Texture2D = hp_bar.texture_progress
+@onready var _normal_hp_track: Texture2D = hp_bar.texture_under
+@onready var _normal_hp_rim: Texture2D = hp_bar.texture_over
+var sentinel_active := false
+
 const STAGGER_MARKER_READY := Color.WHITE
 const STAGGER_MARKER_USED := Color(0.55, 0.55, 0.55, 0.45)
 
@@ -144,6 +160,17 @@ func _ready() -> void:
 			_stamina_actor = ancestor
 			break
 		ancestor = ancestor.get_parent()
+	if is_instance_valid(_stamina_actor) and _stamina_actor.has_method("get_player_vitals"):
+		_vitals = _stamina_actor.get_player_vitals()
+		_stats = _vitals.model
+		_vitals.changed.connect(_on_vitals_changed)
+		_vitals.damage_received.connect(_on_vitals_damage)
+		_vitals.combat_activity.connect(enter_combat)
+		_vitals.flask_started.connect(_start_flask_presentation)
+		_vitals.flask_finished.connect(_finish_flask_presentation)
+		if _stamina_actor.sentinel_state != null:
+			_stamina_actor.sentinel_state.presentation_changed.connect(present_sentinel)
+			present_sentinel(_stamina_actor.sentinel_state.active, _stamina_actor.sentinel_state.exit_pending)
 	_layout_hud()
 	get_viewport().size_changed.connect(_layout_hud)
 	_flask_rest_position = soul_flask.position
@@ -161,6 +188,7 @@ func _ready() -> void:
 	is_hidden = true
 
 func _unhandled_input(event: InputEvent) -> void:
+	if _vitals != null: return # Player owns gameplay input.
 	if event.is_action_pressed("soul_heal"):
 		use_soul_flask()
 		get_viewport().set_input_as_handled()
@@ -170,23 +198,29 @@ func _process(delta: float) -> void:
 	var skill_immune: bool = is_instance_valid(_stamina_actor) and _stamina_actor.has_method("is_skill_damage_immune") and _stamina_actor.is_skill_damage_immune()
 	# CanvasLayer has its own canvas; transfer the existing fade/flash tint.
 	hud_art.modulate = modulate
-	var tick_result := _stats.tick(delta, skill_immune)
-	if tick_result.damage_taken > 0:
-		sync_hp_display()
-		if tick_result.flash_red:
-			flash_red()
-		enter_combat()
-	if tick_result.died:
-		SaveManager.respawn_at_checkpoint()
-		return
+	sentinel_loadout.modulate = modulate
+	# Only standalone previews own a local model clock.
+	if _vitals == null:
+		var tick_result := _stats.tick(delta, skill_immune)
+		if tick_result.damage_taken > 0:
+			sync_hp_display()
+			if tick_result.flash_red:
+				flash_red()
+			enter_combat()
+		if tick_result.died:
+			SaveManager.respawn_at_checkpoint()
+			return
 
-	# Stamina timing follows actions, independently of HUD visibility/combat fade.
-	var regen_blocked: bool = is_instance_valid(_stamina_actor) and _stamina_actor.blocks_stamina_regeneration()
-	if _stats.regen_stamina(delta, regen_blocked):
-		sync_stamina_display()
-		enter_combat()
+		# Stamina timing follows actions, independently of HUD visibility/combat fade.
+		var regen_blocked: bool = is_instance_valid(_stamina_actor) and _stamina_actor.blocks_stamina_regeneration()
+		if _stats.regen_stamina(delta, regen_blocked):
+			sync_stamina_display()
+			enter_combat()
 
-	if in_combat:
+	if sentinel_active or ultimate_meter.is_ultimate_ready():
+		hide_timer = 0.0
+		fade_in()
+	elif in_combat:
 		hide_timer += delta
 		if hide_timer >= hide_delay:
 			fade_out()
@@ -203,7 +237,37 @@ func set_campfire_hidden(hidden: bool) -> void:
 	# ScreenSpace has a separate canvas; keep stats ticking while hiding its art.
 	$ScreenSpace.visible = not hidden
 
+# Sentinel presentation only. No HP drain, resource costs, input or form logic here.
+func set_ultimate_charge(value: float, maximum: float = 100.0) -> void:
+	ultimate_meter.set_charge(value, maximum)
+	if ultimate_meter.is_ultimate_ready(): fade_in()
+
+func set_sentinel_active(active: bool) -> void:
+	sentinel_active = active
+	sentinel_loadout.set_active(active)
+	ultimate_meter.set_active(active)
+	hp_bar.texture_progress = SENTINEL_HP_FILL if active else _normal_hp_fill
+	hp_bar.texture_under = SENTINEL_HP_TRACK if active else _normal_hp_track
+	hp_bar.texture_over = SENTINEL_HP_RIM if active else _normal_hp_rim
+	$ScreenSpace/bar/hp_bar_panel/hp_bar_wrap/stagger_markers.visible = not active
+	if active: fade_in()
+
+func drain_hp_nonlethal(amount: int) -> int:
+	if _vitals != null: return _vitals.drain_hp_nonlethal(amount)
+	var spent := _stats.drain_hp_nonlethal(amount)
+	if spent > 0: sync_hp_display()
+	return spent
+
+func set_sentinel_exit_pending(pending: bool) -> void:
+	sentinel_loadout.set_exit_pending(pending)
+
+func set_sentinel_ability_presentation(slot: StringName, remaining: float, total: float, affordable: bool = true, available: bool = true) -> void:
+	sentinel_loadout.set_ability_presentation(slot, remaining, total, affordable, available)
+
 func heal_to_full() -> void:
+	if _vitals != null:
+		_vitals.heal_to_full()
+		return
 	_stats.heal_to_full()
 	sync_stagger_markers()
 	sync_flask_display()
@@ -213,6 +277,7 @@ func heal_to_full() -> void:
 	fade_in()
 
 func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF, skip_stagger_thresholds: bool = false) -> Dictionary:
+	if _vitals != null: return _vitals.apply_damage(dmg, _hit_from_global, skip_stagger_thresholds)
 	if is_instance_valid(_stamina_actor) and _stamina_actor.has_method("is_skill_damage_immune") and _stamina_actor.is_skill_damage_immune():
 		return {"damage_taken": 0, "staggered": false, "died": false, "flash_red": false}
 	var result := _stats.apply_damage(dmg, _hit_from_global, skip_stagger_thresholds)
@@ -261,6 +326,9 @@ func has_used_stagger_threshold() -> bool:
 
 #hàm công khai nhóm hồi phục
 func use_soul_flask() -> void:
+	if _vitals != null:
+		_vitals.begin_flask_use()
+		return
 	if not _stats.can_use_soul_flask():
 		return
 	if _is_flask_draining:
@@ -294,6 +362,7 @@ func can_spend_stamina(action: String) -> bool:
 	return _stats.can_spend_stamina(action)
 
 func spend_stamina(action: String, allow_partial: bool = false) -> bool:
+	if _vitals != null: return _vitals.spend_stamina(action, allow_partial)
 	var spent := _stats.spend_stamina(action, allow_partial)
 	if spent and _stats.has_stamina_cost(action):
 		sync_stamina_display()
@@ -477,12 +546,16 @@ func _on_flask_drain_complete() -> void:
 
 
 func _layout_hud() -> void:
+	if not is_inside_tree() or not is_node_ready(): return
 	var viewport_size := get_viewport_rect().size
 	var margin := Vector2(maxf(screen_margin.x, 0.0), maxf(screen_margin.y, 0.0))
 	var available := (viewport_size - margin * 2.0).max(Vector2.ONE)
 	var fit := minf(available.x / REFERENCE_SIZE.x, available.y / REFERENCE_SIZE.y)
 	hud_art.scale = Vector2.ONE * minf(maxf(hud_scale, 0.25), fit)
 	hud_art.position = margin
+	sentinel_loadout.hud_scale = sentinel_loadout_scale
+	sentinel_loadout.screen_margin = sentinel_screen_margin
+	sentinel_loadout.reserved_top = margin.y + REFERENCE_SIZE.y * hud_art.scale.y + 24.0
 	hp_label.visible = show_numeric_values
 	stamina_label.visible = show_numeric_values
 	flask_uses_label.visible = show_numeric_values
@@ -496,3 +569,46 @@ func configure_stamina(costs: Dictionary, delay: float, rate: float) -> void:
 	_stats.stamina_costs = costs.duplicate()
 	_stats.stamina_regen_delay = maxf(delay, 0.0)
 	_stats.stamina_regen_per_second = maxf(rate, 0.0)
+
+
+func present_sentinel(active: bool, pending: bool) -> void:
+	if not is_inside_tree(): return
+	set_sentinel_active(active)
+	set_sentinel_exit_pending(pending)
+
+func _on_vitals_changed(mask: int) -> void:
+	if not is_inside_tree(): return
+	if mask & 1: sync_hp_display()
+	if mask & 2: sync_stamina_display()
+	if mask & 4: sync_stagger_markers()
+	if mask & 8: sync_status_icons()
+	if mask & 16: sync_flask_display()
+
+func _on_vitals_damage(result: Dictionary) -> void:
+	if not is_inside_tree(): return
+	if result.get("debuff_id", "") != "":
+		stagger_debuff_applied.emit(result.debuff_id, result.debuff_level)
+	if result.get("staggered", false): stagger_triggered.emit(result.stagger_tier, result.floor_hp)
+	if result.get("damage_taken", 0) > 0:
+		flash_red()
+		enter_combat()
+
+func _start_flask_presentation(duration: float) -> void:
+	if not is_inside_tree(): return
+	_is_flask_draining = true
+	_trigger_flask_shake()
+	if _flask_drain_tween: _flask_drain_tween.kill()
+	_flask_drain_tween = create_tween()
+	var target := float(maxi(flask_charges - 1, 0)) / maxf(max_flask_charges, 1.0)
+	_flask_drain_tween.tween_property(self, "_flask_shader_percent", target, duration)
+
+func _finish_flask_presentation(result: Dictionary) -> void:
+	if not is_inside_tree(): return
+	_is_flask_draining = false
+	if _flask_drain_tween: _flask_drain_tween.kill()
+	_flask_drain_tween = null
+	sync_flask_display()
+	if result.used:
+		flash_heal()
+		enter_combat()
+		_trigger_impact_feedback(SCREEN_SHAKE_FLASK)

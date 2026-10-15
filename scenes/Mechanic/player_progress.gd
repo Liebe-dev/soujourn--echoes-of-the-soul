@@ -62,23 +62,20 @@ func write_to_save_data(data: Dictionary) -> void:
 	data["max_stamina"] = get_max_stamina()
 
 func apply_to_hud(tree: SceneTree = null) -> void:
-	var hud := _find_hud(tree if tree else get_tree())
-	if hud == null:
-		return
+	# Compatibility entry point: stats now belong to Player, including without UI.
+	var target := tree if tree else get_tree()
+	var model = _find_model(target)
+	if model == null: return
+	apply_to_stats(model)
+	_refresh_stats_view(target)
 
-	var max_hp: int = int(hud.max_hp)
-	hud.max_hp = get_max_hp()
-	hud.hp = clampi(hud.hp + (hud.max_hp - max_hp), 0, hud.max_hp)
-
-	hud.max_stamina = get_max_stamina()
-	hud.stamina = clampf(hud.stamina, 0.0, hud.max_stamina)
-
-	if hud.has_method("_recalc_flask_heal_amount"):
-		hud._recalc_flask_heal_amount()
-	if hud.has_method("sync_hp_display"):
-		hud.sync_hp_display()
-	if hud.has_method("sync_stamina_display"):
-		hud.sync_stamina_display()
+func apply_to_stats(model: StatsComponent) -> void:
+	var previous_max: int = model.max_hp
+	model.max_hp = get_max_hp()
+	model.hp = clampi(model.hp + model.max_hp - previous_max, 0, model.max_hp)
+	model.max_stamina = get_max_stamina()
+	model.stamina = clampf(model.stamina, 0.0, model.max_stamina)
+	model.recalc_flask_heal_amount()
 
 func try_upgrade_hp() -> bool:
 	if upgrade_points <= 0:
@@ -169,27 +166,36 @@ func refresh_upgrade_menu_ui(root: Node) -> void:
 		stamina_btn.disabled = upgrade_points <= 0
 
 func _apply_hp_upgrade() -> void:
-	var hud := _find_hud(get_tree())
-	if hud == null:
-		return
-
-	var max_hp: int = hud.max_hp
-	hud.max_hp = get_max_hp()
-	hud.hp = clampi(hud.hp + (hud.max_hp - max_hp), 0, hud.max_hp)
-	if hud.has_method("_recalc_flask_heal_amount"):
-		hud._recalc_flask_heal_amount()
-	if hud.has_method("sync_hp_display"):
-		hud.sync_hp_display()
+	var model = _find_model(get_tree())
+	if model == null: return
+	var previous_max: int = model.max_hp
+	model.max_hp = get_max_hp()
+	model.hp = clampi(model.hp + model.max_hp - previous_max, 0, model.max_hp)
+	model.recalc_flask_heal_amount()
+	_refresh_stats_view(get_tree())
 
 func _apply_stamina_upgrade() -> void:
-	var hud := _find_hud(get_tree())
-	if hud == null:
-		return
+	var model = _find_model(get_tree())
+	if model == null: return
+	var previous: float = model.max_stamina
+	model.max_stamina = get_max_stamina()
+	model.stamina = clampf(model.stamina + model.max_stamina - previous, 0.0, model.max_stamina)
+	_refresh_stats_view(get_tree())
 
-	var old_max := int(hud.max_stamina)
-	hud.max_stamina = get_max_stamina()
-	hud.stamina = clampf(hud.stamina + (hud.max_stamina - old_max), 0.0, hud.max_stamina)
-	if hud.has_method("sync_stamina_display"):
+func _find_model(tree: SceneTree):
+	for player in tree.get_nodes_in_group("Player"):
+		if player.has_method("get_player_vitals"): return player.get_player_vitals().model
+	var hud := _find_hud(tree)
+	return hud._stats if hud != null and "_stats" in hud else null
+
+func _refresh_stats_view(tree: SceneTree) -> void:
+	for player in tree.get_nodes_in_group("Player"):
+		if player.has_method("get_player_vitals"):
+			player.get_player_vitals().refresh()
+			return
+	var hud := _find_hud(tree)
+	if hud != null:
+		hud.sync_hp_display()
 		hud.sync_stamina_display()
 
 func _find_hud(tree: SceneTree) -> Node:

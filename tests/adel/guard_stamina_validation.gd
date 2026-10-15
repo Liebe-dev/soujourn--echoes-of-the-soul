@@ -77,6 +77,7 @@ func _run() -> void:
 	await frames(70)
 	var hud = p.get_node("Camera2D/hud")
 	hud.set_process(false)
+	p.vitals.simulation_enabled = false
 	var pose = p.spine_rig.get_node("TestAttackSprite")
 	var guard_distance: float = p.guard_knockback_distance
 	var guard_duration: float = p.guard_knockback_duration
@@ -246,6 +247,7 @@ func _run() -> void:
 	p._perform_dash(1)
 	check(not p.dash.is_dodging and p.dash.able_to_dodge, "zero also blocks direct dash request")
 	hud.set_process(true)
+	p.vitals.simulation_enabled = true
 	await button(&"guard and deflect", true)
 	await wait(1.7)
 	check(hud.stamina > 0 and not p.is_guarding and p.can_move, "held rejected Defense allows stamina recovery without automatic restart")
@@ -254,12 +256,14 @@ func _run() -> void:
 	check(p.is_guarding, "fresh Defense input works after stamina recovers")
 	await button(&"guard and deflect", false)
 	hud.set_process(false)
+	p.vitals.simulation_enabled = false
 	# Real HUD process timing uses action state instead of the 3s visibility delay.
 	hud.stamina = 100
 	hud.spend_stamina("dash", true)
 	hud.in_combat = true
 	hud.hide_delay = 20
 	hud.set_process(true)
+	p.vitals.simulation_enabled = true
 	await wait(maxf(0.05, p.stamina_regen_delay - 0.15))
 	check(hud.stamina == 80 and hud.stamina_bar.value == 80, "actual HUD waits the configured delay after expenditure")
 	await wait(0.3)
@@ -289,6 +293,7 @@ func _run() -> void:
 	await wait(0.3)
 	check(hud.stamina > 80, "idle after attacking regains stamina")
 	hud.set_process(false)
+	p.vitals.simulation_enabled = false
 	await fresh(p, hud, true)
 	hit(p)
 	var capture_path := OS.get_environment("CODEX_STAMINA_SCREENSHOT")

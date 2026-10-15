@@ -1,0 +1,85 @@
+[gd_scene format=3 uid="uid://iqq6neyb6dmq"]
+
+[ext_resource type="Script" uid="uid://bn16pl8ffgjmn" path="res://scenes/UI/sentinel/ultimate_meter.gd" id="1"]
+[ext_resource type="Shader" uid="uid://dfn5i17opbged" path="res://scenes/UI/sentinel/ultimate_fire.gdshader" id="2"]
+[ext_resource type="Texture2D" uid="uid://b0721oc5qxbx8" path="res://scenes/UI/sentinel/claws.svg" id="3"]
+
+[sub_resource type="StyleBoxFlat" id="Track"]
+bg_color = Color(0.18, 0.09, 0.11, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.7, 0.12, 0.16, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="ShaderMaterial" id="Fire"]
+resource_local_to_scene = true
+shader = ExtResource("2")
+shader_parameter/progress = 1.0
+shader_parameter/ready = true
+shader_parameter/visual_time = 6.887301587301693
+shader_parameter/fire_speed = 0.35
+
+[sub_resource type="GradientTexture2D" id="White"]
+
+[node name="UltimateMeter" type="Control" unique_id=1879188632]
+layout_mode = 3
+anchors_preset = 0
+offset_right = 132.0
+offset_bottom = 22.0
+mouse_filter = 2
+script = ExtResource("1")
+
+[node name="Track" type="Panel" parent="." unique_id=1790325553]
+layout_mode = 0
+offset_right = 132.0
+offset_bottom = 22.0
+mouse_filter = 2
+theme_override_styles/panel = SubResource("Track")
+
+[node name="Fill" type="TextureRect" parent="." unique_id=1550835202]
+material = SubResource("Fire")
+layout_mode = 0
+offset_left = 2.0
+offset_top = 2.0
+offset_right = 130.0
+offset_bottom = 20.0
+mouse_filter = 2
+texture = SubResource("White")
+expand_mode = 1
+
+[node name="ClawsLeft" type="TextureRect" parent="." unique_id=1141538342]
+layout_mode = 0
+offset_left = -16.0
+offset_top = -9.0
+offset_right = 8.0
+offset_bottom = 31.0
+mouse_filter = 2
+texture = ExtResource("3")
+expand_mode = 1
+
+[node name="ClawsRight" type="TextureRect" parent="." unique_id=2020760112]
+layout_mode = 0
+offset_left = 124.0
+offset_top = -9.0
+offset_right = 148.0
+offset_bottom = 31.0
+mouse_filter = 2
+texture = ExtResource("3")
+expand_mode = 1
+flip_h = true
+
+[node name="Prompt" type="Label" parent="." unique_id=633731404]
+layout_mode = 0
+offset_left = 157.0
+offset_top = -3.0
+offset_right = 180.0
+offset_bottom = 25.0
+theme_override_colors/font_color = Color(0.95, 0.2, 0.25, 1)
+theme_override_colors/font_outline_color = Color(0.035, 0.005, 0.01, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 20

@@ -70,14 +70,16 @@ func begin() -> bool:
 	distance_travelled = 0.0
 	contact_target = null
 	tier = 0
-	_direction = _body.facing_direction
+	_update_charge_facing()
 	_body.combat.combo_step = 0
 	_body.velocity.x = 0.0
 	_enter(S.SKILL_CHARGE, &"saber_skill_1")
 	return true
 
 func release() -> void:
-	if not _active or _body.state_machine.current != S.SKILL_CHARGE: return
+	if not _active or _released or _body.state_machine.current != S.SKILL_CHARGE: return
+	# Capture same-frame directional input before release commits the lunge.
+	_update_charge_facing()
 	_released = true
 	if charge_time + 0.000001 >= _full_charge_time():
 		tier = 2
@@ -95,6 +97,7 @@ func physics_update(delta: float) -> void:
 	_elapsed += delta
 	match phase:
 		S.SKILL_CHARGE:
+			if not _released: _update_charge_facing()
 			charge_time += delta
 			if _released:
 				if charge_time + 0.000001 >= tap_windup: _start_lunge()
@@ -123,6 +126,10 @@ func physics_update(delta: float) -> void:
 		_body.velocity.x = 0.0
 		_body.locomotion.apply_vertical_physics(delta)
 		_body.move_and_slide()
+
+func _update_charge_facing() -> void:
+	_body._update_facing(Input.get_axis("move_left", "move_right"))
+	_direction = _body.facing_direction
 
 func _full_charge_time() -> float:
 	return maxf(charge_level_2_time, charge_level_1_time + full_charge_final_pose)

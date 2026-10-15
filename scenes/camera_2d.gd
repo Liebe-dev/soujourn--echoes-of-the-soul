@@ -8,6 +8,10 @@ const CameraTargetLock = preload("res://scenes/camera/camera_target_lock.gd")
 @export_range(0.1, 30.0, 0.1, "or_greater") var follow_speed_x: float = 8.0
 @export var follow_speed_y: float = 5.0
 
+@export_category("Ground Framing")
+@export var ground_framing_enabled: bool = true
+@export_range(0.0, 0.5, 0.001) var ground_screen_fraction: float = 43.0 / 270.0
+
 @export_category("Horizontal Follow")
 @export_range(0.0, 1.0, 0.01, "or_greater") var horizontal_follow_delay: float = 0.1
 @export_range(0.0, 5.0, 0.01) var horizontal_center_snap_distance: float = 0.1
@@ -41,7 +45,9 @@ var hit_stop_zoom: Node
 var _combat_zoom_base: Vector2 = Vector2.ONE
 var _combat_zoom_sources: Dictionary = {}
 var target_lock: Node
-var _stagger_focus_weight: float = 0.0
+const GROUNDED_Y_BIAS := 30.0
+var _authored_offset := Vector2.ZERO
+var _feet_collider: CollisionShape2D
 var _base_offset: Vector2 = Vector2.ZERO
 var _mouse_pan: Vector2 = Vector2.ZERO
 
@@ -54,9 +60,11 @@ var _horizontal_delay_left: float = 0.0
 func _ready() -> void:
 	top_level = true
 	enabled = true
+	_authored_offset = offset
 	_base_offset = offset
 	if get_parent() is CharacterBody2D:
 		target = get_parent()
+		_feet_collider = target.get_node_or_null("CollisionShape2D") as CollisionShape2D
 		global_position = target.global_position
 		_target_y = global_position.y
 		_last_target_x = target.global_position.x
@@ -68,13 +76,15 @@ func _ready() -> void:
 	hit_stop_zoom = HitStopCameraZoom.new()
 	hit_stop_zoom.name = "HitStopZoom"
 	add_child(hit_stop_zoom)
+	get_viewport().size_changed.connect(_apply_camera_offset)
+	_apply_camera_offset()
 
 func _physics_process(delta: float) -> void:
 	if target == null:
 		return
 
 	var target_pos = target.global_position
-	var ideal_center_y = target_pos.y - 30.0
+	var ideal_center_y = target_pos.y - GROUNDED_Y_BIAS
 
 	if target.has_method("is_on_floor") and target.is_on_floor():
 		_target_y = lerp(_target_y, ideal_center_y, follow_speed_y * 0.5 * delta)
@@ -134,6 +144,8 @@ func _apply_combat_zoom() -> void:
 	var multiplier := 1.0
 	for value in _combat_zoom_sources.values(): multiplier = maxf(multiplier, float(value))
 	zoom = _combat_zoom_base * multiplier
+	_apply_camera_offset()
+	if is_inside_tree(): force_update_scroll()
 
 func camera_preferences() -> Dictionary:
 	return {"deadzone": mouse_pan_deadzone, "reset_enabled": mouse_pan_auto_reset_enabled, "reset_delay": mouse_pan_auto_reset_delay}
@@ -160,18 +172,26 @@ func _update_mouse_pan(delta: float) -> void:
 	if _mouse_pan.distance_to(desired) < 0.01: _mouse_pan = desired
 	_apply_camera_offset()
 
-func set_stagger_focus(weight: float) -> void:
-	_stagger_focus_weight = clampf(weight, 0.0, 1.0)
-	_apply_camera_offset()
+func target_feet_offset_y() -> float:
+	if not is_instance_valid(target): return 0.0
+	if not is_instance_valid(_feet_collider) or _feet_collider.shape == null: return 0.0
+	# Use the same physical foot plane as landing, not animation-dependent sprite bounds.
+	var bounds := _feet_collider.shape.get_rect()
+	var bottom := -INF
+	for point in [bounds.position, Vector2(bounds.end.x, bounds.position.y), bounds.end, Vector2(bounds.position.x, bounds.end.y)]:
+		bottom = maxf(bottom, (_feet_collider.global_transform * point).y)
+	return bottom - target.global_position.y
 
 func _apply_camera_offset() -> void:
-	var normal_offset := _base_offset + _mouse_pan
-	if _stagger_focus_weight <= 0.0 or not is_instance_valid(target):
-		offset = normal_offset
-		return
-	var hurtbox := target.get_node_or_null("CollisionShape2D") as CollisionShape2D
-	var focus := hurtbox.global_position if hurtbox != null else target.global_position
-	offset = normal_offset.lerp(focus - global_position, _stagger_focus_weight)
+	# Viewport callbacks may outlive a temporarily detached camera in the editor.
+	if not is_inside_tree(): return
+	_base_offset = _authored_offset
+	if ground_framing_enabled and is_instance_valid(target):
+		var visible_height := get_viewport_rect().size.y / maxf(zoom.y, 0.001)
+		var fraction := clampf(ground_screen_fraction, 0.0, 0.5)
+		_base_offset.y = target_feet_offset_y() + GROUNDED_Y_BIAS - (0.5 - fraction) * visible_height
+	# X continues to use horizontal delay and mouse/lock pan, including during zoom.
+	offset = _base_offset + _mouse_pan
 
 func _pan_for_pointer(pointer: Vector2, viewport_rect: Rect2) -> Vector2:
 	if not viewport_rect.has_area() or not viewport_rect.has_point(pointer): return Vector2.ZERO

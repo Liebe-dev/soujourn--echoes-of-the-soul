@@ -60,6 +60,13 @@ func regen_stamina(delta: float, blocked: bool = false) -> bool:
 	return stamina != before
 
 # --- Damage ---
+func drain_hp_nonlethal(amount: int) -> int:
+	# Self-drain bypasses stagger floors, defense and damage modifiers; never revives.
+	if hp <= 0 or amount <= 0: return 0
+	var previous := hp
+	hp = maxi(1, hp - amount)
+	return previous - hp
+
 func heal_to_full() -> void:
 	hp = max_hp
 	stamina = max_stamina

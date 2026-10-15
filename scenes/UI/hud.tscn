@@ -12,6 +12,9 @@
 [ext_resource type="Texture2D" uid="uid://fmq0c3hsxys8" path="res://scenes/UI/hud_assets/threshold_arrow.svg" id="10"]
 [ext_resource type="Texture2D" uid="uid://bdjkwebk6u7vp" path="res://scenes/UI/hud_assets/hp_rim.svg" id="11"]
 [ext_resource type="Texture2D" uid="uid://cfq2yiga07x2v" path="res://scenes/UI/hud_assets/stamina_rim.svg" id="12"]
+[ext_resource type="PackedScene" uid="uid://iqq6neyb6dmq" path="res://scenes/UI/sentinel/ultimate_meter.tscn" id="13"]
+[ext_resource type="PackedScene" path="res://scenes/UI/sentinel/sentinel_loadout.tscn" id="14"]
+[ext_resource type="Script" uid="uid://cr8skejhwo6qp" path="res://scenes/UI/sentinel/sentinel_debug_controls.gd" id="15"]
 
 [sub_resource type="ShaderMaterial" id="Liquid"]
 resource_local_to_scene = true
@@ -191,3 +194,22 @@ layout_mode = 2
 mouse_filter = 2
 theme_override_constants/separation = 3
 script = ExtResource("5")
+
+[node name="UltimateMeter" parent="ScreenSpace/bar/hp_bar_panel" unique_id=111514207 instance=ExtResource("13")]
+layout_mode = 0
+offset_left = 32.825
+offset_top = -42.0
+offset_right = 164.825
+offset_bottom = -20.0
+
+[node name="SentinelLoadout" parent="ScreenSpace" unique_id=1519710361 instance=ExtResource("14")]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 325.0
+offset_right = 539.0
+offset_bottom = 539.0
+
+[node name="SentinelDebugControls" type="Node" parent="." unique_id=668525758]
+script = ExtResource("15")

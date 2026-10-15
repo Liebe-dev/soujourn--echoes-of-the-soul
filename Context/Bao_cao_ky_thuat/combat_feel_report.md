@@ -1,5 +1,7 @@
 # Combat feel: Attack → Defense, input buffer, hit-stop
 
+> Cập nhật sau refactor 16/10/2026: đã sửa ownership i-frame, chuyển stats/đồng hồ sang Player, gom dash vào module và cho defense bắt đầu ngay sau skid, không chờ cooldown. Xem [player_runtime_refactor_report.md](player_runtime_refactor_report.md). Nội dung và kết quả trước đó bên dưới là snapshot lịch sử; i-frame bug đã nêu trong snapshot nay đã có regression và được sửa.
+
 Ngày: 15/10/2026. Phạm vi: PlayableAdel, Saber combo 1–4, Defense/Guard/Deflect và điều phối hiệu ứng thời gian.
 
 ## Hành vi đã chốt
@@ -105,3 +107,14 @@ Các kết quả trên đã thực sự chạy bằng Godot 4.7 trên bản sao 
 ### Skill vũ khí Q
 
 Skill Saber ba mức charge đã được tách vào node SaberSkill. Hướng dẫn khoảng lao, mốc giữ Q, hit-stop, stun và slow motion trừ Player: [saber_weapon_skill_report.md](saber_weapon_skill_report.md). Không dùng các export damage/hit-stop của combo thường để thay cho tuning riêng của skill Q.
+
+
+## Cập nhật 2026-10-16 — giữ defense khi dash
+
+Nhấn giữ defense trong DASH_ACTIVE/DASH_SKID hoặc thời gian cooldown sẽ ghi nhận yêu cầu chờ. Defense chỉ bắt đầu khi đã thoát DASH, dash.able_to_dodge được Timer cooldown trả về true và có stamina. Không ngắt dash, rút ngắn cooldown hoặc thêm chi phí stamina cho thao tác giữ.
+
+Thả nút, clear_combat_input (menu, focus, rest, stagger...) hủy yêu cầu chờ. Nếu dash tiêu hết stamina, có thể giữ yêu cầu trong dash/cooldown; nếu stamina hồi về >0 trước lúc hết cooldown thì vẫn vào defense. Nếu đến lúc đó stamina vẫn bằng 0, yêu cầu bị hủy và không vào defense.
+
+Giữ cách tính _guard_press_age từ lúc nhấn nút: chờ qua dash/cooldown không cấp lại cửa sổ deflect. Không thay deflect_delay của scene (người dùng hiện đã đặt 0.03), cooldown dash, tốc độ dash hoặc animation.
+
+Test `res://tests/adel/dash_defense_validation.tscn`: 24 check headless + 24 check có render, gồm dash đất/trên không, toàn bộ cooldown, thả trong dash/cooldown, hủy do input cleanup, không cấp deflect mới, hết stamina và hồi stamina trước khi cooldown xong. Hồi quy combat_feel: 106 check headless. Bộ hồi quy cũ có fixture deflect_delay = 0.1 riêng để kiểm tra baseline thiết kế; scene chơi thật không bị sửa. Mọi test dùng save riêng CodexDashDefense/CodexCombatFeel.

@@ -8,6 +8,11 @@ func _ready() -> void:
 func _on_body_entered(body: Node2D) -> void:
 	if not body.is_in_group("Player"):
 		return
+	if body.has_method("get_player_vitals"):
+		var vitals = body.get_player_vitals()
+		vitals.model.restore_stagger_thresholds()
+		vitals.refresh()
+		return
 	var hud := _find_hud(body.get_tree())
 	if hud and hud.has_method("restore_stagger_thresholds"):
 		hud.restore_stagger_thresholds()

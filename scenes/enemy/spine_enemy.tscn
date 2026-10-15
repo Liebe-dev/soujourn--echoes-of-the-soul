@@ -7,12 +7,12 @@
 radius = 76.0
 height = 152.0
 
+[sub_resource type="RectangleShape2D" id="Weapon"]
+size = Vector2(231, 170)
+
 [sub_resource type="CapsuleShape2D" id="Leap"]
 radius = 76.0
 height = 152.0
-
-[sub_resource type="RectangleShape2D" id="Weapon"]
-size = Vector2(231, 170)
 
 [node name="SpineEnemy" type="CharacterBody2D" unique_id=1072287283]
 z_index = 100
@@ -51,13 +51,12 @@ position = Vector2(-114.5, -55)
 shape = SubResource("Weapon")
 disabled = true
 
-
-[node name="LeapHitbox" type="Area2D" parent="."]
+[node name="LeapHitbox" type="Area2D" parent="." unique_id=405385785]
 collision_layer = 16
 collision_mask = 2
 monitorable = false
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="LeapHitbox"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="LeapHitbox" unique_id=622859494]
 position = Vector2(-5, -25)
 shape = SubResource("Leap")
 disabled = true

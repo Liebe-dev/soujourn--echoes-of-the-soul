@@ -76,7 +76,7 @@ func is_doing_action() -> bool:
 	return is_in(State.ATTACK) and not (current == State.JUMP_LAND and _body.combat.is_jump_attack_land_unlocked()) or is_in(State.DEFENSE) or current == State.PICKUP or (_body.deflect_slow_motion.is_active and not is_in(State.STAGGER))
 
 func can_begin_action() -> bool:
-	return is_in(State.LOCOMOTION) and can_move() and not _body.damage.is_touched_enemy and not _body.damage.is_stunned
+	return not _body.is_sentinel_exit_pending() and is_in(State.LOCOMOTION) and can_move() and not _body.damage.is_touched_enemy and not _body.damage.is_stunned
 
 func handle_input(event: InputEvent) -> void:
 	if event.is_action("weapon_skill"):

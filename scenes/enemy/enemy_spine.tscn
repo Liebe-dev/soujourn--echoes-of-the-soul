@@ -3225,6 +3225,7 @@ _data = {
 [node name="Enemy Spine" type="Node2D" unique_id=1107824209]
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1318423965]
+visible = false
 position = Vector2(894.99994, 1022.99994)
 scale = Vector2(29.28, 2.71)
 texture = SubResource("GradientTexture2D_wnxn7")

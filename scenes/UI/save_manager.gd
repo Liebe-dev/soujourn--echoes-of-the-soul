@@ -205,10 +205,10 @@ func save_at_campfire(campfire: Node2D, slot: int = -1, allow_overwrite: bool = 
 	data["spawn_position"] = {"x": player.global_position.x, "y": player.global_position.y}
 	data["hp"] = hp_info.hp
 	data["max_hp"] = hp_info.max_hp
-	var hud := _find_hud(tree)
-	if hud != null:
-		data["flask_charges"] = hud.flask_charges
-		data["max_flask_charges"] = hud.max_flask_charges
+	var stats = _find_stats(tree)
+	if stats != null:
+		data["flask_charges"] = stats.flask_charges
+		data["max_flask_charges"] = stats.max_flask_charges
 	data["facing_left"] = player.global_position.x > campfire.global_position.x
 	data["saved_at"] = Time.get_datetime_string_from_system()
 	PlayerProgress.write_to_save_data(data)
@@ -318,8 +318,12 @@ func respawn_at_checkpoint() -> void:
 
 func heal_player_full(tree: SceneTree = null) -> void:
 	var target := get_tree() if tree == null else tree
-	var hud := _find_hud(target)
-	if hud and hud.has_method("heal_to_full"): hud.heal_to_full()
+	var player := _find_player(target)
+	if player != null and player.has_method("get_player_vitals"):
+		player.get_player_vitals().heal_to_full()
+	else:
+		var hud := _find_hud(target)
+		if hud and hud.has_method("heal_to_full"): hud.heal_to_full()
 
 func delete_save() -> void:
 	# Explicit legacy API only; New Game never calls this.
@@ -425,39 +429,32 @@ func _find_hud(tree: SceneTree) -> Node:
 	return hud_layer
 
 func _read_player_hp(tree: SceneTree) -> Dictionary:
-	var hud := _find_hud(tree)
-	if hud:
-		return {"hp": hud.hp, "max_hp": hud.max_hp}
+	var stats = _find_stats(tree)
+	if stats != null: return {"hp": stats.hp, "max_hp": stats.max_hp}
 	return {"hp": int(_data.get("hp", 100)), "max_hp": int(_data.get("max_hp", 100))}
 
-func _apply_hp_to_hud(tree: SceneTree, hp: int, max_hp: int) -> void:
+func _find_stats(tree: SceneTree):
+	var player := _find_player(tree)
+	if player != null and player.has_method("get_player_vitals"): return player.get_player_vitals().model
 	var hud := _find_hud(tree)
-	if hud == null:
-		return
-	hud.max_hp = maxi(max_hp, PlayerProgress.get_max_hp())
-	hud.hp = clampi(hp, 0, hud.max_hp)
-	if "max_flask_charges" in hud:
-		hud.max_flask_charges = int(_data.get("max_flask_charges", hud.max_flask_charges))
-	if "flask_charges" in hud:
-		hud.flask_charges = clampi(
-			int(_data.get("flask_charges", hud.max_flask_charges)),
-			0,
-			hud.max_flask_charges
-		)
-	if hud.has_method("_recalc_flask_heal_amount"):
-		hud._recalc_flask_heal_amount()
-	if "stamina" in hud and "max_stamina" in hud:
-		hud.max_stamina = PlayerProgress.get_max_stamina()
-		hud.stamina = hud.max_stamina
-	if hud.has_method("sync_hp_display"):
-		hud.sync_hp_display()
-	if hud.has_method("sync_flask_display"):
-		hud.sync_flask_display()
-	elif hud.has_method("sync_soul_display"):
-		hud.sync_soul_display()
-	if hud.has_method("clear_all_debuffs"):
-		hud.clear_all_debuffs()
-	if hud.has_method("sync_status_icons"):
-		hud.sync_status_icons()
-	if hud.has_method("sync_stamina_display"):
-		hud.sync_stamina_display()
+	return hud._stats if hud != null and "_stats" in hud else null
+
+func _apply_hp_to_hud(tree: SceneTree, hp: int, max_hp: int) -> void:
+	# Historical name retained for callers; restores the model without requiring a HUD.
+	var stats = _find_stats(tree)
+	if stats == null: return
+	stats.max_hp = maxi(max_hp, PlayerProgress.get_max_hp())
+	stats.hp = clampi(hp, 0, stats.max_hp)
+	stats.max_flask_charges = maxi(1, int(_data.get("max_flask_charges", stats.max_flask_charges)))
+	stats.flask_charges = clampi(int(_data.get("flask_charges", stats.max_flask_charges)), 0, stats.max_flask_charges)
+	stats.recalc_flask_heal_amount()
+	stats.max_stamina = PlayerProgress.get_max_stamina()
+	stats.stamina = stats.max_stamina
+	stats.clear_all_debuffs()
+	var player := _find_player(tree)
+	if player != null and player.has_method("get_player_vitals"): player.get_player_vitals().refresh()
+	else:
+		var hud := _find_hud(tree)
+		if hud != null:
+			for method in [&"sync_hp_display", &"sync_flask_display", &"sync_status_icons", &"sync_stamina_display"]:
+				if hud.has_method(method): hud.call(method)

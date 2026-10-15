@@ -94,7 +94,7 @@ func _run() -> void:
 	check(fsm.current == S.DASH_ACTIVE and fsm.is_in(S.DASH) and p.dash.is_dodging, "dash enters active child")
 	await button(&"move_right", false)
 	p.enter_rest(false)
-	check(not p.dash.is_dodging and not p.damage.is_invulnerable and not p._dash_tween.is_running(), "dash parent exit cancels tween and invulnerability")
+	check(not p.dash.is_dodging and not p.damage.is_invulnerable and p.dash.phase == DashComponent.Phase.IDLE and p.velocity.x == 0.0, "dash parent exit cancels motion and its own immunity source")
 	await wait(0.6)
 	check(fsm.current == S.REST and p.velocity == Vector2.ZERO, "cancelled dash cannot move or replace resting animation later")
 	p.exit_rest()

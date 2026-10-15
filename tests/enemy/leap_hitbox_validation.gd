@@ -70,6 +70,7 @@ func _run() -> void:
 	p.set_physics_process(false)
 	var hud = p.get_node("Camera2D/hud")
 	hud.set_process(false)
+	p.vitals.simulation_enabled = false
 	var original_player_position: Vector2 = p.position
 	p.position.x = -1000
 	enemy.position = Vector2(700, 300)

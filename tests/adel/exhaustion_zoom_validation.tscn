@@ -1,0 +1,4 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://tests/adel/exhaustion_zoom_validation.gd" id="1"]
+[node name="ExhaustionZoomValidation" type="Node"]
+script = ExtResource("1")

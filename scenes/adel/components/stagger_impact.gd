@@ -64,7 +64,6 @@ func _process(delta: float) -> void:
 	var multiplier := lerpf(1.0, _multiplier, weight)
 	if _camera.has_method("set_combat_zoom"): _camera.set_combat_zoom(&"stagger", multiplier)
 	else: _camera.zoom = _base_zoom * multiplier
-	if _camera.has_method("set_stagger_focus"): _camera.set_stagger_focus(weight)
 
 func _restore_zoom() -> void:
 	if not _zoom_active: return
@@ -72,7 +71,6 @@ func _restore_zoom() -> void:
 	if is_instance_valid(_camera):
 		if _camera.has_method("clear_combat_zoom"): _camera.clear_combat_zoom(&"stagger")
 		else: _camera.zoom = _base_zoom
-		if _camera.has_method("set_stagger_focus"): _camera.set_stagger_focus(0.0)
 
 func cancel() -> void:
 	_generation += 1
