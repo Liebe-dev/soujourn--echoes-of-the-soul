@@ -27,6 +27,9 @@ func _run() -> void:
 	get_tree().root.add_child(scene)
 	get_tree().current_scene = scene
 	var p = scene.get_node("PlayableAdel")
+	# Presentation is covered by stagger_impact_validation; isolate combat clocks here.
+	p.stagger_zoom_enabled = false
+	p.stagger_slow_motion_enabled = false
 	p.hit_stop_enabled = false
 	scene.get_node("Enemy").set_physics_process(false)
 	await frames(65)

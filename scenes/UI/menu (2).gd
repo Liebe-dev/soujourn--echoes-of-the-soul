@@ -26,7 +26,7 @@ var _slot_back: Button
 var _overwrite_confirmation: ConfirmationDialog
 
 func _ready():
-	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	CursorPolicy.set_visible(get_viewport(), true, true)
 	_build_slot_menu()
 	$Control/Continue.disabled = not SaveManager.has_save()
 	menu_buttons.hide()
@@ -275,3 +275,8 @@ func _on_button_hovered():
 	
 func _on_button_click():
 	click_sound.play()
+
+
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_APPLICATION_FOCUS_IN and is_node_ready():
+		CursorPolicy.set_visible(get_viewport(), true, true)

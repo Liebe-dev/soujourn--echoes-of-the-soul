@@ -30,6 +30,7 @@ var _state_time_left: float = 0.0
 
 
 func _ready() -> void:
+	add_to_group(&"camera_lock_targets")
 	current_health = maxi(max_health, 1)
 	_anchor_x = global_position.x
 	_direction = -1 if initial_direction < 0 else 1
@@ -40,6 +41,14 @@ func _ready() -> void:
 		set_physics_process(false)
 	_update_facing()
 	_set_animation(animation_walk)
+
+
+## The body collider is the hurtbox; offensive Areas must never be lock points.
+func get_lock_on_point() -> Vector2:
+	var hurtbox := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if is_dead or current_health <= 0 or hurtbox == null or hurtbox.disabled or hurtbox.shape == null:
+		return Vector2.INF
+	return hurtbox.global_transform * hurtbox.shape.get_rect().get_center()
 
 
 func _physics_process(delta: float) -> void:

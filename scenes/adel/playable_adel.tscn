@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://dhhn1rh24dtco"]
 
-[ext_resource type="Script" path="res://scenes/adel/components/saber_weapon_skill.gd" id="saber_skill"]
 [ext_resource type="Script" uid="uid://xl1mn1dbt32k" path="res://scenes/adel/playable_adel.gd" id="1_playable"]
 [ext_resource type="PackedScene" uid="uid://c2j1ldt5uvdn7" path="res://scenes/adel/weapon/saber.tscn" id="3_5ku1i"]
 [ext_resource type="Script" uid="uid://jti2ptpyhs8u" path="res://scenes/camera_2d.gd" id="3_67loa"]
@@ -10,6 +9,7 @@
 [ext_resource type="Script" uid="uid://ceoihsyanr3kn" path="res://scenes/adel/components/saber_hitbox.gd" id="70_saber_hitbox"]
 [ext_resource type="Script" uid="uid://bhyw5qdkhk5en" path="res://scenes/adel/components/jump_attack_hitbox.gd" id="71_jump_hitbox"]
 [ext_resource type="PackedScene" path="res://scenes/UI/game_pause_menu.tscn" id="pause_flow"]
+[ext_resource type="Script" uid="uid://ce3kn3wd1byld" path="res://scenes/adel/components/saber_weapon_skill.gd" id="saber_skill"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]
 radius = 7.652174
@@ -200,7 +200,11 @@ size = Vector2(150, 100)
 [node name="PlayableAdel" type="CharacterBody2D" unique_id=1485460165 groups=["Player", "playableAdel"]]
 collision_layer = 3
 script = ExtResource("1_playable")
-stagger_knockback_distance = 200.0
+stagger_knockback_distance = 220.0
+stagger_knockback_duration = 0.4
+stagger_zoom_in_duration = 0.09
+stagger_zoom_return_lead = 0.25
+stagger_slow_motion_duration = 0.36
 deflect_slow_motion_scale = 0.5
 deflect_slow_motion_duration = 0.45
 guard_knockback_distance = 20.0
@@ -269,6 +273,12 @@ disabled = true
 offset = Vector2(0, -234.71)
 zoom = Vector2(1.05, 1.05)
 script = ExtResource("3_67loa")
+follow_speed_x = 6.0
+horizontal_follow_delay = 0.2
+horizontal_center_snap_distance = 0.2
+mouse_pan_max_distance = Vector2(120, 75)
+mouse_pan_deadzone = 0.15
+mouse_pan_follow_speed = 6.699999999999999
 
 [node name="hud" parent="Camera2D" unique_id=558584565 instance=ExtResource("4_aphpq")]
 offset_left = -897.0
@@ -290,9 +300,11 @@ visible = false
 wait_time = 0.5
 one_shot = true
 
-
-[node name="SaberSkill" type="Node" parent="."]
+[node name="SaberSkill" type="Node" parent="." unique_id=1870857445]
 script = ExtResource("saber_skill")
+charge_level_1_time = 0.7
+charge_level_2_time = 1.5
+lunge_speed = 2811.0
 
 [connection signal="body_entered" from="WeaponPivot/SaberHitbox/Hitbox" to="WeaponPivot/SaberHitbox" method="_on_hitbox_body_entered"]
 [connection signal="timeout" from="DodgeCooldown" to="." method="_on_dodge_cooldown_timeout"]

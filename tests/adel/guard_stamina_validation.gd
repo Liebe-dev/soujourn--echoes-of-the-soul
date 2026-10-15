@@ -68,6 +68,9 @@ func _run() -> void:
 	get_tree().root.add_child(scene)
 	get_tree().current_scene = scene
 	var p = scene.get_node("PlayableAdel")
+	# Presentation is covered by stagger_impact_validation; isolate combat clocks here.
+	p.stagger_zoom_enabled = false
+	p.stagger_slow_motion_enabled = false
 	p.hit_stop_enabled = false
 	var enemy = scene.get_node("Enemy")
 	enemy.set_physics_process(false)
@@ -173,7 +176,7 @@ func _run() -> void:
 		check(not p.saber_hitbox._attack_active and p.state_machine.current == AdelStateMachine.State.KNOCKBACK, "exhaustion knockback rejects attack input")
 		await wait(p.stagger_knockback_duration + 0.03)
 		var tolerance: float = p.damage.knockback_distance / p.damage.knockback_duration / 60.0 + 1.0
-		check(absf(p.position.x - start.x + p.damage.knockback_distance) <= tolerance and absf(p.position.y - start.y) < 0.1, "exhaustion uses shared stagger travel without upward displacement")
+		check(start.x - p.position.x > p.damage.knockback_distance * 0.7 and start.x - p.position.x < p.damage.knockback_distance and absf(p.position.y - start.y) < 0.1, "exhaustion continues horizontal travel into final frame without upward displacement")
 		check(p.damage.is_stunned and not p.damage.is_knocking_back and pose.frame == 1 and p.spine_anim.assigned_animation == &"saber_stagger", "exhaustion switches to stagger frame 1 and keeps full stun")
 		await click(&"attack")
 		check(not p.saber_hitbox._attack_active and p.state_machine.current == AdelStateMachine.State.STUN, "exhaustion stun rejects attack input")
@@ -182,6 +185,7 @@ func _run() -> void:
 		check(hud.hp == hp_before, "shared stagger iframe rejects damage during stun")
 		await wait(p.stagger_stun_duration + 0.02)
 		check(not p.damage.is_stunned and p.can_move and pose.frame == 2 and p.spine_anim.assigned_animation == &"saber_ready", "shared stun completes into interruptible frame-2 ready")
+		check(absf(p.position.x - start.x + p.damage.knockback_distance) <= tolerance and is_zero_approx(p.velocity.x), "shared stagger reaches full configured distance and stops before recovery")
 		check(p.damage.is_invulnerable, "same stagger iframe continues after control recovers")
 		await wait(0.3)
 		check(not p.damage.is_invulnerable, "shared 1-second iframe ends")

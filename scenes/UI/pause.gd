@@ -5,6 +5,7 @@ var _is_transitioning := false
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	hide()
+	_setup_camera_settings()
 
 func _ui_actor() -> Node:
 	var node := get_parent()
@@ -17,12 +18,12 @@ func _campfire_blocks_menu() -> bool:
 	var actor := _ui_actor()
 	return actor != null and actor.is_campfire_ui_active()
 
-func _refresh_cursor() -> void:
+func _refresh_cursor(center_mouse: bool = false) -> void:
 	var actor := _ui_actor()
 	if actor != null:
-		actor.refresh_gameplay_cursor()
+		actor.refresh_gameplay_cursor(center_mouse)
 	else:
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE if visible else Input.MOUSE_MODE_HIDDEN)
+		CursorPolicy.set_visible(get_viewport(), visible, center_mouse)
 
 func pause_and_unpause() -> void:
 	if _is_transitioning or _campfire_blocks_menu(): return
@@ -31,8 +32,9 @@ func pause_and_unpause() -> void:
 		if actor != null: actor.clear_combat_input()
 	get_tree().paused = not get_tree().paused
 	visible = get_tree().paused
-	_refresh_cursor()
+	_refresh_cursor(visible)
 	if visible:
+		_sync_camera_settings()
 		move_to_front()
 		$VBoxContainer/resume.grab_focus()
 
@@ -72,3 +74,43 @@ func _on_quit_pressed() -> void:
 		_is_transitioning = false
 		$fade_trans.hide()
 		push_warning(SaveManager.last_error)
+
+
+func _game_camera() -> Camera2D:
+	var actor := _ui_actor()
+	return actor.get_node_or_null("Camera2D") as Camera2D if actor != null else null
+
+func _setup_camera_settings() -> void:
+	if not has_node("VBoxContainer/CameraSettings"): return
+	$VBoxContainer/CameraSettings/AutoReset.toggled.connect(_on_camera_auto_reset)
+	$VBoxContainer/CameraSettings/ResetRow/Delay.value_changed.connect(_on_camera_delay)
+	$VBoxContainer/CameraSettings/DeadzoneRow/Deadzone.value_changed.connect(_on_camera_deadzone)
+	_sync_camera_settings()
+
+func _sync_camera_settings() -> void:
+	var camera := _game_camera()
+	if camera == null or not camera.has_method("camera_preferences") or not has_node("VBoxContainer/CameraSettings"): return
+	var settings: Dictionary = camera.camera_preferences()
+	$VBoxContainer/CameraSettings/AutoReset.set_pressed_no_signal(settings.reset_enabled)
+	$VBoxContainer/CameraSettings/ResetRow/Delay.set_value_no_signal(settings.reset_delay)
+	$VBoxContainer/CameraSettings/ResetRow/Delay.editable = settings.reset_enabled
+	$VBoxContainer/CameraSettings/DeadzoneRow/Deadzone.set_value_no_signal(settings.deadzone * 100.0)
+	$VBoxContainer/CameraSettings/Status.text = ""
+
+func _set_camera_setting(key: String, value: Variant) -> void:
+	var camera := _game_camera()
+	if camera == null or not camera.has_method("camera_preferences"): return
+	var settings: Dictionary = camera.camera_preferences()
+	settings[key] = value
+	var error: Error = camera.apply_camera_preferences(settings)
+	$VBoxContainer/CameraSettings/Status.text = "Camera settings saved" if error == OK else "Applied; could not save camera settings"
+
+func _on_camera_auto_reset(value: bool) -> void:
+	$VBoxContainer/CameraSettings/ResetRow/Delay.editable = value
+	_set_camera_setting("reset_enabled", value)
+
+func _on_camera_delay(value: float) -> void:
+	_set_camera_setting("reset_delay", value)
+
+func _on_camera_deadzone(value: float) -> void:
+	_set_camera_setting("deadzone", value / 100.0)

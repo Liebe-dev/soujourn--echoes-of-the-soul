@@ -25,10 +25,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -240.0
-offset_top = -140.0
-offset_right = 240.0
-offset_bottom = 140.0
+offset_left = -280.0
+offset_top = -300.0
+offset_right = 280.0
+offset_bottom = 300.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 18
@@ -53,6 +53,64 @@ text = "Restart Area"
 custom_minimum_size = Vector2(0, 52)
 layout_mode = 2
 text = "Return to Title"
+
+[node name="CameraSettings" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Title" type="Label" parent="VBoxContainer/CameraSettings"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Camera"
+
+[node name="AutoReset" type="CheckButton" parent="VBoxContainer/CameraSettings"]
+layout_mode = 2
+button_pressed = true
+text = "Auto-center when mouse stops moving"
+
+[node name="ResetRow" type="HBoxContainer" parent="VBoxContainer/CameraSettings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/CameraSettings/ResetRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Idle delay"
+
+[node name="Delay" type="SpinBox" parent="VBoxContainer/CameraSettings/ResetRow"]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+min_value = 0.5
+max_value = 30.0
+step = 0.1
+value = 3.0
+suffix = "s"
+
+[node name="DeadzoneRow" type="HBoxContainer" parent="VBoxContainer/CameraSettings"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="VBoxContainer/CameraSettings/DeadzoneRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Mouse deadzone"
+
+[node name="Deadzone" type="SpinBox" parent="VBoxContainer/CameraSettings/DeadzoneRow"]
+custom_minimum_size = Vector2(160, 40)
+layout_mode = 2
+max_value = 90.0
+step = 1.0
+value = 18.0
+suffix = "%"
+
+[node name="Hint" type="Label" parent="VBoxContainer/CameraSettings"]
+layout_mode = 2
+text = "Middle click: lock / unlock
+Hold middle + move: select target; release: confirm"
+theme_override_font_sizes/font_size = 18
+
+[node name="Status" type="Label" parent="VBoxContainer/CameraSettings"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = ""
 
 [node name="fade_trans" type="ColorRect" parent="."]
 visible = false

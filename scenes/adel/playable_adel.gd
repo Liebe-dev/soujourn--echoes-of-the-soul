@@ -1,4 +1,5 @@
 extends CharacterBody2D
+const StaggerImpact = preload("res://scenes/adel/components/stagger_impact.gd")
 @onready var dodge_cooldown = $DodgeCooldown
 @onready var saber_skill: SaberWeaponSkill = $SaberSkill
 @onready var spine_rig = $SpinePivot/SpineRig
@@ -19,6 +20,16 @@ extends CharacterBody2D
 @export_range(0.0, 500.0, 1.0, "or_greater") var stagger_knockback_distance: float = 72.0
 @export_range(0.01, 2.0, 0.01, "or_greater") var stagger_knockback_duration: float = 0.3
 @export_range(0.0, 5.0, 0.01, "or_greater") var stagger_stun_duration: float = 0.45
+
+@export_group("Stagger Impact")
+@export_range(0.0, 1.0, 0.01, "or_greater") var stagger_knockback_deceleration_duration: float = 0.2
+@export var stagger_zoom_enabled: bool = true
+@export_range(1.0, 3.0, 0.05, "or_greater") var stagger_zoom_multiplier: float = 1.5
+@export_range(0.0, 0.5, 0.01, "or_greater") var stagger_zoom_in_duration: float = 0.06
+@export_range(0.0, 1.0, 0.01, "or_greater") var stagger_zoom_return_lead: float = 0.2
+@export var stagger_slow_motion_enabled: bool = true
+@export_range(0.01, 1.0, 0.01) var stagger_slow_motion_scale: float = 0.35
+@export_range(0.0, 1.0, 0.01, "or_greater") var stagger_slow_motion_duration: float = 0.18
 
 @export_group("Combat Input")
 @export_range(0.0, 2.0, 0.01, "or_greater") var attack_defense_unlock_time: float = 0.6
@@ -67,6 +78,7 @@ const ATTACK_INTERRUPT_TIME := 0.40
 const ATTACK_4_INTERRUPT_TIME := 0.55
 signal player_attacked
 
+var stagger_impact: Node
 var presentation: AdelAnimationComponent
 var locomotion: LocomotionComponent
 var combat: CombatComponent
@@ -152,10 +164,14 @@ func _ready() -> void:
 	configure_attack_hitbox(combat.equipped_weapon)
 
 	damage = DamageComponent.new(self, stagger_knockback_distance, stagger_knockback_duration, stagger_stun_duration)
+	damage.knockback_deceleration_duration = stagger_knockback_deceleration_duration
 	damage.staggered.connect(_on_damage_staggered)
 	damage.stagger_recovered.connect(_on_damage_stagger_recovered)
 	damage.knockback_finished.connect(_on_damage_knockback_finished)
 
+	stagger_impact = StaggerImpact.new()
+	stagger_impact.name = "StaggerImpact"
+	add_child(stagger_impact)
 	deflect_slow_motion = DeflectSlowMotion.new()
 	deflect_slow_motion.name = "DeflectSlowMotion"
 	add_child(deflect_slow_motion)
@@ -212,11 +228,10 @@ func _physics_process(delta: float) -> void:
 	state_machine.physics_update(delta)
 
 func _physics_hit_reaction(delta: float) -> void:
-	if damage.is_knocking_back:
-		var travel := minf(_stagger_distance_left, damage.active_knockback_distance * delta / damage.active_knockback_duration)
+	if damage.is_stunned:
+		var travel := minf(_stagger_distance_left, damage.consume_knockback_distance(delta))
 		velocity.x = _stagger_push_direction * travel / maxf(delta, 0.000001)
 		_stagger_distance_left = maxf(_stagger_distance_left - travel, 0.0)
-	elif damage.is_stunned: velocity.x = 0.0
 	else: velocity.x = move_toward(velocity.x, 0.0, 400.0 * delta)
 	locomotion.apply_vertical_physics(delta)
 	move_and_slide()
@@ -348,6 +363,9 @@ func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 	var hit: Dictionary = hud.apply_damage(dmg, hit_from_global, exhausted)
 	# Damage can synchronously respawn or remove this Player from the tree.
 	if hit.get("died", false):
+		stagger_impact.cancel()
+		var camera := get_node_or_null("Camera2D") as Camera2D
+		if camera != null and camera.has_method("cancel_hit_stop_zoom"): camera.cancel_hit_stop_zoom()
 		clear_combat_input()
 		CombatTime.remove(self)
 		defense.end_guard()
@@ -398,7 +416,7 @@ func is_in_rest_state() -> bool:
 func set_campfire_cursor_ready(owner: Node, ready: bool) -> void:
 	if _campfire_ui_owner != owner: return
 	_campfire_cursor_ready = ready
-	refresh_gameplay_cursor()
+	refresh_gameplay_cursor(ready)
 
 func end_campfire_ui(owner: Node) -> void:
 	if _campfire_ui_owner != owner: return
@@ -410,16 +428,16 @@ func end_campfire_ui(owner: Node) -> void:
 	var scene := get_tree().current_scene if is_inside_tree() else null
 	if scene != null and (scene == self or scene.is_ancestor_of(self)): refresh_gameplay_cursor()
 
-func refresh_gameplay_cursor() -> void:
+func refresh_gameplay_cursor(center_mouse: bool = false) -> void:
 	if not is_inside_tree(): return
 	if is_campfire_ui_active():
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE if _campfire_cursor_ready else Input.MOUSE_MODE_HIDDEN)
+		CursorPolicy.set_visible(get_viewport(), _campfire_cursor_ready, center_mouse)
 		return
 	var visible_menu := false
 	for path in ["Camera2D/UI_Layer/master_menu", "Camera2D/UI_Layer/PauseMenu"]:
 		var menu := get_node_or_null(path) as Control
 		visible_menu = visible_menu or (menu != null and menu.visible)
-	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE if visible_menu else Input.MOUSE_MODE_HIDDEN)
+	CursorPolicy.set_visible(get_viewport(), visible_menu, center_mouse)
 
 func prepare_to_exit_rest() -> void:
 	# Keep Rest ownership through the exit fade, but restore position/camera now.
@@ -727,17 +745,23 @@ func _on_dodge_cooldown_timeout() -> void:
 	dash.on_cooldown_timeout()
 
 func _on_damage_staggered(knockback_velocity: Vector2) -> void:
+	var falling_velocity := maxf(velocity.y, 0.0)
 	state_machine.transition(AdelStateMachine.State.KNOCKBACK)
-	velocity = knockback_velocity
+	velocity = Vector2(knockback_velocity.x, falling_velocity)
 	_stagger_push_direction = signf(knockback_velocity.x) if not is_zero_approx(knockback_velocity.x) else -float(facing_direction)
 	_stagger_distance_left = damage.active_knockback_distance
 	_playing_land_anim = false
 	_show_stagger_frame(0)
+	stagger_impact.start(get_node_or_null("Camera2D"), damage.stagger_duration(), {
+		"zoom_enabled": stagger_zoom_enabled, "zoom_multiplier": stagger_zoom_multiplier,
+		"zoom_in_duration": stagger_zoom_in_duration, "return_lead": stagger_zoom_return_lead,
+		"slow_motion_enabled": stagger_slow_motion_enabled,
+		"slow_motion_scale": stagger_slow_motion_scale, "slow_motion_duration": stagger_slow_motion_duration,
+	})
 
 func _on_damage_knockback_finished() -> void:
 	state_machine.transition(AdelStateMachine.State.STUN)
-	velocity.x = 0.0
-	_stagger_distance_left = 0.0
+	# Frame 1 begins now; horizontal motion decelerates for the configured tail.
 	_show_stagger_frame(1)
 
 func _show_stagger_frame(frame_index: int) -> void:
@@ -745,6 +769,7 @@ func _show_stagger_frame(frame_index: int) -> void:
 
 func _on_damage_stagger_recovered() -> void:
 	_stagger_distance_left = 0.0
+	velocity.x = 0.0
 	if deflect_slow_motion.is_active:
 		state_machine.transition(AdelStateMachine.State.DEFLECT_REACTION)
 	else:
@@ -803,10 +828,15 @@ func _release_guard_input() -> void:
 
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_APPLICATION_FOCUS_OUT: clear_combat_input()
+	elif what == NOTIFICATION_APPLICATION_FOCUS_IN and is_node_ready(): refresh_gameplay_cursor.call_deferred(true)
 
 func _request_hit_stop(duration: float) -> float:
 	if not hit_stop_enabled or duration <= 0.0: return 0.0
-	return CombatTime.request(self, &"hit_stop", hit_stop_scale, duration)
+	var accepted := CombatTime.request(self, &"hit_stop", hit_stop_scale, duration)
+	if accepted > 0.0:
+		var camera := get_node_or_null("Camera2D") as Camera2D
+		if camera != null and camera.has_method("play_hit_stop_zoom"): camera.play_hit_stop_zoom()
+	return accepted
 
 func _on_saber_hit_confirmed(attack_name: StringName) -> void:
 	if attack_name == &"saber_skill": return
@@ -907,6 +937,7 @@ func _enter_player_state(state: AdelStateMachine.State) -> void:
 
 func _exit_player_state(state: AdelStateMachine.State) -> void:
 	match state:
+		AdelStateMachine.State.STAGGER: stagger_impact.cancel()
 		AdelStateMachine.State.SKILL: saber_skill.cancel()
 		AdelStateMachine.State.ATTACK:
 			_attack_interrupt_token += 1

@@ -143,7 +143,7 @@ func return_to_title() -> bool:
 		get_tree().paused = was_paused
 		return _fail("Could not open the title screen.")
 	pending_continue = false
-	Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+	CursorPolicy.set_visible(get_viewport(), true, true)
 	return true
 
 func restart_current_area() -> bool:

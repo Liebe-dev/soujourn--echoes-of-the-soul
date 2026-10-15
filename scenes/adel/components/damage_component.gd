@@ -32,6 +32,9 @@ var is_touched_enemy: bool = false
 
 var active_knockback_distance: float
 var active_knockback_duration: float
+var knockback_deceleration_duration: float = 0.2
+var active_deceleration_duration: float = 0.0
+var _knockback_elapsed: float = 0.0
 var _active_stun_duration: float
 var _active_invulnerability_duration: float
 
@@ -57,15 +60,29 @@ func can_take_damage() -> bool:
 
 # --- Knockback direction (was _knockback_dir) ---
 func compute_knockback_dir(hit_from_global: Vector2, facing_direction: int) -> Vector2:
-	if hit_from_global != Vector2.INF:
-		var dir := _body.global_position - hit_from_global
-		if dir.length_squared() > 0.01:
-			var dir_normal := dir.normalized()
-			if abs(dir_normal.x) < 0.1:
-				dir_normal.x = -facing_direction
-			dir_normal.y = randf_range(-0.2, -0.7)
-			return dir_normal
-	return Vector2(1.0 if facing_direction < 0 else -1.0, -0.2).normalized()
+	var direction := -float(facing_direction)
+	if hit_from_global.is_finite():
+		var difference := _body.global_position.x - hit_from_global.x
+		if not is_zero_approx(difference): direction = signf(difference)
+	return Vector2(direction, 0.0)
+
+## Frame 0 owns the constant-speed phase; frame 1 contains the deceleration tail.
+## Integrate the curve, rather than Euler-stepping velocity, to preserve distance at any FPS.
+func consume_knockback_distance(delta: float) -> float:
+	if not is_stunned or delta <= 0.0: return 0.0
+	var previous := _knockback_elapsed
+	_knockback_elapsed = minf(previous + delta, active_knockback_duration + active_deceleration_duration)
+	var area := active_knockback_duration + active_deceleration_duration / 3.0
+	return active_knockback_distance * (_motion_area(_knockback_elapsed) - _motion_area(previous)) / maxf(area, 0.000001)
+
+func _motion_area(elapsed: float) -> float:
+	var first := minf(elapsed, active_knockback_duration)
+	if elapsed <= active_knockback_duration or active_deceleration_duration <= 0.0: return first
+	var progress := clampf((elapsed - active_knockback_duration) / active_deceleration_duration, 0.0, 1.0)
+	return first + active_deceleration_duration * (1.0 - pow(1.0 - progress, 3.0)) / 3.0
+
+func stagger_duration() -> float:
+	return active_knockback_duration + _active_stun_duration
 
 # --- Stagger reaction (was _apply_stagger) ---
 func apply_stagger(
@@ -81,10 +98,15 @@ func apply_stagger(
 	active_knockback_duration = knockback_duration if push_override < 0.0 else maxf(push_override, 0.01)
 	_active_stun_duration = stun_duration if stun_override < 0.0 else maxf(stun_override, 0.0)
 	_active_invulnerability_duration = STAGGER_INVULN_SEC if invulnerability_override < 0.0 else maxf(invulnerability_override, 0.0)
+	active_deceleration_duration = minf(maxf(knockback_deceleration_duration, 0.0), _active_stun_duration)
+	_knockback_elapsed = 0.0
 	is_stunned = true
 	is_knocking_back = true
 	is_invulnerable = true
-	staggered.emit(knockback_dir * (active_knockback_distance / active_knockback_duration))
+	var direction := signf(knockback_dir.x)
+	if is_zero_approx(direction): direction = -float(_body.facing_direction) if "facing_direction" in _body else -1.0
+	var speed := active_knockback_distance / (active_knockback_duration + active_deceleration_duration / 3.0)
+	staggered.emit(Vector2(direction * speed, 0.0))
 	_connect_timeout(active_knockback_duration, _on_knockback_end)
 
 # --- Invulnerability window (was _start_invulnerability) ---

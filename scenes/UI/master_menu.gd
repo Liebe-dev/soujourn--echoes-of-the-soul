@@ -67,12 +67,12 @@ func _campfire_blocks_menu() -> bool:
 	var actor := _ui_actor()
 	return actor != null and actor.is_campfire_ui_active()
 
-func _refresh_cursor() -> void:
+func _refresh_cursor(center_mouse: bool = false) -> void:
 	var actor := _ui_actor()
 	if actor != null:
-		actor.refresh_gameplay_cursor()
+		actor.refresh_gameplay_cursor(center_mouse)
 	else:
-		Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE if visible else Input.MOUSE_MODE_HIDDEN)
+		CursorPolicy.set_visible(get_viewport(), visible, center_mouse)
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _campfire_blocks_menu(): return
@@ -129,7 +129,7 @@ func _open_menu() -> void:
 	_is_transitioning = true
 	modulate.a = 0.0
 	show()
-	_refresh_cursor()            # Hiện trước khi freeze để Godot render frame đầu tiên
+	_refresh_cursor(true)        # Center before showing the UI cursor.
 	get_tree().paused = true      # Freeze NGAY lập tức, không chờ fade xong
 	var tween = create_tween()
 	tween.set_pause_mode(Tween.TWEEN_PAUSE_PROCESS)  # Tween vẫn chạy khi paused

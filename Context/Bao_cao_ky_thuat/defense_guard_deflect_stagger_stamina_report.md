@@ -194,9 +194,11 @@ Threshold thật và thiếu stamina gọi cùng `DamageComponent.apply_stagger(
 - I-frame cấu hình tổng: **1.0 giây game** từ đầu push, nằm trong `STAGGER_INVULN_SEC`.
 - `saber_stagger` frame **0** khi KNOCKBACK, frame **1** khi STUN; hồi về `saber_ready` frame **2**.
 
-Push chạy qua `move_and_slide()` và ngân sách quãng đường; tường/địa hình có thể cắt bớt travel. Threshold không Guard có thể nhận vận tốc dọc theo hướng hit do `compute_knockback_dir()`; Guard-triggered threshold và phản ứng thiếu stamina được truyền hướng ngang, không tạo cú hất lên. Khoảng cách cấu hình là ngân sách ngang, không bảo đảm tổng độ dài quỹ đạo 2D luôn bằng đúng 200.
+Cập nhật 2026-10-15: mọi phản ứng stagger chỉ bật lùi ngang, không tạo xung lực hướng lên. Frame 0 đẩy đều trong 0.3 giây game; khi chuyển frame 1 vẫn trượt và giảm tốc mạnh trong 0.2 giây, dừng tại 0.5 giây game. Giữ nguyên tổng ngân sách 200px, chuẩn hóa vận tốc theo đường cong giảm tốc; tường có thể cắt bớt travel. Trọng lực và va chạm thông thường vẫn áp dụng.
 
-Khi kết thúc push, chuyển STUN và dừng vận tốc ngang. Hết stun thì trả quyền điều khiển qua READY. Với tuning 0.3 + 0.45, khoảng **0.25 giây i-frame còn lại** kéo dài sau hồi điều khiển. Nếu tổng push + stun dài hơn i-frame cấu hình, invulnerability vẫn ít nhất bao phủ hết stun. Sai số tick/timer có thể khiến thời điểm quan sát lệch một bước xử lý; không coi con số cấu hình là đo bảo đảm tới từng millisecond.
+Hết stun thì trả quyền điều khiển qua READY. Với tuning 0.3 + 0.45, khoảng **0.25 giây i-frame còn lại** kéo dài sau hồi điều khiển. Nếu tổng push + stun dài hơn i-frame cấu hình, invulnerability vẫn ít nhất bao phủ hết stun. Sai số tick/timer có thể khiến thời điểm quan sát lệch một bước xử lý.
+
+Stagger nay có zoom 1.5x và slow motion riêng, áp dụng cả phản ứng thiếu stamina. Zoom trả về trước cuối stagger 0.2 giây game. Chi tiết và thông số Inspector nằm trong [stagger_impact_report.md](stagger_impact_report.md). Đây không phải pulse Deflect thành công; không thay đổi điều kiện stamina/HP/debuff.
 
 Floor lock HP 1.0 giây và iframe 1.0 giây là hai timer độc lập dù hiện có cùng giá trị. Thay một constant không tự thay constant kia.
 
