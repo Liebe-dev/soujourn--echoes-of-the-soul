@@ -31,9 +31,15 @@ var attack_queued: bool = false
 var attack_buffer_duration := 0.18
 var _attack_buffer_left := 0.0
 var has_air_comboed: bool = false
+# Normal-fall reference survives combo steps; displayed fall speed is scaled.
+var _air_combo_fall_speed := -1.0
+var _air_attack_pause_at := -1.0
+var _air_attack_pause_duration := 0.0
+var _air_attack_pause_left := 0.0
 var is_jump_attacking: bool = false
 var is_jump_attack_hanging: bool = false
 var jump_attack_hang_timer: float = 0.0
+var _jump_attack_waits_for_animation := false
 var is_jump_attack_landing: bool = false
 var jump_attack_land_timer: float = 0.0
 
@@ -106,14 +112,23 @@ func on_attack_anim_finished() -> AttackAction:
 	attack_queued = false
 	return AttackAction.FINISH_COMBO
 # --- Jump attack state transitions ---
-func start_jump_attack() -> void:
+func start_jump_attack(hang_duration: float = JUMP_ATTACK_HANG_TIME, wait_for_animation: bool = false) -> void:
+	_jump_attack_waits_for_animation = wait_for_animation
+	cancel_air_attack_pause()
+	_air_combo_fall_speed = -1.0
 	attack_queued = false
 	is_jump_attacking = true
 	is_jump_attack_hanging = true
-	jump_attack_hang_timer = JUMP_ATTACK_HANG_TIME
+	jump_attack_hang_timer = maxf(hang_duration, 0.0)
 	combo_step = 0
 
+func finish_jump_attack_hang() -> void:
+	is_jump_attack_hanging = false
+	jump_attack_hang_timer = 0.0
+	_jump_attack_waits_for_animation = false
+
 func begin_jump_attack_land() -> void:
+	_jump_attack_waits_for_animation = false
 	is_jump_attacking = false
 	is_jump_attack_hanging = false
 	jump_attack_hang_timer = 0.0
@@ -134,6 +149,9 @@ func should_cancel_jump_attack_land() -> bool:
 # cancels an in-progress attack. Does NOT reset combo_step — combo progression
 # is deliberately preserved.
 func interrupt() -> void:
+	_jump_attack_waits_for_animation = false
+	cancel_air_attack_pause()
+	_air_combo_fall_speed = -1.0
 	clear_attack_buffer()
 	is_jump_attacking = false
 	is_jump_attack_hanging = false
@@ -144,17 +162,43 @@ func reset_combo_if_idle(is_doing_action: bool) -> void:
 	if not is_doing_action:
 		combo_step = 0
 
-# --- Combat air physics (combo hover + jump-attack hang/fall).
+# --- One frame-marker pause per combo swing. Animation keeps playing.
+func arm_air_attack_pause(frame_time: float, duration: float) -> void:
+	_air_attack_pause_at = frame_time
+	_air_attack_pause_duration = maxf(duration, 0.0)
+	_air_attack_pause_left = 0.0
+
+func cancel_air_attack_pause() -> void:
+	_air_attack_pause_at = -1.0
+	_air_attack_pause_left = 0.0
+
+func tick_air_attack_pause(animation_position: float, delta: float) -> bool:
+	if _air_attack_pause_at >= 0.0 and animation_position + 0.00001 >= _air_attack_pause_at:
+		_air_attack_pause_at = -1.0
+		if not _body.is_on_floor(): _air_attack_pause_left = _air_attack_pause_duration
+	if _body.is_on_floor(): _air_attack_pause_left = 0.0
+	if _air_attack_pause_left <= 0.0: return false
+	_air_attack_pause_left = maxf(_air_attack_pause_left - delta, 0.0)
+	return true
+
+# --- Combat air physics (slow combo fall + jump-attack hang/fall).
 # Returns true when combat handled gravity this frame; false means the caller
 # should run normal locomotion gravity instead.
-func apply_combat_air_physics(delta: float) -> bool:
+func apply_combat_air_physics(delta: float, air_fall_multiplier: float = 0.3) -> bool:
 	if combo_step > 0 and not _body.is_on_floor():
-		_body.velocity.y = 0.0
+		if _air_combo_fall_speed < 0.0:
+			_air_combo_fall_speed = maxf(_body.velocity.y, 0.0)
+		var gravity_multiplier: float = LocomotionComponent.FALL_GRAVITY_MULT if _air_combo_fall_speed > 0.0 else 1.0
+		_air_combo_fall_speed = minf(_air_combo_fall_speed + _body.get_gravity().y * gravity_multiplier * delta, LocomotionComponent.MAX_FALL_SPEED)
+		_body.velocity.y = _air_combo_fall_speed * clampf(air_fall_multiplier, 0.01, 1.0)
 		return true
+
+	_air_combo_fall_speed = -1.0
 
 	if is_jump_attacking and not _body.is_on_floor():
 		if is_jump_attack_hanging:
-			jump_attack_hang_timer = maxf(jump_attack_hang_timer - delta, 0.0)
+			if not _jump_attack_waits_for_animation:
+				jump_attack_hang_timer = maxf(jump_attack_hang_timer - delta, 0.0)
 			_body.velocity.y = 0.0
 			if jump_attack_hang_timer <= 0.0:
 				is_jump_attack_hanging = false

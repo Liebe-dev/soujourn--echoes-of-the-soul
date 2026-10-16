@@ -1,4 +1,6 @@
 extends Control
+const ChargedFinish = preload("res://scenes/adel/components/charged_skill_finish.gd")
+const EnemyDebugSettings = preload("res://scenes/enemy/enemy_debug_settings.gd")
 
 var _is_transitioning := false
 
@@ -6,6 +8,7 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	hide()
 	_setup_camera_settings()
+	_setup_enemy_debug()
 
 func _ui_actor() -> Node:
 	var node := get_parent()
@@ -26,6 +29,7 @@ func _refresh_cursor(center_mouse: bool = false) -> void:
 		CursorPolicy.set_visible(get_viewport(), visible, center_mouse)
 
 func pause_and_unpause() -> void:
+	if ChargedFinish.is_freezing(): return
 	if _is_transitioning or _campfire_blocks_menu(): return
 	if not get_tree().paused:
 		var actor := _ui_actor()
@@ -35,10 +39,12 @@ func pause_and_unpause() -> void:
 	_refresh_cursor(visible)
 	if visible:
 		_sync_camera_settings()
+		_sync_enemy_debug()
 		move_to_front()
 		$VBoxContainer/resume.grab_focus()
 
 func _unhandled_input(event: InputEvent) -> void:
+	if ChargedFinish.is_freezing(): return
 	if _campfire_blocks_menu(): return
 	if not event.is_action_pressed("ui_cancel") or event.is_echo(): return
 	var root := get_tree().current_scene
@@ -114,3 +120,17 @@ func _on_camera_delay(value: float) -> void:
 
 func _on_camera_deadzone(value: float) -> void:
 	_set_camera_setting("deadzone", value / 100.0)
+
+func _setup_enemy_debug() -> void:
+	var panel := get_node_or_null("VBoxContainer/EnemyDebug")
+	if panel == null: return
+	panel.visible = OS.is_debug_build()
+	panel.get_node("DisableAI").toggled.connect(func(value: bool): EnemyDebugSettings.ai_disabled = value)
+	panel.get_node("Immortal").toggled.connect(func(value: bool): EnemyDebugSettings.immortal = value)
+	_sync_enemy_debug()
+
+func _sync_enemy_debug() -> void:
+	var panel := get_node_or_null("VBoxContainer/EnemyDebug")
+	if panel == null: return
+	panel.get_node("DisableAI").set_pressed_no_signal(EnemyDebugSettings.is_ai_disabled())
+	panel.get_node("Immortal").set_pressed_no_signal(EnemyDebugSettings.is_immortal())

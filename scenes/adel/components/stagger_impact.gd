@@ -1,5 +1,7 @@
 extends Node
 ## Presentation only. CombatTime remains the only writer of Engine.time_scale.
+var actor: Node
+var zoom_source: StringName = &"stagger"
 var _camera: Camera2D
 var _base_zoom := Vector2.ONE
 var _active := false
@@ -31,10 +33,10 @@ func start(camera: Camera2D, stagger_duration: float, settings: Dictionary) -> v
 	_multiplier = maxf(float(settings.get("zoom_multiplier", 1.5)), 1.0)
 	_zoom_active = bool(settings.get("zoom_enabled", true)) and is_instance_valid(camera) and camera.is_current() and _restore_at > 0.0
 	if _zoom_active:
-		if camera.has_method("set_combat_zoom"): camera.set_combat_zoom(&"stagger", 1.0)
+		if camera.has_method("set_combat_zoom"): camera.set_combat_zoom(zoom_source, 1.0)
 		_base_zoom = camera.zoom
 		var token := _generation
-		CombatTime.actor_timeout(get_parent(), _restore_at, func():
+		CombatTime.actor_timeout(actor if is_instance_valid(actor) else get_parent(), _restore_at, func():
 			if token == _generation: _restore_zoom()
 		)
 	if bool(settings.get("slow_motion_enabled", true)):
@@ -49,8 +51,10 @@ func _process(delta: float) -> void:
 	var now := Time.get_ticks_usec()
 	_real_elapsed += maxf(float(now - _last_usec) / 1000000.0, 0.0)
 	_last_usec = now
-	_game_elapsed += CombatTime.actor_delta(get_parent(), delta)
-	if not _zoom_active: return
+	_game_elapsed += CombatTime.actor_delta(actor if is_instance_valid(actor) else get_parent(), delta)
+	if not _zoom_active:
+		set_process(false)
+		return
 	if _game_elapsed >= _restore_at:
 		_restore_zoom()
 		return
@@ -62,14 +66,14 @@ func _process(delta: float) -> void:
 		var progress := clampf((_game_elapsed - _peak_game_time) / maxf(_restore_at - _peak_game_time, 0.000001), 0.0, 1.0)
 		weight = 1.0 - smoothstep(0.0, 1.0, progress)
 	var multiplier := lerpf(1.0, _multiplier, weight)
-	if _camera.has_method("set_combat_zoom"): _camera.set_combat_zoom(&"stagger", multiplier)
+	if _camera.has_method("set_combat_zoom"): _camera.set_combat_zoom(zoom_source, multiplier)
 	else: _camera.zoom = _base_zoom * multiplier
 
 func _restore_zoom() -> void:
 	if not _zoom_active: return
 	_zoom_active = false
 	if is_instance_valid(_camera):
-		if _camera.has_method("clear_combat_zoom"): _camera.clear_combat_zoom(&"stagger")
+		if _camera.has_method("clear_combat_zoom"): _camera.clear_combat_zoom(zoom_source)
 		else: _camera.zoom = _base_zoom
 
 func cancel() -> void:

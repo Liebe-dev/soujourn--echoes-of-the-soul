@@ -103,6 +103,7 @@ func apply_stagger(
 ) -> void:
 	if not _has_live_body() or (_body.has_method("is_skill_damage_immune") and _body.is_skill_damage_immune()):
 		return
+	if _body.has_method("is_sentinel_active") and _body.is_sentinel_active(): return
 	active_knockback_distance = knockback_distance if distance_override < 0.0 else maxf(distance_override, 0.0)
 	active_knockback_duration = knockback_duration if push_override < 0.0 else maxf(push_override, 0.01)
 	_active_stun_duration = stun_duration if stun_override < 0.0 else maxf(stun_override, 0.0)
@@ -170,6 +171,14 @@ func _connect_timeout(duration: float, callback: Callable) -> void:
 	if not _has_live_body():
 		return
 	_body.get_node("/root/CombatTime").actor_timeout(_body, duration, callback)
+
+func cancel_hit_reaction() -> void:
+	_stagger_generation += 1
+	release_invulnerability(&"stagger", _stagger_immunity_token)
+	is_stunned = false
+	is_knocking_back = false
+	is_touched_enemy = false
+	_knockback_elapsed = 0.0
 
 func reset() -> void:
 	# Checkpoint/respawn invalidates callbacks from the previous life.

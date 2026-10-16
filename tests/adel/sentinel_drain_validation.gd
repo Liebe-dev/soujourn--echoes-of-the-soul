@@ -48,6 +48,9 @@ func reset_mode(health: int = 100) -> void:
 	hud.stamina = 100.0
 	player.sentinel_hp_drain_percent = 2.0
 	player.begin_sentinel()
+	# This suite tests active-form drain; entry has its own integration suite.
+	player.sentinel_state.tick(player.sentinel_entry_duration)
+	hud.hp = health
 
 func run() -> void:
 	if not OS.get_user_data_dir().contains("CodexSentinelDrain20261016"):
@@ -145,6 +148,7 @@ func run() -> void:
 	hud.set_ultimate_charge(100.0)
 	await key(KEY_R)
 	check(player.sentinel_state.active and hud.sentinel_active and hud.ultimate_meter.charge == 0.0, "real R routes full meter into gameplay drain state")
+	player.sentinel_state.tick(player.sentinel_entry_duration)
 	player.set_physics_process(true)
 	await get_tree().create_timer(0.6, true, false, true).timeout
 	check(hud.hp <= 99 and hud.hp >= 98, "actual runtime physics drains HP over game time")

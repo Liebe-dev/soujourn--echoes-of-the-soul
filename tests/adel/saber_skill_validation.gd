@@ -87,6 +87,9 @@ func _run() -> void:
 	p.stagger_zoom_enabled = false
 	p.stagger_slow_motion_enabled = false
 	skill = p.saber_skill
+	for prefix in ["tap", "charged", "full"]:
+		skill.set(prefix + "_impact_zoom_enabled", false)
+		skill.set(prefix + "_impact_slow_motion_enabled", false)
 	skill.lunge_speed = 900.0
 	skill.charge_level_1_time = 1.0
 	skill.charge_level_2_time = 2.0
@@ -134,7 +137,7 @@ func _run() -> void:
 			var expected: float = skill.lunge_distance * [1.0,1.5,2.0][tier]
 			check(absf(p.position.x-start.x-facing*expected)<0.5 and absf(skill.distance_travelled-expected)<0.5,"whiff range ratio %d is exact, facing %d"%[tier,facing])
 			check(not p.is_skill_damage_immune() and Engine.time_scale == 1.0,"whiff grants neither recovery immunity nor slow motion")
-			check(is_equal_approx(p.spine_anim.get_playing_speed(),2.0 if tier==0 else 1.0),"skill_6 playback speed matches tier")
+			check(is_equal_approx(p.spine_anim.get_animation(&"saber_skill_6").length / p.spine_anim.get_playing_speed(), skill.tap_recovery_duration if tier == 0 else skill.charged_recovery_duration),"skill_6 completes in the configured duration with the current authored clip")
 			check(await finished(),"whiff recovery finishes cleanly")
 			check(p.can_move and not p.is_doing_action and not p.saber_hitbox._attack_active,"skill exit restores control and closes sword hitbox")
 	# Releasing between thresholds selects the lower completed level.
@@ -278,7 +281,7 @@ func _run() -> void:
 	await reset()
 	await button(&"guard and deflect",true)
 	await button(&"weapon_skill",true)
-	check(p.is_guarding and not skill.is_active(),"Q cannot override Defense")
+	check(not p.is_guarding and skill.is_active(),"Q overrides held Defense")
 	await reset()
 	hud.stamina=0
 	await click(&"weapon_skill")

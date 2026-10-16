@@ -1,5 +1,7 @@
 # Dark Sentinel — HUD và đặc tả đã duyệt
 
+> Cập nhật Sentinel 16/10/2026: đã thêm entry 1,5s bất động/i-frame, hồi HP và stamina 1% mỗi 0,015s, khôi phục/tạm tắt stagger threshold trong dạng và kích hoạt từng marker đã vượt khi nhận đòn mới sau thoát. Tự tiêu hao/chi phí HP không kích hoạt stagger. Xem [sentinel_entry_threshold_report.md](sentinel_entry_threshold_report.md) cho hành vi và vị trí chỉnh hiện hành. Các giới hạn cũ về hồi HP/miễn stagger/cấm bình máu bên dưới là lịch sử, không còn phản ánh hiện trạng.
+
 > Cập nhật sau refactor 16/10/2026: đã sửa ownership i-frame, chuyển stats/đồng hồ sang Player, gom dash vào module và cho defense bắt đầu ngay sau skid, không chờ cooldown. Xem [player_runtime_refactor_report.md](player_runtime_refactor_report.md). Nội dung và kết quả trước đó bên dưới là snapshot lịch sử; i-frame bug đã nêu trong snapshot nay đã có regression và được sửa.
 
 Giao diện thực hiện ngày 2026-10-15. Cập nhật 2026-10-16: đã thêm rút máu 2% max HP mỗi giây game và chờ kết thúc hành động để thoát ở 1 HP; T/R/Y trên Player đã nối vào module gameplay tối thiểu. Chi tiết, giới hạn, dash và đánh giá kiến trúc: [player_dash_sentinel_architecture_report.md](player_dash_sentinel_architecture_report.md). Chưa có full chuyển dạng/vũ khí/kỹ năng/buff Sentinel hay tích ulti từ combat.

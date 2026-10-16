@@ -9,7 +9,7 @@ enum State {
 	DEFENSE, DEFENSE_HOLD, GUARD_REACTION, DEFLECT_REACTION,
 	SKILL, SKILL_CHARGE, SKILL_RELEASE, SKILL_DASH, SKILL_IMPACT, SKILL_RECOVERY,
 	DASH, DASH_ACTIVE, DASH_SKID,
-	STAGGER, KNOCKBACK, STUN, CONTACT_REACTION, REST, PICKUP,
+	STAGGER, KNOCKBACK, STUN, CONTACT_REACTION, REST, PICKUP, SENTINEL_ENTRY,
 }
 signal transitioned(previous: State, current: State)
 const PARENT := {
@@ -24,7 +24,7 @@ const PARENT := {
 	State.GUARD_REACTION: State.DEFENSE, State.DEFLECT_REACTION: State.DEFENSE,
 	State.DASH: State.ROOT, State.DASH_ACTIVE: State.DASH, State.DASH_SKID: State.DASH,
 	State.STAGGER: State.ROOT, State.KNOCKBACK: State.STAGGER, State.STUN: State.STAGGER,
-	State.CONTACT_REACTION: State.ROOT, State.REST: State.ROOT, State.PICKUP: State.ROOT,
+	State.SENTINEL_ENTRY: State.ROOT, State.CONTACT_REACTION: State.ROOT, State.REST: State.ROOT, State.PICKUP: State.ROOT,
 }
 var current: State = State.ROOT
 var movement_enabled := true
@@ -73,15 +73,16 @@ func can_move() -> bool:
 	return is_in(State.LOCOMOTION) or (current == State.JUMP_LAND and _body.combat.is_jump_attack_land_unlocked()) or is_in(State.DASH)
 
 func is_doing_action() -> bool:
-	return is_in(State.ATTACK) and not (current == State.JUMP_LAND and _body.combat.is_jump_attack_land_unlocked()) or is_in(State.DEFENSE) or current == State.PICKUP or (_body.deflect_slow_motion.is_active and not is_in(State.STAGGER))
+	return is_in(State.ATTACK) and not (current == State.JUMP_LAND and _body.combat.is_jump_attack_land_unlocked()) or is_in(State.DEFENSE) or current in [State.PICKUP, State.SENTINEL_ENTRY] or (_body.deflect_slow_motion.is_active and not is_in(State.STAGGER))
 
 func can_begin_action() -> bool:
 	return not _body.is_sentinel_exit_pending() and is_in(State.LOCOMOTION) and can_move() and not _body.damage.is_touched_enemy and not _body.damage.is_stunned
 
 func handle_input(event: InputEvent) -> void:
+	if _body.is_sentinel_entering(): return
 	if event.is_action("weapon_skill"):
-		if event.is_action_pressed("weapon_skill") and not event.is_echo(): _body.saber_skill.begin()
-		elif event.is_action_released("weapon_skill"): _body.saber_skill.release()
+		if event.is_action_pressed("weapon_skill") and not event.is_echo(): _body.request_weapon_skill()
+		elif event.is_action_released("weapon_skill"): _body.release_weapon_skill()
 		_body.get_viewport().set_input_as_handled()
 		return
 	if event.is_action("guard and deflect"):
@@ -99,6 +100,9 @@ func handle_input(event: InputEvent) -> void:
 			_body._handle_attack_input()
 
 func physics_update(delta: float) -> void:
+	if _body.is_sentinel_entering():
+		_body.velocity = Vector2.ZERO
+		return
 	_body._update_defense(delta)
 	# Highest priority physical reaction may coexist with a held Deflect visual.
 	if _body.damage.is_stunned:

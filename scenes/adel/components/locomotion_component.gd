@@ -96,6 +96,9 @@ func apply_vertical_physics(delta: float) -> void:
 func handle_jump() -> void:
 	if not Input.is_action_just_pressed("jump"):
 		return
+	perform_buffered_jump()
+
+func perform_buffered_jump() -> void:
 	if _body.is_on_floor():
 		_begin_air_movement()
 		_body.velocity.y = _get_ground_jump_velocity()

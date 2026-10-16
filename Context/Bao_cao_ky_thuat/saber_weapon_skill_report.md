@@ -1,5 +1,13 @@
 # Saber skill Q — vận hành và tuning
 
+> Cập nhật Q mức 1/2 ngày 16/10/2026: giữ zoom qua toàn bộ skill_6, sau đó pause thật trong lúc trả zoom và nhận một input buffer mới nhất; mở băng mới full ready/replay. Zoom Duration mức 1/2 nay là thời gian trả zoom theo giây thực, độc lập mỗi mức. Player root Z Index 200, nằm trước enemy. Chi tiết: [q_charged_return_freeze_report.md](q_charged_return_freeze_report.md).
+
+> Cập nhật tách tuning 16/10/2026: zoom/slow motion khi Q va chạm đã độc lập hoàn toàn với stagger và có ba bộ riêng trên SaberSkill: Tap Impact, Charge Level 1 Impact, Charge Level 2 Impact. Cả thời gian trả zoom cũng không còn theo knockback/stun stagger. Xem [q_impact_tier_tuning_report.md](q_impact_tier_tuning_report.md). Những mô tả dùng chung stagger bên dưới là snapshot trước lần tách này.
+
+> Cập nhật Q 16/10/2026: Q hoàn tất dùng full `saber_ready` 0→1→2; ngay va chạm và vào `saber_skill_5` có zoom/slow motion theo thông số stagger, áp dụng cả tap và charge. Hit-stop riêng và pha skill_6 giữ nguyên, nhưng pulse va chạm có thể cùng chạy và CombatTime chọn mức chậm mạnh nhất. Xem [q_impact_ready_report.md](q_impact_ready_report.md) cho thông số hiện lưu, cleanup và kiểm chứng.
+
+> Đính chính luật cooldown 16/10/2026: dash cooldown CHỈ chặn dash tiếp theo. Giữ Q trong dash sẽ vào Q ngay khi hết skid; defense, attack và các hành động khác không chờ cooldown, vẫn giữ điều kiện riêng của từng hành động. Q chờ hết đòn thường 1–4, Q ngắt defense và buộc nhả/nhấn lại defense vẫn giữ nguyên. Chi tiết hiện hành: [q_hold_input_report.md](q_hold_input_report.md).
+
 Ngày: 15/10/2026. Skill dùng sáu animation người dùng đã cung cấp. Không sửa clip, texture, rig, ordering hay prototype cũ. Các lựa chọn đã trả lời: slow motion 0,50x; mức charge 1 giây có thêm 0,10 giây skill_2 kể từ lúc thả Q.
 
 ## Luồng ba mức

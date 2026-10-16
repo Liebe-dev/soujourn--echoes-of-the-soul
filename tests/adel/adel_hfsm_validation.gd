@@ -105,8 +105,10 @@ func _run() -> void:
 	await click(&"attack")
 	await button(&"move_down", false)
 	check(fsm.is_in(S.JUMP_ATTACK) and fsm.is_in(S.ATTACK), "air attack enters nested attack hierarchy")
-	await wait(0.18)
-	check(fsm.current == S.JUMP_FALL or fsm.current == S.JUMP_LAND, "jump attack progresses from hang to fall/landing")
+	await wait(0.08)
+	check(fsm.current == S.JUMP_HANG, "jump attack stays airborne during its windup animation")
+	await wait(p.spine_anim.get_animation(&"jump_attack(air)").length)
+	check(fsm.current == S.JUMP_FALL or fsm.current == S.JUMP_LAND, "jump attack progresses after the full air animation")
 	await wait(1.2)
 	check(fsm.is_in(S.LOCOMOTION) and p.can_move and not p.is_doing_action, "jump attack landing returns to controllable locomotion")
 	hud.hp = 100

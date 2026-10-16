@@ -1,4 +1,5 @@
 extends CharacterBody2D
+const EnemyDebugSettings = preload("res://scenes/enemy/enemy_debug_settings.gd")
 const PlayerVitals = preload("res://scenes/adel/components/player_vitals.gd")
 const DarkSentinelState = preload("res://scenes/adel/components/dark_sentinel_state.gd")
 const StaggerImpact = preload("res://scenes/adel/components/stagger_impact.gd")
@@ -26,7 +27,14 @@ var vitals: RefCounted = PlayerVitals.new(self, stats)
 
 @export_group("Dark Sentinel")
 @export_range(0.0, 100.0, 0.1, "or_greater", "suffix:%/s") var sentinel_hp_drain_percent: float = 2.0
+@export_range(0.015, 10.0, 0.015, "suffix:s") var sentinel_entry_duration: float = 1.5
+@export_range(0.001, 1.0, 0.001, "suffix:s") var sentinel_recovery_tick_interval: float = 0.015
+@export_range(0.01, 100.0, 0.01, "suffix:%") var sentinel_recovery_percent: float = 1.0
 var sentinel_state: RefCounted
+
+@export_group("Air Attack")
+@export_range(0.01, 1.0, 0.01) var air_attack_fall_speed_multiplier: float = 0.3
+@export_range(0.0, 1.0, 0.005, "suffix:s") var air_attack_frame_pause_duration: float = 0.07
 
 @export_group("Jump Attack")
 @export_range(0, 10000, 1, "or_greater") var jump_attack_damage: int = 20
@@ -108,6 +116,8 @@ var defense: DefenseComponent
 var dash: DashComponent
 var _attack_interrupt_ready: bool = false
 var _attack_interrupt_token: int = 0
+var _skill_requested := false
+var _guard_requires_release := false
 var _guard_requested := false
 var _guard_press_age := 0.0
 var _defense_lock_left := 0.0
@@ -218,6 +228,7 @@ func get_player_vitals() -> RefCounted:
 	return vitals
 
 func _unhandled_input(event: InputEvent) -> void:
+	if is_sentinel_entering(): return
 	if event.is_action_pressed("soul_heal"):
 		vitals.begin_flask_use()
 		get_viewport().set_input_as_handled()
@@ -229,7 +240,7 @@ func _unhandled_input(event: InputEvent) -> void:
 	state_machine.handle_input(event)
 
 func _handle_attack_input() -> void:
-	if _guard_requested or is_sentinel_exit_pending(): return
+	if is_sentinel_entering() or _guard_requested or _skill_requested or is_sentinel_exit_pending(): return
 	combat.attack_buffer_duration = attack_input_buffer
 	if combat.should_cancel_jump_attack_land():
 		_cancel_jump_attack_land()
@@ -246,6 +257,9 @@ func _physics_process(delta: float) -> void:
 		sentinel_state.tick(delta)
 	delta = CombatTime.actor_delta(self, delta)
 	var input_delta := 0.0 if CombatTime.is_hit_stopping() else delta
+	if _guard_requires_release and not Input.is_action_pressed("guard and deflect"):
+		_guard_requires_release = false
+	if _skill_requested: _try_consume_weapon_skill()
 	combat.tick_input_buffer(input_delta)
 	_defense_lock_left = maxf(_defense_lock_left - delta, 0.0)
 	if _guard_requested:
@@ -286,7 +300,7 @@ func _physics_attack(delta: float) -> void:
 			_physics_locomotion(delta)
 			return
 	var direction := Input.get_axis("move_left", "move_right")
-	if _attack_interrupt_ready and state_machine.current == AdelStateMachine.State.COMBO and direction != 0.0 and not combat.attack_queued and not _guard_requested:
+	if _attack_interrupt_ready and state_machine.current == AdelStateMachine.State.COMBO and direction != 0.0 and not combat.attack_queued and not _guard_requested and not _skill_requested:
 		_cancel_combo_for_movement(direction)
 		_physics_locomotion(delta)
 		return
@@ -295,7 +309,10 @@ func _physics_attack(delta: float) -> void:
 		state_machine.transition(AdelStateMachine.State.JUMP_HANG if combat.is_jump_attack_hanging else AdelStateMachine.State.JUMP_FALL)
 
 func _physics_locked(delta: float) -> void:
-	if not combat.apply_combat_air_physics(delta): locomotion.apply_vertical_physics(delta)
+	if combat.tick_air_attack_pause(spine_anim.current_animation_position, delta):
+		velocity.y = 0.0
+	elif not combat.apply_combat_air_physics(delta, air_attack_fall_speed_multiplier):
+		locomotion.apply_vertical_physics(delta)
 	if combat.is_jump_attacking:
 		jump_hitbox.set_damage_window(not combat.is_jump_attack_hanging)
 	velocity.x = move_toward(velocity.x, 0.0, locomotion.GROUND_FRICTION * delta)
@@ -339,6 +356,7 @@ func _physics_locomotion(delta: float) -> void:
 		var collision = get_slide_collision(i)
 		var collider = collision.get_collider()
 		if collider and collider.is_in_group("Enemy"):
+			if collider is EnemyBase and EnemyDebugSettings.is_ai_disabled(): continue
 			if dash.is_dodging or damage.is_invulnerable or damage.is_touched_enemy:
 				continue
 			take_damage(ENEMY_CONTACT_DAMAGE, collider.global_position)
@@ -348,7 +366,7 @@ func _physics_dash(delta: float) -> void:
 	dash.physics_update(delta)
 
 func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
-	if dmg <= 0 or is_skill_damage_immune() or not damage.can_take_damage():
+	if is_skill_finish_frozen() or dmg <= 0 or is_skill_damage_immune() or not damage.can_take_damage():
 		return
 
 	var health = vitals
@@ -538,17 +556,16 @@ func _play_combo_step() -> void:
 	velocity.x = 0
 	_playing_land_anim = false 
 	is_skidding = false
-	velocity.x = facing_direction * 150.0
-	if not is_on_floor():
-		velocity.y = 0.0
+	velocity.x = facing_direction * 150.0 if is_on_floor() else 0.0
 
 	var attack_animation: StringName = combat.get_attack_anim_name()
+	combat.arm_air_attack_pause(presentation.sprite_frame_time(attack_animation, 1) if combat.combo_step <= 3 else -1.0, air_attack_frame_pause_duration)
 	spine_anim.play(attack_animation)
 	saber_hitbox.play_attack_window(attack_animation, combat.get_combo_damage())
 	_arm_attack_interrupt(attack_animation)
 
 func _advance_queued_combo() -> void:
-	if _guard_requested or is_sentinel_exit_pending(): return
+	if is_sentinel_entering() or _guard_requested or _skill_requested or is_sentinel_exit_pending(): return
 	_attack_interrupt_token += 1
 	_attack_interrupt_ready = false
 
@@ -594,7 +611,7 @@ func _on_attack_interrupt_ready(
 		return
 
 	var direction: float = Input.get_axis("move_left", "move_right")
-	if direction != 0.0 and not _guard_requested:
+	if direction != 0.0 and not _guard_requested and not _skill_requested:
 		_cancel_combo_for_movement(direction)
 
 func _reset_combo() -> void:
@@ -607,7 +624,7 @@ func _play_jump_attack() -> void:
 	saber_hitbox.stop_attack_window()
 	combat.disable_attack_hitbox()
 	jump_hitbox.begin_attack(jump_attack_damage)
-	combat.start_jump_attack()
+	combat.start_jump_attack(spine_anim.get_animation(&"jump_attack(air)").length, true)
 	state_machine.transition(AdelStateMachine.State.JUMP_HANG)
 	velocity = Vector2.ZERO
 	presentation.play(&"jump_attack(air)")
@@ -640,7 +657,7 @@ func _get_move_speed_multiplier() -> float:
 	return stats.get_move_speed_multiplier()
 
 func _perform_dash(dash_direction: float) -> void:
-	if not dash.can_start(dash_direction, is_on_floor()) or not has_action_stamina() or is_sentinel_exit_pending(): return
+	if not dash.can_start(dash_direction, is_on_floor()) or not has_action_stamina() or is_sentinel_exit_pending() or is_sentinel_entering(): return
 	if combat.is_jump_attack_landing: _cancel_jump_attack_land()
 	if dash.start_dash(dash_direction, is_on_floor(), facing_direction): _playing_land_anim = false
 
@@ -695,7 +712,7 @@ func _on_locomotion_jumped() -> void:
 	_play_jump_start()
 
 func _on_locomotion_landed() -> void:
-	if saber_skill.is_active(): return
+	if is_sentinel_entering() or saber_skill.is_active(): return
 	dash.reset_air_dash()
 	combat.has_air_comboed = false
 	if is_guarding or deflect_slow_motion.is_active:
@@ -713,8 +730,11 @@ func _update_air_animation() -> void:
 	presentation.air()
 
 func _on_spine_anim_finished(anim_name: StringName) -> void:
-	if saber_skill.is_active(): return
+	if is_sentinel_entering() or saber_skill.is_active(): return
 	if state_machine.is_in(AdelStateMachine.State.DEFENSE) or deflect_slow_motion.is_active or state_machine.is_in(AdelStateMachine.State.STAGGER): return
+	if anim_name == &"jump_attack(air)" and combat.is_jump_attacking:
+		combat.finish_jump_attack_hang()
+		return
 	if anim_name == "jump_attack(land)" and state_machine.current == AdelStateMachine.State.JUMP_LAND:
 		_jump_land_visual_finished = true
 		_defense_lock_left = maxf(jump_attack_land_defense_unlock_time - spine_anim.get_animation(anim_name).length, 0.0)
@@ -796,11 +816,42 @@ func disable_attack_hitbox() -> void:
 	combat.disable_attack_hitbox()
 
 
+func cancel_weapon_skill_request() -> void:
+	_skill_requested = false
+
+func request_weapon_skill() -> void:
+	if _skill_requested or saber_skill.is_active() or _weapon_skill_input_blocked(): return
+	if not state_machine.is_in(AdelStateMachine.State.LOCOMOTION) and not state_machine.is_in(AdelStateMachine.State.DASH) and not state_machine.is_in(AdelStateMachine.State.DEFENSE) and state_machine.current != AdelStateMachine.State.COMBO: return
+	_skill_requested = true
+	combat.clear_attack_buffer()
+	_clear_guard_request()
+	_try_consume_weapon_skill()
+
+func release_weapon_skill() -> void:
+	cancel_weapon_skill_request()
+	saber_skill.release()
+
+func _weapon_skill_input_blocked() -> bool:
+	return is_locked or not state_machine.movement_enabled or damage.is_stunned or damage.is_touched_enemy or is_sentinel_exit_pending() or is_sentinel_entering() or is_campfire_ui_active() or get_tree().paused
+
+func _try_consume_weapon_skill() -> bool:
+	if not _skill_requested: return false
+	if not Input.is_action_pressed("weapon_skill") or _weapon_skill_input_blocked():
+		cancel_weapon_skill_request()
+		return false
+	# Only a fresh accepted press creates intent; holding Q cannot auto-repeat.
+	if state_machine.is_in(AdelStateMachine.State.DASH) or state_machine.current == AdelStateMachine.State.COMBO: return false
+	if not state_machine.is_in(AdelStateMachine.State.LOCOMOTION) and not state_machine.is_in(AdelStateMachine.State.DEFENSE): return false
+	if saber_skill.begin(true):
+		_guard_requires_release = Input.is_action_pressed("guard and deflect")
+		return true
+	return false
+
 func _dash_blocks_defense() -> bool:
 	return state_machine.is_in(AdelStateMachine.State.DASH)
 
 func _try_begin_guard() -> void:
-	if _guard_requested or is_guarding: return
+	if _guard_requires_release or _skill_requested or _guard_requested or is_guarding: return
 	if (not has_action_stamina() and not _dash_blocks_defense()) or is_locked or not state_machine.movement_enabled or damage.is_stunned or damage.is_touched_enemy or deflect_slow_motion.is_active: return
 	if not state_machine.is_in(AdelStateMachine.State.LOCOMOTION) and not state_machine.is_in(AdelStateMachine.State.DASH) and state_machine.current not in [AdelStateMachine.State.COMBO, AdelStateMachine.State.JUMP_LAND] and not state_machine.is_in(AdelStateMachine.State.JUMP_ATTACK): return
 	_guard_requested = true
@@ -809,6 +860,7 @@ func _try_begin_guard() -> void:
 	_try_consume_guard()
 
 func _try_consume_guard() -> bool:
+	if _guard_requires_release or _skill_requested: return false
 	if not _guard_requested or is_guarding or not has_action_stamina() or is_locked or not state_machine.movement_enabled or damage.is_stunned or damage.is_touched_enemy or deflect_slow_motion.is_active: return false
 	# Hold through dash/skid only; cooldown restricts the next dash, not defense.
 	if _dash_blocks_defense(): return false
@@ -829,12 +881,15 @@ func _clear_guard_request() -> void:
 	_guard_press_age = 0.0
 
 func clear_combat_input() -> void:
+	if saber_skill != null: saber_skill.cancel_impact_feedback()
+	cancel_weapon_skill_request()
 	_clear_guard_request()
 	if combat != null: combat.clear_attack_buffer()
 	if is_guarding: _end_guard(false)
 	if saber_skill != null and saber_skill.is_active(): saber_skill.abort()
 
 func _release_guard_input() -> void:
+	_guard_requires_release = false
 	_clear_guard_request()
 	if is_guarding: _end_guard()
 
@@ -929,8 +984,13 @@ func _play_ready(final_frame_only: bool = false) -> void:
 		state_machine.transition(AdelStateMachine.State.READY)
 
 func _enter_player_state(state: AdelStateMachine.State) -> void:
-	if state in [AdelStateMachine.State.STAGGER, AdelStateMachine.State.REST, AdelStateMachine.State.PICKUP, AdelStateMachine.State.DASH, AdelStateMachine.State.CONTACT_REACTION]: clear_combat_input()
+	if state in [AdelStateMachine.State.STAGGER, AdelStateMachine.State.REST, AdelStateMachine.State.PICKUP, AdelStateMachine.State.DASH, AdelStateMachine.State.CONTACT_REACTION, AdelStateMachine.State.SENTINEL_ENTRY]: clear_combat_input()
 	match state:
+		AdelStateMachine.State.SENTINEL_ENTRY:
+			velocity = Vector2.ZERO
+			_playing_land_anim = false
+			is_skidding = false
+			presentation.play(&"idle")
 		AdelStateMachine.State.READY: presentation.ready_pose(_ready_final_frame)
 		AdelStateMachine.State.DEFENSE:
 			combat.combo_step = 0
@@ -968,7 +1028,7 @@ func _configure_stamina() -> void:
 	stats.stamina_regen_per_second = stamina_regen_per_second
 
 func blocks_stamina_regeneration() -> bool:
-	return state_machine != null and (state_machine.is_in(AdelStateMachine.State.ATTACK) or state_machine.is_in(AdelStateMachine.State.DEFENSE) or deflect_slow_motion.is_active)
+	return state_machine != null and (state_machine.is_in(AdelStateMachine.State.ATTACK) or state_machine.is_in(AdelStateMachine.State.DEFENSE) or deflect_slow_motion.is_active or is_sentinel_entering())
 
 func _apply_stamina_exhaustion(hit_from_global: Vector2) -> void:
 	# Share the full threshold reaction (push, stun, frames and iframe), without firing an HP threshold.
@@ -989,8 +1049,34 @@ func begin_sentinel() -> bool:
 func end_sentinel() -> void:
 	if sentinel_state != null: sentinel_state.finish()
 
+func is_sentinel_active() -> bool:
+	return sentinel_state != null and sentinel_state.active
+
+func is_sentinel_entering() -> bool:
+	return sentinel_state != null and sentinel_state.entering
+
 func is_sentinel_exit_pending() -> bool:
 	return sentinel_state != null and sentinel_state.exit_pending
 
 func is_skill_damage_immune() -> bool:
 	return saber_skill != null and saber_skill.is_dashing()
+
+func consume_skill_finish_input(action: StringName, direction: float) -> void:
+	if get_tree().paused or is_locked or damage.is_stunned or is_sentinel_exit_pending() or is_sentinel_entering() or is_campfire_ui_active(): return
+	if not state_machine.can_begin_action(): return
+	match action:
+		&"attack": _handle_attack_input()
+		&"weapon_skill":
+			if saber_skill.begin():
+				_guard_requires_release = Input.is_action_pressed("guard and deflect")
+				if not Input.is_action_pressed("weapon_skill"): saber_skill.release()
+		&"guard and deflect":
+			if Input.is_action_pressed("guard and deflect"):
+				_guard_requires_release = false
+				_try_begin_guard()
+		&"dodge": _perform_dash(direction)
+		&"jump": locomotion.perform_buffered_jump()
+		&"soul_heal": vitals.begin_flask_use()
+
+func is_skill_finish_frozen() -> bool:
+	return saber_skill != null and saber_skill.is_finish_freezing()

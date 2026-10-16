@@ -32,6 +32,17 @@ func _init(body: CharacterBody2D, rig: Node2D, player: AnimationPlayer) -> void:
 	_ready_final.value_track_set_update_mode(frame_track, Animation.UPDATE_DISCRETE)
 	_ready_final.track_insert_key(frame_track, 0.0, 2)
 
+func sprite_frame_time(clip: StringName, frame_index: int) -> float:
+	if not _player.has_animation(clip): return -1.0
+	var animation := _player.get_animation(clip)
+	for track in animation.get_track_count():
+		if animation.track_get_type(track) != Animation.TYPE_VALUE or not animation.track_is_enabled(track): continue
+		if String(animation.track_get_path(track)) != "TestAttackSprite:frame": continue
+		for key in animation.track_get_key_count(track):
+			if int(animation.track_get_key_value(track, key)) == frame_index:
+				return animation.track_get_key_time(track, key)
+	return -1.0
+
 func play(clip: StringName, blend: float = -1.0) -> void:
 	_rig.visible = true
 	_player.play(clip, blend)

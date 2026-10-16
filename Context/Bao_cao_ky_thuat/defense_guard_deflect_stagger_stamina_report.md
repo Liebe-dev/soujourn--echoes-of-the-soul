@@ -1,5 +1,9 @@
 # BÁO CÁO KỸ THUẬT — DEFENSE / GUARD / DEFLECT / STAGGER / STAMINA
 
+> Cập nhật Sentinel 16/10/2026: đã thêm entry 1,5s bất động/i-frame, hồi HP và stamina 1% mỗi 0,015s, khôi phục/tạm tắt stagger threshold trong dạng và kích hoạt từng marker đã vượt khi nhận đòn mới sau thoát. Tự tiêu hao/chi phí HP không kích hoạt stagger. Xem [sentinel_entry_threshold_report.md](sentinel_entry_threshold_report.md) cho hành vi và vị trí chỉnh hiện hành. Các giới hạn cũ về hồi HP/miễn stagger/cấm bình máu bên dưới là lịch sử, không còn phản ánh hiện trạng.
+
+> Đính chính luật cooldown 16/10/2026: dash cooldown CHỈ chặn dash tiếp theo. Giữ Q trong dash sẽ vào Q ngay khi hết skid; defense, attack và các hành động khác không chờ cooldown, vẫn giữ điều kiện riêng của từng hành động. Q chờ hết đòn thường 1–4, Q ngắt defense và buộc nhả/nhấn lại defense vẫn giữ nguyên. Chi tiết hiện hành: [q_hold_input_report.md](q_hold_input_report.md).
+
 > Cập nhật sau refactor 16/10/2026: đã sửa ownership i-frame, chuyển stats/đồng hồ sang Player, gom dash vào module và cho defense bắt đầu ngay sau skid, không chờ cooldown. Xem [player_runtime_refactor_report.md](player_runtime_refactor_report.md). Nội dung và kết quả trước đó bên dưới là snapshot lịch sử; i-frame bug đã nêu trong snapshot nay đã có regression và được sửa.
 
 **Dự án:** Sojourn: Echoes of the Soul  

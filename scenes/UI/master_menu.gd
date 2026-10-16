@@ -1,4 +1,5 @@
 extends Control
+const ChargedFinish = preload("res://scenes/adel/components/charged_skill_finish.gd")
 
 # Node này phải luôn process kể cả khi game paused,
 # để Tween fade in vẫn chạy được sau khi freeze.
@@ -75,6 +76,7 @@ func _refresh_cursor(center_mouse: bool = false) -> void:
 		CursorPolicy.set_visible(get_viewport(), visible, center_mouse)
 
 func _unhandled_input(event: InputEvent) -> void:
+	if ChargedFinish.is_freezing(): return
 	if _campfire_blocks_menu(): return
 	if visible and event.is_action_pressed("ui_cancel"):
 		if not _is_transitioning: _close_menu()
@@ -123,6 +125,7 @@ func _input(event: InputEvent) -> void:
 # --- Fade & freeze logic ---
 
 func _open_menu() -> void:
+	if ChargedFinish.is_freezing(): return
 	if _is_transitioning or _campfire_blocks_menu(): return
 	var actor := _ui_actor()
 	if actor != null: actor.clear_combat_input()

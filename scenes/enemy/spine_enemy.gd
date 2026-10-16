@@ -29,6 +29,10 @@ enum State { WALK, RUN, WINDUP, LEAP, LAND, MELEE, RECOVERY, DETECT, DEAD }
 @export var attack2_window: Vector2 = Vector2(0.3, 0.45)
 @export var attack3_window: Vector2 = Vector2(0.4, 0.65)
 
+@export_group("Death Terrain")
+## World geometry only. Combat layers/hurtboxes remain disabled after death.
+@export_flags_2d_physics var corpse_terrain_mask: int = 1
+
 @export_group("Rig Alignment")
 ## Per-clip offsets compensate the source rig's different pose origins.
 @export var animation_offsets: Dictionary[StringName, Vector2] = {
@@ -63,6 +67,7 @@ var _swing_damage: int = 0
 var _hit_targets: Dictionary = {}
 var _rng := RandomNumberGenerator.new()
 var _rig_origin := Vector2.ZERO
+var _corpse_locomotion: LocomotionComponent
 
 
 func _ready() -> void:
@@ -94,8 +99,16 @@ func _ready() -> void:
 
 
 func _physics_process(delta: float) -> void:
-	if is_dead or delta <= 0.0:
+	if delta <= 0.0: return
+	if is_dead:
+		_physics_corpse(delta)
 		return
+	if EnemyDebugSettings.is_ai_disabled():
+		_debug_idle(delta)
+		return
+	if _debug_ai_was_disabled:
+		_debug_ai_was_disabled = false
+		_enter_state(State.WALK)
 	_elapsed += delta
 	_refresh_target(delta)
 	if not is_on_floor():
@@ -164,6 +177,23 @@ func _physics_process(delta: float) -> void:
 	elif state == State.WALK and is_on_wall():
 		_direction *= -1
 		_update_facing()
+
+
+func _debug_idle(delta: float) -> void:
+	if not _debug_ai_was_disabled:
+		target = null
+		_lost_time = 0.0
+		opener_available = true
+		attack_animation = &""
+		_swing_damage = 0
+		_hit_targets.clear()
+		_enter_state(State.WALK)
+		if animation_player != null: animation_player.pause()
+	_debug_ai_was_disabled = true
+	_set_damage_window(false)
+	velocity.x = 0.0
+	if not is_on_floor(): velocity += get_gravity() * delta
+	move_and_slide()
 
 
 func _refresh_target(delta: float) -> void:
@@ -254,6 +284,7 @@ func _on_animation_finished(clip: StringName) -> void:
 	if is_dead:
 		if clip == &"death": queue_free()
 		return
+	if EnemyDebugSettings.is_ai_disabled(): return
 	# Only the live detection transition owns this completion signal.
 	if clip != &"detect player" or state != State.DETECT:
 		return
@@ -264,7 +295,7 @@ func _on_animation_finished(clip: StringName) -> void:
 
 
 func _set_damage_window(active: bool) -> void:
-	active = active and not is_dead
+	active = active and not is_dead and not EnemyDebugSettings.is_ai_disabled()
 	var selected: Area2D = null
 	if active:
 		if state == State.LEAP: selected = leap_hitbox
@@ -299,7 +330,7 @@ func _apply_leap_contact_damage() -> void:
 
 
 func _try_hit_body(body: Node2D) -> void:
-	if is_dead or not _window_open or not is_inside_tree():
+	if is_dead or EnemyDebugSettings.is_ai_disabled() or not _window_open or not is_inside_tree():
 		return
 	if not is_instance_valid(body) or body.is_queued_for_deletion():
 		return
@@ -345,6 +376,38 @@ func _finish_death() -> void:
 	# Keep the authored 10-second clip and its fading; no extra fade or wall-time timer.
 	animation_player.speed_scale = 1.0
 	_set_animation(&"death")
+	# Lethal hits can occur while physics queries are flushing.
+	_enable_corpse_fall.call_deferred()
+
+
+func _enable_corpse_fall() -> void:
+	if not is_inside_tree() or is_queued_for_deletion() or not is_dead: return
+	var source := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if source == null or source.shape == null: return
+	var terrain_shape := CollisionShape2D.new()
+	terrain_shape.name = "CorpseTerrainCollider"
+	terrain_shape.shape = source.shape.duplicate() as Shape2D
+	terrain_shape.transform = source.transform
+	add_child(terrain_shape)
+	collision_layer = 0
+	collision_mask = corpse_terrain_mask
+	_ignore_corpse_characters(get_tree().root)
+	_corpse_locomotion = LocomotionComponent.new(self)
+	set_physics_process(true)
+
+
+func _ignore_corpse_characters(node: Node) -> void:
+	if node is CharacterBody2D and node != self:
+		add_collision_exception_with(node)
+	for child in node.get_children(): _ignore_corpse_characters(child)
+
+
+func _physics_corpse(delta: float) -> void:
+	if _corpse_locomotion == null: return
+	velocity.x = 0.0
+	# Reuse Player gravity multipliers and terminal speed; no duplicate tuning.
+	_corpse_locomotion.apply_vertical_physics(delta)
+	move_and_slide()
 
 
 func _update_facing() -> void:

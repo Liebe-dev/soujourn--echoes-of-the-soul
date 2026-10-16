@@ -27,6 +27,8 @@ const BLEED_TICK_INTERVAL := 1.0
 const BLEED_DPS := {1: 3, 2: 6}
 
 var stagger_tiers_ready: Array[bool] = [true, true]
+var stagger_thresholds_enabled := true
+var _deferred_thresholds: Array[bool] = [false, false]
 var stagger_lock_hp: int = -1
 var stagger_lock_timer: float = 0.0
 var _bleed_tick_timer: float = 0.0
@@ -86,17 +88,17 @@ func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF, skip_stagge
 		"debuff_level": 0,
 		"died": false,
 	}
-	if dmg <= 0:
+	if dmg <= 0 or hp <= 0:
 		return result
 
 	var scaled_dmg := maxi(1, int(round(float(dmg) * get_damage_taken_multiplier())))
 	var prev_hp := hp
 	var target_hp := prev_hp - scaled_dmg
 
-	if stagger_lock_timer > 0.0 and stagger_lock_hp >= 0:
-		target_hp = maxi(target_hp, stagger_lock_hp)
+	if stagger_thresholds_enabled and stagger_lock_timer > 0.0 and stagger_lock_hp >= 0:
+		target_hp = maxi(target_hp, mini(prev_hp, stagger_lock_hp))
 
-	if not skip_stagger_thresholds:
+	if stagger_thresholds_enabled and not skip_stagger_thresholds:
 		for tier in STAGGER_THRESHOLD_FRACS.size():
 			if not stagger_tiers_ready[tier]:
 				continue
@@ -118,8 +120,18 @@ func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF, skip_stagge
 
 func restore_stagger_thresholds() -> void:
 	stagger_tiers_ready = [true, true]
+	_deferred_thresholds = [false, false]
 	stagger_lock_hp = -1
 	stagger_lock_timer = 0.0
+
+func suspend_stagger_thresholds() -> void:
+	stagger_thresholds_enabled = false
+	restore_stagger_thresholds()
+
+func resume_stagger_thresholds() -> void:
+	stagger_thresholds_enabled = true
+	for tier in STAGGER_THRESHOLD_FRACS.size():
+		_deferred_thresholds[tier] = stagger_tiers_ready[tier] and hp <= _stagger_floor_hp(tier)
 
 func restore_one_stagger_threshold() -> bool:
 	for tier in range(STAGGER_THRESHOLD_FRACS.size() - 1, -1, -1):
@@ -298,15 +310,17 @@ func resolve_stagger_crossing(prev_hp: int, target_hp: int, tier: int) -> Dictio
 		"debuff_id": "",
 		"debuff_level": 0,
 	}
-	if prev_hp <= floor_hp or target_hp > floor_hp:
+	if not (_deferred_thresholds[tier] and prev_hp <= floor_hp) and (prev_hp <= floor_hp or target_hp > floor_hp):
 		return out
 
 	out.triggered = true
 	stagger_tiers_ready[tier] = false
+	_deferred_thresholds[tier] = false
 	out.markers_changed = true
 
-	out.target_hp = floor_hp
-	stagger_lock_hp = floor_hp
+	# A deferred marker protects this hit without healing HP back up to its threshold.
+	out.target_hp = mini(prev_hp, floor_hp)
+	stagger_lock_hp = out.target_hp
 	stagger_lock_timer = STAGGER_LOCK_DURATION
 	var debuff := _apply_random_stagger_debuff()
 	out.debuff_id = debuff["debuff_id"]

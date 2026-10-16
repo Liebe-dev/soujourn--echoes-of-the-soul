@@ -27,7 +27,7 @@ func refresh(mask: int = ALL) -> void:
 
 func tick(game_delta: float, actor_delta: float) -> void:
 	if not simulation_enabled or model.hp <= 0: return
-	var hit := model.tick(actor_delta, _body.is_skill_damage_immune())
+	var hit := model.tick(actor_delta, _body.is_skill_damage_immune() or _body.is_sentinel_entering())
 	if hit.damage_taken > 0:
 		refresh(HP)
 		damage_received.emit(hit)
@@ -46,7 +46,7 @@ func tick(game_delta: float, actor_delta: float) -> void:
 			flask_finished.emit(result)
 
 func apply_damage(amount: int, origin: Vector2 = Vector2.INF, skip_thresholds: bool = false) -> Dictionary:
-	if _body.is_skill_damage_immune():
+	if _body.is_skill_finish_frozen() or _body.is_skill_damage_immune() or _body.is_sentinel_entering():
 		return {"damage_taken": 0, "staggered": false, "died": false}
 	var result := model.apply_damage(amount, origin, skip_thresholds)
 	refresh(HP | MARKERS | STATUS)
@@ -66,12 +66,20 @@ func drain_hp_nonlethal(amount: int) -> int:
 	if spent > 0: refresh(HP)
 	return spent
 
+func spend_sentinel_hp(amount: int) -> bool:
+	# Costs must be affordable and leave at least one HP. They never enter damage resolution.
+	if not _body.is_sentinel_active() or _body.is_sentinel_entering() or _body.is_sentinel_exit_pending(): return false
+	if amount < 0 or model.hp <= 0 or model.hp - amount < 1: return false
+	drain_hp_nonlethal(amount)
+	_body.sentinel_state.check_depletion()
+	return true
+
 func heal_to_full() -> void:
 	model.heal_to_full()
 	refresh()
 
 func begin_flask_use() -> bool:
-	if flask_in_progress or not model.can_use_soul_flask(): return false
+	if _body.is_sentinel_active() or flask_in_progress or not model.can_use_soul_flask(): return false
 	flask_in_progress = true
 	_flask_left = FLASK_DURATION
 	flask_started.emit(FLASK_DURATION)

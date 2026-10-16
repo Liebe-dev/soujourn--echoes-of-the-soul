@@ -26,9 +26,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -280.0
-offset_top = -300.0
+offset_top = -390.0
 offset_right = 280.0
-offset_bottom = 300.0
+offset_bottom = 390.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 18
@@ -111,6 +111,25 @@ theme_override_font_sizes/font_size = 18
 layout_mode = 2
 theme_override_font_sizes/font_size = 16
 text = ""
+
+[node name="EnemyDebug" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="VBoxContainer/EnemyDebug"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Debug - Enemies"
+
+[node name="DisableAI" type="CheckButton" parent="VBoxContainer/EnemyDebug"]
+layout_mode = 2
+text = "Disable enemy AI"
+tooltip_text = "Stop current enemies from moving or attacking. Gravity and receiving hits remain active."
+
+[node name="Immortal" type="CheckButton" parent="VBoxContainer/EnemyDebug"]
+layout_mode = 2
+text = "Invincible enemies"
+tooltip_text = "Hits and stun still work; enemy HP does not decrease. Session only."
 
 [node name="fade_trans" type="ColorRect" parent="."]
 visible = false

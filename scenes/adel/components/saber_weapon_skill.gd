@@ -3,6 +3,8 @@ extends Node
 ## Q skill: charge, committed release, swept lunge, impact and recovery.
 const STUN = preload("res://scenes/adel/components/enemy_skill_stun.gd")
 const S = AdelStateMachine.State
+const ChargedFinish = preload("res://scenes/adel/components/charged_skill_finish.gd")
+const ImpactFeedback = preload("res://scenes/adel/components/stagger_impact.gd")
 
 @export_group("Charge")
 @export_range(0.01, 2.0, 0.01) var tap_windup: float = 0.2
@@ -35,11 +37,42 @@ const S = AdelStateMachine.State
 @export_range(0.01, 1.0, 0.01) var charged_recovery_duration: float = 0.3
 @export_range(0.01, 1.0, 0.01) var tap_recovery_duration: float = 0.15
 
+@export_group("Tap Impact")
+@export var tap_impact_zoom_enabled: bool = true
+@export_range(1.0, 3.0, 0.05, "or_greater") var tap_impact_zoom_multiplier: float = 1.5
+@export_range(0.0, 0.5, 0.01, "or_greater", "suffix:s") var tap_impact_zoom_in_duration: float = 0.09
+@export_range(0.0, 3.0, 0.01, "or_greater", "suffix:s") var tap_impact_zoom_duration: float = 0.6
+@export var tap_impact_slow_motion_enabled: bool = true
+@export_range(0.01, 1.0, 0.01) var tap_impact_slow_motion_scale: float = 0.35
+@export_range(0.0, 3.0, 0.01, "or_greater", "suffix:s") var tap_impact_slow_motion_duration: float = 0.36
+
+@export_group("Charge Level 1 Impact")
+@export var charged_impact_zoom_enabled: bool = true
+@export_range(1.0, 3.0, 0.05, "or_greater") var charged_impact_zoom_multiplier: float = 1.5
+@export_range(0.0, 0.5, 0.01, "or_greater", "suffix:s") var charged_impact_zoom_in_duration: float = 0.09
+@export_range(0.0, 3.0, 0.01, "or_greater", "suffix:s") var charged_impact_zoom_duration: float = 0.6
+@export var charged_impact_slow_motion_enabled: bool = true
+@export_range(0.01, 1.0, 0.01) var charged_impact_slow_motion_scale: float = 0.35
+@export_range(0.0, 3.0, 0.01, "or_greater", "suffix:s") var charged_impact_slow_motion_duration: float = 0.36
+
+@export_group("Charge Level 2 Impact")
+@export var full_impact_zoom_enabled: bool = true
+@export_range(1.0, 3.0, 0.05, "or_greater") var full_impact_zoom_multiplier: float = 1.5
+@export_range(0.0, 0.5, 0.01, "or_greater", "suffix:s") var full_impact_zoom_in_duration: float = 0.09
+@export_range(0.0, 3.0, 0.01, "or_greater", "suffix:s") var full_impact_zoom_duration: float = 0.6
+@export var full_impact_slow_motion_enabled: bool = true
+@export_range(0.01, 1.0, 0.01) var full_impact_slow_motion_scale: float = 0.35
+@export_range(0.0, 3.0, 0.01, "or_greater", "suffix:s") var full_impact_slow_motion_duration: float = 0.36
+
 var tier := 0
 var charge_time := 0.0
 var distance_travelled := 0.0
 var contact_target: Node2D
 var _body: CharacterBody2D
+var _charged_finish: Node
+var _return_started := false
+var _impact_feedback: Node
+var _finishing := false
 var _active := false
 var _elapsed := 0.0
 var _remaining_distance := 0.0
@@ -52,20 +85,34 @@ var _query := PhysicsShapeQueryParameters2D.new()
 
 func setup(body: CharacterBody2D) -> void:
 	_body = body
+	_charged_finish = ChargedFinish.new()
+	_charged_finish.name = "ChargedSkillFinish"
+	add_child(_charged_finish)
+	_charged_finish.returned.connect(_on_zoom_returned)
+	_impact_feedback = ImpactFeedback.new()
+	_impact_feedback.name = "SkillImpactFeedback"
+	_impact_feedback.actor = body
+	_impact_feedback.zoom_source = &"skill_impact"
+	add_child(_impact_feedback)
 	_body.saber_hitbox.target_hit.connect(_on_target_hit)
-	CombatTime.effect_finished.connect(_on_effect_finished)
 
+func is_finish_freezing() -> bool: return ChargedFinish.is_freezing()
 func is_active() -> bool: return _active
 func is_dashing() -> bool: return _active and _body.state_machine.current == S.SKILL_DASH
 
-func begin() -> bool:
-	if _active or not _body.state_machine.can_begin_action() or (not allow_airborne and not _body.is_on_floor()): return false
+func begin(interrupt_defense: bool = false) -> bool:
+	var replacing_defense: bool = interrupt_defense and _body.state_machine.is_in(S.DEFENSE) and not _body.is_locked and _body.state_machine.movement_enabled and not _body.damage.is_stunned and not _body.damage.is_touched_enemy and not _body.is_sentinel_exit_pending()
+	if _active or (not _body.state_machine.can_begin_action() and not replacing_defense) or (not allow_airborne and not _body.is_on_floor()): return false
 	for clip in [&"saber_skill_1", &"saber_skill_2", &"saber_skill_3", &"saber_skill_4", &"saber_skill_5", &"saber_skill_6"]:
 		if not _body.spine_anim.has_animation(clip): return false
+	if replacing_defense:
+		_body.deflect_slow_motion.cancel()
+		_body._end_guard(false)
 	_body.clear_combat_input()
 	_active = true
 	_released = false
 	_confirmed = false
+	_return_started = false
 	charge_time = 0.0
 	distance_travelled = 0.0
 	contact_target = null
@@ -121,7 +168,8 @@ func physics_update(delta: float) -> void:
 			if _elapsed >= impact_pose_duration: _start_recovery()
 		S.SKILL_RECOVERY:
 			_body.spine_anim.advance(delta)
-			if (tier == 0 or not _confirmed) and _elapsed + 0.000001 >= _recovery_duration(): _finish()
+			if not _return_started and _elapsed + 0.000001 >= _recovery_duration(): _finish()
+	if _return_started: return
 	if _active and _body.state_machine.current != S.SKILL_DASH:
 		_body.velocity.x = 0.0
 		_body.locomotion.apply_vertical_physics(delta)
@@ -206,15 +254,32 @@ func _first_enemy_contact(motion: Vector2) -> Dictionary:
 func _impact() -> void:
 	_body.velocity = Vector2.ZERO
 	_enter(S.SKILL_IMPACT, &"saber_skill_5")
+	_start_impact_feedback()
 	var multiplier: float = [1.0, charged_damage_multiplier, full_damage_multiplier][tier]
 	_body.saber_hitbox.begin_skill_window(maxi(0, int(round(damage * multiplier))))
 	_body.saber_hitbox.sample_skill_damage()
+
+func _start_impact_feedback() -> void:
+	# Read only this Q tier's settings; stagger tuning remains independent.
+	var prefix: String = ["tap", "charged", "full"][clampi(tier, 0, 2)] + "_impact_"
+	if tier > 0:
+		_charged_finish.start(_body.get_node_or_null("Camera2D"), bool(get(prefix + "zoom_enabled")), float(get(prefix + "zoom_multiplier")), float(get(prefix + "zoom_in_duration")), float(get(prefix + "zoom_duration")))
+	_impact_feedback.start(_body.get_node_or_null("Camera2D"), float(get(prefix + "zoom_duration")), {
+		"zoom_enabled": tier == 0 and bool(get(prefix + "zoom_enabled")), "zoom_multiplier": float(get(prefix + "zoom_multiplier")),
+		"zoom_in_duration": float(get(prefix + "zoom_in_duration")), "return_lead": 0.0,
+		"slow_motion_enabled": bool(get(prefix + "slow_motion_enabled")),
+		"slow_motion_scale": float(get(prefix + "slow_motion_scale")), "slow_motion_duration": float(get(prefix + "slow_motion_duration")),
+	})
+
+func cancel_impact_feedback() -> void:
+	if is_instance_valid(_charged_finish): _charged_finish.cancel()
+	if is_instance_valid(_impact_feedback): _impact_feedback.cancel()
 
 func _on_target_hit(target: Node2D) -> void:
 	if not _active or _body.state_machine.current != S.SKILL_IMPACT: return
 	if not _confirmed:
 		_confirmed = true
-		_body._request_hit_stop([tap_hit_stop_duration, charged_hit_stop_duration, full_hit_stop_duration][tier])
+		_body._request_hit_stop([tap_hit_stop_duration, charged_hit_stop_duration, full_hit_stop_duration][tier], false)
 	if tier == 0 or not _valid_enemy(target): return
 	var duration: float = charged_stun_duration if tier == 1 else full_stun_duration
 	if duration <= 0.0: return
@@ -246,19 +311,38 @@ func _start_recovery() -> void:
 		CombatTime.set_actor_exempt(_body, true)
 		CombatTime.request(self, &"skill_recovery", recovery_slow_motion_scale, charged_recovery_duration)
 
-func _on_effect_finished(owner: Object, lane: StringName) -> void:
-	if owner == self and lane == &"skill_recovery" and _active and _body.state_machine.current == S.SKILL_RECOVERY: _finish()
-
 func _finish() -> void:
 	if not _active: return
-	_body._play_ready(true)
+	if tier > 0 and _charged_finish.holding:
+		if _return_started: return
+		_return_started = true
+		_body.spine_anim.seek(_body.spine_anim.get_animation(&"saber_skill_6").length, true)
+		CombatTime.set_actor_exempt(_body, false)
+		CombatTime.remove(self, &"skill_recovery")
+		_impact_feedback.cancel() # The frozen return replaces Q slow motion; do not resume an old pulse afterward.
+		_charged_finish.begin_return()
+		return
+	_finish_ready()
+
+func _on_zoom_returned(action: StringName, direction: float) -> void:
+	if not _active: return
+	_finish_ready()
+	_body.consume_skill_finish_input(action, direction)
+
+func _finish_ready() -> void:
+	# Let the impact pulse finish its return instead of snapping zoom at Q completion.
+	_finishing = true
+	_body._play_ready(false)
+	_finishing = false
 
 func abort() -> void:
 	if _active and is_instance_valid(_body) and _body.is_inside_tree(): _body._play_ready(true)
 
 func cancel() -> void:
+	if not _finishing: cancel_impact_feedback()
 	if not _active: return
 	_active = false
+	_return_started = false
 	if is_instance_valid(_body):
 		_body.velocity = Vector2.ZERO
 		_body.saber_hitbox.stop_attack_window()

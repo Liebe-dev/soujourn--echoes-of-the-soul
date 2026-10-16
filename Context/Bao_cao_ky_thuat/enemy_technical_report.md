@@ -1,5 +1,9 @@
 # BÁO CÁO KỸ THUẬT — HỆ THỐNG ENEMY
 
+> Debug enemy 16/10/2026: Esc → Debug - Enemies có Disable enemy AI và Invincible enemies, áp dụng EnemyBase/Wobtear/SpineEnemy theo phiên debug, không ghi save. Chi tiết phạm vi, cleanup và kiểm chứng: [enemy_debug_pause_report.md](enemy_debug_pause_report.md).
+
+> Cập nhật 16/10/2026: SpineEnemy chết trên không vẫn rơi theo physics Player, dùng collider địa hình riêng và tiếp tục death/fade gốc; hurtbox/hitbox gốc vẫn tắt. Các mô tả corpse đứng yên/tắt toàn bộ physics bên dưới là lịch sử. Chi tiết hiện hành: [enemy_death_report.md](enemy_death_report.md).
+
 **Dự án:** Sojourn: Echoes of the Soul  
 **Repository:** Liebe-dev/soujourn--echoes-of-the-soul  
 **Ngày lập:** 14/10/2026  

@@ -47,6 +47,7 @@ func _can_debug() -> bool:
 	var focus := get_viewport().gui_get_focus_owner()
 	if focus is LineEdit or focus is TextEdit: return false
 	if is_instance_valid(_actor):
+		if _actor.is_sentinel_entering(): return false
 		if _actor.is_campfire_ui_active() or _actor.is_in_rest_state(): return false
 		for path in ["Camera2D/UI_Layer/master_menu", "Camera2D/UI_Layer/PauseMenu"]:
 			var menu := _actor.get_node_or_null(path) as Control

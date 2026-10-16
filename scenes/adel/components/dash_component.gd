@@ -32,7 +32,7 @@ func can_start(direction: float, on_floor: bool) -> bool:
 	return not is_dodging and able_to_dodge and (direction != 0.0 if on_floor else not has_air_dashed)
 
 func start_dash(direction: float, on_floor: bool, facing: int) -> bool:
-	if not can_start(direction, on_floor) or not _body.has_action_stamina() or _body.is_sentinel_exit_pending(): return false
+	if not can_start(direction, on_floor) or not _body.has_action_stamina() or _body.is_sentinel_exit_pending() or _body.is_sentinel_entering(): return false
 	_body.vitals.spend_stamina("dash", true)
 	is_air = not on_floor
 	if is_air: has_air_dashed = true
@@ -92,7 +92,8 @@ func _update_immunity() -> void:
 
 func _finish() -> void:
 	_body.state_machine.resume_locomotion() # Parent exit calls end_dash exactly once.
-	_body._try_consume_guard() # Held defense starts now, even during dash cooldown.
+	# Cooldown only gates the next dash; queued actions may start at skid end.
+	if not _body._try_consume_weapon_skill(): _body._try_consume_guard()
 
 func end_dash() -> void:
 	if not is_dodging: return

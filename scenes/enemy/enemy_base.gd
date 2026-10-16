@@ -1,5 +1,7 @@
 class_name EnemyBase
 extends CharacterBody2D
+const ChargedFinish = preload("res://scenes/adel/components/charged_skill_finish.gd")
+const EnemyDebugSettings = preload("res://scenes/enemy/enemy_debug_settings.gd")
 ## M1: patrol, world physics, receiving damage, and one death/EXP reward.
 ## Add the Enemy group in the scene only when player contact damage is wanted.
 
@@ -23,6 +25,7 @@ extends CharacterBody2D
 
 var current_health: int = 0
 var is_dead: bool = false
+var _debug_ai_was_disabled := false
 var _anchor_x: float = 0.0
 var _direction: int = 1
 var _walking: bool = true
@@ -43,6 +46,14 @@ func _ready() -> void:
 	_set_animation(animation_walk)
 
 
+func _debug_idle(delta: float) -> void:
+	_debug_ai_was_disabled = true
+	velocity.x = 0.0
+	if not is_on_floor(): velocity += get_gravity() * delta
+	_set_animation(animation_idle)
+	move_and_slide()
+
+
 ## The body collider is the hurtbox; offensive Areas must never be lock points.
 func get_lock_on_point() -> Vector2:
 	var hurtbox := get_node_or_null("CollisionShape2D") as CollisionShape2D
@@ -54,6 +65,12 @@ func get_lock_on_point() -> Vector2:
 func _physics_process(delta: float) -> void:
 	if is_dead or delta <= 0.0:
 		return
+	if EnemyDebugSettings.is_ai_disabled():
+		_debug_idle(delta)
+		return
+	if _debug_ai_was_disabled:
+		_debug_ai_was_disabled = false
+		_set_animation(animation_walk if _walking else animation_idle)
 	if not is_on_floor():
 		velocity += get_gravity() * delta
 
@@ -87,8 +104,10 @@ func _physics_process(delta: float) -> void:
 @warning_ignore("unused_parameter")
 func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> bool:
 	# Kept for the SaberHitbox API; knockback belongs to a later milestone.
-	if is_dead or dmg <= 0:
+	if ChargedFinish.is_freezing() or is_dead or dmg <= 0:
 		return false
+	# Accept the hit for feedback/stun while leaving HP and EXP untouched.
+	if EnemyDebugSettings.is_immortal(): return true
 	current_health = maxi(current_health - dmg, 0)
 	if current_health == 0:
 		die()
@@ -96,7 +115,7 @@ func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> bool:
 
 
 func die() -> void:
-	if is_dead:
+	if ChargedFinish.is_freezing() or is_dead or EnemyDebugSettings.is_immortal():
 		return
 	# queue_free is deferred; set the guard before signals or another hit can run.
 	is_dead = true

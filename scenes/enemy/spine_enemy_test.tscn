@@ -25,6 +25,7 @@ color = Color(0.22, 0.29, 0.34, 1)
 polygon = PackedVector2Array(-1200, -40, 1200, -40, 1200, 40, -1200, 40)
 
 [node name="PlayableAdel" parent="." unique_id=114176016 instance=ExtResource("1_player")]
+z_index = 0
 position = Vector2(300, 460)
 
 [node name="Enemy" parent="." unique_id=421814899 instance=ExtResource("2_enemy")]

@@ -194,6 +194,7 @@ func run() -> void:
 	p.stats.hp = 100
 	p.sentinel_hp_drain_percent = 20.0
 	p.begin_sentinel()
+	p.sentinel_state.tick(p.sentinel_entry_duration)
 	await wait(0.22)
 	check(p.sentinel_state.active and p.stats.hp < 100, "Sentinel drain works without HUD")
 	p.end_sentinel()
@@ -231,6 +232,9 @@ func run() -> void:
 	p.damage.reset()
 	p.vitals.begin_flask_use()
 	p.begin_sentinel()
+	p.sentinel_state.tick(p.sentinel_entry_duration)
+	p.stats.hp = 5
+	p.stats.stagger_tiers_ready.assign([false, false])
 	p.take_damage(20, p.global_position + Vector2(-80, 0))
 	check(p.stats.hp == 100 and not p.sentinel_state.active and not p.vitals.flask_in_progress, "lethal damage respawns and clears Sentinel/flask state")
 	await wait(1.0)

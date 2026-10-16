@@ -1,5 +1,7 @@
 # Refactor Player: i-frame, stats và dash
 
+> Đính chính luật cooldown 16/10/2026: dash cooldown CHỈ chặn dash tiếp theo. Giữ Q trong dash sẽ vào Q ngay khi hết skid; defense, attack và các hành động khác không chờ cooldown, vẫn giữ điều kiện riêng của từng hành động. Q chờ hết đòn thường 1–4, Q ngắt defense và buộc nhả/nhấn lại defense vẫn giữ nguyên. Chi tiết hiện hành: [q_hold_input_report.md](q_hold_input_report.md).
+
 Ngày: 16/10/2026. Thực hiện theo ba đề xuất đã được duyệt và yêu cầu defense bắt đầu ngay sau skid, không chờ cooldown dash. Dựa trên repo và scene thực tế tại thời điểm bắt đầu; không thay scene, asset, rig, audio hoặc xóa prototype.
 
 ## Hành vi sau thay đổi
