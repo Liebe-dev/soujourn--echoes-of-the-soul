@@ -116,6 +116,7 @@ var defense: DefenseComponent
 var dash: DashComponent
 var _attack_interrupt_ready: bool = false
 var _attack_interrupt_token: int = 0
+var _attack_animation_rate := 1.0
 var _skill_requested := false
 var _guard_requires_release := false
 var _guard_requested := false
@@ -256,12 +257,14 @@ func _physics_process(delta: float) -> void:
 		if not is_inside_tree() or is_queued_for_deletion(): return
 		sentinel_state.tick(delta)
 	delta = CombatTime.actor_delta(self, delta)
+	_sync_attack_speed()
+	_tick_attack_interrupt()
 	var input_delta := 0.0 if CombatTime.is_hit_stopping() else delta
 	if _guard_requires_release and not Input.is_action_pressed("guard and deflect"):
 		_guard_requires_release = false
 	if _skill_requested: _try_consume_weapon_skill()
 	combat.tick_input_buffer(input_delta)
-	_defense_lock_left = maxf(_defense_lock_left - delta, 0.0)
+	_defense_lock_left = maxf(_defense_lock_left - delta * get_attack_speed_multiplier(), 0.0)
 	if _guard_requested:
 		if not Input.is_action_pressed("guard and deflect") or (not has_action_stamina() and not _dash_blocks_defense()) or is_locked or not state_machine.movement_enabled:
 			_clear_guard_request()
@@ -294,7 +297,7 @@ func _physics_defense(delta: float) -> void:
 
 func _physics_attack(delta: float) -> void:
 	if combat.is_jump_attack_landing:
-		combat.jump_attack_land_timer += delta
+		combat.jump_attack_land_timer += delta * get_attack_speed_multiplier()
 		jump_hitbox.set_damage_window(combat.jump_attack_land_timer < minf(jump_attack_landing_active_time, CombatComponent.JUMP_ATTACK_LAND_UNLOCK))
 		if combat.is_jump_attack_land_unlocked() and can_move and not _guard_requested:
 			_physics_locomotion(delta)
@@ -430,8 +433,22 @@ func change_weapon(new_weapon: WeaponData) -> void:
 func get_damage_dealt_multiplier() -> float:
 	return stats.get_damage_dealt_multiplier()
 
+func scale_attack_damage(amount: int) -> int:
+	# Both hitboxes apply the modifier once, at contact, including all Q tiers.
+	return maxi(0, int(round(maxi(amount, 0) * get_damage_dealt_multiplier())))
+
 func get_attack_speed_multiplier() -> float:
 	return stats.get_attack_speed_multiplier()
+
+func _sync_attack_speed() -> void:
+	var normal_attack := state_machine.current in [AdelStateMachine.State.COMBO, AdelStateMachine.State.JUMP_HANG, AdelStateMachine.State.JUMP_FALL, AdelStateMachine.State.JUMP_LAND]
+	var rate := get_attack_speed_multiplier() if normal_attack else 1.0
+	if is_equal_approx(rate, _attack_animation_rate): return
+	# Preserve other playback-speed owners; remove only our own previous factor.
+	var ratio := rate / _attack_animation_rate
+	spine_anim.speed_scale *= ratio
+	saber_hitbox.hitbox_animation.speed_scale *= ratio
+	_attack_animation_rate = rate
 
 func begin_campfire_ui(owner: Node) -> bool:
 	if is_campfire_ui_active() or get_tree().paused or not state_machine.can_begin_action(): return false
@@ -553,6 +570,7 @@ func _play_combo_step() -> void:
 		_update_facing(attack_direction)
 
 	state_machine.transition(AdelStateMachine.State.COMBO)
+	_sync_attack_speed()
 	velocity.x = 0
 	_playing_land_anim = false 
 	is_skidding = false
@@ -562,7 +580,7 @@ func _play_combo_step() -> void:
 	combat.arm_air_attack_pause(presentation.sprite_frame_time(attack_animation, 1) if combat.combo_step <= 3 else -1.0, air_attack_frame_pause_duration)
 	spine_anim.play(attack_animation)
 	saber_hitbox.play_attack_window(attack_animation, combat.get_combo_damage())
-	_arm_attack_interrupt(attack_animation)
+	_arm_attack_interrupt()
 
 func _advance_queued_combo() -> void:
 	if is_sentinel_entering() or _guard_requested or _skill_requested or is_sentinel_exit_pending(): return
@@ -578,19 +596,17 @@ func _cancel_combo_for_movement(direction: float) -> void:
 	_update_facing(direction)
 	_update_ground_animation(direction)
 
-func _arm_attack_interrupt(attack_animation: StringName) -> void:
+func _arm_attack_interrupt() -> void:
 	_attack_interrupt_token += 1
 	_attack_interrupt_ready = false
 
-	var token: int = _attack_interrupt_token
+func _tick_attack_interrupt() -> void:
+	if state_machine.current != AdelStateMachine.State.COMBO or _attack_interrupt_ready: return
 	var interrupt_time: float = ATTACK_INTERRUPT_TIME
 	if combat.combo_step == 4:
 		interrupt_time = ATTACK_4_INTERRUPT_TIME
-
-	get_tree().create_timer(interrupt_time).timeout.connect(
-		_on_attack_interrupt_ready.bind(token, attack_animation),
-		CONNECT_ONE_SHOT
-	)
+	if spine_anim.current_animation_position + 0.00001 >= interrupt_time:
+		_on_attack_interrupt_ready(_attack_interrupt_token, combat.get_attack_anim_name())
 
 func _on_attack_interrupt_ready(
 	token: int,
@@ -984,6 +1000,7 @@ func _play_ready(final_frame_only: bool = false) -> void:
 		state_machine.transition(AdelStateMachine.State.READY)
 
 func _enter_player_state(state: AdelStateMachine.State) -> void:
+	_sync_attack_speed()
 	if state in [AdelStateMachine.State.STAGGER, AdelStateMachine.State.REST, AdelStateMachine.State.PICKUP, AdelStateMachine.State.DASH, AdelStateMachine.State.CONTACT_REACTION, AdelStateMachine.State.SENTINEL_ENTRY]: clear_combat_input()
 	match state:
 		AdelStateMachine.State.SENTINEL_ENTRY:

@@ -60,14 +60,18 @@ func update_run_state(delta: float) -> void:
 
 # --- Horizontal movement ---
 func apply_horizontal_movement(direction: float, delta: float) -> void:
+	var speed_multiplier: float = _body._get_move_speed_multiplier()
 	if not _body.is_on_floor():
+		var speed_cap := _air_speed_cap * speed_multiplier
 		if direction != 0.0:
-			var target_x := direction * _air_speed_cap
+			var target_x := direction * speed_cap
 			_body.velocity.x = move_toward(_body.velocity.x, target_x, _air_accel * delta)
-			_body.velocity.x = clampf(_body.velocity.x, -_air_speed_cap, _air_speed_cap)
+			_body.velocity.x = clampf(_body.velocity.x, -speed_cap, speed_cap)
+		elif speed_multiplier < 1.0:
+			_body.velocity.x = clampf(_body.velocity.x, -speed_cap, speed_cap)
 		return
 
-	var target_speed := _get_ground_target_speed()
+	var target_speed := _get_ground_target_speed() * speed_multiplier
 	if direction != 0.0:
 		var target_x := direction * target_speed
 		var accel := GROUND_ACCEL

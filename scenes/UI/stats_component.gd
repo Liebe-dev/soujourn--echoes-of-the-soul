@@ -25,6 +25,12 @@ const STAGGER_THRESHOLD_FRACS := [0.66, 0.33]
 const STAGGER_LOCK_DURATION := 1.0
 const BLEED_TICK_INTERVAL := 1.0
 const BLEED_DPS := {1: 3, 2: 6}
+const FRACTURE_MAX_LEVEL := 3
+const FRACTURE_DAMAGE_TAKEN_PER_LEVEL := 0.2
+const FRACTURE_DAMAGE_DEALT := [1.0, 0.85, 0.8, 0.65]
+const FRACTURE_SLOW_FROM_LEVEL := 2
+const FRACTURE_MOVE_SPEED := 0.72
+const FRACTURE_ATTACK_SPEED := 0.75
 
 var stagger_tiers_ready: Array[bool] = [true, true]
 var stagger_thresholds_enabled := true
@@ -221,23 +227,19 @@ func get_guard_damage_multiplier() -> float:
 func get_damage_taken_multiplier() -> float:
 	if fracture_level <= 0:
 		return 1.0
-	return 1.0 + 0.2 * fracture_level
+	return 1.0 + FRACTURE_DAMAGE_TAKEN_PER_LEVEL * mini(fracture_level, FRACTURE_MAX_LEVEL)
 
 func get_damage_dealt_multiplier() -> float:
-	match fracture_level:
-		0: return 1.0
-		1: return 0.85
-		2: return 0.8
-		_: return 0.65
+	return FRACTURE_DAMAGE_DEALT[clampi(fracture_level, 0, FRACTURE_MAX_LEVEL)]
 
 func get_move_speed_multiplier() -> float:
-	if fracture_level >= 2:
-		return 0.72
+	if fracture_level >= FRACTURE_SLOW_FROM_LEVEL:
+		return FRACTURE_MOVE_SPEED
 	return 1.0
 
 func get_attack_speed_multiplier() -> float:
-	if fracture_level >= 2:
-		return 0.75
+	if fracture_level >= FRACTURE_SLOW_FROM_LEVEL:
+		return FRACTURE_ATTACK_SPEED
 	return 1.0
 
 func has_bleeding() -> bool:
@@ -294,7 +296,7 @@ func _apply_bleeding(level: int) -> Dictionary:
 	return {"debuff_id": "bleeding", "level": bleeding_level}
 
 func _apply_fracture(add_levels: int = 1) -> Dictionary:
-	fracture_level = clampi(fracture_level + add_levels, 0, 3)
+	fracture_level = clampi(fracture_level + add_levels, 0, FRACTURE_MAX_LEVEL)
 	return {"debuff_id": "fracture", "level": fracture_level}
 
 # --- Internal: stagger ---

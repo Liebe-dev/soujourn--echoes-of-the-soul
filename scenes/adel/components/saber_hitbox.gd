@@ -6,6 +6,7 @@ var _impact_reported := false
 
 @onready var hitbox_shape: CollisionShape2D = $Hitbox/CollisionShape2D
 @onready var hitbox_animation: AnimationPlayer = $AnimationPlayer
+@onready var source_body: CharacterBody2D = get_parent().get_parent() as CharacterBody2D
 
 var _attack_active := false
 var _active_attack_name: StringName
@@ -47,12 +48,13 @@ func _on_hitbox_body_entered(body: Node2D) -> void:
 
 	_hit_targets[target_id] = true
 	var old_health = _read_health(body)
-	var accepted = body.take_damage(_swing_damage, global_position)
+	var amount: int = source_body.scale_attack_damage(_swing_damage)
+	var accepted = body.take_damage(amount, global_position)
 	if accepted == null and old_health != null and is_instance_valid(body):
 		var new_health = _read_health(body)
 		accepted = new_health != null and new_health < old_health
-	if accepted == true and _swing_damage > 0: target_hit.emit(body)
-	if accepted == true and _swing_damage > 0 and not _impact_reported:
+	if accepted == true and amount > 0: target_hit.emit(body)
+	if accepted == true and amount > 0 and not _impact_reported:
 		_impact_reported = true
 		hit_confirmed.emit(_active_attack_name)
 

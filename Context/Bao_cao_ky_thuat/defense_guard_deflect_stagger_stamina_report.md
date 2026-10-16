@@ -1,357 +1,65 @@
-# BÁO CÁO KỸ THUẬT — DEFENSE / GUARD / DEFLECT / STAGGER / STAMINA
+# Defense, Guard, Deflect, Stagger Threshold và Stamina
 
-> Cập nhật Sentinel 16/10/2026: đã thêm entry 1,5s bất động/i-frame, hồi HP và stamina 1% mỗi 0,015s, khôi phục/tạm tắt stagger threshold trong dạng và kích hoạt từng marker đã vượt khi nhận đòn mới sau thoát. Tự tiêu hao/chi phí HP không kích hoạt stagger. Xem [sentinel_entry_threshold_report.md](sentinel_entry_threshold_report.md) cho hành vi và vị trí chỉnh hiện hành. Các giới hạn cũ về hồi HP/miễn stagger/cấm bình máu bên dưới là lịch sử, không còn phản ánh hiện trạng.
+Cập nhật: 16/10/2026. Báo cáo hiện hành; [vị trí và cách chỉnh thông số](huong_dan_tuy_chinh.md) được quản lý trong một file chung.
 
-> Đính chính luật cooldown 16/10/2026: dash cooldown CHỈ chặn dash tiếp theo. Giữ Q trong dash sẽ vào Q ngay khi hết skid; defense, attack và các hành động khác không chờ cooldown, vẫn giữ điều kiện riêng của từng hành động. Q chờ hết đòn thường 1–4, Q ngắt defense và buộc nhả/nhấn lại defense vẫn giữ nguyên. Chi tiết hiện hành: [q_hold_input_report.md](q_hold_input_report.md).
+## 1. Trạng thái và đường nhận đòn
 
-> Cập nhật sau refactor 16/10/2026: đã sửa ownership i-frame, chuyển stats/đồng hồ sang Player, gom dash vào module và cho defense bắt đầu ngay sau skid, không chờ cooldown. Xem [player_runtime_refactor_report.md](player_runtime_refactor_report.md). Nội dung và kết quả trước đó bên dưới là snapshot lịch sử; i-frame bug đã nêu trong snapshot nay đã có regression và được sửa.
+Defense là tư thế giữ chuột phải; Guard/Deflect là kết quả khi nhận đòn hợp lệ trong tư thế đó. Enemy gọi Player nhận damage với vị trí nguồn đánh; `DefenseComponent` quyết định kết quả, `StatsComponent` xử lý HP/stamina/threshold/debuff, `DamageComponent` sở hữu phản ứng và i-frame. HFSM của Player điều phối pose và chuyển trạng thái.
 
-**Dự án:** Sojourn: Echoes of the Soul  
-**Ngày lập:** 14/10/2026  
-**Phạm vi:** hệ thống phòng thủ, nhận đòn và stamina của PlayableAdel; tương tác với các nguồn damage.  
-**Nguồn:** code và scene đang lưu tại `D:/Godot Project/soujourn--echoes-of-the-soul`. Báo cáo này được tách từ phần combat Player trong `enemy_technical_report.md` và bổ sung chi tiết để đọc độc lập.
+Guard/Deflect áp dụng cho mọi đòn hiện có của SpineEnemy, không còn chỉ nhánh quyết định đầu tiên. Tư thế cần đúng hướng nguồn đánh theo kiểm tra của defense; không phải miễn damage toàn hướng. Damage thật, hit-stop và kết quả đỡ được xử lý ở cùng cửa nhận đòn, tránh hitbox tự quyết định riêng.
 
-Trong lượt tách báo cáo chỉ sửa tài liệu. Không thay đổi code, tuning, asset, rig, audio hoặc gameplay. Các kết quả chạy Godot ở mục 12 thuộc những lượt kiểm thử trước; không chạy lại game trong lượt tách tài liệu này.
+Guard hiện nhân damage đầu vào với `1 - guard_damage_reduction` ở cả trường hợp đủ và thiếu stamina; mặc định nhận 50% trước các hệ số khác. Deflect hợp lệ không nhận damage. Đủ stamina không đồng nghĩa Guard chặn 100% HP damage.
 
-> Cập nhật 15/10/2026: Attack → Defense, buffer và hit-stop đã triển khai. Hướng dẫn Inspector và kết quả mới: [combat_feel_report.md](combat_feel_report.md). Các kết quả kiểm thử cũ bên dưới là lịch sử, không phải kết quả lượt này.
+## 2. Animation và cửa sổ Deflect
 
-## 1. Các khái niệm và luật hiện tại
+Giữ Defense mà không nhận đòn: giữ `saber_defense`. Trong thời gian startup trước Deflect vẫn Guard được. Từ `deflect_delay` tới hết `deflect_window` tính từ lần nhấn là Deflect; ngoài cửa sổ đó là Guard. Các giá trị script mặc định từng được chốt là 0,1 giây startup + 0,2 giây cửa sổ; scene có thể override, xem hướng dẫn chung.
 
-- **Defense:** trạng thái giữ phòng thủ. Nhấn nút sẽ giữ pose `saber_defense`; bản thân việc giữ chưa phải Guard/Deflect thành công và không trừ stamina.
-- **Deflect:** nhận một đòn hợp lệ từ phía trước trong [0.10; 0.30) giây kể từ lần nhấn giữ Defense, sau startup Guard 0.10 giây. Đủ stamina thì không mất HP, phát `saber_deflect` và slow motion.
-- **Guard:** nhận đòn hợp lệ từ phía trước trong 0.10 giây đầu hoặc từ mốc 0.30 giây trở đi, khi Defense vẫn có bảo vệ. Giảm damage cơ bản 50%, trừ stamina, phát `saber_guard` và bật lùi ngang nhẹ.
-- **Stagger threshold:** mốc 66% và 33% max HP. Đòn trực tiếp vượt/chạm mốc còn sẵn sẽ chặn HP tại mốc, tiêu marker, gây phản ứng bật lùi/stun và áp debuff.
-- **Stagger do thiếu stamina:** dùng cùng phản ứng vật lý/animation/i-frame, nhưng không tiêu marker HP, không áp debuff ngẫu nhiên và không tự kích hoạt khóa HP mới.
-- **Stamina:** thanh xanh lục dưới HP. Tốn khi bắt đầu Dash hoặc khi một đòn được xử lý là Guard/Deflect. Attack chưa có chi phí stamina trong phạm vi hiện tại.
+Chỉ khi nhận đòn mới dùng `saber_guard` hoặc `saber_deflect`; không tự chuyển pose theo đồng hồ khi chưa bị đánh. Deflect thành công giữ pose trong hiệu ứng slow motion toàn game. Hết phản ứng mà còn giữ hợp lệ thì về Defense, nhả thì hồi phục bằng ready frame cuối. Có thể đổi hướng khi Defense.
 
-HP-threshold lock, trạng thái stunned và i-frame là ba cơ chế khác nhau: khóa HP nằm trong StatsComponent; quyền điều khiển/phản ứng nằm trong DamageComponent/HFSM; i-frame chặn tiếp nhận đòn ở Player. Không dùng một cờ để diễn giải cả ba.
+Attack 1–3, Attack 4 và Jump Land có thời điểm cho phép vào Defense riêng. Jump Air/Fall không được Defense. Giữ xuyên Dash/Skid sẽ vào Defense ngay khi Skid kết thúc, không chờ cooldown dash, nhưng không làm mới tuổi lần nhấn để kiếm cửa sổ Deflect mới. Q ngắt Defense và yêu cầu nhả/nhấn lại trước khi nhận Defense tiếp.
 
-## 2. Cấu trúc và trách nhiệm
+## 3. Stamina và phản ứng thiếu stamina
 
-### 2.1. Những file chính
+Model có max stamina, chi phí theo hành động, thời gian chờ và tốc độ hồi. Dash, Guard thành công, Deflect thành công tiêu stamina; chỉ giữ Defense không tự trừ. Attack/Defense/Guard/Deflect và Sentinel Entry chặn hồi, đồng thời giữ lại thời gian chờ; sau đó mới hồi tới max. Vitals tick độc lập HUD.
 
-- `res://scenes/adel/playable_adel.gd`: điều phối input, `take_damage()`, Defense, dash, slow motion, stagger và cấu hình stamina từ Inspector.
-- `res://scenes/adel/playable_adel.tscn`: lưu tuning của nhân vật. Override scene/instance ưu tiên hơn default script.
-- `res://scenes/adel/components/adel_state_machine.gd`: HFSM, quyền sở hữu hành động, transition và enter/exit cleanup.
-- `res://scenes/adel/components/defense_component.gd`: RefCounted, quản lý thời gian giữ, phân loại đòn, ngân sách bật lùi Guard. Không tự trừ HP/stamina hoặc phát animation.
-- `res://scenes/adel/components/damage_component.gd`: RefCounted, quản lý push/stun/i-frame, signal và kiểm tra vòng đời body trước timer/callback.
-- `res://scenes/adel/components/adel_animation_component.gd`: RefCounted, trình bày pose và biến thể ready chỉ frame cuối theo từng instance.
-- `res://scenes/adel/components/deflect_slow_motion.gd`: Node giữ pulse time scale, timeout theo thời gian thực và khôi phục scale.
-- `res://scenes/UI/stats_component.gd`: RefCounted, mô hình HP, threshold, debuff, stamina, chi phí và hồi phục; không phụ thuộc SceneTree.
-- `res://scenes/UI/ui.gd`: facade cho StatsComponent, đồng bộ thanh chỉ số/marker/icon, xử lý feedback và gọi SaveManager khi chết.
-- `res://scenes/UI/status_icon_slot.gd`: dùng icon Bleed/fracture và thể hiện cấp hiệu ứng.
-- `res://scenes/Mechanic/player_progress.gd`: max HP/stamina cơ bản, nâng cấp và áp chỉ số vào HUD.
+- **Stamina đủ chi phí:** Dash/Guard/Deflect xử lý bình thường. Guard có bật lùi ngang nhẹ, giữ pose Guard và vẫn có thể đỡ đòn kế tiếp.
+- **Còn dương nhưng thiếu chi phí:** tiêu hết phần còn lại. Dash vẫn thực hiện, không phạt thêm. Deflect không mất HP nhưng kích hoạt cùng phản ứng ngang, hai pose và i-frame như stagger; không tiêu marker hoặc random debuff. Guard cũng phản ứng như vậy nhưng nhận damage theo `guard_damage_reduction`, hiện giữ 50% trước các hệ số damage còn lại.
+- **Stamina bằng 0:** không bắt đầu Dash hoặc Defense; vì không Defense nên không Guard/Deflect. Phản ứng đỡ đang xảy ra được dọn theo HFSM, không tự cấp thêm cơ hội đỡ miễn phí.
+- **Vừa đủ chi phí:** đó là kết quả đủ stamina, không bị xử phạt thiếu chỉ vì số dư sau chi phí bằng 0.
 
-### 2.2. HFSM liên quan
+Phản ứng do cạn stamina dùng thông số zoom riêng và nhân thời lượng slow motion riêng; khoảng bật lùi, chuỗi pose, stun và i-frame vẫn dùng cùng cấu hình stagger. Không đồng nhất nó với việc tiêu một stagger threshold.
 
-```text
-ROOT
-├── LOCOMOTION
-│   ├── GROUNDED
-│   ├── AIRBORNE
-│   └── READY
-├── ATTACK
-│   ├── COMBO
-│   ├── JUMP_ATTACK → JUMP_HANG / JUMP_FALL
-│   └── JUMP_LAND
-├── DEFENSE
-│   ├── DEFENSE_HOLD
-│   ├── GUARD_REACTION
-│   └── DEFLECT_REACTION
-├── STAGGER
-│   ├── KNOCKBACK
-│   └── STUN
-└── DASH / CONTACT_REACTION / REST / PICKUP
-```
+## 4. Stagger Threshold
 
-Chuyển giữa hai state con của DEFENSE không thoát parent nên không reset thời điểm bắt đầu Defense. Khi thoát DEFENSE, component kết thúc bảo vệ và dọn recoil/timer pose. Khi thoát ATTACK, queue/callback/hitbox được dọn. Slow motion là hiệu ứng có vòng đời riêng, có thể cùng tồn tại với một trạng thái vật lý; không dùng nó thay cho HFSM.
+Hai marker tại 66% và 33% HP tối đa. Đòn trực tiếp vượt mốc còn hiệu lực chặn HP ở mốc, tiêu một marker, áp random debuff và phát phản ứng. Mỗi đòn xử lý một marker theo thứ tự ngoài cùng; HP lock có đồng hồ riêng. Nếu đang Bleed vẫn có thể kích hoạt threshold từ đòn trực tiếp, giống khi đang Fracture.
 
-## 3. Luồng nhận đòn và điều kiện Defense
+Tick Bleed đi qua đường raw HP loss và bỏ qua threshold. Không dùng ngoại lệ 'đang bleeding' để vô hiệu hóa tất cả threshold. Thao tác tự rút/HP cost Sentinel đi qua đường không gây stagger, tạm vô hiệu marker trong dạng.
 
-Nguồn damage gọi `PlayableAdel.take_damage(dmg, hit_from_global)`. Enemy mới gửi origin là vị trí root enemy, không phải điểm va chạm VFX. Các đòn leap/attack2/attack3 và normal/special của vũ khí legacy dùng cùng quy tắc phía Player.
+Khi vào Sentinel, marker được khôi phục và tạm tắt. Sau thoát, nếu HP đã thấp hơn marker thì chỉ ghi trạng thái chờ; chưa bật phản ứng ngay, không nâng HP lên marker. Đòn trực tiếp mới tiêu một marker chờ và random debuff như thường. Hồi marker qua bình máu/checkpoint theo model hiện tại.
 
-Thứ tự xử lý chính:
+## 5. Bật lùi, pose, zoom và i-frame
 
-1. Bỏ qua damage ≤0, body ngoài tree/queued deletion, hoặc Player đang invulnerable/stunned.
-2. Lấy HUD sở hữu chỉ số; nếu Defense còn cờ giữ nhưng stamina đã về 0 thì kết thúc bảo vệ trước khi phân loại.
-3. DefenseComponent trả NONE, DEFLECT hoặc GUARD theo trạng thái, hướng và thời gian giữ.
-4. Nếu đỡ hợp lệ: xác định đủ/thiếu stamina **trước khi trừ**, rồi tiêu chi phí hoặc phần còn lại.
-5. DEFLECT chặn HP; GUARD giảm damage rồi đi tiếp vào StatsComponent. Phản ứng thiếu stamina dùng nhánh riêng.
-6. Kiểm tra chết/respawn/rời tree sau khi apply damage, trước khi tạo phản ứng/timer tiếp theo.
-7. Nếu sống: thiếu stamina → stagger vật lý; threshold thật → stagger threshold; damage thường >0 → i-frame nhận đòn ngắn.
+Stagger đẩy theo X, giữ Y đang rơi nếu có; không hất lên trời. Pose dùng frame 0 của `saber_stagger` trong pha bật lùi, rồi frame 1 ở pha stun. Gần cuối pha bật lùi giảm tốc mạnh trong khoảng cấu hình để dừng; độ dài pha và lúc đổi pose tuân theo thông số hiện hành, không suy ra từ một giá trị cũ trong báo cáo.
 
-Để bắt đầu Defense, HFSM phải cho phép bắt đầu hành động từ LOCOMOTION, không bị external lock/stun/contact reaction/slow-motion lock và stamina phải **>0**. Giữ Defense trong COMBO được ghi nhận: Attack 1–3 mở Defense từ 0.60 giây, Attack 4 từ 0.75 giây, mặc định sau khi hết animation. Không thêm cancel trong jump attack hoặc DASH. Điều kiện không yêu cầu luôn đứng sàn: có thể Defense trong AIRBORNE; gravity vẫn được áp theo nhánh vật lý tương ứng.
+Zoom stagger vào nhanh và trả về trước khi phản ứng kết thúc theo `return_lead`. Camera giữ bố cục chân và độ trễ X, không tự đặt thân ở tâm dọc. Stagger HP và thiếu stamina dùng mức zoom khác nhau. Zoom/slow motion Q độc lập hoàn toàn với các thông số này.
 
-Hướng đỡ dùng dấu của `(hit_from.x - player.x) × facing_direction`. Giá trị phải >0. Đòn phía sau, cùng x hoặc origin không hữu hạn không được coi là frontal hit. Như vậy, một VFX đi qua trước mặt nhưng origin enemy ở sau vẫn không được đỡ theo định nghĩa hiện tại.
+I-frame có nguồn sở hữu/token riêng: HIT, DASH, STAGGER, SENTINEL_ENTRY. Timer cũ chỉ giải phóng đúng token của nó; gia hạn sinh token mới. Hết Dash không tắt HIT còn hiệu lực; stagger ngắt dash vẫn giữ STAGGER. Callback knockback/stun cũng có generation, kiểm tra lại sau signal và bị vô hiệu khi restore checkpoint/respawn. Không gọi `get_tree().create_timer()` trên node đã rời cây khi Player chết.
 
-Sau khi bắt đầu Defense, `_update_defense()` kiểm tra release/lock/stamina trước nhánh xử lý chuyển động, giúp tránh giữ bảo vệ do mất hoặc bị tiêu thụ sự kiện release. Thời gian Deflect được đo từ **lần nhấn giữ chuột phải**, kể cả phần còn cam kết của combo, không reset bởi mỗi lần Guard/Deflect hay mỗi lần đổi reaction pose.
+## 6. Hiệu ứng bất lợi hiện có
 
-## 4. Defense và Guard đủ stamina
+`StatsComponent` là nơi chứa luật thử nghiệm, không phải hệ thống buff hoàn thiện:
 
-### 4.1. Defense không nhận đòn
+- **Bleeding:** level 1/2 tương ứng mất 3/6 HP mỗi tick 1 giây. Nhận thêm Bleed lấy mức cao hơn, không tự cộng level mỗi lần. Tick không kích hoạt threshold, có thể giết Player nếu không có điều kiện chặn damage phù hợp.
+- **Fracture:** cộng level, giới hạn 3. Tăng damage trực tiếp nhận 20% mỗi level. Damage gây ra còn 85%/80%/65% ở level 1/2/3, đã áp dụng khi chạm qua cả SaberHitbox (combo/ba mức Q) và JumpAttackHitbox. Từ level 2, tốc di chuyển ngang còn 72% trên đất/trên không và tốc đánh combo/jump còn 75%. Hình, hitbox và mốc nối đòn/Defense/land dùng nhịp đồng bộ; dùng bình hạ cấp sẽ cập nhật tốc độ trong physics tick tiếp theo mà không khởi động lại đòn. Q giữ timing riêng và chỉ chịu giảm damage. Không thay jump height/gravity/dash, nhịp Defense/Ready, thời gian input buffer hoặc khoảng ngưng rơi riêng. Vị trí, đơn vị và cách chỉnh các hằng `FRACTURE_*` nằm trong [hướng dẫn chung, mục Fracture](huong_dan_tuy_chinh.md#fracture).
+- Random threshold hiện chọn Bleed I hoặc thêm Fracture với xác suất 50/50. Icon lấy từ `res://asset/UI/Menu screen/Bleed.png` và `res://asset/UI/Menu screen/fracture.png`.
+- Bình máu hiện hồi theo `flask_heal_per_use`, xóa Bleed, giảm một level Fracture và hồi một marker theo điều kiện model; không ghi là xóa toàn bộ Fracture mọi cấp. Dùng bình bị cấm trong Sentinel. Poisoning và debuff cao cấp chưa có gameplay hoàn chỉnh.
 
-Giữ `saber_defense` cả khi đã quá 0.2 giây nếu chưa có hit. Không tự chuyển `saber_guard` chỉ vì hết cửa sổ Deflect; vẫn chỉ đổi pose khi nhận hit hợp lệ. Không trừ stamina khi chỉ giữ nút, nhưng trạng thái Defense vẫn chặn hồi stamina.
+## 7. Source và kiểm tra liên quan
 
-Trong Defense, di chuyển ngang chủ động, tấn công, nhảy mới và Dash không được xử lý như trạng thái locomotion bình thường. Gravity/chuyển động dọc đang có vẫn được xử lý, tránh treo nhân vật trên không.
+Source chính: `res://scenes/adel/components/defense_component.gd`, `damage_component.gd`, `player_vitals.gd`, `stagger_impact.gd`, `deflect_slow_motion.gd`, `res://scenes/UI/stats_component.gd` và coordinator `playable_adel.gd`.
 
-### 4.2. Guard thành công
+Các scene test: `fracture_validation`, `guard_stamina_validation`, `stagger_impact_validation`, `exhaustion_zoom_validation`, `combat_feel_validation`, `jump_attack_defense_validation`, `player_refactor_validation`, `sentinel_entry_validation` dưới `res://tests/adel/`; camera framing dưới `res://tests/camera/`. Những lần triển khai trước có log Godot thật với save thử riêng. Không chạy test ghi save trong thư mục user thật.
 
-Guard đủ chi phí hiện trừ **20 stamina** mỗi hit được chấp nhận. Hệ số damage cơ bản là `1 - guard_damage_reduction = 0.5`. Player làm tròn damage sau Guard rồi chuyển vào StatsComponent để áp modifier nhận damage và threshold.
+Lượt hoàn thiện Fracture 16/10/2026 đã chạy Godot 4.7 trên bản sao project có custom user directory riêng: `fracture_validation` đạt **80 assertions headless + 80 có render**. Phạm vi gồm bốn cấp, damage nhận, combo/finisher/jump/Q, chống hit lặp, vận tốc đất/không, đồng bộ hình/hitbox, bình hạ cấp giữa đòn, giữ hệ số playback khác, jump hang/land và Defense sau đòn bị chậm. Đây là kiểm chứng hành vi hiện hành, chưa nghiệm thu balance hoặc debuff nâng cao.
 
-Ví dụ hit 20, không có debuff: nhận 10 HP. Nếu Fracture cấp 1 thì damage sau Guard 10 được nhân 1.2 thành 12 HP. Nếu phòng thủ được cấu hình giảm 100% thì damage về 0; vẫn là một hit đỡ thành công và vẫn xử lý chi phí/phản ứng, không ép trở lại 1 HP.
-
-Guard reaction giữ pose `saber_guard`, bật lùi **ngang 20 đơn vị trong 0.1 giây** theo scene đang lưu, không thêm vận tốc hất lên. Recoil dùng ngân sách quãng đường và `move_and_slide()`, nên tường có thể chặn bớt quãng đường. Normal Guard trong không trung không tự thêm một cú nhấc lên; gravity/vận tốc dọc theo vật lý hiện có tiếp tục được xử lý.
-
-Pose Guard tồn tại ít nhất theo `Defense Hit Pose Duration` hiện **0.2 giây**, và vẫn giữ nếu ngân sách push chưa kết thúc. Vì vậy push 0.1 giây không có nghĩa pose phải hết sau đúng 0.1 giây. Sau reaction, còn giữ nút và stamina dương thì quay về `saber_defense`.
-
-Defense vẫn bảo vệ các đòn tiếp theo trong recoil nếu còn stamina và đòn mới qua được kiểm tra i-frame. Đòn Guard có HP loss thường tạo i-frame **0.2 giây**, nên contact trong thời gian này có thể bị bỏ qua; không diễn giải thành mọi overlap frame đều phải trừ stamina. Hit mới hợp lệ có thể bắt đầu lại recoil budget. Thả Defense bình thường sẽ hủy recoil còn lại.
-
-Nếu damage đã Guard chạm threshold HP thật, phản ứng threshold ưu tiên hơn normal Guard pose; nhánh này dùng hướng bật lùi ngang để không hất lên khi đỡ đòn.
-
-## 5. Deflect đủ stamina và slow motion
-
-Deflect hợp lệ sau Delay=0.10 trong Window=0.20 giây trừ **20 stamina**, không trừ HP và không tạo debuff/tiêu marker threshold. Giữ pose `saber_deflect` trong pulse.
-
-Tuning scene hiện tại: **time scale 0.5x, thời lượng 0.45 giây thực**. Default trong script là 0.6x / 0.2 giây; chỉ đọc default sẽ không phản ánh nhân vật đang được lưu.
-
-Autoload CombatTime là nơi duy nhất điều phối Engine.time_scale cho combat. DeflectSlowMotion quản lý vòng đời pose và gửi yêu cầu; hit-stop 0.065 giây thực chạy trước slow motion 0.45 giây thực đang lưu. Nhiều hiệu ứng dùng mức chậm mạnh nhất; pause giữ thời lượng còn lại và trả scale nền cho UI. Khi owner rời tree/cancel, khôi phục hiệu ứng còn hiệu lực hoặc scale nền. Không dùng nhiều timer riêng tự khôi phục scale đè nhau.
-
-Physics/FSM/animation dùng thời gian game sẽ cùng chậm; timer hồi stamina/stagger dùng thời gian game cũng bị kéo theo. Không tuyên bố rằng âm thanh, shader dùng đồng hồ thực hoặc một hệ thống tự bỏ qua time scale đều được giảm đúng tốc độ chỉ bằng thay Engine.time_scale. Không có thay đổi audio trong phần triển khai này.
-
-Thả Defense trong lúc pulse đang chạy kết thúc khả năng bảo vệ nhưng vẫn giữ pose Deflect đến hết pulse. Khi hết pulse: nếu còn Defense, còn stamina và vẫn giữ nút thì về pose phù hợp; nếu không thì về ready. External lock/stun/rest/contact được kiểm tra để callback pulse không tự mở khóa hoặc phục hồi sai state.
-
-Deflect không tự gây stagger hoặc ngắt đòn của enemy. Enemy giữ FSM của nó và đánh dấu contact đã xử lý cho swing hiện tại. Muốn enemy có phản ứng sau Deflect là một yêu cầu gameplay khác, chưa triển khai.
-
-## 6. Stamina: chi phí, hồi phục và các trường hợp biên
-
-### 6.1. Dữ liệu và hồi phục
-
-- Max stamina cơ bản: **100**, được PlayerProgress quản lý; nâng cấp stamina hiện thêm **15** mỗi điểm nâng cấp tương ứng.
-- Dash / Guard / Deflect: **20** cho mỗi hành động hoặc hit được chấp nhận; có export riêng để chỉnh độc lập.
-- Tốc độ hồi: **28 stamina / giây game**.
-- **Thời gian chờ hồi đang lưu trong scene: 1.0 giây.** Default Player/StatsComponent vẫn là **1.5 giây**, đồng thời là giá trị yêu cầu/kiểm thử ban đầu. Scene override 1.0 được giữ nguyên.
-- Không thêm chi phí attack. Defense không nhận đòn không tiêu stamina.
-
-`_configure_stamina()` lấy export Player và truyền vào StatsComponent qua HUD khi `_ready()`. Muốn thay cấu hình đang lưu, sửa Inspector, save và chạy lại; chỉnh default StatsComponent đơn lẻ có thể bị cấu hình Player ghi đè.
-
-Tiêu stamina đặt lại thời gian chờ hồi. Khi ATTACK, bất kỳ state DEFENSE hoặc pulse Deflect còn active, `blocks_stamina_regeneration()` chặn hồi và reset delay. Sau khi hết các hoạt động đó, chờ đủ delay rồi mới hồi dần; nếu một delta vượt qua mốc delay thì chỉ phần thời gian dư được dùng để hồi. Stamina không vượt max hoặc xuống âm.
-
-Hồi phục độc lập với cờ HUD `in_combat`/thời gian fade. Thanh xanh cập nhật ngay khi tiêu và khi hồi. DASH/STAGGER/READY không nằm trong danh sách chặn hồi của hàm hiện tại; chúng vẫn có thể đang chờ delay do lần tiêu hoặc trạng thái trước đó.
-
-### 6.2. Còn dương nhưng thiếu chi phí — ví dụ còn 10, chi phí 20
-
-- **Dash:** vẫn được thực hiện, tiêu 10 còn lại, không có trừng phạt stagger bổ sung. Quy tắc cooldown/aerial dash thông thường vẫn áp dụng.
-- **Deflect:** tiêu 10 còn lại, HP không mất, chuyển ngay sang phản ứng stagger đầy đủ và i-frame chung. Không bắt đầu pulse; nếu pulse cũ còn active thì hủy để hiện stagger ngay.
-- **Guard:** tiêu 10 còn lại, nhận damage sau giảm Guard cơ bản 50% cùng modifier hiện có, rồi phản ứng stagger giống trường hợp Deflect thiếu stamina.
-
-Thiếu stamina không kích hoạt threshold HP/debuff mới. Guard thiếu stamina dùng `skip_stagger_thresholds = true`; HP có thể đi qua 66%/33% mà không tiêu marker. Nếu một floor lock từ threshold trước đang còn hiệu lực, damage trực tiếp vẫn tôn trọng floor lock đó.
-
-### 6.3. Vừa đủ chi phí — ví dụ còn 20
-
-Hit đầu vẫn là Guard/Deflect đủ stamina, không nhận hình phạt thiếu stamina chỉ vì sau khi trừ còn 0. Normal Guard hoàn tất recoil/pose, Deflect hoàn tất pulse/pose; **bảo vệ kết thúc ngay ở 0**. Đòn tiếp theo không được Guard/Deflect, kể cả nếu xảy ra trước physics tick tiếp theo; i-frame hiện có vẫn có thể từ chối nhận đòn.
-
-Đây là phân biệt giữa “phản ứng của lần đỡ đã được thanh toán” và “đang còn quyền Defense”. Cờ `is_guarding` có thể false trong khi pose phản ứng vừa trả chi phí vẫn còn phát.
-
-### 6.4. Stamina bằng 0
-
-- Chặn bắt đầu Dash và Defense ở cả input và helper điều phối.
-- Dash bị từ chối không tiêu cooldown, allowance air dash, i-frame hoặc reset delay hồi stamina.
-- Defense đang giữ hết bảo vệ; không Guard/Deflect được đòn mới.
-- Nút Defense bị từ chối không giữ state DEFENSE để chặn hồi. Giữ nút sau khi hết stamina cũng không tự tái bắt đầu Defense khi hồi được stamina; thả và nhấn lại.
-- Di chuyển/nhảy/attack vẫn có thể thực hiện theo quyền state thông thường; bằng 0 không tự tạo một trạng thái khóa toàn bộ nhân vật.
-
-## 7. Stagger threshold 66% / 33% HP
-
-### 7.1. Điều kiện vượt mốc và khóa HP
-
-StatsComponent dùng `STAGGER_THRESHOLD_FRACS = [0.66, 0.33]`. Floor của mỗi tier là `round(max_hp × fraction)`; với max HP 100 là 66 và 33, không phải phân số chính xác 2/3 và 1/3.
-
-Một marker còn sẵn kích hoạt khi **HP trước đòn > floor** và **HP dự kiến sau đòn ≤ floor**. Khi kích hoạt:
-
-1. HP dừng ở floor, bỏ phần damage trực tiếp vượt quá mốc trong hit đó.
-2. Marker bị đánh dấu đã dùng.
-3. Đặt floor lock **1.0 giây game**.
-4. Chọn debuff ngẫu nhiên.
-5. Player thực hiện phản ứng stagger nếu kết quả không yêu cầu bỏ qua phản ứng.
-
-Ví dụ HP 70, nhận 20 damage: dừng 66 và dùng marker 66. Trong lúc khóa, damage trực tiếp không đẩy HP dưới floor 66. Sau lock, HP có thể giảm tiếp; marker đã dùng không kích hoạt lại cho đến khi được phục hồi. Một hit lớn chỉ kích hoạt tier đầu tiên tìm được và dừng tại đó, không tiêu cả hai marker cùng hit.
-
-Ngoại lệ “đang bleeding thì bỏ stagger khi nhận đòn trực tiếp” đã được loại bỏ: có bleeding vẫn chạm threshold, bật lùi/stun và áp hiệu ứng theo cùng logic. `skip_player_stagger` của kết quả crossing hiện không được đặt true vì bleeding.
-
-### 7.2. Bleed tick đi ngoài luồng threshold
-
-Theo lựa chọn người dùng, tick bleeding tiếp tục bỏ qua threshold. `_process_bleeding()` đi qua `_apply_raw_hp_loss()` thay vì `PlayableAdel.take_damage()` / `StatsComponent.apply_damage()`, nên không gọi Guard/Deflect và không tiêu stamina.
-
-Đường raw HP hiện cũng không kiểm tra DamageComponent i-frame hoặc floor lock của damage trực tiếp; bleed có thể làm HP xuống dưới mốc trong thời gian các cơ chế đó còn active. Đây là mô tả source đang có, không phải quy tắc mới được thêm khi viết báo cáo.
-
-Nếu DOT đã làm HP ≤ một mốc chưa dùng, hit trực tiếp tiếp theo không tự kích hoạt ngược mốc đó vì điều kiện yêu cầu HP trước hit > floor. Marker có thể vẫn hiện ready; cần hồi HP lên trên mốc rồi crossing lại hoặc thay luật trong một yêu cầu sau này nếu muốn hành vi khác.
-
-### 7.3. Phục hồi marker
-
-`restore_stagger_thresholds()` phục hồi cả hai marker và dọn floor lock. Full heal phục hồi HP/stamina, marker, flask và debuff theo model hiện tại. Soul Flask phục hồi một marker đã dùng; vòng lặp ưu tiên marker 33 trước 66, đồng thời có luật hồi HP/chữa debuff riêng.
-
-## 8. Phản ứng stagger vật lý, animation và i-frame
-
-Threshold thật và thiếu stamina gọi cùng `DamageComponent.apply_stagger()` với cấu hình chung:
-
-- Ngân sách bật lùi ngang: **200 đơn vị** theo scene.
-- Push: **0.3 giây game**.
-- Stun sau push: **0.45 giây game**.
-- I-frame cấu hình tổng: **1.0 giây game** từ đầu push, nằm trong `STAGGER_INVULN_SEC`.
-- `saber_stagger` frame **0** khi KNOCKBACK, frame **1** khi STUN; hồi về `saber_ready` frame **2**.
-
-Cập nhật 2026-10-15: mọi phản ứng stagger chỉ bật lùi ngang, không tạo xung lực hướng lên. Frame 0 đẩy đều trong 0.3 giây game; khi chuyển frame 1 vẫn trượt và giảm tốc mạnh trong 0.2 giây, dừng tại 0.5 giây game. Giữ nguyên tổng ngân sách 200px, chuẩn hóa vận tốc theo đường cong giảm tốc; tường có thể cắt bớt travel. Trọng lực và va chạm thông thường vẫn áp dụng.
-
-Hết stun thì trả quyền điều khiển qua READY. Với tuning 0.3 + 0.45, khoảng **0.25 giây i-frame còn lại** kéo dài sau hồi điều khiển. Nếu tổng push + stun dài hơn i-frame cấu hình, invulnerability vẫn ít nhất bao phủ hết stun. Sai số tick/timer có thể khiến thời điểm quan sát lệch một bước xử lý.
-
-Stagger nay có zoom 1.5x và slow motion riêng, áp dụng cả phản ứng thiếu stamina. Zoom trả về trước cuối stagger 0.2 giây game. Chi tiết và thông số Inspector nằm trong [stagger_impact_report.md](stagger_impact_report.md). Đây không phải pulse Deflect thành công; không thay đổi điều kiện stamina/HP/debuff.
-
-Floor lock HP 1.0 giây và iframe 1.0 giây là hai timer độc lập dù hiện có cùng giá trị. Thay một constant không tự thay constant kia.
-
-Pulse Deflect là hiệu ứng độc lập: trong trường hợp threshold vật lý xuất hiện khi một pulse trước vẫn còn, pose Deflect có thể được giữ đến hết pulse rồi hiển thị frame stagger phù hợp với pha hiện tại. Phản ứng **thiếu stamina hủy pulse trước khi stagger**, nên không bị pulse che pose tức thời.
-
-## 9. Debuff từ threshold và icon HUD
-
-### 9.1. Chọn hiệu ứng
-
-Mỗi threshold thật hiện chọn bleeding hoặc fracture theo xác suất **50% / 50%**. Đây là lựa chọn mỗi lần, không luân phiên cố định. Thiếu stamina không gọi lựa chọn này. Không có debuff thứ ba trong nhánh random threshold hiện tại.
-
-### 9.2. Bleeding
-
-- Tick interval: **1.0 giây game**.
-- Damage tick cấp 1: **3 HP**; cấp 2: **6 HP**.
-- Random threshold gọi `_apply_bleeding(1)`; áp lại dùng `max(current, requested)`, không tự cộng một cấp mỗi lần. Cấp 2 được hỗ trợ trong model nhưng không tự sinh chỉ vì nhận bleeding cấp 1 lần nữa.
-- Soul Flask xóa bleeding và timer tick; full heal/clear debuffs cũng xóa.
-- Icon: `res://asset/UI/Menu screen/Bleed.png`.
-
-### 9.3. Fracture — phần hiện có, chưa coi là hoàn thiện thiết kế
-
-Áp fracture cộng một cấp, clamp tối đa **3**. Modifier hiện có:
-
-- Cấp 1: damage nhận ×1.2, damage gây ×0.85; chưa giảm tốc di chuyển/tấn công.
-- Cấp 2: damage nhận ×1.4, damage gây ×0.80, tốc di chuyển ×0.72, tốc tấn công ×0.75.
-- Cấp 3: damage nhận ×1.6, damage gây ×0.65, tốc di chuyển ×0.72, tốc tấn công ×0.75.
-- Soul Flask giảm một cấp fracture; full heal/clear debuffs xóa toàn bộ.
-- Icon: `res://asset/UI/Menu screen/fracture.png`.
-
-Các hệ số damage gây/tốc tấn công là dữ liệu/getter model; không suy diễn mọi đường gây damage hoặc mọi animation đều đã sử dụng getter. Saber hiện đã đọc WeaponData.damage, nhưng chưa tự nối thêm các hệ số damage gây của Fracture; jump attack có damage export riêng. Theo phạm vi đã thống nhất, không tự hoàn thiện thêm fracture trong các lượt chỉnh animation/icon/stamina hoặc lượt viết báo cáo này.
-
-HUD đồng bộ icon qua `sync_status_icons()` và status slots; marker threshold ready trắng, đã dùng mờ/xám. Thanh xanh phản ánh stamina, không phải một thanh stagger riêng.
-
-## 10. Animation recovery và các lỗi đã sửa
-
-### 10.1. Ready chỉ frame cuối, vẫn ngắt được
-
-Sau Defense/Guard/Deflect/Stagger, `_play_ready(true)` dùng biến thể `saber_ready` **chỉ frame index 2**, thời lượng **1.0 giây game**, không loop. READY nằm trong LOCOMOTION nên có thể bị movement/jump/attack/Defense/Dash hợp lệ ngắt; không tạo khóa hành động một giây.
-
-AdelAnimationComponent nhân bản AnimationLibrary theo Player instance, giữ animation ready gốc và tạo variant riêng. Texture/hframes được áp trước track frame=2. Không sửa trực tiếp asset animation nguồn `res://asset/Character/Adel/adel spine action use.tscn`; ready sau combo bình thường vẫn có thể dùng bản gốc.
-
-### 10.2. Kẹt attack khi animation bị stagger ngắt
-
-Trường hợp đã gặp: spam attack rồi bị stagger, clip attack không phát tới cuối nên callback hoàn tất không dọn state. HFSM hiện dọn queue, combat state, interrupt token và cả Saber/AttackHitbox khi thoát ATTACK. Callback cũ phải qua token/state check; không được bật lại state đã bị ngắt. Sau KNOCKBACK → STUN → READY, input attack mới có thể bắt đầu combo.
-
-### 10.3. Timer trên Player đã rời tree khi chết
-
-Damage từ enemy có thể làm HUD gọi respawn đồng bộ, đổi scene hoặc loại Player khỏi tree trước khi Player tạo i-frame. Code hiện kiểm tra kết quả died và vòng đời body trước bước tiếp; DamageComponent kiểm tra body hợp lệ, inside tree, chưa queued deletion trước get_tree/timer và trong callback. UI xử lý chết do bleeding cũng return sau respawn.
-
-Các bảo vệ này sửa đường lỗi `get_tree() null / create_timer on null` đã ghi nhận. Không suy ra mọi callback trong toàn project đã được kiểm toán hoặc mọi native engine/addon crash đều được xử lý.
-
-## 11. Vị trí điều chỉnh
-
-Mở [playable_adel.tscn](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/playable_adel.tscn>), chọn root **PlayableAdel**, xem Inspector:
-
-- **Defense → Deflect Window:** 0.2 giây game.
-- **Defense → Defense Hit Pose Duration:** 0.2 giây game; Guard giữ lâu hơn nếu push còn active.
-- **Defense → Deflect Slow Motion Scale / Duration:** đang lưu 0.5x / 0.45 giây thực; default 0.6x / 0.2.
-- **Guard Knockback → Distance / Duration:** đang lưu 20 / 0.1 giây game; default 50 / 0.2.
-- **Stagger Threshold → Stagger Knockback Distance:** đang lưu 200; default 72.
-- **Stagger Threshold → Stagger Knockback Duration / Stagger Stun Duration:** 0.3 / 0.45 giây game. Dùng chung threshold thật và thiếu stamina, không còn bộ Stamina Exhaustion export riêng.
-- **Stamina → Dash / Guard / Deflect Stamina Cost:** mỗi loại 20, chỉnh độc lập.
-- **Stamina → Stamina Regen Delay:** **scene 1.0 giây**, default 1.5.
-- **Stamina → Stamina Regen Per Second:** 28.
-
-Thông số chưa có export trực tiếp trên Player:
-
-- I-frame stagger chung: `damage_component.gd` → `STAGGER_INVULN_SEC = 1.0`.
-- I-frame hit thường: `damage_component.gd` → `HIT_INVULN_SEC = 0.2`.
-- Mốc HP và thời gian floor lock: `stats_component.gd` → `STAGGER_THRESHOLD_FRACS`, `STAGGER_LOCK_DURATION`.
-- Giảm damage Guard: `StatsComponent.guard_damage_reduction`, mặc định 0.5, có facade trên HUD; không phải export riêng đang lưu ở root PlayableAdel.
-- Max stamina cơ bản/nâng cấp: `player_progress.gd` → `BASE_MAX_STAMINA`, `STAMINA_PER_UPGRADE`.
-- Bleed/fracture: các constant/helper trong StatsComponent; icon preload trong `status_icon_slot.gd`.
-- Pose nguồn: mở `adel spine action use.tscn` → AnimationPlayer → saber_defense / saber_guard / saber_deflect / saber_stagger. Variant frame-2 ready do animation component tạo riêng lúc chạy.
-- Nút Defense: Project Settings → Input Map → action `guard and deflect`.
-
-Override trên instance trong map có thể ghi đè wrapper Player; default script không thắng override scene/instance. Save và restart gameplay để nhận cấu hình stamina/damage component được tiêm khi ready. Chỉnh Remote Inspector không tự lưu vào file.
-
-## 12. Kiểm thử đã có và giới hạn
-
-Những lượt triển khai trước đã thực sự chạy Godot 4.7 trong bản sao dùng dữ liệu save riêng. Lượt sửa zero-stamina gần nhất đạt **369 checks headless và 94 checks có render**, gồm:
-
-- Guard/stamina: 94; Defense: 59; Deflect slow motion: 25.
-- Ready recovery: 21; Adel HFSM: 31.
-- Leap/Defense qua enemy: 79; stagger/attack matrix: 40; death/respawn: 20.
-
-Các nhóm trên là 369 assertion được báo bởi suite; render chạy lại suite 94, không phải thêm 94 case độc lập mới. Kiểm tra có input/physics/Area2D thật và có fixture gọi method/đặt state để kiểm tra biên. Không mô tả tất cả là chơi thủ công.
-
-Đã kiểm tra chi phí 20, partial 10→0, đúng 20→0, chặn Defense/Dash ở 0, hit trước physics tick tiếp theo, giữ reaction đã trả chi phí, hai frame stagger, hồi quyền attack, regen, release/pulse và lethal Guard respawn. Log và ảnh nằm trong gói `Zero-stamina-verification.zip` của workspace trước đó.
-
-**Giới hạn phiên bản kiểm thử:** các bài timing hồi stamina trước đó được chạy với scene delay **1.5 giây**. Scene được đọc khi tách báo cáo này lưu **1.0 giây**. Lượt này chỉ đối chiếu source/tài liệu, không chạy lại các assertion timing cho tuning 1.0; không dùng số test cũ để tuyên bố giá trị mới đã được runtime nghiệm thu.
-
-Test được lưu trong repo gồm `tests/adel/guard_stamina_validation.tscn`, `ready_recovery_validation.tscn`, `adel_hfsm_validation.tscn` và `tests/enemy/leap_hitbox_validation.tscn`. Guard/stamina suite ghi checkpoint và có gate yêu cầu bản sao với custom user directory có prefix **CodexGuardStamina**. Không chạy suite này lên save thật để kiểm thử.
-
-Chưa nghiệm thu mọi map/build, mọi interaction timing hoặc cân bằng gameplay. Chưa đánh giá xung đột khi nhiều chủ thể cùng thay global time scale. Cảnh báo rig/legacy/addon đã ghi nhận không được giải quyết chỉ bằng các sửa phòng thủ này.
-
-## 13. Những phần còn mở
-
-Các mục sau là đề xuất để chọn scope sau, không tự triển khai trong lượt báo cáo:
-
-1. Cập nhật assertion thời gian hồi theo tuning scene hoặc chuẩn hóa fixture cấu hình rõ ràng, rồi chạy lại nếu chọn 1.0 giây làm giá trị nghiệm thu.
-2. Chốt việc bleeding tick tiếp tục bỏ qua cả i-frame/floor lock, và cách hiển thị marker nếu DOT đã vượt mốc còn ready.
-3. Hoàn thiện fracture và kiểm tra từng modifier thực sự được đường damage/animation nào sử dụng.
-4. Quyết định enemy có bị phản ứng, mất nhịp hoặc mở cơ hội tấn công sau Deflect hay không; hiện chưa có phản ứng đó.
-5. Nếu nhiều actor có slow motion, thiết kế một chủ sở hữu/điều phối time scale chung; mỗi pulse hiện lưu/khôi phục scale riêng.
-6. Nếu thay push/stun dài hơn, kiểm tra riêng iframe và floor lock, không chỉ căn pose bằng mắt.
-
-## 14. Source đối chiếu và liên kết báo cáo
-
-- [Luồng nhận damage Player](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/playable_adel.gd:271>).
-- [DefenseComponent](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/components/defense_component.gd>), [HFSM](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/components/adel_state_machine.gd>).
-- [DamageComponent](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/components/damage_component.gd>), [slow motion](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/components/deflect_slow_motion.gd>), [animation component](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/adel/components/adel_animation_component.gd>).
-- [StatsComponent](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/UI/stats_component.gd>), [HUD facade](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/UI/ui.gd>), [icon](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/UI/status_icon_slot.gd>), [PlayerProgress](<D:/Godot Project/soujourn--echoes-of-the-soul/scenes/Mechanic/player_progress.gd>).
-- [Báo cáo enemy](<D:/Godot Project/soujourn--echoes-of-the-soul/Context/Bao_cao_ky_thuat/enemy_technical_report.md>): AI, rig, collider, hitbox, damage và EXP của enemy.
-
-`guard_def.md` và `guard_stamina.md` được giữ lại làm tài liệu ở các thời điểm trước, không xóa legacy báo cáo. Các giá trị cũ như delay 1.5 hoặc bản kế hoạch animation ban đầu không thay thế source/scene hiện tại. Báo cáo độc lập này là bản tổng hợp được đối chiếu lại tại ngày lập; tiếp tục cập nhật khi gameplay thay đổi.
-
-Bổ sung damage Player: xem `Context/Bao_cao_ky_thuat/combat_damage_tuning.md` cho combo 20/24, jump attack và vị trí chỉnh HP/enemy skill damage. Không thêm chi phí stamina cho attack trong thay đổi đó.
-
-
-## Cập nhật 2026-10-15 — đổi hướng trong defense
-
-A/D đổi hướng tại chỗ trong defense hold, guard reaction và deflect reaction. Dùng đường face hiện có để đồng bộ facing_direction, SpinePivot và WeaponPivot. Phân loại hit trước/sau dựa theo hướng mới. Không reset thời gian giữ defense hoặc mở lại cửa sổ deflect; không đổi hướng world-space của cú bật lùi đã bắt đầu. Không đổi chi phí stamina hoặc animation/timing.
-
-Kiểm tra Godot: test facing_input_validation, 29 check headless và 29 check có render, bao gồm hit guard/deflect thật từ hướng vừa quay và giữ animation khi đổi hướng.
-
-
-## Cập nhật 2026-10-15 — zoom riêng khi thiếu stamina
-
-Guard/Deflect được chấp nhận với stamina còn ít hơn chi phí dùng `Stamina Exhaustion Zoom Multiplier = 1.3` (+30%). Chỉnh ở node gốc PlayableAdel trong playable_adel.tscn, Inspector → Stagger Impact. Stagger do ngưỡng HP vẫn dùng `Stagger Zoom Multiplier` (mặc định 1.5, +50%). Mức zoom tính so với zoom nền camera, không cộng dồn với hit-stop zoom.
-
-Chỉ tách cường độ zoom; giữ nguyên animation hai frame, quãng đường/thời gian bật lùi, stun, i-frame, slow motion và thời gian trả zoom. Ngữ cảnh thiếu stamina chỉ tồn tại trong lúc apply_stagger phát tín hiệu đồng bộ; không ảnh hưởng stagger thường xảy ra sau đó.
-
-Test `res://tests/adel/exhaustion_zoom_validation.tscn`: 27 kiểm tra headless và 27 có render trong Godot 4.7, trên save riêng CodexExhaustionZoom20261015. Kiểm tra Guard/Deflect với 10 stamina, HP/stamina/threshold không đổi luật, peak camera 1.3, trả zoom nền, stagger thường sau đó vẫn 1.5 và thay thông số riêng không đổi stagger thường.
-
-
-## Cập nhật 2026-10-16 — giảm thời lượng slow motion thiếu stamina
-
-Guard/Deflect thiếu stamina vẫn dùng zoom riêng và đầy đủ knockback/animation/stun/i-frame như hiện tại. Thời lượng slow motion riêng bằng `Stagger Slow Motion Duration * Stamina Exhaustion Slow Motion Duration Multiplier`; hệ số mặc định 0.5. Với scene hiện tại: 0.36s → 0.18s, giữ scale cũ. Chỉnh trên node gốc PlayableAdel → Stagger Impact. Stagger HP thường giữ toàn bộ thời lượng. Camera dùng ground framing 43/270; xem `camera_ground_framing_report.md`.
-
-
-## Cập nhật 2026-10-16 — giữ defense khi dash
-
-Nhấn giữ defense trong DASH_ACTIVE/DASH_SKID hoặc thời gian cooldown sẽ ghi nhận yêu cầu chờ. Defense chỉ bắt đầu khi đã thoát DASH, dash.able_to_dodge được Timer cooldown trả về true và có stamina. Không ngắt dash, rút ngắn cooldown hoặc thêm chi phí stamina cho thao tác giữ.
-
-Thả nút, clear_combat_input (menu, focus, rest, stagger...) hủy yêu cầu chờ. Nếu dash tiêu hết stamina, có thể giữ yêu cầu trong dash/cooldown; nếu stamina hồi về >0 trước lúc hết cooldown thì vẫn vào defense. Nếu đến lúc đó stamina vẫn bằng 0, yêu cầu bị hủy và không vào defense.
-
-Giữ cách tính _guard_press_age từ lúc nhấn nút: chờ qua dash/cooldown không cấp lại cửa sổ deflect. Không thay deflect_delay của scene (người dùng hiện đã đặt 0.03), cooldown dash, tốc độ dash hoặc animation.
-
-Test `res://tests/adel/dash_defense_validation.tscn`: 24 check headless + 24 check có render, gồm dash đất/trên không, toàn bộ cooldown, thả trong dash/cooldown, hủy do input cleanup, không cấp deflect mới, hết stamina và hồi stamina trước khi cooldown xong. Hồi quy combat_feel: 106 check headless. Bộ hồi quy cũ có fixture deflect_delay = 0.1 riêng để kiểm tra baseline thiết kế; scene chơi thật không bị sửa. Mọi test dùng save riêng CodexDashDefense/CodexCombatFeel.
+Hồi quy headless cùng lượt: `combat_feel_validation` **106**, `adel_hfsm_validation` **32**, `jump_attack_defense_validation` **41**, `jump_attack_damage_validation` **42** assertions, tất cả đạt. Tổng lượt này **381 assertions** (gồm 80 chạy lại có render, không phải 381 kịch bản độc lập). Log còn cảnh báo rig/UID có sẵn; bản chạy render không ghi được shader cache trong user directory do giới hạn filesystem, nhưng hoàn tất toàn bộ assertions. Không có script error trong các suite trên. Không sửa override scene để làm test đạt và không ghi/xóa save chơi thật.
