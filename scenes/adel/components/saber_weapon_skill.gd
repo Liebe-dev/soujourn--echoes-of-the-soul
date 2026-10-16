@@ -1,10 +1,18 @@
 class_name SaberWeaponSkill
 extends Node
-## Q skill: charge, committed release, swept lunge, impact and recovery.
+## Q skill owns charge, lunge, impact, recovery and the game-time cooldown.
 const STUN = preload("res://scenes/adel/components/enemy_skill_stun.gd")
 const S = AdelStateMachine.State
 const ChargedFinish = preload("res://scenes/adel/components/charged_skill_finish.gd")
 const ImpactFeedback = preload("res://scenes/adel/components/stagger_impact.gd")
+const SkillDebugSettings = preload("res://scenes/adel/components/skill_debug_settings.gd")
+
+signal cooldown_changed(slot: StringName, remaining: float, total: float)
+
+@export_group("Cooldown")
+@export_range(0.0, 120.0, 0.1, "or_greater", "suffix:s") var tap_cooldown: float = 5.0
+@export_range(0.0, 120.0, 0.1, "or_greater", "suffix:s") var charged_cooldown: float = 8.0
+@export_range(0.0, 120.0, 0.1, "or_greater", "suffix:s") var full_cooldown: float = 10.0
 
 @export_group("Charge")
 @export_range(0.01, 2.0, 0.01) var tap_windup: float = 0.2
@@ -65,6 +73,8 @@ const ImpactFeedback = preload("res://scenes/adel/components/stagger_impact.gd")
 @export_range(0.0, 3.0, 0.01, "or_greater", "suffix:s") var full_impact_slow_motion_duration: float = 0.36
 
 var tier := 0
+var cooldown_remaining := 0.0
+var cooldown_total := 0.0
 var charge_time := 0.0
 var distance_travelled := 0.0
 var contact_target: Node2D
@@ -85,6 +95,7 @@ var _query := PhysicsShapeQueryParameters2D.new()
 
 func setup(body: CharacterBody2D) -> void:
 	_body = body
+	process_mode = Node.PROCESS_MODE_PAUSABLE
 	_charged_finish = ChargedFinish.new()
 	_charged_finish.name = "ChargedSkillFinish"
 	add_child(_charged_finish)
@@ -99,10 +110,33 @@ func setup(body: CharacterBody2D) -> void:
 func is_finish_freezing() -> bool: return ChargedFinish.is_freezing()
 func is_active() -> bool: return _active
 func is_dashing() -> bool: return _active and _body.state_machine.current == S.SKILL_DASH
+func is_cooling_down() -> bool: return SkillDebugSettings.are_cooldowns_enabled() and cooldown_remaining > 0.0
+
+func _physics_process(delta: float) -> void:
+	# Game time: independent of HUD visibility and actor exemptions, frozen by pause.
+	if cooldown_remaining <= 0.0 or get_tree().paused: return
+	if not SkillDebugSettings.are_cooldowns_enabled():
+		reset_cooldown()
+		return
+	cooldown_remaining = maxf(cooldown_remaining - delta, 0.0)
+	cooldown_changed.emit(&"Q", cooldown_remaining, cooldown_total)
+
+func reset_cooldown() -> void:
+	cooldown_remaining = 0.0
+	cooldown_total = 0.0
+	cooldown_changed.emit(&"Q", cooldown_remaining, cooldown_total)
+
+func _start_cooldown() -> void:
+	if not SkillDebugSettings.are_cooldowns_enabled():
+		reset_cooldown()
+		return
+	cooldown_total = maxf([tap_cooldown, charged_cooldown, full_cooldown][tier], 0.0)
+	cooldown_remaining = cooldown_total
+	cooldown_changed.emit(&"Q", cooldown_remaining, cooldown_total)
 
 func begin(interrupt_defense: bool = false) -> bool:
 	var replacing_defense: bool = interrupt_defense and _body.state_machine.is_in(S.DEFENSE) and not _body.is_locked and _body.state_machine.movement_enabled and not _body.damage.is_stunned and not _body.damage.is_touched_enemy and not _body.is_sentinel_exit_pending()
-	if _active or (not _body.state_machine.can_begin_action() and not replacing_defense) or (not allow_airborne and not _body.is_on_floor()): return false
+	if _active or is_cooling_down() or (not _body.state_machine.can_begin_action() and not replacing_defense) or (not allow_airborne and not _body.is_on_floor()): return false
 	for clip in [&"saber_skill_1", &"saber_skill_2", &"saber_skill_3", &"saber_skill_4", &"saber_skill_5", &"saber_skill_6"]:
 		if not _body.spine_anim.has_animation(clip): return false
 	if replacing_defense:
@@ -118,6 +152,8 @@ func begin(interrupt_defense: bool = false) -> bool:
 	contact_target = null
 	tier = 0
 	_update_charge_facing()
+	# Q replaces the landing clip, so its completion callback will never clear this flag.
+	_body._playing_land_anim = false
 	_body.combat.combo_step = 0
 	_body.velocity.x = 0.0
 	_enter(S.SKILL_CHARGE, &"saber_skill_1")
@@ -188,6 +224,7 @@ func _enter(phase: int, clip: StringName) -> void:
 	_body.presentation.hold(clip)
 
 func _start_lunge() -> void:
+	_start_cooldown()
 	_remaining_distance = lunge_distance * ([1.0, charged_distance_multiplier, full_distance_multiplier][tier])
 	_body.velocity = Vector2.ZERO
 	_enter(S.SKILL_DASH, &"saber_skill_4")

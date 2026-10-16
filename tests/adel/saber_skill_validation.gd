@@ -48,6 +48,7 @@ func reset() -> void:
 	for action in [&"weapon_skill",&"attack",&"guard and deflect",&"move_right",&"move_left",&"jump"]:await button(action,false)
 	p.enter_rest(false)
 	p.exit_rest()
+	skill.reset_cooldown() # Isolate each charge/damage scenario from previous casts.
 	if p.damage.is_stunned or p.damage.is_invulnerable:await wait(1.1)
 	p.damage.is_stunned = false
 	p.damage.is_knocking_back = false

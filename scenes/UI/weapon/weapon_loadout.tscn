@@ -1,0 +1,140 @@
+[gd_scene format=3 uid="uid://btfhuuvuv5kng"]
+
+[ext_resource type="Script" uid="uid://dxhtbjrnfu28v" path="res://scenes/UI/weapon/weapon_loadout.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://7l3sut0xr3pf" path="res://asset/UI/HUD/Rectangle 4.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://dw8erkvti74aq" path="res://asset/UI/HUD/Layer 10.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://b7uap05e6a7p7" path="res://asset/UI/HUD/saber1.png" id="4"]
+[ext_resource type="PackedScene" path="res://scenes/UI/weapon/weapon_skill_slot.tscn" id="6"]
+[ext_resource type="Shader" uid="uid://c7cjn8k7thjm0" path="res://scenes/UI/weapon/weapon_inset.gdshader" id="7"]
+[ext_resource type="Texture2D" uid="uid://b23cg1bsb0gcq" path="res://asset/UI/HUD/skill.png" id="9"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_s6tyr"]
+resource_local_to_scene = true
+shader = ExtResource("7")
+shader_parameter/inset_opacity = 0.32
+
+[sub_resource type="AtlasTexture" id="LeftRepair"]
+atlas = ExtResource("2")
+region = Rect2(0, 0, 35, 28)
+filter_clip = true
+
+[sub_resource type="AtlasTexture" id="RightRepair"]
+atlas = ExtResource("2")
+region = Rect2(179, 0, 35, 28)
+filter_clip = true
+
+[node name="WeaponLoadout" type="Control" unique_id=1237197147]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 390.5
+offset_right = 258.0
+offset_bottom = 489.5
+scale = Vector2(1.5, 1.5)
+mouse_filter = 2
+script = ExtResource("1")
+hud_scale = 1.5
+right_weapon = ExtResource("4")
+
+[node name="Inset" type="TextureRect" parent="." unique_id=257095860]
+material = SubResource("ShaderMaterial_s6tyr")
+layout_mode = 0
+offset_left = 15.0
+offset_top = 5.0
+offset_right = 219.0
+offset_bottom = 78.0
+mouse_filter = 2
+texture = ExtResource("3")
+expand_mode = 1
+
+[node name="Frame" type="TextureRect" parent="." unique_id=1385788366]
+layout_mode = 0
+offset_left = 10.0
+offset_right = 224.0
+offset_bottom = 88.0
+mouse_filter = 2
+texture = ExtResource("2")
+expand_mode = 1
+
+[node name="BorderRepair" type="Control" parent="." unique_id=781086291]
+anchors_preset = 0
+offset_left = 10.0
+offset_right = 224.0
+offset_bottom = 88.0
+mouse_filter = 2
+
+[node name="Left" type="TextureRect" parent="BorderRepair" unique_id=1434150596]
+layout_mode = 0
+offset_top = 55.0
+offset_right = 35.0
+offset_bottom = 83.0
+mouse_filter = 2
+texture = SubResource("LeftRepair")
+expand_mode = 1
+flip_v = true
+
+[node name="Right" type="TextureRect" parent="BorderRepair" unique_id=2089324106]
+layout_mode = 0
+offset_left = 179.0
+offset_top = 55.0
+offset_right = 214.0
+offset_bottom = 83.0
+mouse_filter = 2
+texture = SubResource("RightRepair")
+expand_mode = 1
+flip_v = true
+
+[node name="RightWeaponArtwork" type="TextureRect" parent="." unique_id=609243127]
+layout_mode = 0
+offset_left = 18.0
+offset_top = 5.0
+offset_right = 89.0
+offset_bottom = 79.0
+pivot_offset = Vector2(-35, 28.5)
+mouse_filter = 2
+texture = ExtResource("4")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="LeftWeaponArtwork" type="TextureRect" parent="." unique_id=1842266511]
+layout_mode = 0
+offset_left = 145.0
+offset_top = 8.0
+offset_right = 220.0
+offset_bottom = 80.0
+mouse_filter = 2
+expand_mode = 1
+
+[node name="ItemSlots" type="Control" parent="." unique_id=1225522203]
+anchors_preset = 0
+offset_left = 102.0
+offset_top = 5.0
+offset_right = 130.0
+offset_bottom = 83.0
+mouse_filter = 2
+
+[node name="Selected" type="Control" parent="ItemSlots" unique_id=1432118334]
+anchors_preset = 0
+offset_right = 28.0
+offset_bottom = 28.0
+mouse_filter = 2
+
+[node name="Next" type="Control" parent="ItemSlots" unique_id=1072587264]
+anchors_preset = 0
+offset_top = 28.0
+offset_right = 28.0
+offset_bottom = 53.0
+mouse_filter = 2
+
+[node name="Previous" type="Control" parent="ItemSlots" unique_id=1369331960]
+anchors_preset = 0
+offset_top = 53.0
+offset_right = 28.0
+offset_bottom = 78.0
+mouse_filter = 2
+
+[node name="Q" parent="." unique_id=284726393 instance=ExtResource("6")]
+anchors_preset = 0
+offset_top = 55.0
+offset_bottom = 99.0
+icon = ExtResource("9")

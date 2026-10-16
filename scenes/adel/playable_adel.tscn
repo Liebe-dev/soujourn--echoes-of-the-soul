@@ -201,7 +201,7 @@ size = Vector2(150, 100)
 z_index = 200
 collision_layer = 3
 script = ExtResource("1_playable")
-air_attack_fall_speed_multiplier = 0.09999999999999999
+air_attack_fall_speed_multiplier = 0.1
 air_attack_frame_pause_duration = 0.15
 stagger_knockback_distance = 220.0
 stagger_knockback_duration = 0.4
@@ -311,6 +311,9 @@ one_shot = true
 
 [node name="SaberSkill" type="Node" parent="." unique_id=1870857445]
 script = ExtResource("saber_skill")
+tap_cooldown = 4.0
+charged_cooldown = 6.0
+full_cooldown = 8.0
 charge_level_1_time = 0.7
 charge_level_2_time = 1.5
 lunge_speed = 2811.0

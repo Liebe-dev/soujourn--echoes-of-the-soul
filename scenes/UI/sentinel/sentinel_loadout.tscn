@@ -1,17 +1,19 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene format=3 uid="uid://chvnr8qw25iay"]
 
-[ext_resource type="Script" path="res://scenes/UI/sentinel/sentinel_loadout.gd" id="1"]
-[ext_resource type="Texture2D" path="res://asset/UI/Menu screen/dark conversion bar.png" id="2"]
-[ext_resource type="Shader" path="res://scenes/UI/sentinel/sentinel_art.gdshader" id="3"]
+[ext_resource type="Script" uid="uid://b81i2infms2gd" path="res://scenes/UI/sentinel/sentinel_loadout.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://daaey6m4autra" path="res://asset/UI/Menu screen/dark conversion bar.png" id="2"]
+[ext_resource type="Shader" uid="uid://b1fnrxdlscjfu" path="res://scenes/UI/sentinel/sentinel_art.gdshader" id="3"]
 [ext_resource type="PackedScene" path="res://scenes/UI/sentinel/sentinel_ability_slot.tscn" id="4"]
+
+[sub_resource type="ShaderMaterial" id="Art"]
+shader = ExtResource("3")
+shader_parameter/background_key = Color(0.6392157, 0.6392157, 0.6392157, 1)
+shader_parameter/key_tolerance = 0.012
 
 [sub_resource type="AtlasTexture" id="Weapon"]
 atlas = ExtResource("2")
 region = Rect2(0, 0, 243, 188)
 filter_clip = true
-
-[sub_resource type="ShaderMaterial" id="Art"]
-shader = ExtResource("3")
 
 [sub_resource type="AtlasTexture" id="Q"]
 atlas = ExtResource("2")
@@ -43,14 +45,19 @@ atlas = ExtResource("2")
 region = Rect2(457, 136, 52, 52)
 filter_clip = true
 
-[node name="SentinelLoadout" type="Control"]
-layout_mode = 0
-offset_right = 515.0
-offset_bottom = 214.0
+[node name="SentinelLoadout" type="Control" unique_id=217355581]
+layout_mode = 3
+anchors_preset = 0
+offset_left = 24.0
+offset_top = 378.5
+offset_right = 539.0
+offset_bottom = 592.5
+scale = Vector2(0.75, 0.75)
 mouse_filter = 2
 script = ExtResource("1")
+hud_scale = 0.75
 
-[node name="WeaponArtwork" type="TextureRect" parent="."]
+[node name="WeaponArtwork" type="TextureRect" parent="." unique_id=2021640592]
 material = SubResource("Art")
 layout_mode = 0
 offset_right = 243.0
@@ -59,7 +66,8 @@ mouse_filter = 2
 texture = SubResource("Weapon")
 expand_mode = 1
 
-[node name="Q" parent="." instance=ExtResource("4")]
+[node name="Q" parent="." unique_id=1335271970 instance=ExtResource("4")]
+anchors_preset = 0
 offset_left = 3.0
 offset_top = 119.0
 offset_right = 73.0
@@ -67,7 +75,8 @@ offset_bottom = 189.0
 icon = SubResource("Q")
 key_label = "Q"
 
-[node name="E" parent="." instance=ExtResource("4")]
+[node name="E" parent="." unique_id=951652418 instance=ExtResource("4")]
+anchors_preset = 0
 offset_left = 169.0
 offset_top = 119.0
 offset_right = 240.0
@@ -75,15 +84,16 @@ offset_bottom = 189.0
 icon = SubResource("E")
 key_label = "E"
 
-[node name="Skill1" parent="." instance=ExtResource("4")]
+[node name="Skill1" parent="." unique_id=1588159184 instance=ExtResource("4")]
+anchors_preset = 0
 offset_left = 277.0
 offset_top = 136.0
 offset_right = 329.0
 offset_bottom = 188.0
 icon = SubResource("One")
-key_label = "1"
 
-[node name="Skill2" parent="." instance=ExtResource("4")]
+[node name="Skill2" parent="." unique_id=1468330249 instance=ExtResource("4")]
+anchors_preset = 0
 offset_left = 337.0
 offset_top = 136.0
 offset_right = 389.0
@@ -91,7 +101,8 @@ offset_bottom = 188.0
 icon = SubResource("Two")
 key_label = "2"
 
-[node name="Skill3" parent="." instance=ExtResource("4")]
+[node name="Skill3" parent="." unique_id=383687766 instance=ExtResource("4")]
+anchors_preset = 0
 offset_left = 397.0
 offset_top = 136.0
 offset_right = 449.0
@@ -99,7 +110,8 @@ offset_bottom = 188.0
 icon = SubResource("Three")
 key_label = "3"
 
-[node name="Skill4" parent="." instance=ExtResource("4")]
+[node name="Skill4" parent="." unique_id=2086832075 instance=ExtResource("4")]
+anchors_preset = 0
 offset_left = 457.0
 offset_top = 136.0
 offset_right = 509.0

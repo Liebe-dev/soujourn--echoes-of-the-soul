@@ -41,6 +41,7 @@ func reset() -> void:
 	p.damage.reset()
 	p.stagger_impact.cancel()
 	p.state_machine.resume_locomotion()
+	skill.reset_cooldown() # Tier presentation scenarios start with Q ready.
 	p.stats.heal_to_full()
 	p.position = origin
 	p.velocity = Vector2.ZERO

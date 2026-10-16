@@ -1,6 +1,6 @@
 # Hướng dẫn tùy chỉnh thông số game
 
-Cập nhật: **16/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
+Cập nhật: **17/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
 
 ## Mục lục
 
@@ -294,6 +294,8 @@ Scene `res://scenes/adel/playable_adel.tscn` → **PlayableAdel**.
 
 Mở Player scene → **SaberSkill**, không phải node WeaponHolder/Saber. Source: `res://scenes/adel/components/saber_weapon_skill.gd`.
 
+- **Cooldown:** **SaberSkill → Cooldown** có `tap_cooldown`, `charged_cooldown`, `full_cooldown`, tương ứng nhấn nhanh/tụ mức 1/mức 2. Mặc định script **5/8/10**; scene `playable_adel.tscn` hiện được người dùng override thành **4/6/8**. Đơn vị **giây game**, chưa có override map riêng cho ba trường này. Bắt đầu ở `_start_lunge()` khi thực sự tung đòn, không tính lúc đang giữ/tụ Q. Dừng khi pause và freeze trả zoom; chịu slow motion/hit-stop toàn game, kể cả pha Player được miễn slow motion. Chỉnh số giây trong Inspector; 0 là không hồi cho mức đó. Đánh hụt hoặc bị ngắt sau khi tung vẫn giữ hồi; bị hủy trước khi lao không tiêu hồi. Chỉ chặn Q, không khóa di chuyển/đánh thường/Defense; bấm trong hồi không tạo lệnh chờ tự dùng khi hết. `restore_checkpoint_state()` reset hồi và HUD; hồi không lưu trong save.
+- **Tắt/bật hồi khi debug:** trong game **Esc → Debug - Skills → Skill cooldowns**. Mặc định **bật**; **tắt** sẽ xóa hồi Q hiện tại, trả HUD về sẵn sàng ngay khi menu còn pause và bỏ hồi ở mọi lần Q tiếp theo, tới khi **bật lại**. Bật lại chỉ áp dụng hồi bình thường cho lần tung tiếp theo, không tự tạo hồi cho chiêu trước đó. Tùy chọn giữ xuyên checkpoint/đổi map trong phiên debug, không ghi save/config, khởi động game mới mặc định bật; release luôn dùng hồi bình thường. Scene `res://scenes/UI/game_pause_menu.tscn` → **VBoxContainer/SkillDebug/CooldownsEnabled** là CheckButton, `button_pressed=true` trong scene; script `pause.gd` đồng bộ trạng thái phiên khi mở menu và xử lý `_on_skill_cooldowns_toggled()`. Biến bool `cooldowns_enabled=true` trong `res://scenes/adel/components/skill_debug_settings.gd` là mặc định script, không export/không override scene; `SaberWeaponSkill` đọc qua `are_cooldowns_enabled()`. Việc tắt không sửa ba thông số Cooldown trong Inspector; bật lại dùng đúng override hiện tại **4/6/8**. Nhóm debug chỉ hiện ở debug build.
 - **Charge:** `tap_windup`; `charge_level_1_time`/`charge_level_2_time` là hai mốc giữ; `charged_release_windup` là phần thêm sau thả mức 1; `full_charge_final_pose` là pose cuối trước ép lao mức 2. Thả giữa mốc lấy mức thấp đã đạt. `allow_airborne` bật/tắt Q trên không.
 - **Lunge:** `lunge_distance` là quãng nhấn nhanh; nhân `charged_distance_multiplier`/`full_distance_multiplier` cho hai mức giữ. `lunge_speed` đổi tốc độ, không đổi tổng ngân sách quãng đường. `enemy_detection_mask` là physics bitmask chọn đối tượng dò; không phải layer index đơn lẻ.
 - **Damage And Stun:** `damage` cơ sở, `charged_damage_multiplier`/`full_damage_multiplier`; `charged_stun_duration`/`full_stun_duration` là thời gian enemy không tấn công sau trúng. Nhấn nhanh không có stun charge. `impact_pose_duration` là pha skill_5.
@@ -302,12 +304,19 @@ Mở Player scene → **SaberSkill**, không phải node WeaponHolder/Saber. Sou
 
 **Quan trọng về Zoom Duration:** với charge 1/2, giữ zoom đỉnh tới khi skill_6 kết thúc, rồi `charged_impact_zoom_duration`/`full_impact_zoom_duration` là thời gian trả zoom có đóng băng toàn game, tính bằng giây thực. Với tap, duration vẫn là pulse theo đồng hồ actor, không có pha freeze cuối. Tắt zoom/hệ số 1/thời lượng 0 không tạo freeze vô hình. Slow motion impact tính thời gian thực và độc lập hiệu ứng recovery; nguồn chậm mạnh nhất được chọn khi cùng tồn tại.
 
-Freeze vẫn nhận một input buffer mới nhất; không có tham số export riêng cho số lượng buffer. Không đổi `attack_input_buffer` để kéo dài freeze hay tích nhiều hành động. Trong freeze, Defense cần còn giữ; các điều kiện hành động được kiểm tra lại sau mở băng.
+Freeze vẫn nhận một input buffer mới nhất; không có tham số export riêng cho số lượng buffer. Không đổi `attack_input_buffer` để kéo dài freeze hay tích nhiều hành động. Trong freeze, Defense cần còn giữ; các điều kiện hành động được kiểm tra lại sau mở băng. Q buffer vẫn phải qua kiểm tra cooldown; với hồi mặc định đang chạy sẽ không được thực hiện lại. Khi Q nhận quyền điều khiển sau tiếp đất, `SaberWeaponSkill.begin()` xóa cờ `_playing_land_anim` của clip đã bị thay để đi/chạy có thể ngắt Ready ngay sau skill; đứng yên vẫn chơi đủ Ready gốc. Không có thông số tuning mới cho sửa animation này.
 
 Q dùng shape của **WeaponPivot/SaberHitbox/Hitbox/CollisionShape2D**; `SaberHitbox.begin_skill_window()` lấy Position/Rotation từ key đầu của clip hitbox **saber_attack_1**. Muốn đổi offset Q hiện tại thì chỉnh các key đó, nó sẽ ảnh hưởng cả đòn 1; chưa có export offset Q độc lập. Q dừng ở enemy đầu tiên. Vùng dò va chạm lunge lấy collider thân Player; không kéo collider detect để tăng damage area. Miễn damage của Q thường chỉ trong lunge; không nhầm với Q Sentinel đang ở thiết kế.
 
 Scene `res://scenes/adel/playable_adel.tscn` → **SaberSkill**.
 
+
+**Cooldown**
+
+- **Tap Cooldown** (`tap_cooldown`): script `5.0`, scene gốc override `4.0` giây game; nhấn nhanh, miền Inspector từ 0 trở lên.
+- **Charged Cooldown** (`charged_cooldown`): script `8.0`, scene gốc override `6.0` giây game; tụ mức 1.
+- **Full Cooldown** (`full_cooldown`): script `10.0`, scene gốc override `8.0` giây game; tụ mức 2.
+- Giữ các override scene người dùng vừa chỉnh, chưa có override map riêng; mốc bắt đầu và đồng hồ như mô tả trên. Không nhầm với các mốc giữ `charge_level_1_time=0.7`/`charge_level_2_time=1.5` đang được người dùng override trong scene.
 
 **Charge**
 
@@ -582,16 +591,37 @@ Trigger map dùng `res://scenes/Mechanic/camera_zoom_trigger.gd`: `target_zoom`,
 <a id="hud"></a>
 ## 10. HUD, thanh ulti, icon và loadout
 
-Mở `res://scenes/UI/hud.tscn` → node **hud**. **HUD Layout** có `hud_scale`, `screen_margin`, `show_numeric_values`; **Sentinel HUD Layout** có `sentinel_loadout_scale`, `sentinel_screen_margin`. HUD thuộc CanvasLayer nên không chạy theo camera zoom.
+Mở `res://scenes/UI/hud.tscn` → node **hud**. **HUD Layout** có `hud_scale`, `screen_margin`, `show_numeric_values` cho cụm phía trên; nhóm **Bottom Loadout Layout** có `sentinel_screen_margin` dùng chung cho hai cụm phía dưới. Scale phía dưới chỉnh trực tiếp ở **ScreenSpace/WeaponLoadout** và **ScreenSpace/SentinelLoadout**, mỗi node có **Hud Scale** riêng. HUD thuộc CanvasLayer nên không chạy theo camera zoom.
 
 - Thanh ulti: **ScreenSpace/bar/hp_bar_panel/UltimateMeter** → Layout/Transform. Tăng Position X/offset_left để cách bình máu hơn; giữ width nếu không muốn đổi độ dài. Chỉnh trong hud.tscn và lưu, không chỉ kéo instance tạm trong Player. Runtime giữ vị trí node đã lưu; không còn export Ultimate Meter Offset thứ hai.
 - Hình thanh ulti: mở `res://scenes/UI/sentinel/ultimate_meter.tscn`; `meter_size`, `fire_speed`, `preview_charge`. Preview Charge chỉ editor, không cấp charge gameplay; `fire_speed` là chuyển động phần cháy.
 - Cụm Sentinel: `res://scenes/UI/sentinel/sentinel_loadout.tscn`. `hud_scale`, `screen_margin`, `reserved_top`; `preview_active` chỉ xem editor. `WeaponArtwork` đổi hình vũ khí. Các ô **Q**, **E**, **Skill1/2/3/4** có `icon` và `key_label`; nhãn phím không tự đổi input gameplay.
 - Màu HP Sentinel: `res://scenes/UI/sentinel/hp_sentinel_fill.svg`, `res://scenes/UI/sentinel/hp_sentinel_rim.svg`, `res://scenes/UI/sentinel/hp_sentinel_track.svg`; các hằng texture trong ui.gd nạp ba file này. Texture HP thường và marker nằm trong hud.tscn.
 - Icon Bleed/Fracture dùng `res://asset/UI/Menu screen/Bleed.png`, `fracture.png`; `ui.gd.sync_status_icons()` gửi ID effect tới thanh status. Xem mapping icon của `res://scenes/UI/status_icon_slot.gd` để thay đúng loại. Poisoning và icon thử không đồng nghĩa có debuff gameplay.
-- Các hằng `SCREEN_SHAKE_FLASK`, `SCREEN_SHAKE_STAGGER`, `FLASK_SHAKE_DECAY` trong ui.gd là phản hồi HUD hiện có; không phải tham số rung Camera2D gameplay.
+- Phản hồi nhận đòn: `res://scenes/UI/ui.gd` đã bỏ `flash_red()` và các lời gọi trong `_on_vitals_damage()`, `apply_damage()` và `_process()`. HUD không nháy đỏ khi trúng đòn hoặc tick Bleed; HP, fade hiện/ẩn và nháy hồi máu vẫn hoạt động. Đây là thay đổi code, không có công tắc Inspector/override scene cho nháy đỏ.
+- Rung stagger giữ luồng **`_on_stagger_triggered()` → `_trigger_impact_feedback()`** trong `ui.gd`: hằng `SCREEN_SHAKE_STAGGER=0.72` là cường độ màn hình, hệ số không đơn vị 0–1, không có override scene. Muốn mạnh/nhẹ hơn chỉnh hằng này; `_trigger_flask_shake()` vẫn rung bình máu cùng lượt. `SCREEN_SHAKE_FLASK` và `FLASK_SHAKE_DECAY` vẫn giữ nguyên; các hằng này không chỉnh thông số rung Camera2D gameplay.
 
 Preview an toàn: mở `res://scenes/UI/previews/dark_sentinel_hud_preview.tscn` và F6, dùng các nút xem Normal/Ulti/Sentinel/Pending/Cooldown. Preview độc lập không là bản skill gameplay và không ghi save.
+
+<a id="weapon-hud"></a>
+#### HUD vũ khí thường: vị trí và cách chỉnh
+
+Scene chính: `res://scenes/UI/hud.tscn` → **ScreenSpace/WeaponLoadout**, nguồn `res://scenes/UI/weapon/weapon_loadout.tscn`. Ở dạng thường hiện cụm này; vào Sentinel ẩn nó và hiện SentinelLoadout, thoát đổi lại. Hai cụm dùng chung lề trái/dưới, không vẽ chồng nhau; cùng chịu fade/nháy hồi máu và ẩn campfire như HUD hiện hành.
+
+- **Kích thước cả cụm khi chơi:** trong `hud.tscn`, chọn **ScreenSpace/WeaponLoadout → Weapon Layout → Hud Scale** (`hud_scale`), instance hiện **`1.25`**; cụm Sentinel chỉnh **ScreenSpace/SentinelLoadout → Sentinel Layout → Hud Scale**, instance hiện **`0.65`**. Đây là hệ số không đơn vị, miền Inspector 0.25–3.0; tăng để phóng to. Script của cả hai cụm mặc định `1.0`. Runtime giữ giá trị đã lưu khi khởi tạo/resize; viewport quá nhỏ tự giảm scale để vừa vùng trống. Không chỉnh **Transform → Scale** vì layout tính lại thuộc tính đó. Hai thông số scale trùng trên HUD cha đã bỏ vì trước đây ghi đè lựa chọn này.
+- **Lề chung:** `hud.tscn` → **hud → Bottom Loadout Layout → Sentinel Screen Margin** (`sentinel_screen_margin`), mặc định script/scene `Vector2(24,24)`: X là lề trái, Y là lề dưới, đơn vị pixel viewport. Tên biến cũ được giữ để tương thích; kéo Position trực tiếp trên instance sẽ bị layout runtime đặt lại. HUD vẫn truyền lề chung và tính `reserved_top` từ HUD trên (hiện 223 px ở scale HUD trên bằng 1), nhưng không truyền scale. Không có map override mới trong lượt này.
+- **Căn trong scene riêng và ưu tiên override:** `weapon_loadout.tscn` → **WeaponLoadout → Weapon Layout → Hud Scale** hiện **`1.5`**, mặc định script **`1.0`**. Scene Sentinel gốc hiện **`0.75`**, mặc định script **`1.0`**. Hai instance trong `hud.tscn` đang override thành **`1.25` / `0.65`**, nên sửa scene gốc sẽ chưa đổi gameplay; muốn kế thừa giá trị gốc thì bấm **Revert** cạnh **Hud Scale** trên instance tương ứng và lưu `hud.tscn`. Giữ nguyên các override người dùng vừa chỉnh. Khi mở scene riêng, `screen_margin=Vector2(24,24)` và `reserved_top=220.0` vẫn kế thừa mặc định script. Kích thước tham chiếu cụm thường là `REFERENCE_SIZE=Vector2(234,99)` trong `weapon_loadout.gd`, đồng bộ với size node gốc nếu đổi bố cục; đã bỏ phần chiều cao chừa cho chữ Q/E.
+- **Nền lót:** chọn **WeaponLoadout → Weapon Appearance → Inset Opacity**, biến `inset_opacity`, mặc định script/scene **0.32** (32%, miền 0–1). Dùng `Layer 10.png` đặt tại node **Inset**, Position `(15,5)`, Size `(204,73)`; giữa khung `(10,0)`, Size `(214,88)`. Shader `weapon_inset.gdshader` chuẩn hóa alpha gốc 87/255 trước khi áp 0.32, tránh nhân alpha hai lần; phần dưới hai ô dùng nửa trên nguyên vẹn đối xứng để lấp chỗ khoét skill cũ, không đổi họa tiết giữa hoặc PNG nguồn. Chỉnh Position/Size của Inset nếu cần đổi khe hở với khung.
+- **Khung và bản vá:** node **Frame** dùng nguyên `asset/UI/HUD/Rectangle 4.png`. **BorderRepair/Left** và **Right** lấy hai đoạn viền trên nguyên vẹn qua AtlasTexture, lật dọc để lấp phần thiếu ở hai góc dưới. Asset PNG tác giả được giữ nguyên, không dùng bản sinh ảnh đã làm lệch họa tiết giữa. Khi chỉnh kích thước/offset khung phải căn cả hai node vá và Inset theo cùng tỉ lệ.
+- **Hình vũ khí:** **WeaponLoadout → Weapon Appearance → Right Weapon / Left Weapon**, tương ứng `right_weapon`/`left_weapon`; script mặc định cả hai `null`, scene gốc tay phải dùng **`res://asset/UI/HUD/saber1.png`**, tay trái `null`. Tay phải vẫn ở ô hình bên trái như ảnh mẫu; ô hình bên phải để trống. Đã bỏ ảnh khiên, material tách nền và ô skill E khỏi cụm thường; ảnh nguồn cũ vẫn giữ nguyên.
+- **Phóng to/căn kiếm:** `weapon_loadout.tscn` → **RightWeaponArtwork → Layout/Transform**: Position hiện **`(18,5)` px** theo giá trị người dùng đã căn, Size **`(71,74)` px**, Rotation **`0°`** trong scene. PNG `saber1.png` đã có góc chéo như ảnh mẫu và hiển thị nguyên kích thước gốc, không còn xoay thêm -0.8 rad như bản dùng `saber.png`. Muốn to hơn, tăng hai chiều Size cùng tỉ lệ, rồi chỉnh Position để giữ hình giữa ô; không sửa rig gameplay hoặc ảnh nguồn. Stretch Mode vẫn Keep Aspect Centered. `LeftWeaponArtwork` giữ node rỗng để dành cho trang bị sau, không có texture/material.
+- **Icon skill tay phải:** trong `weapon_loadout.tscn` chọn **Q → Icon** (`icon`): scene gốc dùng **`res://asset/UI/HUD/skill.png`** do người dùng cung cấp; script slot mặc định `null`. Không còn node **Key** hoặc export `key_label` trong slot thường nên không hiện chữ Q/E dưới icon. Tên node **Q** chỉ dùng định danh API, không vẽ lên màn hình. Quy ước input thiết kế vẫn là chuột trái/Q tay phải, chuột phải/E tay trái; lần sửa hình này không đổi input gameplay. Icon `saber_q_icon.png` cũ được giữ nhưng không còn được HUD thường tham chiếu.
+- **Nếu scene test/map vẫn hiện ảnh cũ:** kiểm tra `hud.tscn` → **ScreenSpace/WeaponLoadout → Right Weapon / Left Weapon**. Instance này hiện kế thừa `saber1.png`/`null` từ scene gốc, không còn override kiếm/khiên cũ. Khi có biểu tượng Revert cạnh thuộc tính và muốn dùng cấu hình chung, trả về giá trị kế thừa; không gán lại texture cũ tại HUD. Luồng đã đối chiếu là `spine_enemy_test.tscn → PlayableAdel → Camera2D/hud → ScreenSpace/WeaponLoadout`. Nếu scale không đổi, kiểm tra **Hud Scale** trên instance trong `hud.tscn` trước khi sửa scene gốc như hướng dẫn ưu tiên override phía trên; lưu scene rồi dừng/chạy lại F6 để nạp cấu hình mới.
+- **Cooldown:** chọn **Q → Cooldown Appearance**, `cooldown_opacity=0.6` (đen 60%), `ready_border_color=Color.WHITE`, `cooldown_border_color=Color(0.5,0.5,0.5,1)`; các giá trị scene kế thừa đúng mặc định script. Chữ thời gian: **Q/Remaining → Theme Overrides → Font Sizes → Font Size**, scene `19` px. Khi remaining > 0 và total > 0, viền xám, lớp đen giữ phần còn lại phía dưới và rút từ trên xuống; hiển thị số giây với một chữ số thập phân. Hết hồi trả viền trắng, bỏ lớp đen và số.
+- **API hiển thị:** `ui.gd.set_weapon_ability_presentation(slot, remaining, total)` nhận slot `&"Q"`; `&"E"` được bỏ qua an toàn vì hiện không có ô E. `PlayableAdel._ready()` nối signal `SaberSkill.cooldown_changed` vào API này và đồng bộ trạng thái đầu tiên. Hồi Q gameplay hiện **4/6/8 giây game** theo override scene cho nhấn nhanh/tụ mức 1/mức 2; mặc định script 5/8/10, chỉnh tại [SaberSkill → Cooldown](#skill-q). HUD không sở hữu timer; giây còn lại và tổng được gửi từ skill, dừng/tiếp tục cùng gameplay khi pause/slow motion. Ví dụ remaining 3 / total 6 che nửa dưới. Khi đang hồi, tín hiệu giữ HUD hiện để đọc thời gian; ẩn campfire/đổi cụm Sentinel không reset đồng hồ. Tắt **Skill cooldowns** trong pause sẽ trả HUD về sẵn sàng tới khi bật lại. Chưa thêm chi phí stamina Q; E và logic chi phí/hồi chiêu tay trái còn chờ gameplay.
+- **Vật phẩm/mana/Arts:** **ItemSlots/Selected, Next, Previous** chỉ là ba Control rỗng, chưa có icon/số lượng/trang bị/sử dụng. C/Z chưa bind; thiết kế chờ là C tới kế tiếp, Z về trước, xoay vòng tối đa ba vật phẩm (bánh mì → đá vụn → bình nước). Chưa thêm hai bình mana hoặc các ô Arts 1–4 vào cụm thường. Các ô 1–4 vốn có của Sentinel được giữ nguyên.
+
+Xem thử: F6 `res://scenes/UI/previews/weapon_hud_preview.tscn`, chọn **Thường / Cooldown Q / Sentinel**. Đồng hồ 6 giây chỉ thuộc script preview `weapon_hud_preview.gd` (`_duration=6.0`, không export/không override scene), chịu pause/slow motion theo game time; không phải cooldown gameplay. Preview không spawn Player, không ghi save. Kiểm thử tự động ở `res://tests/ui/weapon_hud_validation.tscn` yêu cầu bản sao project có custom user directory chứa `CodexWeaponHUD`.
 
 #### HUD chính
 
@@ -604,10 +634,9 @@ Scene `res://scenes/UI/hud.tscn` → **hud**.
 - **Screen Margin** (`screen_margin`): scene gốc `Vector2(24, 24)`; script `Vector2(24, 24)`.
 - **Show Numeric Values** (`show_numeric_values`): scene gốc `false`; script `false`.
 
-**Sentinel HUD Layout**
+**Bottom Loadout Layout**
 
-- **Sentinel Loadout Scale** (`sentinel_loadout_scale`): scene gốc `1`; script `1`.
-- **Sentinel Screen Margin** (`sentinel_screen_margin`): scene gốc `Vector2(24, 24)`; script `Vector2(24, 24)`.
+- **Sentinel Screen Margin** (`sentinel_screen_margin`): scene gốc `Vector2(24, 24)`; script `Vector2(24, 24)`; dùng chung cho cụm thường và Sentinel.
 
 #### Thanh ulti
 
@@ -630,7 +659,7 @@ Scene `res://scenes/UI/sentinel/sentinel_loadout.tscn` → **SentinelLoadout**.
 
 **Sentinel Layout**
 
-- **Hud Scale** (`hud_scale`): scene gốc `1`; script `1`.
+- **Hud Scale** (`hud_scale`): scene gốc `0.75`; script `1`; instance **ScreenSpace/SentinelLoadout** trong `hud.tscn` override `0.65`. Hệ số không đơn vị, tăng để phóng to; viewport nhỏ tự giảm để vừa vùng trống. Chỉnh ở instance để đổi gameplay, hoặc Revert trên instance để kế thừa scene gốc.
 - **Screen Margin** (`screen_margin`): scene gốc `Vector2(24, 24)`; script `Vector2(24, 24)`.
 - **Reserved Top** (`reserved_top`): scene gốc `220`; script `220`.
 
@@ -712,5 +741,11 @@ Giữ nội dung hiện hành ngay tại mục đang có, thay mô tả đã b�
 
 ### Thay đổi gần nhất
 
+- 17/10/2026: thêm công tắc **Esc → Debug - Skills → Skill cooldowns**. Tắt xóa hồi hiện tại và bỏ hồi cho mọi lần Q tiếp theo tới khi bật lại; trạng thái chỉ giữ trong phiên debug, không đổi thông số Inspector hoặc save. Đối chiếu/giữ override mới của người dùng **4/6/8** trong Player scene, tách khỏi mặc định script **5/8/10**.
+- 17/10/2026: sửa cờ animation tiếp đất còn sót khi giữ Q trên không rồi tụ dưới đất, để di chuyển ngắt Ready sau skill. Thêm cooldown Saber Q 5/8/10 giây game bắt đầu khi lao, chặn input dùng lại và nối signal lên HUD hồi chiêu hiện có; giữ thông số charge/impact/layout của người dùng.
+- 17/10/2026: bỏ nháy đỏ HUD ở mọi đường nhận damage/Bleed; giữ rung màn hình/bình máu khi stagger, nháy hồi máu và fade. Xóa hàm `flash_red()` cùng các lời gọi, không đổi damage hoặc thông số rung.
+- 17/10/2026: bỏ override ảnh kiếm/khiên và kích thước cũ để scene test kế thừa asset mới; giữ vị trí kiếm `(18,5)`. Bỏ hai scale trùng trên HUD cha từng ghi đè lúc khởi tạo/resize; scale do từng loadout sở hữu. Giữ cấu hình mới của người dùng: scene thường/Sentinel `1.5`/`0.75`, instance trong `hud.tscn` `1.25`/`0.65`; bổ sung cách Revert để kế thừa scene gốc.
+- 17/10/2026: để trống vũ khí tay trái, bỏ ảnh khiên/skill E và chữ Q/E của HUD thường. Thay kiếm bằng `saber1.png` nguyên cỡ 71×74 theo góc chéo ảnh mẫu và icon Q bằng `skill.png` người dùng cung cấp. Bỏ phần chiều cao chừa cho chữ phím, giữ lề dưới/trái chung và cơ chế cooldown/Sentinel.
+- 16/10/2026: thêm HUD vũ khí thường, Saber/ảnh khiên mẫu, icon Q chỉnh mới, ba ô vật phẩm rỗng; vá viền bằng AtlasTexture gốc và nền lót 32%. Thêm lớp trình bày cooldown Q/E đen 60%, chuyển thường/Sentinel, đổi nhóm Inspector thành Bottom Loadout Layout và giữ lề chung. Không thêm gameplay vật phẩm/mana/Arts/E hoặc chi phí/cooldown Q mới.
 - 16/10/2026: nối đầy đủ hệ số Fracture vào damage combo/jump/Q, tốc di chuyển ngang và tốc đánh combo/jump; đồng bộ hitbox, nối đòn và khóa Defense/land. Chuyển hệ số cũ thành các hằng `FRACTURE_*` trong model; không thay giá trị tuning/override scene.
 - 16/10/2026: tạo hướng dẫn chung từ các báo cáo cũ, đối chiếu source/scene hiện tại; bao gồm rơi chậm/ngưng theo frame, jump air giữ trọn clip, Q ba mức/freeze, Sentinel nền, debug enemy và bố cục camera/HUD. Giá trị trong danh mục là cấu hình scene tại lượt tổng hợp, không phải cam kết mọi map instance giống nhau.

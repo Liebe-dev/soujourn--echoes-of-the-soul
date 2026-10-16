@@ -102,6 +102,11 @@ func run() -> void:
 	camera = p.get_node("Camera2D")
 	base_zoom = camera.zoom
 	skill = p.saber_skill
+	# This suite isolates frozen-input arbitration, including a buffered second Q.
+	# q_cooldown_validation verifies that production 5/8/10s cooldowns reject that Q.
+	skill.tap_cooldown = 0.0
+	skill.charged_cooldown = 0.0
+	skill.full_cooldown = 0.0
 	p.vitals.simulation_enabled = false
 	p.hit_stop_enabled = false
 	clock = WorldClock.new()

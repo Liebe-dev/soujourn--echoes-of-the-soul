@@ -40,4 +40,5 @@ func _show_state(index: int) -> void:
 	hud.modulate = Color.WHITE
 	hud.hud_art.modulate = Color.WHITE
 	hud.sentinel_loadout.modulate = Color.WHITE
+	hud.weapon_loadout.modulate = Color.WHITE
 	$State.text = "T: +30 ulti | R: bật HUD Sentinel khi đầy | Y: thoát. Chỉ xem thử giao diện."

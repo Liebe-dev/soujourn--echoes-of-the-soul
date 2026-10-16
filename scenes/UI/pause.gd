@@ -1,6 +1,7 @@
 extends Control
 const ChargedFinish = preload("res://scenes/adel/components/charged_skill_finish.gd")
 const EnemyDebugSettings = preload("res://scenes/enemy/enemy_debug_settings.gd")
+const SkillDebugSettings = preload("res://scenes/adel/components/skill_debug_settings.gd")
 
 var _is_transitioning := false
 
@@ -9,6 +10,7 @@ func _ready() -> void:
 	hide()
 	_setup_camera_settings()
 	_setup_enemy_debug()
+	_setup_skill_debug()
 
 func _ui_actor() -> Node:
 	var node := get_parent()
@@ -40,6 +42,7 @@ func pause_and_unpause() -> void:
 	if visible:
 		_sync_camera_settings()
 		_sync_enemy_debug()
+		_sync_skill_debug()
 		move_to_front()
 		$VBoxContainer/resume.grab_focus()
 
@@ -134,3 +137,31 @@ func _sync_enemy_debug() -> void:
 	if panel == null: return
 	panel.get_node("DisableAI").set_pressed_no_signal(EnemyDebugSettings.is_ai_disabled())
 	panel.get_node("Immortal").set_pressed_no_signal(EnemyDebugSettings.is_immortal())
+
+func _weapon_skill() -> Node:
+	var actor := _ui_actor()
+	return actor.get_node_or_null("SaberSkill") if actor != null else null
+
+func _setup_skill_debug() -> void:
+	var panel := get_node_or_null("VBoxContainer/SkillDebug")
+	if panel == null: return
+	panel.visible = OS.is_debug_build()
+	panel.get_node("CooldownsEnabled").toggled.connect(_on_skill_cooldowns_toggled)
+	_sync_skill_debug()
+
+func _sync_skill_debug() -> void:
+	var button := get_node_or_null("VBoxContainer/SkillDebug/CooldownsEnabled") as CheckButton
+	if button == null: return
+	var skill := _weapon_skill()
+	button.disabled = not OS.is_debug_build() or skill == null or not skill.has_method("reset_cooldown")
+	button.set_pressed_no_signal(SkillDebugSettings.are_cooldowns_enabled())
+
+func _on_skill_cooldowns_toggled(enabled: bool) -> void:
+	if not OS.is_debug_build() or not visible or not get_tree().paused or _is_transitioning or ChargedFinish.is_freezing(): return
+	# Keep the session switch separate from the designer's cooldown durations.
+	SkillDebugSettings.cooldowns_enabled = enabled
+	if not enabled:
+		var skill := _weapon_skill()
+		if skill != null and skill.has_method("reset_cooldown"):
+			skill.reset_cooldown()
+	_sync_skill_debug()

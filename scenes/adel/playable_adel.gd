@@ -219,6 +219,10 @@ func _ready() -> void:
 	var hud := _find_hud()
 	if hud != null: sentinel_state.presentation_changed.connect(hud.present_sentinel)
 	saber_skill.setup(self)
+	if hud != null:
+		# Gameplay owns the cooldown clock; HUD only receives presentation updates.
+		saber_skill.cooldown_changed.connect(hud.set_weapon_ability_presentation)
+		hud.set_weapon_ability_presentation(&"Q", saber_skill.cooldown_remaining, saber_skill.cooldown_total)
 	_configure_stamina()
 	PlayerProgress.apply_to_stats(stats)
 	vitals.refresh()
@@ -535,6 +539,7 @@ func restore_checkpoint_state(saved_position: Vector2, face_left: bool, keep_res
 		_set_facing_direction(-1 if face_left else 1)
 		presentation.play(&"idle")
 	velocity = Vector2.ZERO
+	if saber_skill != null: saber_skill.reset_cooldown()
 	snap_feet_to_floor()
 
 func snap_feet_to_floor(max_drop: float = 96.0) -> void:
@@ -848,7 +853,7 @@ func release_weapon_skill() -> void:
 	saber_skill.release()
 
 func _weapon_skill_input_blocked() -> bool:
-	return is_locked or not state_machine.movement_enabled or damage.is_stunned or damage.is_touched_enemy or is_sentinel_exit_pending() or is_sentinel_entering() or is_campfire_ui_active() or get_tree().paused
+	return saber_skill.is_cooling_down() or is_locked or not state_machine.movement_enabled or damage.is_stunned or damage.is_touched_enemy or is_sentinel_exit_pending() or is_sentinel_entering() or is_campfire_ui_active() or get_tree().paused
 
 func _try_consume_weapon_skill() -> bool:
 	if not _skill_requested: return false

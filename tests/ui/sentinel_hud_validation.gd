@@ -49,7 +49,8 @@ func run() -> void:
 	for name in loadout.SLOT_NAMES:
 		check(loadout.get_node(name).get_node("Key").text == name.trim_prefix("Skill"), "correct key legend for " + name)
 	check(loadout.get_node("Q").position.x < loadout.get_node("E").position.x and loadout.get_node("E").position.x < loadout.get_node("Skill1").position.x, "Q and E flank weapon; numbered skills follow to the right")
-	check(loadout.position.is_equal_approx(Vector2(24, 842)), "loadout anchors 24px from bottom-left at 1920x1080")
+	var expected_position := Vector2(24, 1080.0 - 24.0 - loadout.REFERENCE_SIZE.y * loadout.scale.y)
+	check(loadout.position.is_equal_approx(expected_position), "loadout anchors 24px from bottom-left using its authored scale")
 	var active_image: Image = await snapshot("active")
 	if rendered:
 		var outside := active_image.get_pixelv(point(loadout, Vector2(10, 10)))

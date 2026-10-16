@@ -39,6 +39,7 @@ func reset() -> void:
 	p.clear_combat_input()
 	p.end_sentinel()
 	p.state_machine.resume_locomotion()
+	p.saber_skill.reset_cooldown() # Each scenario starts with Q ready; cooldown has its own suite.
 	while not p.dash.able_to_dodge: await frames()
 	p.damage.reset()
 	p.stats.heal_to_full()

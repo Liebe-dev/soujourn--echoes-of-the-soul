@@ -5,8 +5,7 @@ extends Control
 @export var screen_margin: Vector2 = Vector2(24, 24)
 @export var show_numeric_values: bool = false
 
-@export_group("Sentinel HUD Layout")
-@export_range(0.25, 3.0, 0.05) var sentinel_loadout_scale: float = 1.0
+@export_group("Bottom Loadout Layout")
 @export var sentinel_screen_margin := Vector2(24, 24)
 
 const SENTINEL_HP_FILL = preload("res://scenes/UI/sentinel/hp_sentinel_fill.svg")
@@ -128,6 +127,7 @@ const FLASK_SHAKE_DECAY := 3.5
 @onready var buff_bar: HBoxContainer = $ScreenSpace/bar/hp_bar_panel/status_panel/buff_bar
 
 @onready var sentinel_loadout = $ScreenSpace/SentinelLoadout
+@onready var weapon_loadout = $ScreenSpace/WeaponLoadout
 @onready var ultimate_meter = $ScreenSpace/bar/hp_bar_panel/UltimateMeter
 @onready var _normal_hp_fill: Texture2D = hp_bar.texture_progress
 @onready var _normal_hp_track: Texture2D = hp_bar.texture_under
@@ -196,16 +196,15 @@ func _unhandled_input(event: InputEvent) -> void:
 func _process(delta: float) -> void:
 	if is_instance_valid(_stamina_actor): delta = CombatTime.actor_delta(_stamina_actor, delta)
 	var skill_immune: bool = is_instance_valid(_stamina_actor) and _stamina_actor.has_method("is_skill_damage_immune") and _stamina_actor.is_skill_damage_immune()
-	# CanvasLayer has its own canvas; transfer the existing fade/flash tint.
+	# CanvasLayer has its own canvas; transfer the fade and healing tint.
 	hud_art.modulate = modulate
 	sentinel_loadout.modulate = modulate
+	weapon_loadout.modulate = modulate
 	# Only standalone previews own a local model clock.
 	if _vitals == null:
 		var tick_result := _stats.tick(delta, skill_immune)
 		if tick_result.damage_taken > 0:
 			sync_hp_display()
-			if tick_result.flash_red:
-				flash_red()
 			enter_combat()
 		if tick_result.died:
 			SaveManager.respawn_at_checkpoint()
@@ -245,6 +244,7 @@ func set_ultimate_charge(value: float, maximum: float = 100.0) -> void:
 func set_sentinel_active(active: bool) -> void:
 	sentinel_active = active
 	sentinel_loadout.set_active(active)
+	weapon_loadout.visible = not active
 	ultimate_meter.set_active(active)
 	hp_bar.texture_progress = SENTINEL_HP_FILL if active else _normal_hp_fill
 	hp_bar.texture_under = SENTINEL_HP_TRACK if active else _normal_hp_track
@@ -263,6 +263,12 @@ func set_sentinel_exit_pending(pending: bool) -> void:
 
 func set_sentinel_ability_presentation(slot: StringName, remaining: float, total: float, affordable: bool = true, available: bool = true) -> void:
 	sentinel_loadout.set_ability_presentation(slot, remaining, total, affordable, available)
+
+func set_weapon_ability_presentation(slot: StringName, remaining: float, total: float) -> void:
+	weapon_loadout.set_ability_presentation(slot, remaining, total)
+	# Keep the remaining time readable while the gameplay clock is cooling down.
+	if slot == &"Q" and remaining > 0.0 and total > 0.0:
+		enter_combat()
 
 func heal_to_full() -> void:
 	if _vitals != null:
@@ -293,7 +299,6 @@ func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF, skip_stagge
 
 	if result.damage_taken > 0:
 		sync_hp_display()
-		flash_red()
 		enter_combat()
 
 	if result.died:
@@ -456,11 +461,6 @@ func update_shader_value(node: CanvasItem, value: float) -> void:
 	if node and node.material:
 		node.material.set_shader_parameter("hp", value)
 
-func flash_red() -> void:
-	var t := create_tween()
-	t.tween_property(self, "modulate", Color(1, 0.5, 0.5, 1), 0.05)
-	t.tween_property(self, "modulate", Color(1, 1, 1, 1), 0.15)
-
 func flash_heal() -> void:
 	var t := create_tween()
 	t.tween_property(self, "modulate", Color(0.75, 0.9, 1, 1), 0.05)
@@ -553,9 +553,11 @@ func _layout_hud() -> void:
 	var fit := minf(available.x / REFERENCE_SIZE.x, available.y / REFERENCE_SIZE.y)
 	hud_art.scale = Vector2.ONE * minf(maxf(hud_scale, 0.25), fit)
 	hud_art.position = margin
-	sentinel_loadout.hud_scale = sentinel_loadout_scale
+	# Preserve each loadout's Hud Scale from its scene or Inspector instance.
 	sentinel_loadout.screen_margin = sentinel_screen_margin
 	sentinel_loadout.reserved_top = margin.y + REFERENCE_SIZE.y * hud_art.scale.y + 24.0
+	weapon_loadout.screen_margin = sentinel_screen_margin
+	weapon_loadout.reserved_top = sentinel_loadout.reserved_top
 	hp_label.visible = show_numeric_values
 	stamina_label.visible = show_numeric_values
 	flask_uses_label.visible = show_numeric_values
@@ -590,7 +592,6 @@ func _on_vitals_damage(result: Dictionary) -> void:
 		stagger_debuff_applied.emit(result.debuff_id, result.debuff_level)
 	if result.get("staggered", false): stagger_triggered.emit(result.stagger_tier, result.floor_hp)
 	if result.get("damage_taken", 0) > 0:
-		flash_red()
 		enter_combat()
 
 func _start_flask_presentation(duration: float) -> void:

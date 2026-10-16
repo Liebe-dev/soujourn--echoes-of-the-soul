@@ -131,6 +131,22 @@ layout_mode = 2
 text = "Invincible enemies"
 tooltip_text = "Hits and stun still work; enemy HP does not decrease. Session only."
 
+[node name="SkillDebug" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="VBoxContainer/SkillDebug"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Debug - Skills"
+
+[node name="CooldownsEnabled" type="CheckButton" parent="VBoxContainer/SkillDebug"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+button_pressed = true
+text = "Skill cooldowns"
+tooltip_text = "Turn off to clear the current Q cooldown and keep casting without waiting. Session only."
+
 [node name="fade_trans" type="ColorRect" parent="."]
 visible = false
 layout_mode = 1

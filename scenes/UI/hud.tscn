@@ -13,8 +13,9 @@
 [ext_resource type="Texture2D" uid="uid://bdjkwebk6u7vp" path="res://scenes/UI/hud_assets/hp_rim.svg" id="11"]
 [ext_resource type="Texture2D" uid="uid://cfq2yiga07x2v" path="res://scenes/UI/hud_assets/stamina_rim.svg" id="12"]
 [ext_resource type="PackedScene" uid="uid://iqq6neyb6dmq" path="res://scenes/UI/sentinel/ultimate_meter.tscn" id="13"]
-[ext_resource type="PackedScene" path="res://scenes/UI/sentinel/sentinel_loadout.tscn" id="14"]
+[ext_resource type="PackedScene" uid="uid://chvnr8qw25iay" path="res://scenes/UI/sentinel/sentinel_loadout.tscn" id="14"]
 [ext_resource type="Script" uid="uid://cr8skejhwo6qp" path="res://scenes/UI/sentinel/sentinel_debug_controls.gd" id="15"]
+[ext_resource type="PackedScene" uid="uid://btfhuuvuv5kng" path="res://scenes/UI/weapon/weapon_loadout.tscn" id="16"]
 
 [sub_resource type="ShaderMaterial" id="Liquid"]
 resource_local_to_scene = true
@@ -35,7 +36,7 @@ layout_mode = 3
 anchors_preset = 0
 mouse_filter = 2
 script = ExtResource("1")
-hud_scale = 1.0
+hud_scale = 0.9
 
 [node name="ScreenSpace" type="CanvasLayer" parent="." unique_id=1760439203]
 
@@ -202,14 +203,17 @@ offset_top = -42.0
 offset_right = 164.825
 offset_bottom = -20.0
 
+[node name="WeaponLoadout" parent="ScreenSpace" unique_id=37371306 instance=ExtResource("16")]
+offset_top = 400.4
+offset_bottom = 499.4
+scale = Vector2(1.4, 1.4)
+hud_scale = 1.4
+
 [node name="SentinelLoadout" parent="ScreenSpace" unique_id=1519710361 instance=ExtResource("14")]
-visible = false
-layout_mode = 3
-anchors_preset = 0
-offset_left = 24.0
-offset_top = 325.0
-offset_right = 539.0
-offset_bottom = 539.0
+offset_top = 389.2
+offset_bottom = 603.2001
+scale = Vector2(0.7, 0.7)
+hud_scale = 0.7
 
 [node name="SentinelDebugControls" type="Node" parent="." unique_id=668525758]
 script = ExtResource("15")
