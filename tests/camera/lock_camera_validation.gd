@@ -243,6 +243,17 @@ func native_input_tests(pause) -> void:
 	lock.set_process(true)
 	lock.clear_lock()
 	await frames()
+	var bindings = get_node("/root/InputBindings")
+	var rebound := InputEventKey.new()
+	rebound.physical_keycode = KEY_L
+	check(bindings.bind(&"target_lock", 0, rebound).is_empty(), "target lock accepts remapped keyboard binding")
+	for pressed in [true, false]:
+		rebound.pressed = pressed
+		Input.parse_input_event(rebound)
+		await frames()
+	check(lock.locked == near_enemy, "remapped key acquires target through real camera input")
+	bindings.reset_action(&"target_lock")
+	lock.clear_lock()
 	await click_middle(true)
 	await click_middle(false)
 	check(lock.locked == near_enemy, "native middle input routed to acquire enemy")

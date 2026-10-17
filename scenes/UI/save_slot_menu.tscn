@@ -1,0 +1,66 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://scenes/UI/save_slot_menu.gd" id="1"]
+
+[node name="SaveSlotMenu" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1")
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.03, 0.04, 0.06, 0.92)
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(640, 0)
+layout_mode = 2
+
+[node name="Margin" type="MarginContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 24
+theme_override_constants/margin_right = 24
+theme_override_constants/margin_top = 24
+theme_override_constants/margin_bottom = 24
+
+[node name="Contents" type="VBoxContainer" parent="Center/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="Title" type="Label" parent="Center/Panel/Margin/Contents"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "New Game - Select Slot"
+
+[node name="Status" type="Label" parent="Center/Panel/Margin/Contents"]
+custom_minimum_size = Vector2(580, 0)
+layout_mode = 2
+text = "Existing slots require confirmation. Other slots will be preserved."
+autowrap_mode = 3
+
+[node name="SlotList" type="VBoxContainer" parent="Center/Panel/Margin/Contents"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Back" type="Button" parent="Center/Panel/Margin/Contents"]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+text = "Back"
+
+[node name="OverwriteConfirmation" type="ConfirmationDialog" parent="."]
+title = "Replace save slot"
+ok_button_text = "Replace"
+

@@ -1,0 +1,50 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://scenes/UI/controls_settings.gd" id="1"]
+
+[node name="Controls" type="VBoxContainer"]
+theme_override_constants/separation = 16
+script = ExtResource("1")
+
+[node name="Heading" type="Label" parent="."]
+theme_override_font_sizes/font_size = 32
+text = "Controls"
+
+[node name="Hint" type="Label" parent="."]
+text = "Keyboard & mouse  |  Select a binding to change it. Changes save automatically."
+autowrap_mode = 2
+
+[node name="Scroll" type="ScrollContainer" parent="."]
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
+follow_focus = true
+
+[node name="ListMargin" type="MarginContainer" parent="Scroll"]
+size_flags_horizontal = 3
+theme_override_constants/margin_right = 16
+
+[node name="Rows" type="VBoxContainer" parent="Scroll/ListMargin"]
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="Status" type="Label" parent="."]
+custom_minimum_size = Vector2(0, 56)
+text = "Esc: Back / cancel binding. Menu navigation keys remain available."
+autowrap_mode = 2
+
+[node name="Footer" type="HBoxContainer" parent="."]
+theme_override_constants/separation = 16
+
+[node name="CancelBinding" type="Button" parent="Footer"]
+visible = false
+custom_minimum_size = Vector2(180, 50)
+text = "Cancel binding"
+
+[node name="ResetDefaults" type="Button" parent="Footer"]
+custom_minimum_size = Vector2(220, 50)
+text = "Restore defaults"
+
+[node name="ResetConfirmation" type="ConfirmationDialog" parent="."]
+title = "Restore default controls"
+dialog_text = "Restore every keyboard and mouse binding to the project defaults?"
+ok_button_text = "Restore"
+

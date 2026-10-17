@@ -1,0 +1,30 @@
+[gd_scene format=3]
+[node name="BindingRow" type="HBoxContainer"]
+custom_minimum_size = Vector2(0, 48)
+theme_override_constants/separation = 10
+
+[node name="Action" type="Label" parent="."]
+custom_minimum_size = Vector2(250, 0)
+size_flags_horizontal = 3
+text = "Action"
+
+[node name="Primary" type="Button" parent="."]
+custom_minimum_size = Vector2(150, 48)
+clip_text = true
+text = "Primary"
+
+[node name="Secondary" type="Button" parent="."]
+custom_minimum_size = Vector2(150, 48)
+clip_text = true
+text = "Unassigned"
+
+[node name="Clear" type="Button" parent="."]
+custom_minimum_size = Vector2(62, 48)
+text = "Clear"
+tooltip_text = "Clear the secondary binding"
+
+[node name="Reset" type="Button" parent="."]
+custom_minimum_size = Vector2(68, 48)
+text = "Reset"
+tooltip_text = "Restore this action's default binding"
+

@@ -1,6 +1,25 @@
-[gd_scene format=3 uid="uid://dd3kuxfkj4iwc"]
+[gd_scene load_steps=6 format=3 uid="uid://dd3kuxfkj4iwc"]
 
 [ext_resource type="Script" uid="uid://bog4ckhfapne5" path="res://scenes/UI/settings_menu.gd" id="1_h37gn"]
+
+[ext_resource type="PackedScene" path="res://scenes/UI/controls_settings.tscn" id="2_controls"]
+
+[ext_resource type="PackedScene" path="res://scenes/UI/video_settings.tscn" id="3_video"]
+
+[sub_resource type="Theme" id="Theme_settings"]
+default_font_size = 22
+
+[sub_resource type="StyleBoxFlat" id="Style_settings"]
+content_margin_left = 24.0
+content_margin_top = 24.0
+content_margin_right = 24.0
+content_margin_bottom = 24.0
+bg_color = Color(0.06, 0.065, 0.075, 0.98)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.3, 0.3, 0.3, 1)
 
 [node name="SettingsMenu" type="Control" unique_id=252361829]
 layout_mode = 3
@@ -9,7 +28,15 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = SubResource("Theme_settings")
 script = ExtResource("1_h37gn")
+
+[node name="Shade" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.03, 0.04, 0.06, 0.92)
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=987904901]
 layout_mode = 1
@@ -18,36 +45,48 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -168.0
-offset_top = -85.5
-offset_right = 168.0
-offset_bottom = 85.5
+offset_left = -620.0
+offset_top = -410.0
+offset_right = 620.0
+offset_bottom = 410.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_constants/separation = 32
 
 [node name="Sidebar" type="VBoxContainer" parent="HBoxContainer" unique_id=695444211]
-custom_minimum_size = Vector2(200, 0)
+custom_minimum_size = Vector2(240, 0)
+theme_override_constants/separation = 16
 layout_mode = 2
 
 [node name="GeneralButton" type="Button" parent="HBoxContainer/Sidebar" unique_id=1676071829]
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 text = "General"
 
 [node name="VideoButton" type="Button" parent="HBoxContainer/Sidebar" unique_id=1864822331]
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 text = "Video"
 
 [node name="AudioButton" type="Button" parent="HBoxContainer/Sidebar" unique_id=1927274948]
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 text = "Audio"
 
 [node name="ControlsButton" type="Button" parent="HBoxContainer/Sidebar" unique_id=959513859]
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 text = "Controls"
 
+[node name="Spacer" type="Control" parent="HBoxContainer/Sidebar"]
+layout_mode = 2
+size_flags_vertical = 3
+mouse_filter = 2
+
 [node name="BackButton" type="Button" parent="HBoxContainer/Sidebar" unique_id=6231617]
+custom_minimum_size = Vector2(0, 64)
 layout_mode = 2
 text = "Back"
 
@@ -55,21 +94,32 @@ text = "Back"
 layout_mode = 2
 size_flags_horizontal = 3
 
+theme_override_styles/panel = SubResource("Style_settings")
+
 [node name="General" type="VBoxContainer" parent="HBoxContainer/Content" unique_id=328992618]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="HBoxContainer/Content/General" unique_id=444381686]
 layout_mode = 2
+theme_override_font_sizes/font_size = 32
 text = "General Settings"
 
 [node name="Audio" type="VBoxContainer" parent="HBoxContainer/Content" unique_id=1727567945]
 layout_mode = 2
+
+theme_override_constants/separation = 20
+
+[node name="AudioHeading" type="Label" parent="HBoxContainer/Content/Audio"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 32
+text = "Audio"
 
 [node name="MusicLabel" type="Label" parent="HBoxContainer/Content/Audio" unique_id=53037750]
 layout_mode = 2
 text = "Music Volume"
 
 [node name="MusicSlider" type="HSlider" parent="HBoxContainer/Content/Audio" unique_id=745759014]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 max_value = 1.0
 step = 0.01
@@ -80,23 +130,16 @@ layout_mode = 2
 text = "SFX Volume"
 
 [node name="SfxSlider" type="HSlider" parent="HBoxContainer/Content/Audio" unique_id=938692986]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 max_value = 1.0
 step = 0.01
 value = 0.5
 
-[node name="Video" type="VBoxContainer" parent="HBoxContainer/Content" unique_id=1691995636]
+[node name="Video" parent="HBoxContainer/Content" instance=ExtResource("3_video")]
 layout_mode = 2
 
-[node name="VideoLabel" type="Label" parent="HBoxContainer/Content/Video" unique_id=176983575]
+[node name="Controls" parent="HBoxContainer/Content" instance=ExtResource("2_controls")]
 layout_mode = 2
-text = "Video Settings"
-
-[node name="Controls" type="VBoxContainer" parent="HBoxContainer/Content" unique_id=771646088]
-layout_mode = 2
-
-[node name="ControlsLabel" type="Label" parent="HBoxContainer/Content/Controls" unique_id=710077203]
-layout_mode = 2
-text = "Controls Settings"
 
 [connection signal="pressed" from="HBoxContainer/Sidebar/BackButton" to="." method="_on_back_button_pressed"]

@@ -1,0 +1,126 @@
+[gd_scene load_steps=2 format=3]
+[ext_resource type="Script" path="res://scenes/UI/video_settings.gd" id="1"]
+
+[node name="Video" type="VBoxContainer"]
+theme_override_constants/separation = 20
+script = ExtResource("1")
+
+[node name="Heading" type="Label" parent="."]
+theme_override_font_sizes/font_size = 32
+text = "Video"
+
+[node name="DisplayHeading" type="Label" parent="."]
+text = "Display"
+
+[node name="DisplayRows" type="VBoxContainer" parent="."]
+theme_override_constants/separation = 16
+
+[node name="ModeRow" type="HBoxContainer" parent="DisplayRows"]
+theme_override_constants/separation = 24
+[node name="Label" type="Label" parent="DisplayRows/ModeRow"]
+custom_minimum_size = Vector2(260, 0)
+size_flags_horizontal = 3
+text = "Display mode"
+[node name="Mode" type="OptionButton" parent="DisplayRows/ModeRow"]
+custom_minimum_size = Vector2(320, 52)
+
+[node name="ResolutionRow" type="HBoxContainer" parent="DisplayRows"]
+theme_override_constants/separation = 24
+[node name="Label" type="Label" parent="DisplayRows/ResolutionRow"]
+custom_minimum_size = Vector2(260, 0)
+size_flags_horizontal = 3
+text = "Resolution"
+[node name="Resolution" type="OptionButton" parent="DisplayRows/ResolutionRow"]
+custom_minimum_size = Vector2(320, 52)
+
+[node name="DisplayHint" type="Label" parent="."]
+text = "Fullscreen modes use the current desktop resolution."
+autowrap_mode = 2
+
+[node name="PerformanceHeading" type="Label" parent="."]
+text = "Performance"
+
+[node name="PerformanceRows" type="VBoxContainer" parent="."]
+theme_override_constants/separation = 16
+[node name="VSync" type="CheckButton" parent="PerformanceRows"]
+custom_minimum_size = Vector2(0, 52)
+text = "VSync"
+[node name="FPSRow" type="HBoxContainer" parent="PerformanceRows"]
+theme_override_constants/separation = 24
+[node name="Label" type="Label" parent="PerformanceRows/FPSRow"]
+custom_minimum_size = Vector2(260, 0)
+size_flags_horizontal = 3
+text = "Frame rate limit"
+[node name="FPS" type="OptionButton" parent="PerformanceRows/FPSRow"]
+custom_minimum_size = Vector2(320, 52)
+
+[node name="PerformanceHint" type="Label" parent="."]
+text = "With VSync on, the display refresh rate also limits FPS. Your graphics driver may override VSync."
+autowrap_mode = 2
+
+[node name="Spacer" type="Control" parent="."]
+size_flags_vertical = 3
+mouse_filter = 2
+
+[node name="Status" type="Label" parent="."]
+custom_minimum_size = Vector2(0, 64)
+text = "Choose settings, then Apply."
+autowrap_mode = 2
+
+[node name="Footer" type="HBoxContainer" parent="."]
+theme_override_constants/separation = 16
+[node name="Apply" type="Button" parent="Footer"]
+custom_minimum_size = Vector2(130, 52)
+text = "Apply"
+[node name="Revert" type="Button" parent="Footer"]
+custom_minimum_size = Vector2(130, 52)
+text = "Revert"
+[node name="Defaults" type="Button" parent="Footer"]
+custom_minimum_size = Vector2(220, 52)
+text = "Restore defaults"
+
+[node name="ConfirmationLayer" type="CanvasLayer" parent="."]
+layer = 80
+visible = false
+
+[node name="Overlay" type="Control" parent="ConfirmationLayer"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Shade" type="ColorRect" parent="ConfirmationLayer/Overlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color(0.03, 0.04, 0.06, 0.97)
+
+[node name="Center" type="CenterContainer" parent="ConfirmationLayer/Overlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="Panel" type="PanelContainer" parent="ConfirmationLayer/Overlay/Center"]
+custom_minimum_size = Vector2(640, 0)
+[node name="Margin" type="MarginContainer" parent="ConfirmationLayer/Overlay/Center/Panel"]
+theme_override_constants/margin_left = 32
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 32
+theme_override_constants/margin_bottom = 32
+[node name="Contents" type="VBoxContainer" parent="ConfirmationLayer/Overlay/Center/Panel/Margin"]
+theme_override_constants/separation = 28
+[node name="Countdown" type="Label" parent="ConfirmationLayer/Overlay/Center/Panel/Margin/Contents"]
+theme_override_font_sizes/font_size = 28
+text = "Keep these display settings?"
+horizontal_alignment = 1
+[node name="Buttons" type="HBoxContainer" parent="ConfirmationLayer/Overlay/Center/Panel/Margin/Contents"]
+theme_override_constants/separation = 24
+alignment = 1
+[node name="Keep" type="Button" parent="ConfirmationLayer/Overlay/Center/Panel/Margin/Contents/Buttons"]
+custom_minimum_size = Vector2(200, 56)
+theme_override_font_sizes/font_size = 22
+text = "Keep changes"
+[node name="Revert" type="Button" parent="ConfirmationLayer/Overlay/Center/Panel/Margin/Contents/Buttons"]
+custom_minimum_size = Vector2(200, 56)
+theme_override_font_sizes/font_size = 22
+text = "Revert"
+

@@ -1,7 +1,7 @@
 extends Node
 ## Checkpoint saves. Slot 1 retains the legacy filename for compatibility.
 
-const TITLE_SCENE := "res://scenes/UI/menu (2).tscn"
+const TITLE_SCENE := "res://scenes/UI/title_screen.tscn"
 const NEW_GAME_SCENE := "res://scenes/Map 1/map_1_scene_2.tscn"
 const LEGACY_SAVE_PATH := "user://soujourn_save.json"
 const SAVE_VERSION := 1

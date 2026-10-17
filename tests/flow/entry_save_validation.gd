@@ -48,6 +48,16 @@ func fixture(slot: int) -> Dictionary:
 func actor():
 	return get_tree().get_first_node_in_group("Player")
 
+func reveal_title(menu) -> void:
+	if menu.state == menu.State.MAIN_MENU: return
+	for i in 2:
+		var event := InputEventKey.new()
+		event.keycode = KEY_SPACE
+		event.pressed = true
+		get_viewport().push_input(event, true)
+		await frames(2)
+	await get_tree().create_timer(menu.prompt_exit_duration + menu.menu_fade_duration + 0.1).timeout
+
 func _run() -> void:
 	if not OS.get_user_data_dir().contains("CodexEntrySave20261014"):
 		push_error("Refusing to modify real user saves; run in isolated test project")
@@ -65,15 +75,17 @@ func _run() -> void:
 	get_tree().current_scene = menu
 	await frames()
 	check(ResourceLoader.exists(SaveManager.NEW_GAME_SCENE) and ResourceLoader.exists(SaveManager.TITLE_SCENE), "both centralized entry/title destinations load")
+	await reveal_title(menu)
 	menu._on_start_pressed()
 	check(bytes(1) == original1 and bytes(2) == original2, "Start preserves every occupied slot")
-	check(menu._slot_overlay.visible and menu._slot_list.get_child_count() == 5, "Start offers five slots")
+	check(menu.slot_menu.visible and menu.slot_menu.slot_list.get_child_count() == 5, "Start offers five slots")
 	await capture("new-game-slots")
-	menu._on_slot_selected(1)
-	check(menu._overwrite_confirmation.visible and bytes(1) == original1 and bytes(2) == original2, "occupied slot requires confirmation without writes")
+	menu.slot_menu.select_slot(1)
+	check(menu.slot_menu.confirmation.visible and bytes(1) == original1 and bytes(2) == original2, "occupied slot requires confirmation without writes")
 	menu._close_slot_menu()
-	check(not menu._slot_overlay.visible and bytes(1) == original1, "cancel replacement preserves existing save")
+	check(not menu.slot_menu.visible and bytes(1) == original1, "cancel replacement preserves existing save")
 	check(not SaveManager.start_new_game(2) and bytes(2) == original2, "API also rejects unconfirmed replacement")
+	await reveal_title(menu)
 	menu._on_start_pressed()
 	await menu._begin_selected_game(3, false)
 	await frames(5)
@@ -94,8 +106,9 @@ func _run() -> void:
 	check(get_tree().current_scene.scene_file_path == SaveManager.TITLE_SCENE and not get_tree().paused, "pause Return to Title opens actual title and unpauses tree")
 	check(bytes(1) == original1 and bytes(2) == original2, "returning to title preserves saves")
 	menu = get_tree().current_scene
+	await reveal_title(menu)
 	menu._on_continue_pressed()
-	check(menu._slot_overlay.visible and menu._slot_list.get_child(3).disabled, "Continue offers slots and disables empty ones")
+	check(menu.slot_menu.visible and menu.slot_menu.slot_list.get_child(3).disabled, "Continue offers slots and disables empty ones")
 	await menu._begin_selected_game(1, false)
 	await frames(5)
 	var player = actor()
@@ -195,16 +208,18 @@ func _run() -> void:
 	await frames(5)
 	check(get_tree().current_scene.scene_file_path == SaveManager.TITLE_SCENE and not get_tree().paused, "central title return after cross-scene respawn succeeds")
 	menu = get_tree().current_scene
+	await reveal_title(menu)
 	menu._on_continue_pressed()
-	check(menu._slot_list.get_child(3).disabled and not menu._slot_list.get_child(0).disabled, "UI distinguishes bad slot from recovered backup")
+	check(menu.slot_menu.slot_list.get_child(3).disabled and not menu.slot_menu.slot_list.get_child(0).disabled, "UI distinguishes bad slot from recovered backup")
 	await menu._begin_selected_game(4, false)
-	check(get_tree().current_scene == menu and menu._slot_overlay.visible and not menu._is_transitioning and menu._slot_status.text == SaveManager.last_error, "failed Continue restores interactive menu and displays reason")
+	check(get_tree().current_scene == menu and menu.slot_menu.visible and menu.state != menu.State.TRANSITIONING and menu.slot_menu.status_label.text == SaveManager.last_error, "failed Continue restores interactive menu and displays reason")
 	check(bytes(4) == "{broken", "failed menu transition preserves invalid data")
 	menu._close_slot_menu()
+	await reveal_title(menu)
 	menu._on_start_pressed()
-	menu._on_slot_selected(2)
+	menu.slot_menu.select_slot(2)
 	var old2 := bytes(2)
-	menu._overwrite_confirmation.hide()
+	menu.slot_menu.confirmation.hide()
 	await menu._begin_selected_game(2, true)
 	await frames(5)
 	check(SaveManager.active_slot == 2 and PlayerProgress.level == 1 and bytes(2) != old2, "confirmed New Game replaces selected occupied slot and resets progression")

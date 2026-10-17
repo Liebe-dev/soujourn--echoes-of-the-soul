@@ -68,8 +68,8 @@ func _input(event: InputEvent) -> void:
 	if not gameplay_active():
 		cancel_gesture()
 		return
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_MIDDLE:
-		if event.pressed: begin_gesture(Time.get_ticks_msec())
+	if event.is_action("target_lock") and not event.is_echo():
+		if event.is_pressed(): begin_gesture(Time.get_ticks_msec())
 		else: finish_gesture(Time.get_ticks_msec())
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseMotion and _holding:
