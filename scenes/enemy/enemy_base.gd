@@ -9,6 +9,10 @@ const EnemyDebugSettings = preload("res://scenes/enemy/enemy_debug_settings.gd")
 @export_range(1, 10000, 1, "or_greater") var max_health: int = 20
 @export_range(0, 10000, 1, "or_greater") var exp_reward: int = 30
 
+@export_group("Currency Rewards")
+@export_range(0, 10000, 1, "or_greater") var coin_reward: int = 5
+@export_range(0, 10000, 1, "or_greater") var soul_reward: int = 1
+
 @export_group("Patrol")
 @export_range(0.0, 1000.0, 1.0, "or_greater") var speed: float = 150.0
 @export_range(0.0, 2000.0, 1.0, "or_greater") var patrol_range: float = 200.0
@@ -123,6 +127,7 @@ func die() -> void:
 	velocity = Vector2.ZERO
 	set_physics_process(false)
 	PlayerProgress.add_exp(exp_reward)
+	PlayerProgress.add_currency(maxi(coin_reward, 0), maxi(soul_reward, 0))
 	_finish_death()
 
 

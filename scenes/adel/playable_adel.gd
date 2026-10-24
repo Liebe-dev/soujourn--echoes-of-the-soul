@@ -224,7 +224,8 @@ func _ready() -> void:
 		saber_skill.cooldown_changed.connect(hud.set_weapon_ability_presentation)
 		hud.set_weapon_ability_presentation(&"Q", saber_skill.cooldown_remaining, saber_skill.cooldown_total)
 	_configure_stamina()
-	PlayerProgress.apply_to_stats(stats)
+	PlayerProgress.changed.connect(_on_progress_changed)
+	_on_progress_changed()
 	vitals.refresh()
 	spine_anim.animation_finished.connect(_on_spine_anim_finished)
 	spine_anim.play("idle")
@@ -433,9 +434,32 @@ func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 
 func change_weapon(new_weapon: WeaponData) -> void:
 	combat.change_weapon(new_weapon)
+	_refresh_weapon_requirements()
+
+func _on_progress_changed() -> void:
+	PlayerProgress.apply_to_stats(stats, stamina_regen_per_second)
+	vitals.refresh()
+	_refresh_weapon_requirements()
+
+func can_use_weapon_skill() -> bool:
+	return combat != null and combat.equipped_weapon != null and combat.equipped_weapon.meets_requirements(PlayerProgress.attributes)
+
+func _refresh_weapon_requirements() -> void:
+	var hud := _find_hud()
+	if hud == null: return
+	var loadout := hud.get_node_or_null("ScreenSpace/WeaponLoadout")
+	if loadout == null: return
+	var slot := loadout.get_node_or_null("Q")
+	if slot != null:
+		var current = combat.equipped_weapon
+		slot.set_requirement_lock(not can_use_weapon_skill(), current.requirement_text(PlayerProgress.attributes) if current != null else "No weapon")
 
 func get_damage_dealt_multiplier() -> float:
-	return stats.get_damage_dealt_multiplier()
+	var factor := stats.get_damage_dealt_multiplier()
+	if combat != null and combat.equipped_weapon != null:
+		factor *= combat.equipped_weapon.attack_multiplier(PlayerProgress.attributes, PlayerProgress.config)
+	if is_sentinel_active(): factor *= PlayerProgress.config.sentinel_damage(PlayerProgress.attributes)
+	return factor
 
 func scale_attack_damage(amount: int) -> int:
 	# Both hitboxes apply the modifier once, at contact, including all Q tiers.
@@ -841,6 +865,7 @@ func cancel_weapon_skill_request() -> void:
 	_skill_requested = false
 
 func request_weapon_skill() -> void:
+	if not can_use_weapon_skill(): return
 	if _skill_requested or saber_skill.is_active() or _weapon_skill_input_blocked(): return
 	if not state_machine.is_in(AdelStateMachine.State.LOCOMOTION) and not state_machine.is_in(AdelStateMachine.State.DASH) and not state_machine.is_in(AdelStateMachine.State.DEFENSE) and state_machine.current != AdelStateMachine.State.COMBO: return
 	_skill_requested = true
@@ -853,7 +878,7 @@ func release_weapon_skill() -> void:
 	saber_skill.release()
 
 func _weapon_skill_input_blocked() -> bool:
-	return saber_skill.is_cooling_down() or is_locked or not state_machine.movement_enabled or damage.is_stunned or damage.is_touched_enemy or is_sentinel_exit_pending() or is_sentinel_entering() or is_campfire_ui_active() or get_tree().paused
+	return not can_use_weapon_skill() or saber_skill.is_cooling_down() or is_locked or not state_machine.movement_enabled or damage.is_stunned or damage.is_touched_enemy or is_sentinel_exit_pending() or is_sentinel_entering() or is_campfire_ui_active() or get_tree().paused
 
 func _try_consume_weapon_skill() -> bool:
 	if not _skill_requested: return false

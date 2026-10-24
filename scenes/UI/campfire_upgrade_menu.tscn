@@ -45,10 +45,10 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -320.0
-offset_top = -260.0
-offset_right = 320.0
-offset_bottom = 260.0
+offset_left = -460.0
+offset_top = -440.0
+offset_right = 460.0
+offset_bottom = 440.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
@@ -62,7 +62,8 @@ theme_override_constants/margin_bottom = 8
 
 [node name="VBox" type="VBoxContainer" parent="Panel/MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 18
+theme_override_font_sizes/font_size = 24
+theme_override_constants/separation = 12
 
 [node name="Title" type="Label" parent="Panel/MarginContainer/VBox"]
 layout_mode = 2
@@ -75,7 +76,7 @@ horizontal_alignment = 1
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.8, 0.72, 1)
 theme_override_font_sizes/font_size = 18
-text = "Spend upgrade points earned from battle."
+text = "Plan with - / +, then confirm. Back discards the plan."
 horizontal_alignment = 1
 
 [node name="Header" type="GridContainer" parent="Panel/MarginContainer/VBox"]
@@ -116,53 +117,42 @@ theme_override_font_sizes/font_size = 24
 text = "0"
 horizontal_alignment = 2
 
-[node name="Stats" type="VBoxContainer" parent="Panel/MarginContainer/VBox"]
+[node name="Scroll" type="ScrollContainer" parent="Panel/MarginContainer/VBox"]
+custom_minimum_size = Vector2(0, 300)
 layout_mode = 2
-theme_override_constants/separation = 14
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
-[node name="HPRow" type="HBoxContainer" parent="Panel/MarginContainer/VBox/Stats"]
+[node name="Attributes" type="VBoxContainer" parent="Panel/MarginContainer/VBox/Scroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="Preview" type="Label" parent="Panel/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+autowrap_mode = 2
+
+[node name="Status" type="Label" parent="Panel/MarginContainer/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.8, 0.4, 1)
+theme_override_font_sizes/font_size = 18
+autowrap_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="Panel/MarginContainer/VBox"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="StatName" type="Label" parent="Panel/MarginContainer/VBox/Stats/HPRow"]
-custom_minimum_size = Vector2(120, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 26
-text = "Health"
-
-[node name="CurrentValue" type="Label" parent="Panel/MarginContainer/VBox/Stats/HPRow"]
+[node name="Confirm" type="Button" parent="Panel/MarginContainer/VBox/Actions"]
+custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 26
-text = "100  (+ 20 next)"
+text = "Confirm and save"
 
-[node name="UpgradeButton" type="Button" parent="Panel/MarginContainer/VBox/Stats/HPRow"]
-custom_minimum_size = Vector2(140, 44)
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Upgrade HP"
-
-[node name="StaminaRow" type="HBoxContainer" parent="Panel/MarginContainer/VBox/Stats"]
-layout_mode = 2
-theme_override_constants/separation = 16
-
-[node name="StatName" type="Label" parent="Panel/MarginContainer/VBox/Stats/StaminaRow"]
-custom_minimum_size = Vector2(120, 0)
-layout_mode = 2
-theme_override_font_sizes/font_size = 26
-text = "Stamina"
-
-[node name="CurrentValue" type="Label" parent="Panel/MarginContainer/VBox/Stats/StaminaRow"]
+[node name="Reset" type="Button" parent="Panel/MarginContainer/VBox/Actions"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 26
-text = "100  (+ 15 next)"
-
-[node name="UpgradeButton" type="Button" parent="Panel/MarginContainer/VBox/Stats/StaminaRow"]
-custom_minimum_size = Vector2(140, 44)
-layout_mode = 2
-theme_override_font_sizes/font_size = 22
-text = "Upgrade Stamina"
+text = "Reset plan"
 
 [node name="BackButton" type="Button" parent="Panel/MarginContainer/VBox"]
 custom_minimum_size = Vector2(0, 48)

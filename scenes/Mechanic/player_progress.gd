@@ -3,213 +3,116 @@ signal exp_changed(current_exp: int, exp_to_next: int, level: int)
 signal level_up(new_level: int, points_gained: int)
 signal upgrade_points_changed(points: int)
 signal stats_upgraded
+signal changed
+signal wallet_changed(coin: int, soul: int)
 
-const BASE_MAX_HP := 100
-const BASE_MAX_STAMINA := 100.0
-const HP_PER_UPGRADE := 20
-const STAMINA_PER_UPGRADE := 15.0
-const EXP_PER_LEVEL_BASE := 100
-const UPGRADE_POINTS_PER_LEVEL := 1
-
+const MAX_SAVED_INTEGER := 9007199254740991
+const Config = preload("res://scenes/Mechanic/progression_config.gd")
+var config: Resource = preload("res://scenes/Mechanic/progression_config.tres")
 var total_play_time: float = 0.0
 var level := 1
 var exp := 0
 var upgrade_points := 0
-var hp_upgrades := 0
-var stamina_upgrades := 0
+var attributes: Dictionary = config.empty_attributes()
+var coin := 0
+var soul := 0
+var migration_message := ""
 
 func get_exp_to_next_level() -> int:
-	return EXP_PER_LEVEL_BASE * level
+	return maxi(config.exp_per_level_base, 1) * level
 
-func get_max_hp() -> int:
-	return BASE_MAX_HP + hp_upgrades * HP_PER_UPGRADE
-
-func get_max_stamina() -> float:
-	return BASE_MAX_STAMINA + stamina_upgrades * STAMINA_PER_UPGRADE
+func get_max_hp() -> int: return config.max_hp(attributes)
+func get_max_stamina() -> float: return config.max_stamina(attributes)
 
 func add_exp(amount: int) -> void:
-	if amount <= 0:
-		return
-
+	if amount <= 0: return
 	exp += amount
-	var leveled := false
 	while exp >= get_exp_to_next_level():
 		exp -= get_exp_to_next_level()
 		level += 1
-		upgrade_points += UPGRADE_POINTS_PER_LEVEL
-		leveled = true
-		level_up.emit(level, UPGRADE_POINTS_PER_LEVEL)
-		upgrade_points_changed.emit(upgrade_points)
-
+		var gained: int = maxi(config.points_per_level, 1)
+		upgrade_points += gained
+		level_up.emit(level, gained)
+	upgrade_points_changed.emit(upgrade_points)
 	exp_changed.emit(exp, get_exp_to_next_level(), level)
-	if leveled:
-		upgrade_points_changed.emit(upgrade_points)
+	changed.emit()
+
+func add_currency(coin_amount: int, soul_amount: int) -> bool:
+	if coin_amount < 0 or soul_amount < 0 or coin_amount > MAX_SAVED_INTEGER - coin or soul_amount > MAX_SAVED_INTEGER - soul: return false
+	coin += coin_amount
+	soul += soul_amount
+	wallet_changed.emit(coin, soul)
+	changed.emit()
+	return true
+
+func try_spend_currency(coin_amount: int, soul_amount: int) -> bool:
+	if coin_amount < 0 or soul_amount < 0 or coin < coin_amount or soul < soul_amount: return false
+	coin -= coin_amount
+	soul -= soul_amount
+	wallet_changed.emit(coin, soul)
+	changed.emit()
+	return true
 
 func read_from_save_data(data: Dictionary) -> void:
 	level = maxi(int(data.get("level", 1)), 1)
 	exp = maxi(int(data.get("exp", 0)), 0)
 	upgrade_points = maxi(int(data.get("upgrade_points", 0)), 0)
-	hp_upgrades = maxi(int(data.get("hp_upgrades", 0)), 0)
-	stamina_upgrades = maxi(int(data.get("stamina_upgrades", 0)), 0)
+	attributes = config.empty_attributes()
+	var stored: Dictionary = data.get("attributes", {})
+	for id in Config.ATTRIBUTES: attributes[id] = maxi(int(stored.get(id, 0)), 0)
+	coin = maxi(int(data.get("coin", 0)), 0)
+	soul = maxi(int(data.get("soul", 0)), 0)
+	migration_message = str(data.get("migration_message", ""))
+	upgrade_points_changed.emit(upgrade_points)
+	wallet_changed.emit(coin, soul)
+	exp_changed.emit(exp, get_exp_to_next_level(), level)
+	changed.emit()
 
 func write_to_save_data(data: Dictionary) -> void:
+	data["version"] = 2
 	data["level"] = level
 	data["exp"] = exp
 	data["upgrade_points"] = upgrade_points
-	data["hp_upgrades"] = hp_upgrades
-	data["stamina_upgrades"] = stamina_upgrades
+	data["attributes"] = attributes.duplicate()
+	data["coin"] = coin
+	data["soul"] = soul
 	data["max_hp"] = get_max_hp()
 	data["max_stamina"] = get_max_stamina()
+	data["migration_message"] = migration_message
+	data.erase("hp_upgrades")
+	data.erase("stamina_upgrades")
+
+func allocation_candidate(allocation: Dictionary) -> Dictionary:
+	var next := attributes.duplicate()
+	var total := 0
+	for id in allocation:
+		var value: Variant = allocation[id]
+		if not id in Config.ATTRIBUTES or not value is int or value < 0 or value > upgrade_points: return {}
+		total += value
+		if total > upgrade_points: return {}
+		next[id] += value
+	if total <= 0: return {}
+	return {"attributes": next, "upgrade_points": upgrade_points - total}
 
 func apply_to_hud(tree: SceneTree = null) -> void:
-	# Compatibility entry point: stats now belong to Player, including without UI.
 	var target := tree if tree else get_tree()
-	var model = _find_model(target)
-	if model == null: return
-	apply_to_stats(model)
-	_refresh_stats_view(target)
+	for player in target.get_nodes_in_group("Player"):
+		if player.has_method("get_player_vitals"):
+			apply_to_stats(player.get_player_vitals().model, player.stamina_regen_per_second)
+			player.get_player_vitals().refresh()
 
-func apply_to_stats(model: StatsComponent) -> void:
-	var previous_max: int = model.max_hp
+func apply_to_stats(model: StatsComponent, actor_base_regen: float = 28.0) -> void:
+	# Preserve current resources: upgrading is not a heal. Derived values never stack.
 	model.max_hp = get_max_hp()
-	model.hp = clampi(model.hp + model.max_hp - previous_max, 0, model.max_hp)
+	model.hp = clampi(model.hp, 0, model.max_hp)
 	model.max_stamina = get_max_stamina()
 	model.stamina = clampf(model.stamina, 0.0, model.max_stamina)
+	model.stamina_regen_per_second = config.stamina_regen(attributes, actor_base_regen)
 	model.recalc_flask_heal_amount()
 
-func try_upgrade_hp() -> bool:
-	if upgrade_points <= 0:
-		return false
+func _ready() -> void: process_mode = Node.PROCESS_MODE_ALWAYS
+func _process(delta: float) -> void: total_play_time += delta
 
-	upgrade_points -= 1
-	hp_upgrades += 1
-	_apply_hp_upgrade()
-	upgrade_points_changed.emit(upgrade_points)
-	stats_upgraded.emit()
-	return true
-
-func try_upgrade_stamina() -> bool:
-	if upgrade_points <= 0:
-		return false
-
-	upgrade_points -= 1
-	stamina_upgrades += 1
-	_apply_stamina_upgrade()
-	upgrade_points_changed.emit(upgrade_points)
-	stats_upgraded.emit()
-	return true
-
-func refresh_character_menu_ui(root: Node) -> void:
-	if root == null:
-		return
-
-	var hud := _find_hud(get_tree())
-	var lv_value: Label = root.get_node_or_null(
-		"MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/LV_EXP/lv_value"
-	)
-	var exp_value: Label = root.get_node_or_null(
-		"MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/LV_EXP/exp_value"
-	)
-	var hp_value: Label = root.get_node_or_null(
-		"MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/MainStatsGrid/hp value"
-	)
-	var sp_value: Label = root.get_node_or_null(
-		"MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/MainStatsGrid/sp_value"
-	)
-	var points_label: Label = root.get_node_or_null("UpgradePointsLabel")
-
-	if lv_value:
-		lv_value.text = str(level)
-	if exp_value:
-		exp_value.text = "%d / %d" % [exp, get_exp_to_next_level()]
-	if hp_value:
-		hp_value.text = str(hud.max_hp if hud else get_max_hp())
-	if sp_value:
-		var max_stamina: int = hud.max_stamina if hud else get_max_stamina()
-		sp_value.text = str(int(round(max_stamina)))
-	if points_label:
-		points_label.text = "Upgrade Points: %d  (spend at campfire)" % upgrade_points
-
-func refresh_upgrade_menu_ui(root: Node) -> void:
-	if root == null:
-		return
-
-	var hud := _find_hud(get_tree())
-	var level_label: Label = root.get_node_or_null("Panel/MarginContainer/VBox/Header/LevelValue")
-	var exp_label: Label = root.get_node_or_null("Panel/MarginContainer/VBox/Header/ExpValue")
-	var points_label: Label = root.get_node_or_null("Panel/MarginContainer/VBox/Header/PointsValue")
-	var hp_label: Label = root.get_node_or_null("Panel/MarginContainer/VBox/Stats/HPRow/CurrentValue")
-	var stamina_label: Label = root.get_node_or_null("Panel/MarginContainer/VBox/Stats/StaminaRow/CurrentValue")
-	var hp_btn: Button = root.get_node_or_null("Panel/MarginContainer/VBox/Stats/HPRow/UpgradeButton")
-	var stamina_btn: Button = root.get_node_or_null("Panel/MarginContainer/VBox/Stats/StaminaRow/UpgradeButton")
-
-	if level_label:
-		level_label.text = str(level)
-	if exp_label:
-		exp_label.text = "%d / %d" % [exp, get_exp_to_next_level()]
-	if points_label:
-		points_label.text = str(upgrade_points)
-	if hp_label:
-		hp_label.text = "%d  (+ %d next)" % [
-			hud.max_hp if hud else get_max_hp(),
-			HP_PER_UPGRADE,
-		]
-	if stamina_label:
-		var max_stamina: int = hud.max_stamina if hud else get_max_stamina()
-		stamina_label.text = "%d  (+ %d next)" % [
-			int(round(max_stamina)),
-			int(STAMINA_PER_UPGRADE),
-		]
-	if hp_btn:
-		hp_btn.disabled = upgrade_points <= 0
-	if stamina_btn:
-		stamina_btn.disabled = upgrade_points <= 0
-
-func _apply_hp_upgrade() -> void:
-	var model = _find_model(get_tree())
-	if model == null: return
-	var previous_max: int = model.max_hp
-	model.max_hp = get_max_hp()
-	model.hp = clampi(model.hp + model.max_hp - previous_max, 0, model.max_hp)
-	model.recalc_flask_heal_amount()
-	_refresh_stats_view(get_tree())
-
-func _apply_stamina_upgrade() -> void:
-	var model = _find_model(get_tree())
-	if model == null: return
-	var previous: float = model.max_stamina
-	model.max_stamina = get_max_stamina()
-	model.stamina = clampf(model.stamina + model.max_stamina - previous, 0.0, model.max_stamina)
-	_refresh_stats_view(get_tree())
-
-func _find_model(tree: SceneTree):
-	for player in tree.get_nodes_in_group("Player"):
-		if player.has_method("get_player_vitals"): return player.get_player_vitals().model
-	var hud := _find_hud(tree)
-	return hud._stats if hud != null and "_stats" in hud else null
-
-func _refresh_stats_view(tree: SceneTree) -> void:
-	for player in tree.get_nodes_in_group("Player"):
-		if player.has_method("get_player_vitals"):
-			player.get_player_vitals().refresh()
-			return
-	var hud := _find_hud(tree)
-	if hud != null:
-		hud.sync_hp_display()
-		hud.sync_stamina_display()
-
-func _find_hud(tree: SceneTree) -> Node:
-	if tree == null or tree.current_scene == null:
-		return null
-	return tree.current_scene.find_child("hud", true, false)
-func _ready() -> void:
-	process_mode = Node.PROCESS_MODE_ALWAYS
-func _process(delta: float) -> void:
-	total_play_time += delta
-	
 func get_formatted_time() -> String:
-	var time_in_seconds: int = int(total_play_time)
-	var hours: int = time_in_seconds / 3600
-	var minutes: int = (time_in_seconds % 3600) / 60
-	var seconds: int = time_in_seconds % 60
-	return "%02d:%02d:%02d" % [hours, minutes, seconds]
+	var seconds := int(total_play_time)
+	return "%02d:%02d:%02d" % [seconds / 3600, (seconds % 3600) / 60, seconds % 60]

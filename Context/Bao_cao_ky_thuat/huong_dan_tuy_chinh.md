@@ -1,6 +1,6 @@
 # Hướng dẫn tùy chỉnh thông số game
 
-Cập nhật: **17/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
+Cập nhật: **24/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
 
 ## Mục lục
 
@@ -26,23 +26,33 @@ Cập nhật: **17/10/2026**. Đây là file dùng chung: khi thêm hoặc đổ
 4. Các lựa chọn camera đã lưu trong pause và dữ liệu progression/save có thể có ưu tiên hơn mặc định; đọc lưu ý ở từng phần trước khi kết luận chỉnh không có tác dụng.
 5. `px` ở thông số gameplay là đơn vị world; `px/s` là vận tốc. Hệ số zoom `1.5` nghĩa là thêm 50% so với zoom nền, `1.1` thêm 10%; scale slow motion `0.5` nghĩa là còn nửa tốc độ. Game time chịu pause/time_scale; real time là thời gian thực theo chủ sở hữu hiệu ứng, có thể vẫn dừng theo pause thường.
 
-Đây là ảnh chụp cấu hình từ source/scene, không phải giao diện chỉnh tập trung mới trong game. Lượt soạn tài liệu này không thay gameplay hoặc đặt lại các override của bạn.
+Các mục dưới phản ánh cấu hình source/scene hiện hành; không dùng giá trị mặc định để đặt lại override của người dùng. Thuộc tính có Resource cấu hình riêng từ 24/10/2026, các hệ thống khác vẫn theo vị trí ghi ở từng mục.
 
 <a id="hp-stamina"></a>
 ## 2. HP, stamina, bình máu và progression
 
-### HP/stamina tối đa khi chơi thật
+### Thuộc tính, HP/stamina và điểm lên cấp — 24/10/2026
 
-Sửa `res://scenes/Mechanic/player_progress.gd`:
+Mở **FileSystem → `res://scenes/Mechanic/progression_config.tres` → Inspector**. Resource này được `PlayerProgress.config` nạp; script khai báo là `res://scenes/Mechanic/progression_config.gd`. Dừng game, sửa và lưu Resource rồi chạy lại. Tám thuộc tính khởi đầu có **0 điểm đầu tư**; save lưu điểm đã đầu tư, không lưu một bản công thức riêng.
 
-- `BASE_MAX_HP`: HP nền, hiện 100.
-- `HP_PER_UPGRADE`: HP thêm mỗi nâng cấp, hiện 20.
-- `BASE_MAX_STAMINA`: stamina nền, hiện 100.
-- `STAMINA_PER_UPGRADE`: stamina thêm mỗi nâng cấp, hiện 15.
-- `EXP_PER_LEVEL_BASE`: hệ số EXP lên cấp, hiện 100; ngưỡng = hệ số × level.
-- `UPGRADE_POINTS_PER_LEVEL`: điểm nâng cấp nhận khi lên cấp, hiện 1.
+Các giá trị dưới đây là **mặc định script**, Resource hiện **không override**, scene/instance hiện không override các trường này. Đây là **bộ số thử nghiệm**, chưa nghiệm thu cân bằng:
 
-`get_max_hp()`/`get_max_stamina()` kết hợp hằng nền và số nâng cấp; progression/save có thể áp lại các giá trị này lên model. Sửa riêng `StatsComponent.max_hp` không đủ để đổi cân bằng game thật nếu PlayerProgress đang ghi đè. Khi thử, dùng save thử hoặc New Game ở slot riêng; không xóa save thật để kiểm tra.
+- **Level and Resources:** `points_per_level = 5` điểm/cấp; `base_hp = 100` HP; `base_stamina = 100` stamina; `exp_per_level_base = 100` EXP, ngưỡng cấp kế = hệ số × level. Đổi điểm/cấp chỉ tác động lần lên cấp tiếp theo của save phiên bản 2, không tính lại số điểm đã nhận.
+- **Attribute Contributions:** `vitality_hp = 10` HP/điểm Vitality; `strength_hp = 4` HP/điểm Strength; `resistance_hp = 2` HP/điểm Resistance. HP tối đa = nền + ba đóng góp, làm tròn về số nguyên một lần.
+- Cùng nhóm: `agility_stamina = 4` stamina/điểm Agility; `agility_regen = 0.28` stamina/**giây actor**/điểm Agility. Tốc hồi = **giá trị nền đã cấu hình trên Player/instance** + thưởng Agility; không cộng lên giá trị model đã có thưởng. Actor time hiện chịu pause/slow motion và các chủ sở hữu CombatTime hiện hành, không phải giây thực.
+- Cùng nhóm: `prowess_attack = 0.02`, `strength_attack = 0.012`, hệ số thưởng sát thương nền/điểm, tương ứng 2% và 1,2%, còn nhân scaling riêng của món vũ khí. Đây không phải % tăng tổng HP/stamina mỗi điểm.
+- **Dark Sentinel:** `assimilation_damage = 0.003` hệ số sát thương Sentinel thêm/điểm Dark Arts Assimilation; `upkeep_step = 10` điểm/mốc; `upkeep_reduction_per_step = 0.05` hệ số giảm HP rút duy trì/mốc; `upkeep_reduction_cap = 0.5` trần giảm. Giảm duy trì = min(floor(điểm / mốc) × hệ số, trần); lượng HP rút nền vẫn lấy từ Player và tính theo **giây game**, không phải giây thực.
+- **Equipment:** `unmet_requirement_factor = 0.2` hệ số damage khi vũ khí thiếu ít nhất một yêu cầu. Chỉ áp dụng một lần. Hiện nối cho vũ khí; chưa phải hệ giáp/passive.
+
+`PlayerProgress.apply_to_stats()` tính lại từ dữ liệu gốc, giữ HP/stamina hiện có và clamp nếu vượt tối đa mới; không hồi khi mở menu, thay thuộc tính hoặc gắn lại HUD. Mặc định model hồi stamina vẫn **28**, Player scene `PlayableAdel → Stamina → Stamina Regen Per Second` vẫn override **33**; Agility cộng lên đúng nền này. Instance trong `spine_enemy_test.tscn` không override nền hồi; vẫn phải kiểm tra instance khi chỉnh map khác.
+
+Resistance hiện chỉ cộng HP, **không tác động Bleed/Fracture**. Giảm xác suất/thời lượng debuff ngoài hai loại này chưa có nguồn gameplay hỗ trợ. Arts Compatibility/Faith lưu và nâng được nhưng chờ Arts/Divine Arts; Dark Arts Assimilation hiện chỉ nối damage Sentinel và duy trì, chưa nối nguồn ulti/chi phí skill 1–4. Xem mô tả khi rê vào tên thuộc tính trong menu. Chưa có soft cap hay đồ bonus tham gia xét yêu cầu.
+
+### Cách nâng và đọc dữ liệu thật
+
+Vào campfire → **Relica/Upgrade**: dùng `− / +` cho tám thuộc tính trong danh sách cuộn, xem HP/stamina/hồi và Saber trước → sau; **Confirm and save** mới tiêu điểm và ghi slot. **Reset plan** hoặc **Back** bỏ bản phân bổ thử, không tẩy điểm đã xác nhận. Thiếu điểm/dữ liệu không hợp lệ/lỗi ghi giữ điểm và bản thử; scene chạy riêng chưa chọn slot không được tự ghi đè. Character đọc tám thuộc tính, EXP, điểm và Coin/Soul thật; Equipment hiện thông tin vũ khí đang cầm, còn grid túi đồ/giáp là nền trình bày.
+
+Vị trí UI: `res://scenes/UI/campfire_upgrade_menu.tscn → Panel/MarginContainer/VBox`: **Scroll/Attributes** chứa tám hàng tạo từ danh mục trong `campfire_upgrade_menu.gd::_ready()`; font hàng **22 px viewport**, nút +/− **44×44 px**; **Preview, Status, Actions/Confirm, Actions/Reset, BackButton** giữ bố cục. `_layout()` dùng khung **920×880 px**, lề tổng **32 px**, thu nhỏ đồng đều tới vừa viewport, không phóng quá 1. Đây là số layout cố định trong hàm, không export/override; offsets scene đồng bộ khung này. Character giữ bố cục cũ, **UpgradePointsLabel** ở (136,982)–(620,1040), font 22; Equipment **WeaponDetails** ở (136,730)–(700,870), font 22. Những giá trị này là layout authored trong scene, không có mặc định script hay override instance mới.
 
 ### Model và bình máu
 
@@ -120,6 +130,15 @@ Scene `res://scenes/adel/weapon/saber.tscn` → **Saber**.
 - **Attack Active Start** (`attack_active_start`): scene gốc `[0.1, 0.1, 0.1, 0.15]`; script `[0.1, 0.1, 0.1, 0.15]`.
 - **Attack Active End** (`attack_active_end`): scene gốc `[0.2, 0.2, 0.2, 0.3]`; script `[0.2, 0.2, 0.2, 0.3]`.
 
+
+### Yêu cầu và scaling vũ khí
+
+Mở `res://scenes/adel/weapon/saber.tscn → Saber → Requirements and Scaling`, hoặc **PlayableAdel/WeaponHolder/Saber**. Script `weapon_data.gd`:
+- `requirements: Dictionary[StringName, int] = {}`: số điểm cần đạt theo ID thuộc tính; dictionary rỗng nghĩa là không yêu cầu. ID dùng `vitality, prowess, strength, agility, resistance, arts_compatibility, dark_arts_assimilation, faith`. Phải đạt tất cả; vẫn được cầm món không đạt.
+- `attribute_scaling = {prowess: 1.0, strength: 1.0}`: hệ số không đơn vị của riêng món. Hiện công thức damage hỗ trợ Prowess và Strength, các stat Arts chưa cấp damage giả. Saber scene và instance Player/map hiện **không override** hai dictionary, nên vũ khí khởi đầu dùng đủ ngay với tám điểm đầu tư bằng 0.
+- Attack = damage nền × (1 + Prowess × hệ số cấu hình × scaling Prowess + Strength × hệ số cấu hình × scaling Strength), rồi nhân mức thiếu yêu cầu từ Resource. Combo/jump/Q dùng chung `PlayableAdel.scale_attack_damage()` tại contact: kết hợp Fracture và thưởng Sentinel đúng một lần, làm tròn damage cuối về số nguyên. Giữ `damage = 20`, finisher `1.2` và timing cũ.
+- Thiếu yêu cầu chặn Q trước animation, tài nguyên, cooldown và buffer; HUD **ScreenSpace/WeaponLoadout/Q** hiện **LOCK** và làm tối icon, rê vào để xem đang có/cần có. Đây là trình bày khóa theo gameplay, không phải export mới. Đủ lại thì gỡ khóa; cooldown thực vẫn độc lập. E/tay trái chưa có gameplay. Kiểm tra điều kiện thuộc về từng WeaponData, chưa có inventory/equip nhiều tay để thử luồng đổi đồ thực.
+- Tab Equipment có **WeaponDetails**: damage nền/thực nhận trước mục tiêu, scaling, yêu cầu và trạng thái Q. Chưa thay icon placeholder thành một hệ túi đồ.
 
 ### Rơi chậm và ngưng rơi theo frame
 
@@ -389,7 +408,7 @@ Scene `res://scenes/adel/playable_adel.tscn` → **SaberSkill**.
 
 Player root → **Dark Sentinel**:
 
-- `sentinel_hp_drain_percent`: phần trăm HP **tối đa** rút mỗi giây game. 2 nghĩa là 2%, không phải 2 HP với mọi max HP. Dừng khi pause, chịu slow motion, không kích hoạt threshold.
+- `sentinel_hp_drain_percent`: mức nền phần trăm HP **tối đa** rút mỗi giây game; nhân thêm hệ số giảm duy trì từ Dark Arts Assimilation (phần 2). 2 nghĩa là 2%, không phải 2 HP với mọi max HP. Dừng khi pause, chịu slow motion, không kích hoạt threshold.
 - `sentinel_entry_duration`: thời gian bất động/i-frame lúc vào.
 - `sentinel_recovery_tick_interval`: khoảng giữa tick hồi.
 - `sentinel_recovery_percent`: phần trăm max HP/stamina hồi mỗi tick; cuối entry chốt full để không sai do làm tròn.
@@ -410,6 +429,7 @@ Enemy chiến đấu hiện hành: `res://scenes/enemy/spine_enemy.tscn` → **S
 ### HP, EXP và hành vi
 
 - **Health:** `max_health`, `exp_reward` (kế thừa EnemyBase).
+- **Currency Rewards:** `coin_reward = 5` Coin/vòng đời, `soul_reward = 1` Soul/vòng đời là **mặc định script thử nghiệm** trong `enemy_base.gd`. `spine_enemy.tscn`, `wobtear_enemy.tscn` và các instance hiện không override hai trường; để chỉnh chọn root enemy → nhóm này. Nhận một lần lúc chết hợp lệ, không có đơn vị thời gian. Reload/respawn enemy tạo vòng đời mới; chưa lưu xác chết lâu dài. Enemy legacy dùng script khác không tự nhận thưởng tiền.
 - **Patrol:** `speed`, `patrol_range`, `walk_duration`, `idle_duration`, `initial_direction`. Đây là đi tuần, không phải tốc độ đuổi.
 - **Detection:** `detection_distance`, `disengage_distance`, `chase_memory`, `reset_opener_on_disengage`, `run_speed`. Nên để disengage lớn hơn detect để tránh đổi trạng thái liên tục. Walk → detect player → Run là chuyển tiếp animation, không tự rút ngắn bằng cách tăng run_speed.
 - **Opening Leap:** `leap_range`, `windup_time`, `jump_speed`, `max_leap_speed`, `landing_time`, `leap_damage`.
@@ -739,6 +759,12 @@ Màn hình mở đầu là `res://scenes/UI/title_screen.tscn` → node gốc **
 
 `res://scenes/UI/save_manager.gd`: `TITLE_SCENE = "res://scenes/UI/title_screen.tscn"` chọn đích **Return to Title**; `NEW_GAME_SCENE` chọn scene New Game, cần spawn phù hợp, hiện `SpawnPoint_Default`. Hai hằng là đường dẫn trong script, không export/override scene; nếu đổi đích title sang scene khác thì cập nhật cả Main Scene và `TITLE_SCENE` để khởi động/thoát về cùng màn hình. `MAX_SAVE_SLOTS` hiện 5, tăng số lượng cần đồng bộ UI slot và validation, không chỉ đổi hằng. `SAVE_VERSION` là schema, không tăng tùy ý như một thông số gameplay.
 
+**Progression/save phiên bản 2:** `SaveManager.SAVE_VERSION = 2`, không có đơn vị/Inspector/override. Lưu tám điểm đầu tư, điểm còn lại, Coin/Soul; HP/stamina tối đa tính lại từ Resource, không lấy snapshot cũ làm công thức. Đọc v1/không có version theo luật cũ 1 điểm/cấp: hoàn số nâng HP + stamina, giữ điểm dư kể cả điểm debug, cộng max(điểm/cấp cấu hình − 1, 0) × (level − 1). Bù chỉ ở đường đọc v1; v2 không tính lại. Schema legacy có khai báo điểm/cấp riêng hoặc trộn khóa thuộc tính/tiền mới bị từ chối thay vì đoán. HP giữ số hiện có, chỉ clamp xuống tối đa mới. Thông báo chuyển cơ chế hiện tại campfire.
+
+Đọc/Continue không ghi file. Trước lần ghi thay v1 hợp lệ, giữ nguyên bytes ở `soujourn_save[_n].json.before-stats-v2.bak`; vẫn có `.bak` xoay và archive trước New Game riêng. Nếu không sao lưu/ghi được thì không xác nhận nâng. Không sửa/xóa save thật để thử migration.
+
+Coin/Soul thuộc `PlayerProgress.coin/soul`; `add_currency()` nhận thưởng, `try_spend_currency()` kiểm tra hai số dư và trừ cùng lúc trong RAM, chưa phải giao dịch vật phẩm/rèn. Giới hạn lưu kỹ thuật là số nguyên không âm tới `MAX_SAVED_INTEGER = 9007199254740991` để JSON roundtrip chính xác; không phải soft cap gameplay. Thưởng địch được lưu cùng progression khi ghi campfire/xác nhận nâng; không tự ghi từng kill. Chưa có luật mất tiền khi chết, thưởng Observe/nhiệm vụ, shop/bán đồ/rèn hoặc Soul mua điểm.
+
 Slot và backup nằm ở `user://`, dùng menu Project → Open User Data Folder để tìm. Slot1 `soujourn_save.json`, slot2–5 `soujourn_save_2.json`…`_5.json`, `.bak` là backup gần nhất. Các file `.before-new-game-...bak` là bản trước Replace. Không sửa/xóa các file đó chỉ để thử tuning. Dùng bản sao project với custom user directory khi chạy suite save/flow.
 
 <a id="video-settings"></a>
@@ -774,6 +800,8 @@ Khi có thông số mới hoặc chuyển node/script: sửa ngay phần hệ th
 Giữ nội dung hiện hành ngay tại mục đang có, thay mô tả đã bị thay thế thay vì chồng nhiều đoạn đính chính. Các bản báo cáo hệ thống chỉ ghi cơ chế, phạm vi và kiểm chứng; liên kết về file này cho tuning. Cập nhật ngày trên đầu file và mục thay đổi gần nhất bên dưới. Không tạo báo cáo mới cho từng thông số. `.docx` và bản tổng hợp tuần là tài liệu lịch sử giữ nguyên.
 
 ### Thay đổi gần nhất
+
+- 24/10/2026: triển khai thuộc tính, phân bổ thử/xác nhận, migration v2, Character/Equipment dữ liệu thật, yêu cầu/scaling Saber, Coin/Soul/thưởng EnemyBase và phần damage/duy trì Sentinel của Assimilation. Giữ các tuning combat, scene rig/map và tài liệu Word đang sửa. Bộ số mới là cấu hình thử; các luồng phụ thuộc chưa có nền vẫn chờ.
 
 - 17/10/2026: triển khai Video với Windowed/Borderless/Fullscreen, kích thước cửa sổ, VSync và FPS cap; staged Apply/Revert/defaults, xác nhận 15 giây thực và rollback, video.cfg riêng có backup. Giữ viewport 1920×1080 và aspect Keep.
 

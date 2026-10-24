@@ -23,6 +23,13 @@ extends Control
 var remaining := 0.0
 var total := 0.0
 var _border: StyleBoxFlat
+var requirement_locked := false
+
+func set_requirement_lock(locked: bool, reason: String = "") -> void:
+	requirement_locked = locked
+	mouse_filter = Control.MOUSE_FILTER_PASS if locked else Control.MOUSE_FILTER_IGNORE
+	tooltip_text = ("Insufficient attributes: " if locked else "") + reason
+	_refresh()
 
 func _ready() -> void:
 	_border = $Frame.get_theme_stylebox("panel").duplicate() as StyleBoxFlat
@@ -44,5 +51,6 @@ func _refresh() -> void:
 	$Cooldown.visible = cooling
 	$Cooldown.material.set_shader_parameter("remaining_ratio", ratio)
 	$Cooldown.material.set_shader_parameter("overlay_opacity", cooldown_opacity)
-	$Remaining.visible = cooling
-	$Remaining.text = "%.1fs" % (ceil(remaining * 10.0) / 10.0) if cooling else ""
+	$Icon.modulate = Color(0.35, 0.35, 0.35, 1) if requirement_locked else Color.WHITE
+	$Remaining.visible = cooling or requirement_locked
+	$Remaining.text = "LOCK" if requirement_locked else ("%.1fs" % (ceil(remaining * 10.0) / 10.0) if cooling else "")

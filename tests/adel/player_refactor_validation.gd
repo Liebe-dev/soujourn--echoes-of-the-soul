@@ -162,7 +162,9 @@ func run() -> void:
 	p.vitals.simulation_enabled = true
 	p.stats.stamina = 50.0
 	p.stats._stamina_regen_time_left = 0.0
-	p.stats.stamina_regen_per_second = 20.0
+	# Fixture the actor's configured baseline; model regeneration is derived.
+	p.stamina_regen_per_second = 20.0
+	p._configure_stamina()
 	await wait(0.22)
 	check(p.stats.stamina > 53.0 and p.stats.stamina < 56.0, "stamina regenerates with no HUD in the scene")
 	p.stats.hp = 100
@@ -184,12 +186,12 @@ func run() -> void:
 	check(p.stats.hp == 55 and p.stats.stamina == p.stats.max_stamina, "save restoration updates Player stats without UI")
 	SaveManager.heal_player_full(get_tree())
 	check(p.stats.hp == p.stats.max_hp and p.stats.flask_charges == p.stats.max_flask_charges, "campfire healing uses Player stats without UI")
-	var upgrades: int = PlayerProgress.hp_upgrades
+	var upgrades: int = PlayerProgress.attributes[&"vitality"]
 	p.stats.hp = 50
-	PlayerProgress.hp_upgrades += 1
-	PlayerProgress._apply_hp_upgrade()
-	check(p.stats.max_hp == 120 and p.stats.hp == 70, "HP upgrade still works without UI")
-	PlayerProgress.hp_upgrades = upgrades
+	PlayerProgress.attributes[&"vitality"] += 1
+	PlayerProgress.apply_to_hud(get_tree())
+	check(p.stats.max_hp == 110 and p.stats.hp == 50, "attribute upgrade preserves HP and works without UI")
+	PlayerProgress.attributes[&"vitality"] = upgrades
 	PlayerProgress.apply_to_hud(get_tree())
 	p.stats.hp = 100
 	p.sentinel_hp_drain_percent = 20.0
@@ -243,17 +245,17 @@ func run() -> void:
 	SaveManager._restore_player(false)
 	await wait(0.4)
 	check(not p.damage.is_stunned and not p.damage.is_invulnerable and p.state_machine.is_in(S.LOCOMOTION), "checkpoint restoration invalidates previous-life stagger callbacks")
-	var old_upgrades: int = PlayerProgress.hp_upgrades
-	PlayerProgress.hp_upgrades = 1
+	var old_upgrades: int = PlayerProgress.attributes[&"vitality"]
+	PlayerProgress.attributes[&"vitality"] = 1
 	var bare = load("res://scenes/adel/playable_adel.tscn").instantiate()
 	bare.get_node("Camera2D/hud").free()
 	bare.position = origin + Vector2(3000, -100)
 	scene.add_child(bare)
-	check(bare.stats.max_hp == 120 and bare.stats.hp == 120, "Player authored without HUD initializes its own progression stats")
+	check(bare.stats.max_hp == 110 and bare.stats.hp == 100, "Player without HUD derives max HP and preserves current HP")
 	bare.stats.hp = 90
 	bare.take_damage(5, bare.global_position + Vector2(-80, 0))
 	check(bare.stats.hp == 85, "Player authored without HUD accepts damage immediately")
 	# Keep this extra actor until tree shutdown: the authored IK resource is shared.
-	PlayerProgress.hp_upgrades = old_upgrades
+	PlayerProgress.attributes[&"vitality"] = old_upgrades
 	print("PLAYER REFACTOR RESULT: %d checks, %d failures" % [checks, failures])
 	get_tree().quit(0 if failures == 0 else 1)

@@ -1,27 +1,26 @@
 extends Control
+const Config = preload("res://scenes/Mechanic/progression_config.gd")
+const STATS := "MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/"
+const WALLET := "MainPanel/MarginContainer/HBoxContainer/LeftColumn/Coin_Soul/VBoxContainer/"
 
-
-@onready var lv_value: Label = $MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/LV_EXP/lv_value
-@onready var hp_value: Label = $"MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/MainStatsGrid/hp value"
-@onready var sp_value: Label = $MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/MainStatsGrid/sp_value
-
-# @onready var exp_label: Label = $"Đường/Dẫn/Tới/Label_EXP"
 func _ready() -> void:
-	# Cập nhật chỉ số ngay khi game vừa load xong
+	PlayerProgress.changed.connect(update_character_stats)
+	visibility_changed.connect(update_character_stats)
 	update_character_stats()
 
 func update_character_stats() -> void:
-	# Đảm bảo Autoload PlayerProgress có tồn tại
-	if PlayerProgress != null:
-		
-		# 1. Gắn Level vào lv_value
-		if lv_value:
-			lv_value.text = str(PlayerProgress.level)
-			
-		# 2. Gắn Máu vào hp_value (Định dạng: Máu hiện tại / Máu tối đa)
-		if hp_value:
-			hp_value.text = str(PlayerProgress.get_max_hp())
-			
-		# 3. Gắn Thể lực (Stamina/SP) vào sp_value
-		if sp_value:
-			sp_value.text = str(int(PlayerProgress.get_max_stamina()))
+	if not is_node_ready(): return
+	get_node(STATS + "LV_EXP/lv_value").text = str(PlayerProgress.level)
+	get_node(STATS + "LV_EXP/exp_value").text = "%d / %d" % [PlayerProgress.exp, PlayerProgress.get_exp_to_next_level()]
+	get_node(STATS + "MainStatsGrid/hp value").text = str(PlayerProgress.get_max_hp())
+	get_node(STATS + "MainStatsGrid/sp_value").text = "%.0f" % PlayerProgress.get_max_stamina()
+	get_node(STATS + "MainStatsGrid/mp_value").text = "Pending"
+	for i in Config.ATTRIBUTES.size():
+		var id: StringName = Config.ATTRIBUTES[i]
+		get_node(STATS + "SubStatsGrid/" + str(id) + "_label").tooltip_text = Config.DESCRIPTIONS[i]
+		get_node(STATS + "SubStatsGrid/" + str(id) + "_label").mouse_filter = Control.MOUSE_FILTER_PASS
+		get_node(STATS + "SubStatsGrid/" + str(id) + "_value").text = str(PlayerProgress.attributes[id])
+	get_node(WALLET + "coin/coin_value").text = str(PlayerProgress.coin)
+	get_node(WALLET + "soul/soul_value").text = str(PlayerProgress.soul)
+	$MainPanel/MarginContainer/HBoxContainer/LeftColumn/Name/NameLabel.text = "Adel"
+	$UpgradePointsLabel.text = "Upgrade points: %d — allocate at a campfire" % PlayerProgress.upgrade_points

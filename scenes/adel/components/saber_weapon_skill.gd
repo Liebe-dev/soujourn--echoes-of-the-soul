@@ -135,6 +135,7 @@ func _start_cooldown() -> void:
 	cooldown_changed.emit(&"Q", cooldown_remaining, cooldown_total)
 
 func begin(interrupt_defense: bool = false) -> bool:
+	if not _body.can_use_weapon_skill(): return false
 	var replacing_defense: bool = interrupt_defense and _body.state_machine.is_in(S.DEFENSE) and not _body.is_locked and _body.state_machine.movement_enabled and not _body.damage.is_stunned and not _body.damage.is_touched_enemy and not _body.is_sentinel_exit_pending()
 	if _active or is_cooling_down() or (not _body.state_machine.can_begin_action() and not replacing_defense) or (not allow_airborne and not _body.is_on_floor()): return false
 	for clip in [&"saber_skill_1", &"saber_skill_2", &"saber_skill_3", &"saber_skill_4", &"saber_skill_5", &"saber_skill_6"]:

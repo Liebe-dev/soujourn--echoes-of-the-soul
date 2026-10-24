@@ -4,8 +4,9 @@ extends Node
 const TITLE_SCENE := "res://scenes/UI/title_screen.tscn"
 const NEW_GAME_SCENE := "res://scenes/Map 1/map_1_scene_2.tscn"
 const LEGACY_SAVE_PATH := "user://soujourn_save.json"
-const SAVE_VERSION := 1
+const SAVE_VERSION := 2
 const MAX_SAVE_SLOTS := 5
+const DefaultConfig = preload("res://scenes/Mechanic/progression_config.tres")
 
 signal save_written(slot: int)
 signal checkpoint_changed(checkpoint_id: String)
@@ -30,10 +31,11 @@ func _ready() -> void:
 func _default_data() -> Dictionary:
 	return {
 		"version": SAVE_VERSION, "scene_path": "", "checkpoint_id": "",
-		"spawn_position": {"x": 0.0, "y": 0.0}, "hp": 100, "max_hp": 100,
+		"spawn_position": {"x": 0.0, "y": 0.0}, "hp": DefaultConfig.base_hp, "max_hp": DefaultConfig.base_hp,
 		"flask_charges": 3, "max_flask_charges": 3, "facing_left": false,
 		"saved_at": "", "level": 1, "exp": 0, "upgrade_points": 0,
-		"hp_upgrades": 0, "stamina_upgrades": 0, "max_stamina": 100.0,
+		"attributes": DefaultConfig.empty_attributes(), "coin": 0, "soul": 0,
+		"max_stamina": DefaultConfig.base_stamina,
 	}
 
 func get_save_path(slot: int) -> String:
@@ -346,6 +348,27 @@ func sync_progress_to_active_slot() -> bool:
 	_data = data
 	return true
 
+func commit_attribute_allocation(allocation: Dictionary) -> bool:
+	last_error = ""
+	if _changing_scene or needs_save_confirmation(active_slot):
+		return _fail("Rest at a campfire and select a save slot before upgrading.")
+	var candidate: Dictionary = PlayerProgress.allocation_candidate(allocation)
+	if candidate.is_empty(): return _fail("Allocation is invalid or no longer affordable.")
+	var data := _data.duplicate(true)
+	PlayerProgress.write_to_save_data(data)
+	data.merge(candidate, true)
+	data.max_hp = PlayerProgress.config.max_hp(data.attributes)
+	data.max_stamina = PlayerProgress.config.max_stamina(data.attributes)
+	# Keep the checkpoint HP; spending points must not save a new location or heal.
+	data.hp = mini(int(data.get("hp", data.max_hp)), int(data.max_hp))
+	if not _write_slot_to_disk(active_slot, data): return false
+	_data = data
+	PlayerProgress.read_from_save_data(data)
+	PlayerProgress.apply_to_hud()
+	PlayerProgress.stats_upgraded.emit()
+	save_written.emit(active_slot)
+	return true
+
 func _write_slot_to_disk(slot: int, candidate: Dictionary = {}) -> bool:
 	var data := _data if candidate.is_empty() else candidate
 	if not _valid_slot(slot): return _fail("Invalid save slot.")
@@ -354,6 +377,16 @@ func _write_slot_to_disk(slot: int, candidate: Dictionary = {}) -> bool:
 func _replace_slot_bytes(slot: int, bytes: PackedByteArray, make_backup: bool) -> bool:
 	var path := get_save_path(slot)
 	var temp := path + ".tmp"
+	# A permanent migration archive survives later rotating checkpoint backups.
+	if make_backup:
+		var legacy_path := path
+		if _read_valid_file(legacy_path).is_empty(): legacy_path += ".bak"
+		if FileAccess.file_exists(legacy_path):
+			var raw: Variant = JSON.parse_string(FileAccess.get_file_as_string(legacy_path))
+			var archive := path + ".before-stats-v2.bak"
+			if raw is Dictionary and int(raw.get("version", 1)) == 1 and not FileAccess.file_exists(archive):
+				if DirAccess.copy_absolute(legacy_path, archive) != OK:
+					return _fail("Could not archive the old progression save; save cancelled.")
 	var file := FileAccess.open(temp, FileAccess.WRITE)
 	if file == null: return _fail("Could not write slot %d; previous save retained." % slot)
 	file.store_buffer(bytes)
@@ -390,16 +423,38 @@ func _read_valid_file(path: String) -> Dictionary:
 	if parser.parse(text) != OK: return {}
 	var parsed: Variant = parser.data
 	if not parsed is Dictionary or not _valid_data(parsed): return {}
+	var migrated := _migrate_data(parsed)
+	if not _valid_data(migrated): return {}
 	var data := _default_data()
-	data.merge(parsed, true)
+	data.merge(migrated, true)
+	data.max_hp = PlayerProgress.config.max_hp(data.attributes)
+	data.max_stamina = PlayerProgress.config.max_stamina(data.attributes)
+	data.hp = mini(int(data.hp), int(data.max_hp))
+	return data
+
+func _migrate_data(parsed: Dictionary) -> Dictionary:
+	var data := parsed.duplicate(true)
+	if int(data.get("version", 1)) == 1:
+		var levels := maxi(int(data.get("level", 1)) - 1, 0)
+		# Version 1 awarded one point/level. Preserve all extra/debug points too.
+		var refund := int(data.get("hp_upgrades", 0)) + int(data.get("stamina_upgrades", 0))
+		var compensation := maxi(PlayerProgress.config.points_per_level - 1, 0) * levels
+		data.upgrade_points = int(data.get("upgrade_points", 0)) + refund + compensation
+		data.attributes = PlayerProgress.config.empty_attributes()
+		data.coin = 0
+		data.soul = 0
+		data.migration_message = "Legacy HP/stamina upgrades refunded; level points adjusted. Reallocate at a campfire. Current HP is clamped to the new maximum."
+		data.version = SAVE_VERSION
+		data.erase("hp_upgrades")
+		data.erase("stamina_upgrades")
 	return data
 
 func _valid_number(value: Variant) -> bool:
 	return (value is int or value is float) and is_finite(float(value))
 
 func _valid_data(data: Dictionary) -> bool:
-	var version: Variant = data.get("version", SAVE_VERSION)
-	if not _valid_number(version) or float(version) != SAVE_VERSION: return false
+	var version: Variant = data.get("version", 1)
+	if not _valid_number(version) or float(version) not in [1.0, 2.0]: return false
 	var scene: Variant = data.get("scene_path", "")
 	if not scene is String or not scene.begins_with("res://") or not ResourceLoader.exists(scene, "PackedScene"): return false
 	var pos: Variant = data.get("spawn_position")
@@ -407,13 +462,28 @@ func _valid_data(data: Dictionary) -> bool:
 	for key in ["hp", "max_hp", "flask_charges", "max_flask_charges", "level", "exp", "upgrade_points", "hp_upgrades", "stamina_upgrades"]:
 		if data.has(key):
 			var value: Variant = data[key]
-			if not _valid_number(value) or float(value) < 0 or floorf(float(value)) != float(value): return false
+			if not _valid_count(value): return false
 	if float(data.get("max_hp", 100)) < 1 or float(data.get("level", 1)) < 1: return false
 	if data.has("max_stamina") and (not _valid_number(data.max_stamina) or float(data.max_stamina) < 0): return false
 	if data.has("facing_left") and not data.facing_left is bool: return false
 	for key in ["checkpoint_id", "saved_at"]:
 		if data.has(key) and not data[key] is String: return false
+	if int(version) == 2:
+		var attributes: Variant = data.get("attributes")
+		if not attributes is Dictionary or attributes.size() != PlayerProgress.Config.ATTRIBUTES.size(): return false
+		for id in PlayerProgress.Config.ATTRIBUTES:
+			if not _valid_count(attributes.get(id)): return false
+		for key in ["coin", "soul", "upgrade_points"]:
+			if not _valid_count(data.get(key)): return false
+		if data.has("migration_message") and not data.migration_message is String: return false
+	else:
+		# Reject mixed/custom schemas rather than silently discard their data.
+		for key in ["attributes", "coin", "soul", "points_per_level"]:
+			if data.has(key): return false
 	return true
+
+func _valid_count(value: Variant) -> bool:
+	return _valid_number(value) and float(value) >= 0.0 and floorf(float(value)) == float(value) and float(value) <= 9007199254740991.0
 
 func _find_player(tree: SceneTree) -> CharacterBody2D:
 	var nodes := tree.get_nodes_in_group("Player")
@@ -439,11 +509,11 @@ func _find_stats(tree: SceneTree):
 	var hud := _find_hud(tree)
 	return hud._stats if hud != null and "_stats" in hud else null
 
-func _apply_hp_to_hud(tree: SceneTree, hp: int, max_hp: int) -> void:
+func _apply_hp_to_hud(tree: SceneTree, hp: int, _max_hp: int) -> void:
 	# Historical name retained for callers; restores the model without requiring a HUD.
 	var stats = _find_stats(tree)
 	if stats == null: return
-	stats.max_hp = maxi(max_hp, PlayerProgress.get_max_hp())
+	stats.max_hp = PlayerProgress.get_max_hp()
 	stats.hp = clampi(hp, 0, stats.max_hp)
 	stats.max_flask_charges = maxi(1, int(_data.get("max_flask_charges", stats.max_flask_charges)))
 	stats.flask_charges = clampi(int(_data.get("flask_charges", stats.max_flask_charges)), 0, stats.max_flask_charges)

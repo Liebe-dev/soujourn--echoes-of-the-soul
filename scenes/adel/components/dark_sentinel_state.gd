@@ -81,7 +81,7 @@ func tick(delta: float) -> void:
 		_vitals.refresh(_vitals.HP | _vitals.STAMINA)
 		if entering: return
 	if not exit_pending:
-		_fractional_drain += elapsed * maxf(_body.sentinel_hp_drain_percent, 0.0) * maxf(_vitals.model.max_hp, 0) / 100.0
+		_fractional_drain += elapsed * maxf(_body.sentinel_hp_drain_percent, 0.0) * maxf(_vitals.model.max_hp, 0) / 100.0 * PlayerProgress.config.sentinel_upkeep(PlayerProgress.attributes)
 		var whole := int(floor(_fractional_drain + 0.000001))
 		if whole > 0:
 			_fractional_drain = maxf(_fractional_drain - whole, 0.0)

@@ -1194,7 +1194,37 @@ layout_mode = 2
 size_flags_vertical = 0
 columns = 2
 
-[node name="st_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=1241931184]
+[node name="vitality_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=1241931184]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_fonts/font = SubResource("FontFile_8wlm2")
+theme_override_font_sizes/font_size = 30
+text = "Vitality"
+
+[node name="vitality_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=460884017]
+layout_mode = 2
+theme_override_fonts/font = SubResource("FontFile_4gnm3")
+theme_override_font_sizes/font_size = 30
+text = "0"
+horizontal_alignment = 2
+
+[node name="prowess_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=2059029099]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 1
+theme_override_fonts/font = SubResource("FontFile_8wlm2")
+theme_override_font_sizes/font_size = 30
+text = "Prowess"
+
+[node name="prowess_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=1212557999]
+layout_mode = 2
+theme_override_fonts/font = SubResource("FontFile_4gnm3")
+theme_override_font_sizes/font_size = 30
+text = "0"
+horizontal_alignment = 2
+
+[node name="strength_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=534393821]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -1202,14 +1232,14 @@ theme_override_fonts/font = SubResource("FontFile_8wlm2")
 theme_override_font_sizes/font_size = 30
 text = "Strength"
 
-[node name="st value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=460884017]
+[node name="strength_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=649470751]
 layout_mode = 2
 theme_override_fonts/font = SubResource("FontFile_4gnm3")
 theme_override_font_sizes/font_size = 30
 text = "0"
 horizontal_alignment = 2
 
-[node name="agt_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=2059029099]
+[node name="agility_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=783963547]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -1217,29 +1247,14 @@ theme_override_fonts/font = SubResource("FontFile_8wlm2")
 theme_override_font_sizes/font_size = 30
 text = "Agility"
 
-[node name="agt_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=1212557999]
+[node name="agility_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=868038527]
 layout_mode = 2
 theme_override_fonts/font = SubResource("FontFile_4gnm3")
 theme_override_font_sizes/font_size = 30
 text = "0"
 horizontal_alignment = 2
 
-[node name="dex_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=534393821]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 1
-theme_override_fonts/font = SubResource("FontFile_8wlm2")
-theme_override_font_sizes/font_size = 30
-text = "Dexterity"
-
-[node name="dex_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=649470751]
-layout_mode = 2
-theme_override_fonts/font = SubResource("FontFile_4gnm3")
-theme_override_font_sizes/font_size = 30
-text = "0"
-horizontal_alignment = 2
-
-[node name="res_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=783963547]
+[node name="resistance_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=1736287063]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -1247,14 +1262,14 @@ theme_override_fonts/font = SubResource("FontFile_8wlm2")
 theme_override_font_sizes/font_size = 30
 text = "Resistance"
 
-[node name="res_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=868038527]
+[node name="resistance_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=933398185]
 layout_mode = 2
 theme_override_fonts/font = SubResource("FontFile_4gnm3")
 theme_override_font_sizes/font_size = 30
 text = "0"
 horizontal_alignment = 2
 
-[node name="cpt_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=1736287063]
+[node name="arts_compatibility_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=1425004060]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -1262,29 +1277,14 @@ theme_override_fonts/font = SubResource("FontFile_8wlm2")
 theme_override_font_sizes/font_size = 30
 text = "Arts Compatibility"
 
-[node name="cpt_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=933398185]
+[node name="arts_compatibility_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=1143196714]
 layout_mode = 2
 theme_override_fonts/font = SubResource("FontFile_4gnm3")
 theme_override_font_sizes/font_size = 30
 text = "0"
 horizontal_alignment = 2
 
-[node name="eff_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=1425004060]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 1
-theme_override_fonts/font = SubResource("FontFile_8wlm2")
-theme_override_font_sizes/font_size = 30
-text = "Arts Effectiveness"
-
-[node name="eff_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=1143196714]
-layout_mode = 2
-theme_override_fonts/font = SubResource("FontFile_4gnm3")
-theme_override_font_sizes/font_size = 30
-text = "0"
-horizontal_alignment = 2
-
-[node name="ast_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=1602795667]
+[node name="dark_arts_assimilation_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=1602795667]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -1292,14 +1292,14 @@ theme_override_fonts/font = SubResource("FontFile_8wlm2")
 theme_override_font_sizes/font_size = 30
 text = "Dark Arts Assimilation"
 
-[node name="ast_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=453996958]
+[node name="dark_arts_assimilation_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=453996958]
 layout_mode = 2
 theme_override_fonts/font = SubResource("FontFile_4gnm3")
 theme_override_font_sizes/font_size = 30
 text = "0"
 horizontal_alignment = 2
 
-[node name="fth_label6" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=338068709]
+[node name="faith_label" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=338068709]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 1
@@ -1307,7 +1307,7 @@ theme_override_fonts/font = SubResource("FontFile_8wlm2")
 theme_override_font_sizes/font_size = 30
 text = "Faith"
 
-[node name="fth_value6" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=533972798]
+[node name="faith_value" type="Label" parent="MainPanel/MarginContainer/HBoxContainer/LeftColumn/Stats/VBoxContainer/SubStatsGrid" unique_id=533972798]
 layout_mode = 2
 theme_override_fonts/font = SubResource("FontFile_4gnm3")
 theme_override_font_sizes/font_size = 30
@@ -1451,3 +1451,14 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 color = Color(0, 0, 0, 1)
+
+[node name="UpgradePointsLabel" type="Label" parent="."]
+layout_mode = 0
+offset_left = 136.0
+offset_top = 982.0
+offset_right = 620.0
+offset_bottom = 1040.0
+theme_override_font_sizes/font_size = 22
+text = "Upgrade points"
+autowrap_mode = 2
+mouse_filter = 2

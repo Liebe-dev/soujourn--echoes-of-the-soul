@@ -37,7 +37,7 @@ func fixture(slot: int) -> Dictionary:
 	data.spawn_position = {"x": 300.0 + slot * 25, "y": 700.0}
 	data.level = slot + 3
 	data.exp = slot * 5
-	data.hp_upgrades = 2
+	data.attributes[&"vitality"] = 4
 	data.max_hp = 140
 	data.hp = 81
 	data.flask_charges = 1
@@ -92,7 +92,7 @@ func _run() -> void:
 	check(get_tree().current_scene.scene_file_path == SaveManager.NEW_GAME_SCENE, "New Game enters actual map scene")
 	check(SaveManager.active_slot == 3 and FileAccess.file_exists(SaveManager.get_save_path(3)), "new empty slot gets initial save")
 	check(bytes(1) == original1 and bytes(2) == original2, "new game in slot 3 does not change slots 1 or 2")
-	check(PlayerProgress.level == 1 and PlayerProgress.exp == 0 and PlayerProgress.hp_upgrades == 0, "New Game resets progression in memory")
+	check(PlayerProgress.level == 1 and PlayerProgress.exp == 0 and PlayerProgress.attributes[&"vitality"] == 0, "New Game resets progression in memory")
 	check(actor() != null and is_equal_approx(actor().global_position.x, 175.0) and not SaveManager.pending_continue, "dynamic Adel receives initial spawn after scene_changed")
 	var pause = actor().get_node("Camera2D/UI_Layer/PauseMenu")
 	pause.pause_and_unpause()
@@ -116,7 +116,7 @@ func _run() -> void:
 	check(get_tree().current_scene.scene_file_path == SaveManager.NEW_GAME_SCENE and SaveManager.active_slot == 1, "Continue selected slot enters saved map")
 	check(is_equal_approx(player.global_position.x, 325.0), "saved position survives exit_rest instead of resetting to origin")
 	check(player.facing_direction == -1 and is_zero_approx(player.velocity.x), "saved facing and horizontal motion restore")
-	check(PlayerProgress.level == 4 and PlayerProgress.exp == 5 and PlayerProgress.hp_upgrades == 2, "Continue restores progression")
+	check(PlayerProgress.level == 4 and PlayerProgress.exp == 5 and PlayerProgress.attributes[&"vitality"] == 4, "Continue restores progression")
 	check(hud.hp == 81 and hud.max_hp == 140 and hud.flask_charges == 1, "Continue restores HP/flask into actual HUD")
 	check(bytes(1) == original1 and bytes(2) == original2, "Continue reads without rewriting any slot")
 	player.global_position.x += 75
@@ -187,6 +187,9 @@ func _run() -> void:
 	check(not SaveManager._valid_data(invalid), "unsupported future schema rejected")
 	var legacy := fixture(5)
 	legacy.erase("version")
+	for key in ["attributes", "coin", "soul"]: legacy.erase(key)
+	legacy.hp_upgrades = 2
+	legacy.stamina_upgrades = 0
 	write_text(5, JSON.stringify(legacy))
 	check(SaveManager.get_slot_info(5).loadable, "legacy filename and missing version remain compatible")
 	write_text(1, "{broken primary")

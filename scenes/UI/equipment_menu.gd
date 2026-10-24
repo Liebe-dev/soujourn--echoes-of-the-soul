@@ -11,8 +11,24 @@ extends Control
 @onready var grid_replica = $MainSplit/Right_InventoryArea/GridArea/Grid_Relica
 
 func _ready() -> void:
-	
+	PlayerProgress.changed.connect(_refresh_weapon)
+	visibility_changed.connect(_refresh_weapon)
 	_on_btn_weapon_pressed()
+	_refresh_weapon()
+
+func _refresh_weapon() -> void:
+	if not is_node_ready(): return
+	var actor := get_tree().get_first_node_in_group("Player")
+	if actor == null or actor.combat == null: return
+	var item = actor.combat.equipped_weapon
+	if item == null:
+		$WeaponDetails.text = "No right-hand weapon. Left hand empty."
+		return
+	$WeaponDetails.text = "%s | Base %d > Attack %.2f\nProwess x%.2f | Strength x%.2f\n%s\nQ %s | Left hand empty" % [
+		item.display_name, item.damage, item.damage * item.attack_multiplier(PlayerProgress.attributes, PlayerProgress.config),
+		item.attribute_scaling.get(&"prowess", 0.0), item.attribute_scaling.get(&"strength", 0.0),
+		item.requirement_text(PlayerProgress.attributes), "Ready" if item.meets_requirements(PlayerProgress.attributes) else "Locked: insufficient attributes"]
+	$MainSplit/Left_DollArea/Slot_WeaponRight.tooltip_text = $WeaponDetails.text
 
 # Hàm tiện ích để giấu tất cả các lưới đồ đi
 # Nâng cấp hàm này để nó kiêm luôn việc reset màu của các nút
