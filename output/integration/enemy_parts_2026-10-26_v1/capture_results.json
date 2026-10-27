@@ -1,0 +1,81 @@
+{
+	"cases": [
+		{
+			"animation": "walk",
+			"column": 0,
+			"sprite_count": 13,
+			"time": 0.0
+		},
+		{
+			"animation": "walk",
+			"column": 1,
+			"sprite_count": 13,
+			"time": 0.0
+		},
+		{
+			"animation": "walk",
+			"column": 0,
+			"sprite_count": 13,
+			"time": 0.5
+		},
+		{
+			"animation": "walk",
+			"column": 1,
+			"sprite_count": 13,
+			"time": 0.5
+		},
+		{
+			"animation": "run",
+			"column": 0,
+			"sprite_count": 13,
+			"time": 0.25
+		},
+		{
+			"animation": "run",
+			"column": 1,
+			"sprite_count": 13,
+			"time": 0.25
+		},
+		{
+			"animation": "run",
+			"column": 0,
+			"sprite_count": 13,
+			"time": 0.75
+		},
+		{
+			"animation": "run",
+			"column": 1,
+			"sprite_count": 13,
+			"time": 0.75
+		},
+		{
+			"animation": "detect player",
+			"column": 0,
+			"sprite_count": 13,
+			"time": 0.2
+		},
+		{
+			"animation": "detect player",
+			"column": 1,
+			"sprite_count": 13,
+			"time": 0.2
+		},
+		{
+			"animation": "RESET",
+			"column": 0,
+			"sprite_count": 13,
+			"time": 0.0
+		},
+		{
+			"animation": "RESET",
+			"column": 1,
+			"sprite_count": 13,
+			"time": 0.0
+		}
+	],
+	"image_size": [
+		2200,
+		2520
+	],
+	"status": "passed"
+}

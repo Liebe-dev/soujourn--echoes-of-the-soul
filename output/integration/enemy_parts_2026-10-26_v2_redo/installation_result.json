@@ -1,0 +1,68 @@
+{
+  "status": "installed",
+  "method": "Redrawn to original native frames; no per-part rotation, recentering, or added padding",
+  "parts": [
+    {
+      "file": "body.png",
+      "width": 303,
+      "height": 263,
+      "sha256": "F0443EA7631E42D2154EF6EBBF11747E888406C55C9D7A2F6C5F5DDA3CC854B8"
+    },
+    {
+      "file": "head.png",
+      "width": 99,
+      "height": 188,
+      "sha256": "346912B449C933C8058EBD0FF5516B56722074CF9026951FEA7C2E76ADC2113E"
+    },
+    {
+      "file": "lef leg.png",
+      "width": 181,
+      "height": 229,
+      "sha256": "1F4976EB426829A751A16BAA4382E3D00F7F3C8C53AED60A8CE48662B889C267"
+    },
+    {
+      "file": "left hand.png",
+      "width": 139,
+      "height": 208,
+      "sha256": "CC5B7F3D353D1355EFAFC50A33C111BC59031B03C2DAB57AC3EB15233BB195CA"
+    },
+    {
+      "file": "left palm.png",
+      "width": 159,
+      "height": 79,
+      "sha256": "3B7D1882F6DA4706002E74B7A5D6A66FE2CB0A53AAB53040B5AD18C2B9967ECA"
+    },
+    {
+      "file": "right bicep.png",
+      "width": 128,
+      "height": 106,
+      "sha256": "96885A3B8BE7630C17B262A8698E518D4054FCA6DD0EF6647BE771F91B1E5D11"
+    },
+    {
+      "file": "right hand.png",
+      "width": 163,
+      "height": 131,
+      "sha256": "51038C61F086F7C64A2D9F2EB86321EDA2A91E157AF7E811B558C65DDF9305DA"
+    },
+    {
+      "file": "right leg.png",
+      "width": 148,
+      "height": 191,
+      "sha256": "3DD39F2ED6C34176C3C0B61BD22E013B58CE3BFDBDDEA6BBE92BF4879F7A26AA"
+    },
+    {
+      "file": "right palm.png",
+      "width": 144,
+      "height": 85,
+      "sha256": "3AC9A800484DA9DC4A0B07E4212B4D5721447D69F6BF05C350C8F692C44A33E5"
+    },
+    {
+      "file": "tail.png",
+      "width": 361,
+      "height": 232,
+      "sha256": "2EAA28B47F23BAEF67CCB01B64E90839C0D871607B7DA5AFB2C0E793C0518674"
+    }
+  ],
+  "rig_scene_unchanged": true,
+  "validation": "6 poses rendered in isolated Godot using same rig and same PNG bytes"
+}

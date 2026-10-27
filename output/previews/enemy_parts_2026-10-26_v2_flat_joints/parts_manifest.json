@@ -1,0 +1,102 @@
+[
+  {
+    "file": "left palm.png",
+    "source_rect": [
+      34,
+      112,
+      256,
+      201
+    ],
+    "solid_black_pixels": 3828
+  },
+  {
+    "file": "right palm.png",
+    "source_rect": [
+      359,
+      95,
+      255,
+      237
+    ],
+    "solid_black_pixels": 4706
+  },
+  {
+    "file": "right bicep.png",
+    "source_rect": [
+      685,
+      79,
+      249,
+      269
+    ],
+    "solid_black_pixels": 10589
+  },
+  {
+    "file": "head.png",
+    "source_rect": [
+      1019,
+      32,
+      231,
+      362
+    ],
+    "solid_black_pixels": 4660
+  },
+  {
+    "file": "tail.png",
+    "source_rect": [
+      1325,
+      87,
+      263,
+      253
+    ],
+    "solid_black_pixels": 627
+  },
+  {
+    "file": "body.png",
+    "source_rect": [
+      33,
+      585,
+      260,
+      230
+    ],
+    "solid_black_pixels": 4705
+  },
+  {
+    "file": "left hand.png",
+    "source_rect": [
+      400,
+      519,
+      174,
+      360
+    ],
+    "solid_black_pixels": 7238
+  },
+  {
+    "file": "right hand.png",
+    "source_rect": [
+      684,
+      576,
+      252,
+      248
+    ],
+    "solid_black_pixels": 4880
+  },
+  {
+    "file": "lef leg.png",
+    "source_rect": [
+      1005,
+      534,
+      259,
+      334
+    ],
+    "solid_black_pixels": 4287
+  },
+  {
+    "file": "right leg.png",
+    "source_rect": [
+      1355,
+      518,
+      204,
+      362
+    ],
+    "solid_black_pixels": 3639
+  }
+]

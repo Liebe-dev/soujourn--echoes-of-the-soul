@@ -1,0 +1,62 @@
+[
+  {
+    "source": "D:\\Downloads\\W_Corp._L2_Cleanup_Agent_Meursault_Skill_3.gif",
+    "file": "w_corp_meursault_skill_3.gif",
+    "sha256": "840FCDE1B31165382BD164DC5E92A43F541441C3D6A3C8D615D1437FAB564BC0",
+    "bytes": 571595
+  },
+  {
+    "source": "C:\\Users\\xuank\\AppData\\Local\\Temp\\codex-clipboard-49602e32-1bc3-4d71-ba83-aaa06ae4e730.png",
+    "file": "hitbox_saber_attack_1.png",
+    "sha256": "46932D517A760DF1B095A26BFBEB5AD59221EA3CE3E17A3F0788C2DBA4E4DE73",
+    "bytes": 64383
+  },
+  {
+    "source": "C:\\Users\\xuank\\AppData\\Local\\Temp\\codex-clipboard-b6e7a198-6aea-40d4-9b88-3ca02e956e04.png",
+    "file": "hitbox_saber_attack_2.png",
+    "sha256": "73BA7EF3FD644F0448ED95A52507AEA1B5A3E419FD461033D39DBCB824933F8F",
+    "bytes": 103327
+  },
+  {
+    "source": "C:\\Users\\xuank\\AppData\\Local\\Temp\\codex-clipboard-6661f3cd-53e7-4692-a780-c2495c6e654a.png",
+    "file": "hitbox_saber_attack_3.png",
+    "sha256": "879E2A6969B05C55BA689ACE1BB120D72955A6646E7B6DBB0307794536227292",
+    "bytes": 97879
+  },
+  {
+    "source": "C:\\Users\\xuank\\AppData\\Local\\Temp\\codex-clipboard-7561765d-ae87-40ce-be6c-d1ecbc32bb61.png",
+    "file": "hitbox_saber_attack_4.png",
+    "sha256": "D4AB921F1744F9A128EF23DB1894629FA01272EA5772BC17591AC020E076B812",
+    "bytes": 115264
+  },
+  {
+    "source": "C:\\Users\\xuank\\AppData\\Local\\Temp\\codex-clipboard-24cdfd43-f180-4927-aacd-0fd02b527fc5.png",
+    "file": "single_crescent_shape.png",
+    "sha256": "C290DB3F366352662FEB3231D87B238EB8AB291534717A0EC6AC78CF11C9D056",
+    "bytes": 117573
+  },
+  {
+    "source": "C:\\Users\\xuank\\AppData\\Local\\Temp\\codex-clipboard-77e1ea44-901d-489d-afad-13a0dbbc9e27.png",
+    "file": "style_white_ellipse.png",
+    "sha256": "687F77C02E49158BDE672BDC5AA29F277C6D3ABF26BE329D86B46C13899BCEEE",
+    "bytes": 28639
+  },
+  {
+    "source": "C:\\Users\\xuank\\AppData\\Local\\Temp\\codex-clipboard-6009f994-0d53-48a7-b4bc-7738cc5e8e5d.png",
+    "file": "style_white_brush_arc.png",
+    "sha256": "5DA0420AE320C7CF484CAD61BC862380936C74481415D5308227A185A37085B2",
+    "bytes": 127281
+  },
+  {
+    "source": "C:\\Users\\xuank\\AppData\\Local\\Temp\\codex-clipboard-be53a460-4b19-4edd-a42c-d802574d7475.png",
+    "file": "style_white_slender_arc.png",
+    "sha256": "DCCC3D58F1EFB5CDFA6C2DBD1E7A67E2CC5EDF51BC31E5D1B0C6CB7E16719D47",
+    "bytes": 51074
+  },
+  {
+    "source": "C:\\Users\\xuank\\AppData\\Local\\Temp\\codex-clipboard-56ef3668-103c-4cdb-9fe4-baba7c429ea4.png",
+    "file": "style_gold_structure_only.png",
+    "sha256": "DA351672BC7ACBB4A5246DF68B6CAF9952E1CDD4DB3D283700416236F9DB62CC",
+    "bytes": 23772
+  }
+]

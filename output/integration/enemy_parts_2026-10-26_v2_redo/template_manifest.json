@@ -1,0 +1,122 @@
+[
+  {
+    "file": "body.png",
+    "width": 303,
+    "height": 263,
+    "scale": 2,
+    "crop_x": 209,
+    "crop_y": 249,
+    "crop_width": 606,
+    "crop_height": 526,
+    "template_width": 1024,
+    "template_height": 1024
+  },
+  {
+    "file": "head.png",
+    "width": 99,
+    "height": 188,
+    "scale": 4,
+    "crop_x": 314,
+    "crop_y": 136,
+    "crop_width": 396,
+    "crop_height": 752,
+    "template_width": 1024,
+    "template_height": 1024
+  },
+  {
+    "file": "lef leg.png",
+    "width": 181,
+    "height": 229,
+    "scale": 3,
+    "crop_x": 240,
+    "crop_y": 168,
+    "crop_width": 543,
+    "crop_height": 687,
+    "template_width": 1024,
+    "template_height": 1024
+  },
+  {
+    "file": "left hand.png",
+    "width": 139,
+    "height": 208,
+    "scale": 3,
+    "crop_x": 303,
+    "crop_y": 200,
+    "crop_width": 417,
+    "crop_height": 624,
+    "template_width": 1024,
+    "template_height": 1024
+  },
+  {
+    "file": "left palm.png",
+    "width": 159,
+    "height": 79,
+    "scale": 4,
+    "crop_x": 194,
+    "crop_y": 354,
+    "crop_width": 636,
+    "crop_height": 316,
+    "template_width": 1024,
+    "template_height": 1024
+  },
+  {
+    "file": "right bicep.png",
+    "width": 128,
+    "height": 106,
+    "scale": 6,
+    "crop_x": 128,
+    "crop_y": 194,
+    "crop_width": 768,
+    "crop_height": 636,
+    "template_width": 1024,
+    "template_height": 1024
+  },
+  {
+    "file": "right hand.png",
+    "width": 163,
+    "height": 131,
+    "scale": 4,
+    "crop_x": 186,
+    "crop_y": 250,
+    "crop_width": 652,
+    "crop_height": 524,
+    "template_width": 1024,
+    "template_height": 1024
+  },
+  {
+    "file": "right leg.png",
+    "width": 148,
+    "height": 191,
+    "scale": 4,
+    "crop_x": 216,
+    "crop_y": 130,
+    "crop_width": 592,
+    "crop_height": 764,
+    "template_width": 1024,
+    "template_height": 1024
+  },
+  {
+    "file": "right palm.png",
+    "width": 144,
+    "height": 85,
+    "scale": 5,
+    "crop_x": 152,
+    "crop_y": 299,
+    "crop_width": 720,
+    "crop_height": 425,
+    "template_width": 1024,
+    "template_height": 1024
+  },
+  {
+    "file": "tail.png",
+    "width": 361,
+    "height": 232,
+    "scale": 2,
+    "crop_x": 151,
+    "crop_y": 280,
+    "crop_width": 722,
+    "crop_height": 464,
+    "template_width": 1024,
+    "template_height": 1024
+  }
+]

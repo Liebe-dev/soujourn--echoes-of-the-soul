@@ -2,6 +2,10 @@
 .godot/
 .nomedia
 
+# Isolated Godot test user data and runtime caches.
+/output/**/isolated_appdata/
+/output/**/isolated_localappdata/
+
 # Godot-specific ignores
 .import/
 export.cfg

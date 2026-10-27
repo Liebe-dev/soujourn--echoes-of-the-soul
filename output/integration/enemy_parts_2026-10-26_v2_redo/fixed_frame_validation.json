@@ -1,0 +1,152 @@
+[
+  {
+    "file": "body.png",
+    "width": 303,
+    "height": 263,
+    "original_size_preserved": true,
+    "manual_rotation_degrees": 0,
+    "manual_translation": [
+      0,
+      0
+    ],
+    "added_padding": 0,
+    "original_joint_opaque_pixels": 21229,
+    "missing_original_joint_coverage": 0,
+    "method": "Fixed original template frame; resolution conversion only; original joint alpha underlay in black"
+  },
+  {
+    "file": "head.png",
+    "width": 99,
+    "height": 188,
+    "original_size_preserved": true,
+    "manual_rotation_degrees": 0,
+    "manual_translation": [
+      0,
+      0
+    ],
+    "added_padding": 0,
+    "original_joint_opaque_pixels": 3758,
+    "missing_original_joint_coverage": 0,
+    "method": "Fixed original template frame; resolution conversion only; original joint alpha underlay in black"
+  },
+  {
+    "file": "lef leg.png",
+    "width": 181,
+    "height": 229,
+    "original_size_preserved": true,
+    "manual_rotation_degrees": 0,
+    "manual_translation": [
+      0,
+      0
+    ],
+    "added_padding": 0,
+    "original_joint_opaque_pixels": 9450,
+    "missing_original_joint_coverage": 0,
+    "method": "Fixed original template frame; resolution conversion only; original joint alpha underlay in black"
+  },
+  {
+    "file": "left hand.png",
+    "width": 139,
+    "height": 208,
+    "original_size_preserved": true,
+    "manual_rotation_degrees": 0,
+    "manual_translation": [
+      0,
+      0
+    ],
+    "added_padding": 0,
+    "original_joint_opaque_pixels": 4359,
+    "missing_original_joint_coverage": 0,
+    "method": "Fixed original template frame; resolution conversion only; original joint alpha underlay in black"
+  },
+  {
+    "file": "left palm.png",
+    "width": 159,
+    "height": 79,
+    "original_size_preserved": true,
+    "manual_rotation_degrees": 0,
+    "manual_translation": [
+      0,
+      0
+    ],
+    "added_padding": 0,
+    "original_joint_opaque_pixels": 1108,
+    "missing_original_joint_coverage": 0,
+    "method": "Fixed original template frame; resolution conversion only; original joint alpha underlay in black"
+  },
+  {
+    "file": "right bicep.png",
+    "width": 128,
+    "height": 106,
+    "original_size_preserved": true,
+    "manual_rotation_degrees": 0,
+    "manual_translation": [
+      0,
+      0
+    ],
+    "added_padding": 0,
+    "original_joint_opaque_pixels": 6083,
+    "missing_original_joint_coverage": 0,
+    "method": "Fixed original template frame; resolution conversion only; original joint alpha underlay in black"
+  },
+  {
+    "file": "right hand.png",
+    "width": 163,
+    "height": 131,
+    "original_size_preserved": true,
+    "manual_rotation_degrees": 0,
+    "manual_translation": [
+      0,
+      0
+    ],
+    "added_padding": 0,
+    "original_joint_opaque_pixels": 2381,
+    "missing_original_joint_coverage": 0,
+    "method": "Fixed original template frame; resolution conversion only; original joint alpha underlay in black"
+  },
+  {
+    "file": "right leg.png",
+    "width": 148,
+    "height": 191,
+    "original_size_preserved": true,
+    "manual_rotation_degrees": 0,
+    "manual_translation": [
+      0,
+      0
+    ],
+    "added_padding": 0,
+    "original_joint_opaque_pixels": 3544,
+    "missing_original_joint_coverage": 0,
+    "method": "Fixed original template frame; resolution conversion only; original joint alpha underlay in black"
+  },
+  {
+    "file": "right palm.png",
+    "width": 144,
+    "height": 85,
+    "original_size_preserved": true,
+    "manual_rotation_degrees": 0,
+    "manual_translation": [
+      0,
+      0
+    ],
+    "added_padding": 0,
+    "original_joint_opaque_pixels": 1036,
+    "missing_original_joint_coverage": 0,
+    "method": "Fixed original template frame; resolution conversion only; original joint alpha underlay in black"
+  },
+  {
+    "file": "tail.png",
+    "width": 361,
+    "height": 232,
+    "original_size_preserved": true,
+    "manual_rotation_degrees": 0,
+    "manual_translation": [
+      0,
+      0
+    ],
+    "added_padding": 0,
+    "original_joint_opaque_pixels": 3229,
+    "missing_original_joint_coverage": 0,
+    "method": "Fixed original template frame; resolution conversion only; original joint alpha underlay in black"
+  }
+]

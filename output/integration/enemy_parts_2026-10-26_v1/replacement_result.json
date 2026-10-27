@@ -1,0 +1,48 @@
+{
+  "status": "replaced",
+  "files": [
+    {
+      "file": "body.png",
+      "sha256": "A01FA0B7D35DABCEA986646FEAF3CDC584A69F4E823E4088B871A51E69770351"
+    },
+    {
+      "file": "head.png",
+      "sha256": "3639925A4C0956CEB5F02076D2F8763CC73092F2AB6442E3CA60C5BD03898303"
+    },
+    {
+      "file": "lef leg.png",
+      "sha256": "B045D4BB1269D9AEA3ABC50F012580A75933098F89F412CFB0D90D513E985880"
+    },
+    {
+      "file": "left hand.png",
+      "sha256": "0EEC2668DC99F809C36781E23081DFEB35C2F35105C576EC8BE4385546C81B66"
+    },
+    {
+      "file": "left palm.png",
+      "sha256": "6416AC5C5848181C2A0E7A484DB4C5924053E3AA4ADC628C478C7C4CAC0C73B2"
+    },
+    {
+      "file": "right bicep.png",
+      "sha256": "4BDB8EF8D5C47E9C400DF92681A7D3AC79F79F12D7D799F0C033EAE95504D013"
+    },
+    {
+      "file": "right hand.png",
+      "sha256": "C082AB16B1BC81E3FB4EDB920312D261DCBA3BA9E82081F69D8B5545A27E0801"
+    },
+    {
+      "file": "right leg.png",
+      "sha256": "FFDB15D28E42C18473DD8C1C4C087F748F3268FC2814411B6A93CB68DB06D6D0"
+    },
+    {
+      "file": "right palm.png",
+      "sha256": "AF677F7490EAB38585E2BD1404916EAE786BF718A5624F90BF84172E5FDB5F7B"
+    },
+    {
+      "file": "tail.png",
+      "sha256": "2A311272553DDD5C686863E882C31FF6E59046EF6FDD92C6B559413B2C9609A1"
+    }
+  ],
+  "rig_scene_unchanged": true,
+  "backup": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\integration\\enemy_parts_2026-10-26_v1\\originals",
+  "scope": "10 separated body parts only; attack and death images unchanged"
+}

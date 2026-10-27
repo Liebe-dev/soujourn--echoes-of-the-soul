@@ -1,0 +1,342 @@
+{
+	"cases": [
+		{
+			"animation": "walk",
+			"loaded_parts": [
+				{
+					"file": "body.png",
+					"height": 359,
+					"width": 399
+				},
+				{
+					"file": "head.png",
+					"height": 284,
+					"width": 195
+				},
+				{
+					"file": "lef leg.png",
+					"height": 325,
+					"width": 277
+				},
+				{
+					"file": "right leg.png",
+					"height": 287,
+					"width": 244
+				},
+				{
+					"file": "left hand.png",
+					"height": 304,
+					"width": 235
+				},
+				{
+					"file": "left palm.png",
+					"height": 175,
+					"width": 255
+				},
+				{
+					"file": "right bicep.png",
+					"height": 202,
+					"width": 224
+				},
+				{
+					"file": "right hand.png",
+					"height": 227,
+					"width": 259
+				},
+				{
+					"file": "right palm.png",
+					"height": 181,
+					"width": 240
+				},
+				{
+					"file": "tail.png",
+					"height": 328,
+					"width": 457
+				}
+			],
+			"time": 0.0
+		},
+		{
+			"animation": "walk",
+			"loaded_parts": [
+				{
+					"file": "body.png",
+					"height": 359,
+					"width": 399
+				},
+				{
+					"file": "head.png",
+					"height": 284,
+					"width": 195
+				},
+				{
+					"file": "lef leg.png",
+					"height": 325,
+					"width": 277
+				},
+				{
+					"file": "right leg.png",
+					"height": 287,
+					"width": 244
+				},
+				{
+					"file": "left hand.png",
+					"height": 304,
+					"width": 235
+				},
+				{
+					"file": "left palm.png",
+					"height": 175,
+					"width": 255
+				},
+				{
+					"file": "right bicep.png",
+					"height": 202,
+					"width": 224
+				},
+				{
+					"file": "right hand.png",
+					"height": 227,
+					"width": 259
+				},
+				{
+					"file": "right palm.png",
+					"height": 181,
+					"width": 240
+				},
+				{
+					"file": "tail.png",
+					"height": 328,
+					"width": 457
+				}
+			],
+			"time": 0.5
+		},
+		{
+			"animation": "run",
+			"loaded_parts": [
+				{
+					"file": "body.png",
+					"height": 359,
+					"width": 399
+				},
+				{
+					"file": "head.png",
+					"height": 284,
+					"width": 195
+				},
+				{
+					"file": "lef leg.png",
+					"height": 325,
+					"width": 277
+				},
+				{
+					"file": "right leg.png",
+					"height": 287,
+					"width": 244
+				},
+				{
+					"file": "left hand.png",
+					"height": 304,
+					"width": 235
+				},
+				{
+					"file": "left palm.png",
+					"height": 175,
+					"width": 255
+				},
+				{
+					"file": "right bicep.png",
+					"height": 202,
+					"width": 224
+				},
+				{
+					"file": "right hand.png",
+					"height": 227,
+					"width": 259
+				},
+				{
+					"file": "right palm.png",
+					"height": 181,
+					"width": 240
+				},
+				{
+					"file": "tail.png",
+					"height": 328,
+					"width": 457
+				}
+			],
+			"time": 0.25
+		},
+		{
+			"animation": "run",
+			"loaded_parts": [
+				{
+					"file": "body.png",
+					"height": 359,
+					"width": 399
+				},
+				{
+					"file": "head.png",
+					"height": 284,
+					"width": 195
+				},
+				{
+					"file": "lef leg.png",
+					"height": 325,
+					"width": 277
+				},
+				{
+					"file": "right leg.png",
+					"height": 287,
+					"width": 244
+				},
+				{
+					"file": "left hand.png",
+					"height": 304,
+					"width": 235
+				},
+				{
+					"file": "left palm.png",
+					"height": 175,
+					"width": 255
+				},
+				{
+					"file": "right bicep.png",
+					"height": 202,
+					"width": 224
+				},
+				{
+					"file": "right hand.png",
+					"height": 227,
+					"width": 259
+				},
+				{
+					"file": "right palm.png",
+					"height": 181,
+					"width": 240
+				},
+				{
+					"file": "tail.png",
+					"height": 328,
+					"width": 457
+				}
+			],
+			"time": 0.75
+		},
+		{
+			"animation": "detect player",
+			"loaded_parts": [
+				{
+					"file": "body.png",
+					"height": 359,
+					"width": 399
+				},
+				{
+					"file": "head.png",
+					"height": 284,
+					"width": 195
+				},
+				{
+					"file": "lef leg.png",
+					"height": 325,
+					"width": 277
+				},
+				{
+					"file": "right leg.png",
+					"height": 287,
+					"width": 244
+				},
+				{
+					"file": "left hand.png",
+					"height": 304,
+					"width": 235
+				},
+				{
+					"file": "left palm.png",
+					"height": 175,
+					"width": 255
+				},
+				{
+					"file": "right bicep.png",
+					"height": 202,
+					"width": 224
+				},
+				{
+					"file": "right hand.png",
+					"height": 227,
+					"width": 259
+				},
+				{
+					"file": "right palm.png",
+					"height": 181,
+					"width": 240
+				},
+				{
+					"file": "tail.png",
+					"height": 328,
+					"width": 457
+				}
+			],
+			"time": 0.2
+		},
+		{
+			"animation": "RESET",
+			"loaded_parts": [
+				{
+					"file": "body.png",
+					"height": 359,
+					"width": 399
+				},
+				{
+					"file": "head.png",
+					"height": 284,
+					"width": 195
+				},
+				{
+					"file": "lef leg.png",
+					"height": 325,
+					"width": 277
+				},
+				{
+					"file": "right leg.png",
+					"height": 287,
+					"width": 244
+				},
+				{
+					"file": "left hand.png",
+					"height": 304,
+					"width": 235
+				},
+				{
+					"file": "left palm.png",
+					"height": 175,
+					"width": 255
+				},
+				{
+					"file": "right bicep.png",
+					"height": 202,
+					"width": 224
+				},
+				{
+					"file": "right hand.png",
+					"height": 227,
+					"width": 259
+				},
+				{
+					"file": "right palm.png",
+					"height": 181,
+					"width": 240
+				},
+				{
+					"file": "tail.png",
+					"height": 328,
+					"width": 457
+				}
+			],
+			"time": 0.0
+		}
+	],
+	"source": "imported replacement PNG resources; no runtime texture overrides",
+	"status": "passed"
+}

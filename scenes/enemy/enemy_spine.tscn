@@ -25,6 +25,7 @@ gradient = SubResource("Gradient_j5yna")
 fill_to = Vector2(0, 0)
 
 [sub_resource type="SkeletonModificationStack2D" id="SkeletonModificationStack2D_qko5b"]
+resource_local_to_scene = true
 enabled = true
 
 [sub_resource type="Animation" id="Animation_v82rw"]
@@ -616,6 +617,18 @@ tracks/48/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 0,
 "values": [Color(1, 1, 1, 1)]
+}
+tracks/49/type = "value"
+tracks/49/imported = false
+tracks/49/enabled = true
+tracks/49/path = NodePath("Skeleton2D/body/right bicep/right bicep:z_index")
+tracks/49/interp = 1
+tracks/49/loop_wrap = true
+tracks/49/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [-3]
 }
 
 [sub_resource type="Animation" id="Animation_7wisb"]
@@ -1643,6 +1656,18 @@ tracks/42/keys = {
 "update": 0,
 "values": [Color(1, 1, 1, 1), Color(1, 1, 1, 1), Color(1, 1, 1, 0)]
 }
+tracks/43/type = "value"
+tracks/43/imported = false
+tracks/43/enabled = true
+tracks/43/path = NodePath("Skeleton2D/body/right bicep/right bicep:z_index")
+tracks/43/interp = 1
+tracks/43/loop_wrap = true
+tracks/43/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [-3]
+}
 
 [sub_resource type="Animation" id="Animation_0npyx"]
 resource_name = "detect player"
@@ -2164,6 +2189,18 @@ tracks/42/keys = {
 "update": 0,
 "values": [Color(1, 1, 1, 1)]
 }
+tracks/43/type = "value"
+tracks/43/imported = false
+tracks/43/enabled = true
+tracks/43/path = NodePath("Skeleton2D/body/right bicep/right bicep:z_index")
+tracks/43/interp = 1
+tracks/43/loop_wrap = true
+tracks/43/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [-3]
+}
 
 [sub_resource type="Animation" id="Animation_w68ut"]
 resource_name = "run"
@@ -2684,6 +2721,18 @@ tracks/42/keys = {
 "transitions": PackedFloat32Array(1),
 "update": 0,
 "values": [Color(1, 1, 1, 1)]
+}
+tracks/43/type = "value"
+tracks/43/imported = false
+tracks/43/enabled = true
+tracks/43/path = NodePath("Skeleton2D/body/right bicep/right bicep:z_index")
+tracks/43/interp = 1
+tracks/43/loop_wrap = true
+tracks/43/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [-3]
 }
 
 [sub_resource type="Animation" id="Animation_6t7gl"]
@@ -3207,6 +3256,18 @@ tracks/42/keys = {
 "update": 0,
 "values": [Color(1, 1, 1, 1)]
 }
+tracks/43/type = "value"
+tracks/43/imported = false
+tracks/43/enabled = true
+tracks/43/path = NodePath("Skeleton2D/body/right bicep/right bicep:z_index")
+tracks/43/interp = 1
+tracks/43/loop_wrap = true
+tracks/43/keys = {
+"times": PackedFloat32Array(0),
+"transitions": PackedFloat32Array(1),
+"update": 1,
+"values": [-3]
+}
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_w68ut"]
 _data = {
@@ -3225,7 +3286,6 @@ _data = {
 [node name="Enemy Spine" type="Node2D" unique_id=1107824209]
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=1318423965]
-visible = false
 position = Vector2(894.99994, 1022.99994)
 scale = Vector2(29.28, 2.71)
 texture = SubResource("GradientTexture2D_wnxn7")
@@ -3249,7 +3309,7 @@ texture = ExtResource("1_v82rw")
 
 [node name="head" type="Bone2D" parent="Skeleton2D/body" unique_id=994426581]
 position = Vector2(-175, 22)
-scale = Vector2(0.9998353, 0.9998353)
+scale = Vector2(0.9998306, 0.9998306)
 rest = Transform2D(0.996905, 0.07845813, -0.07845813, 0.996905, -175, 22)
 
 [node name="head" type="Sprite2D" parent="Skeleton2D/body/head" unique_id=1000910683]
@@ -3258,7 +3318,7 @@ texture = ExtResource("2_6t7gl")
 
 [node name="left leg" type="Bone2D" parent="Skeleton2D/body" unique_id=251953830]
 position = Vector2(94, 94)
-scale = Vector2(0.99984974, 0.99984974)
+scale = Vector2(0.99984324, 0.99984324)
 rest = Transform2D(0.97029144, 0.24192083, -0.24192083, 0.97029144, 94, 94)
 
 [node name="left leg" type="Sprite2D" parent="Skeleton2D/body/left leg" unique_id=839463738]
@@ -3267,7 +3327,7 @@ texture = ExtResource("3_w68ut")
 
 [node name="right leg" type="Bone2D" parent="Skeleton2D/body" unique_id=749570345]
 position = Vector2(25, 88)
-scale = Vector2(0.99985206, 0.99985206)
+scale = Vector2(0.99984825, 0.99984825)
 rest = Transform2D(0.9998448, -0.017452355, 0.017452355, 0.9998448, 23, 103)
 
 [node name="right leg" type="Sprite2D" parent="Skeleton2D/body/right leg" unique_id=806748549]
@@ -3277,7 +3337,7 @@ texture = ExtResource("4_0npyx")
 
 [node name="left hand" type="Bone2D" parent="Skeleton2D/body" unique_id=2068286689]
 position = Vector2(-44, 61)
-scale = Vector2(0.999848, 0.999848)
+scale = Vector2(0.9998428, 0.9998428)
 rest = Transform2D(0.98480445, 0.17364766, -0.17364766, 0.98480445, -77, 66)
 
 [node name="left hand" type="Sprite2D" parent="Skeleton2D/body/left hand" unique_id=1585448043]
@@ -3286,7 +3346,7 @@ texture = ExtResource("5_15am3")
 
 [node name="left palm" type="Bone2D" parent="Skeleton2D/body/left hand" unique_id=1636281089]
 position = Vector2(-44, 155)
-scale = Vector2(0.99989635, 0.99989635)
+scale = Vector2(0.9998885, 0.9998885)
 rest = Transform2D(1, 0, 0, 1, -44, 155)
 
 [node name="left palm" type="Sprite2D" parent="Skeleton2D/body/left hand/left palm" unique_id=1333886471]
@@ -3298,10 +3358,11 @@ texture = ExtResource("6_uss21")
 z_index = -3
 position = Vector2(-138, 43)
 rotation = -0.21816616
-scale = Vector2(0.9998453, 0.9998453)
+scale = Vector2(0.99984246, 0.99984246)
 rest = Transform2D(0.97629344, -0.21643905, 0.21643905, 0.97629344, -137, 61)
 
 [node name="right bicep" type="Sprite2D" parent="Skeleton2D/body/right bicep" unique_id=1489567709]
+z_index = -3
 position = Vector2(-50, 5)
 texture = ExtResource("7_boq7l")
 
@@ -3309,7 +3370,7 @@ texture = ExtResource("7_boq7l")
 z_index = -3
 position = Vector2(-72, 26)
 rotation = -0.19198622
-scale = Vector2(0.9999042, 0.9999042)
+scale = Vector2(0.9998941, 0.9998941)
 rest = Transform2D(0.98162687, -0.19080894, 0.19080894, 0.98162687, -72, 26)
 
 [node name="right hand" type="Sprite2D" parent="Skeleton2D/body/right bicep/right hand" unique_id=352907808]
@@ -3319,7 +3380,7 @@ texture = ExtResource("8_8v4ga")
 [node name="right palm" type="Bone2D" parent="Skeleton2D/body/right bicep/right hand" unique_id=26180859]
 position = Vector2(-90, 111)
 rotation = 0.28797933
-scale = Vector2(0.9998998, 0.9998998)
+scale = Vector2(0.9999009, 0.9999009)
 rest = Transform2D(0.95881915, 0.28401518, -0.28401518, 0.95881915, -90, 111)
 
 [node name="right palm" type="Sprite2D" parent="Skeleton2D/body/right bicep/right hand/right palm" unique_id=1233770075]
@@ -3330,7 +3391,7 @@ texture = ExtResource("9_7wisb")
 [node name="tail" type="Bone2D" parent="Skeleton2D/body" unique_id=1946207231]
 z_index = -1
 position = Vector2(115, 48)
-scale = Vector2(0.99984264, 0.99984264)
+scale = Vector2(0.9998424, 0.9998424)
 rest = Transform2D(0.99539423, -0.095845565, 0.095845565, 0.99539423, 115, 48)
 
 [node name="tail" type="Sprite2D" parent="Skeleton2D/body/tail" unique_id=1119080631]

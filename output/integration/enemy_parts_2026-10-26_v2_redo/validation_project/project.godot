@@ -1,0 +1,13 @@
+config_version=5
+[application]
+config/name="Codex Enemy Art Validation"
+config/use_custom_user_dir=true
+config/custom_user_dir="CodexEnemyArt20261026"
+[display]
+window/size/viewport_width=64
+window/size/viewport_height=64
+window/size/initial_position_type=0
+window/size/initial_position=Vector2i(-4000,-4000)
+[rendering]
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"

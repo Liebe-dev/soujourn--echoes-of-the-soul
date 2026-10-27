@@ -1,0 +1,94 @@
+[
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\body.png",
+    "Hash": "75FB5BDAE9714B967A97E7C8116E5C07B5D31A69A4743788DDB1B64984A1AF8A"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\body.png.import",
+    "Hash": "78EE39DB8693ACB9D36E8868D561F719A4DF2381A3802CF8A622FDC2D25131DA"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\head.png",
+    "Hash": "56311A39750BEE57EA79102DB6DFDD5E25711FBDAB6ED740956895CF9F33B931"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\head.png.import",
+    "Hash": "0FFB7D1111EC59C0C3D380B02A719F9427E8529191973D6C6EE40E34580AC2D7"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\lef leg.png",
+    "Hash": "7338A9BE65BA43045CDC4F7FC27FF2E28EC79C45AA7EF53E49CF7F25B710717B"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\lef leg.png.import",
+    "Hash": "30000C1CC4AA15B30BC6C37B641E51A369A3DBD27E74E886979228F47322F4E7"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\left hand.png",
+    "Hash": "3BE2D4C059435C0D1332E6CB5596547E35DC8F4B4030829DAE422F51E651F350"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\left hand.png.import",
+    "Hash": "01EA060699BBA7C3C3A709A83740FCF010F06A0DA136B56865D7CA9B0A3A6EA2"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\left palm.png",
+    "Hash": "1C215E971D26FB41CD57FCB2F4C101923D5D60E9704D50F16AB53772F392DA27"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\left palm.png.import",
+    "Hash": "E2341B5D4D0F94F92AFC0B8C10C163AF24312C343AA6C5133FFA82275D556087"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right bicep.png",
+    "Hash": "2ABE2C6427DF74B353574644138A5C7525CB045E2D69987F74B198A9102C26E9"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right bicep.png.import",
+    "Hash": "F2FAA61F256708EB7834A5627778BA3F4E482134B6D203EE7EB31AE4E82DA635"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right hand.png",
+    "Hash": "9962598DC46F6B660633B99237F21499442F1A60B347D7E449138339F697CF19"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right hand.png.import",
+    "Hash": "77134500E3F029011D52426D4655A988BA593F3CAB47483BFA0635F374E851C0"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right leg.png",
+    "Hash": "30570AE18F197B6F204FD34EB349112330F0402EB1B389D0A544B26D86CCC9E5"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right leg.png.import",
+    "Hash": "76DF7506B19E0B8ABE950DE837D76C5713B725EF101EE55739FAE80570EC66E2"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right palm.png",
+    "Hash": "8BB9BDA4DC7CEE7EF9DE152560EB0B8099576671336892F22D66F37E78FEE337"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right palm.png.import",
+    "Hash": "4B5D7B07C238E3CC542F5D47F2EBB19AAD9C7680ED9C20307A8DCF1C3C655BB9"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\tail.png",
+    "Hash": "0A525FC6AB35B37BD533B2FF88D74DF9923892D19A2084FCC19DB79E766817B8"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\tail.png.import",
+    "Hash": "C2D752C137FADF1694AAF8574863EC47B97B817DA2961C0E2941143DEEBD655B"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\template.png",
+    "Hash": "C6C6B57D8B90715A446359EABD51EF5C81ABF02A7D75789575B408B88FDC7705"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\template.png.import",
+    "Hash": "99E4B77398A3318933DCFA2B4655896F43F34E3FF6A71289D4025C471A3AAC7A"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\scenes\\enemy\\enemy_spine.tscn",
+    "Hash": "CE4B5313F89211E8135FA63F7A3AAC4A497E669F9CA2871D95797D1F6093EF37"
+  }
+]

@@ -6,6 +6,7 @@ const S = AdelStateMachine.State
 const ChargedFinish = preload("res://scenes/adel/components/charged_skill_finish.gd")
 const ImpactFeedback = preload("res://scenes/adel/components/stagger_impact.gd")
 const SkillDebugSettings = preload("res://scenes/adel/components/skill_debug_settings.gd")
+const ChargeZoom = preload("res://scenes/adel/components/skill_charge_zoom.gd")
 
 signal cooldown_changed(slot: StringName, remaining: float, total: float)
 
@@ -21,6 +22,13 @@ signal cooldown_changed(slot: StringName, remaining: float, total: float)
 @export_range(0.01, 1.0, 0.01) var charged_release_windup: float = 0.1
 @export_range(0.01, 1.0, 0.01) var full_charge_final_pose: float = 0.2
 @export var allow_airborne: bool = false
+
+@export_group("Charge Zoom")
+@export var charge_zoom_enabled: bool = true
+@export_range(1.0, 3.0, 0.01, "or_greater") var charge_level_1_zoom_multiplier: float = 1.12
+@export_range(1.0, 3.0, 0.01, "or_greater") var charge_level_2_zoom_multiplier: float = 1.25
+@export_range(0.0, 1.0, 0.01, "or_greater", "suffix:s") var charge_zoom_in_duration: float = 0.12
+@export_range(0.0, 2.0, 0.01, "or_greater", "suffix:s") var charge_zoom_out_duration: float = 0.18
 
 @export_group("Lunge")
 @export_range(0.0, 2000.0, 1.0, "or_greater") var lunge_distance: float = 180.0
@@ -80,6 +88,7 @@ var distance_travelled := 0.0
 var contact_target: Node2D
 var _body: CharacterBody2D
 var _charged_finish: Node
+var _charge_zoom: Node
 var _return_started := false
 var _impact_feedback: Node
 var _finishing := false
@@ -96,6 +105,9 @@ var _query := PhysicsShapeQueryParameters2D.new()
 func setup(body: CharacterBody2D) -> void:
 	_body = body
 	process_mode = Node.PROCESS_MODE_PAUSABLE
+	_charge_zoom = ChargeZoom.new()
+	_charge_zoom.name = "ChargeZoom"
+	add_child(_charge_zoom)
 	_charged_finish = ChargedFinish.new()
 	_charged_finish.name = "ChargedSkillFinish"
 	add_child(_charged_finish)
@@ -183,6 +195,7 @@ func physics_update(delta: float) -> void:
 		S.SKILL_CHARGE:
 			if not _released: _update_charge_facing()
 			charge_time += delta
+			if not _released: _sync_charge_zoom()
 			if _released:
 				if charge_time + 0.000001 >= tap_windup: _start_lunge()
 			elif charge_time + 0.000001 >= _full_charge_time():
@@ -219,12 +232,23 @@ func _update_charge_facing() -> void:
 func _full_charge_time() -> float:
 	return maxf(charge_level_2_time, charge_level_1_time + full_charge_final_pose)
 
+func _sync_charge_zoom() -> void:
+	if not charge_zoom_enabled:
+		_charge_zoom.cancel()
+		return
+	if charge_time < charge_level_1_time: return
+	# Level 2 has an authored final pose before auto-release, so its zoom is visible.
+	var level_2_start := _full_charge_time() - full_charge_final_pose
+	var multiplier := charge_level_2_zoom_multiplier if charge_time >= level_2_start else charge_level_1_zoom_multiplier
+	_charge_zoom.hold(_body.get_node_or_null("Camera2D"), multiplier, charge_zoom_in_duration)
+
 func _enter(phase: int, clip: StringName) -> void:
 	_elapsed = 0.0
 	_body.state_machine.transition(phase)
 	_body.presentation.hold(clip)
 
 func _start_lunge() -> void:
+	_charge_zoom.release(charge_zoom_out_duration)
 	_start_cooldown()
 	_remaining_distance = lunge_distance * ([1.0, charged_distance_multiplier, full_distance_multiplier][tier])
 	_body.velocity = Vector2.ZERO
@@ -310,6 +334,7 @@ func _start_impact_feedback() -> void:
 	})
 
 func cancel_impact_feedback() -> void:
+	if is_instance_valid(_charge_zoom): _charge_zoom.cancel()
 	if is_instance_valid(_charged_finish): _charged_finish.cancel()
 	if is_instance_valid(_impact_feedback): _impact_feedback.cancel()
 
@@ -354,6 +379,8 @@ func _finish() -> void:
 	if tier > 0 and _charged_finish.holding:
 		if _return_started: return
 		_return_started = true
+		# The impact source owns the complete frozen return; remove any slow charge tail.
+		_charge_zoom.cancel()
 		_body.spine_anim.seek(_body.spine_anim.get_animation(&"saber_skill_6").length, true)
 		CombatTime.set_actor_exempt(_body, false)
 		CombatTime.remove(self, &"skill_recovery")

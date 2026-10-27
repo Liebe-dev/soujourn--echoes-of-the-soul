@@ -1,6 +1,6 @@
 # Hướng dẫn tùy chỉnh thông số game
 
-Cập nhật: **24/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
+Cập nhật: **26/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
 
 ## Mục lục
 
@@ -8,6 +8,7 @@ Cập nhật: **24/10/2026**. Đây là file dùng chung: khi thêm hoặc đổ
 - [HP, stamina, bình máu và progression](#hp-stamina)
 - [Di chuyển, nhảy và dash](#di-chuyen)
 - [Combo, đánh trên không, jump attack và hitbox Player](#tan-cong)
+- [VFX bốn đòn Saber: vị trí, hướng và vệt dư](#saber-vfx)
 - [Defense, Guard, Deflect, Stagger và hit-stop](#phong-thu)
 - [Q Saber: charge, damage, zoom và freeze](#skill-q)
 - [Dark Sentinel: entry, rút HP và debug](#sentinel)
@@ -165,6 +166,88 @@ Vận tốc lao xuống: `JUMP_ATTACK_FALL_SPEED` trong `res://scenes/adel/compo
 - Collider nhận hit Player: **PlayableAdel/CollisionShape2D**. Collider thân không phải hitbox tấn công. `AttackHitbox` là đường legacy, không dùng nó để căn SaberHitbox hiện hành.
 - Animation hình: **SpinePivot/SpineRig/AnimationPlayer** thuộc rig Adel. Ready sau Defense/Stagger chỉ frame cuối; Q hoàn tất dùng đủ chuỗi. Thời gian khóa Defense ở phần 5 độc lập với việc kéo key pose.
 
+<a id="saber-vfx"></a>
+### VFX bốn đòn Saber — cập nhật 26/10/2026
+
+Scene gốc: **`res://asset/Character/Adel/adel spine action use.tscn` → SaberSwingVFX**.
+Trong Player: **`res://scenes/adel/playable_adel.tscn` → SpinePivot/SpineRig/SaberSwingVFX**.
+Script: `res://scenes/adel/components/saber_swing_vfx.gd`; material được tạo bằng
+`res://scenes/adel/components/saber_slash.gdshader`. Các scene playable/test hiện
+không khai báo override riêng cho các trường VFX dưới đây; vẫn kiểm tra instance
+map và Remote nếu kết quả khác scene gốc.
+
+**Appearance — mặc định script và override scene gốc hiện tại:**
+
+- `enabled`: script `true`, scene kế thừa; bật/tắt cả hai lớp và dọn vệt dư khi tắt.
+- `attached_opacity`: script `0.96`, scene kế thừa; độ đậm lớp gắn frame, khoảng 0–1.
+- `residual_opacity`: script `0.86`, scene kế thừa; độ đậm vệt dư, khoảng 0–1.
+- `effect_offset_pixels`: script `(0,0)`, scene kế thừa; dịch toàn bộ hiệu ứng.
+- `effect_scale`: script `(1,1)`; **scene đang override `(1.15,1.15)`**. Giữ giá trị
+  người dùng đã căn, không đặt lại thành mặc định chỉ để khớp ảnh preview cũ.
+
+Tọa độ `*_pixels`, pivot và `texture_frame_rects` dùng **pixel frame sprite gốc
+1371×976**, không phải pixel cửa sổ hoặc world unit. Toàn bộ kết quả căn riêng
+từng đòn chịu Effect Scale chung; không lấy số pixel đo trên GIF làm offset nguồn.
+
+**Per-attack — chỉ số mảng 0/1/2/3 tương ứng đòn 1/2/3/4.** Tất cả các giá trị
+riêng từng đòn bên dưới là mặc định script, scene gốc hiện không override:
+
+- Đòn 1, phần tử **0**: Offset `(0,0)`, Scale `(1,1)`, Rotation `0°`, Pivot
+  `(950,450)`, Flip H `false`, Flip V **`true`**, Reverse Motion `false`, Stroke Width `1.0`.
+- Đòn 2, phần tử **1**: Offset `(0,0)`, Scale `(1,1)`, Rotation `0°`, Pivot
+  `(900,480)`, Flip H/V `false`, Reverse Motion `false`, Stroke Width `1.0`.
+- Đòn 3, phần tử **2**: Offset **`(0,-80)`**, Scale **`(1.38,0.40)`**, Rotation
+  **`-1°`**, Pivot **`(1660,400)`**, Flip H/V `false`, Reverse Motion **`true`**,
+  Stroke Width **`0.90`**. Pivot phía trước giữ gần nguyên tầm trước khi tăng X,
+  nên phần thêm chủ yếu kéo về sau; cung phẳng, cao gần vai và hơi nghiêng.
+- Đòn 4, phần tử **3**: Offset `(0,-60)`, Scale `(1,0.22)`, Rotation `0°`, Pivot
+  `(905,400)`, Flip H/V `false`, Reverse Motion `false`, Stroke Width `0.75`;
+  vệt mảnh ngang vai, chiều ngược đòn 3 khi nhân vật nhìn phải.
+
+Các tên trường: `attack_offsets_pixels`, `attack_scales`,
+`attack_rotations_degrees`, `attack_pivots_pixels`, `attack_flip_h`,
+`attack_flip_v`, `attack_reverse_motion`, `attack_stroke_widths`.
+Offset Y âm nâng lên; Scale X kéo dài, Scale Y làm phẳng/cao cung; rotation là độ
+quanh pivot. Flip H/V lật cả hình lẫn cung. Reverse Motion đảo **cả đầu/đuôi hình
+khi bung hết và chiều chuyển động**, không chỉ chiều biến mất. Stroke Width giảm
+bề dày nét theo bán kính cung mà không rút ngắn chiều dài; script clamp 0.05–2.0.
+
+**Residual lifetime — giây thực, không phải giây game:**
+
+- `residual_lifetime`: script `0.35s`; **scene override `0.30s`**, dùng cho đòn 1–3.
+- `finisher_residual_lifetime`: script `0.44s`; **scene override `0.39s`**, dùng cho đòn 4.
+- `residual_head_travel`: script `0.12`; **scene override `0.10`**, đơn vị là tỷ lệ
+  của cung gốc mà đầu vệt đi thêm, không phải giây hoặc pixel.
+- `max_residuals`: script `3`, scene kế thừa; số vệt dư tối đa, export cho phép 1–8.
+
+Đồng hồ `Time.get_ticks_usec()` và `PROCESS_MODE_ALWAYS` cho vệt dư chạy qua
+hit-stop/freeze, slow motion và cả pause SceneTree. Đổi animation không tự xóa
+vệt còn tuổi; một vệt đã hết lifetime thì không nhất thiết còn thấy ở đòn tiếp.
+Vệt cũ giữ transform thế giới lúc sinh, không xoay/lật theo lần đổi hướng sau.
+
+**Texture và mốc phát:** `attack_textures` kế thừa bốn PNG
+`res://asset/VFX/Adel/Saber/saber_attack_1.png` … `saber_attack_4.png`; nền đen
+được shader chuyển từ độ sáng sang alpha. `texture_frame_rects` mặc định, không
+override, theo thứ tự bốn đòn:
+
+- `Rect2(647.1531, 2.1739, 1158.4567, 957.3913)`.
+- `Rect2(675.7747, 44.7316, 988.6629, 965.9564)`.
+- `Rect2(626.1668, 26.0688, 1151.3319, 804.4746)`.
+- `Rect2(336.5756, -13.9835, 1426.5598, 839.3178)`.
+
+`animation_player_path = ../AnimationPlayer`, `source_sprite_path = ../TestAttackSprite`,
+scene kế thừa. Component tự đọc track `TestAttackSprite:frame`: hiện frame 1 ở
+`0.15s`, frame 2 ở `0.20s` **animation time**. Lớp gắn frame mất tại frame 2/đổi
+animation; vệt dư sinh tại frame 1 và tự hết tuổi theo giây thực.
+Sửa các mốc này trong AnimationPlayer khi thực sự muốn đổi nhịp; chỉnh VFX không
+tự đổi hitbox hoặc damage. `ARC_*` trong script và `_configure_sprite()` là phép
+ánh xạ ảnh/cung; khi đổi bitmap mới phải căn lại cả hình và đường thu, không chỉ
+thay một Texture rồi coi là tương thích.
+
+Inspector `Remote` chỉ thử trong lần chạy; lưu ở node scene gốc để dùng lâu dài.
+Thử từng đòn, nối đòn, quay hai phía và hit-stop; mở hitbox thật để kiểm tra vùng
+đánh. Bản render kiểm tra hình vệt chưa phải phép chứng minh pixel VFX trùng collider.
+
 <a id="phong-thu"></a>
 ## 5. Defense, Guard, Deflect, Stagger và hit-stop
 
@@ -316,6 +399,7 @@ Mở Player scene → **SaberSkill**, không phải node WeaponHolder/Saber. Sou
 - **Cooldown:** **SaberSkill → Cooldown** có `tap_cooldown`, `charged_cooldown`, `full_cooldown`, tương ứng nhấn nhanh/tụ mức 1/mức 2. Mặc định script **5/8/10**; scene `playable_adel.tscn` hiện được người dùng override thành **4/6/8**. Đơn vị **giây game**, chưa có override map riêng cho ba trường này. Bắt đầu ở `_start_lunge()` khi thực sự tung đòn, không tính lúc đang giữ/tụ Q. Dừng khi pause và freeze trả zoom; chịu slow motion/hit-stop toàn game, kể cả pha Player được miễn slow motion. Chỉnh số giây trong Inspector; 0 là không hồi cho mức đó. Đánh hụt hoặc bị ngắt sau khi tung vẫn giữ hồi; bị hủy trước khi lao không tiêu hồi. Chỉ chặn Q, không khóa di chuyển/đánh thường/Defense; bấm trong hồi không tạo lệnh chờ tự dùng khi hết. `restore_checkpoint_state()` reset hồi và HUD; hồi không lưu trong save.
 - **Tắt/bật hồi khi debug:** trong game **Esc → Debug - Skills → Skill cooldowns**. Mặc định **bật**; **tắt** sẽ xóa hồi Q hiện tại, trả HUD về sẵn sàng ngay khi menu còn pause và bỏ hồi ở mọi lần Q tiếp theo, tới khi **bật lại**. Bật lại chỉ áp dụng hồi bình thường cho lần tung tiếp theo, không tự tạo hồi cho chiêu trước đó. Tùy chọn giữ xuyên checkpoint/đổi map trong phiên debug, không ghi save/config, khởi động game mới mặc định bật; release luôn dùng hồi bình thường. Scene `res://scenes/UI/game_pause_menu.tscn` → **VBoxContainer/SkillDebug/CooldownsEnabled** là CheckButton, `button_pressed=true` trong scene; script `pause.gd` đồng bộ trạng thái phiên khi mở menu và xử lý `_on_skill_cooldowns_toggled()`. Biến bool `cooldowns_enabled=true` trong `res://scenes/adel/components/skill_debug_settings.gd` là mặc định script, không export/không override scene; `SaberWeaponSkill` đọc qua `are_cooldowns_enabled()`. Việc tắt không sửa ba thông số Cooldown trong Inspector; bật lại dùng đúng override hiện tại **4/6/8**. Nhóm debug chỉ hiện ở debug build.
 - **Charge:** `tap_windup`; `charge_level_1_time`/`charge_level_2_time` là hai mốc giữ; `charged_release_windup` là phần thêm sau thả mức 1; `full_charge_final_pose` là pose cuối trước ép lao mức 2. Thả giữa mốc lấy mức thấp đã đạt. `allow_airborne` bật/tắt Q trên không.
+- **Charge Zoom:** zoom khi giữ Q, chỉnh riêng tại **SaberSkill → Charge Zoom**. Mức 1 bắt đầu cùng pose `saber_skill_2` ở `charge_level_1_time`; mức 2 cùng pose cuối `saber_skill_3` ở `_full_charge_time() - full_charge_final_pose`, trước tự lao. Với scene hiện tại là **0,7 giây / 1,3 giây**; mốc đủ mức 2 vẫn **1,5 giây game**. Nhấn nhanh chưa tới mức 1 không zoom. Khi bắt đầu lao, nguồn zoom tụ trả êm về nền kể cả đánh hụt; zoom impact vẫn theo ba nhóm riêng bên dưới. Zoom tụ dùng thời gian thực nhưng dừng theo pause, không thay thời gian tụ hoặc tốc độ gameplay. Các nguồn camera lấy hệ số lớn nhất; không nhân chồng zoom. Hủy chiêu/mất focus/checkpoint/thoát scene xóa nguồn `skill_charge`; nguồn impact sở hữu trọn đoạn freeze trả zoom cuối.
 - **Lunge:** `lunge_distance` là quãng nhấn nhanh; nhân `charged_distance_multiplier`/`full_distance_multiplier` cho hai mức giữ. `lunge_speed` đổi tốc độ, không đổi tổng ngân sách quãng đường. `enemy_detection_mask` là physics bitmask chọn đối tượng dò; không phải layer index đơn lẻ.
 - **Damage And Stun:** `damage` cơ sở, `charged_damage_multiplier`/`full_damage_multiplier`; `charged_stun_duration`/`full_stun_duration` là thời gian enemy không tấn công sau trúng. Nhấn nhanh không có stun charge. `impact_pose_duration` là pha skill_5.
 - **Impact Timing:** ba `*_hit_stop_duration` cho tap/mức 1/mức 2; `tap_recovery_duration` và `charged_recovery_duration` đặt thời lượng skill_6; `recovery_slow_motion_scale` đặt mức chậm toàn game trừ Player của recovery charge. Thời lượng recovery charge được giữ theo thời gian thực.
@@ -345,6 +429,16 @@ Scene `res://scenes/adel/playable_adel.tscn` → **SaberSkill**.
 - **Charged Release Windup** (`charged_release_windup`): scene gốc `0.1`; script `0.1`.
 - **Full Charge Final Pose** (`full_charge_final_pose`): scene gốc `0.2`; script `0.2`.
 - **Allow Airborne** (`allow_airborne`): scene gốc `false`; script `false`.
+
+**Charge Zoom**
+
+Các giá trị dưới đây phân biệt mặc định script và override hiện có trong scene người dùng.
+
+- **Charge Zoom Enabled** (`charge_zoom_enabled`): `true`; tắt để bỏ zoom tụ, giữ nguyên phản hồi đánh trúng.
+- **Charge Level 1 Zoom Multiplier** (`charge_level_1_zoom_multiplier`): scene `1.15`; script `1.12` lần zoom nền.
+- **Charge Level 2 Zoom Multiplier** (`charge_level_2_zoom_multiplier`): scene `1.28`; script `1.25` lần zoom nền. Hệ số `1` bỏ zoom ở mức tương ứng.
+- **Charge Zoom In Duration** (`charge_zoom_in_duration`): scene `0.13`; script `0.12` giây thực cho mỗi lần chuyển mức; `0` đổi ngay. Đường vào là **quintic ease-out**: kéo vào mạnh từ đầu rồi giảm tốc liên tục về đích, đi khoảng 67% quãng zoom trong 20% thời gian đầu. Áp dụng cho cả mức 1 và mức 2.
+- **Charge Zoom Out Duration** (`charge_zoom_out_duration`): scene `0.2`; script `0.18` giây thực từ lúc bắt đầu lao để trả zoom tụ; `0` xóa ngay. Hủy chiêu luôn dọn ngay để tránh giữ camera. Thời lượng trả zoom impact có freeze vẫn chỉnh bằng `charged_impact_zoom_duration` / `full_impact_zoom_duration`.
 
 **Lunge**
 
@@ -800,6 +894,13 @@ Khi có thông số mới hoặc chuyển node/script: sửa ngay phần hệ th
 Giữ nội dung hiện hành ngay tại mục đang có, thay mô tả đã bị thay thế thay vì chồng nhiều đoạn đính chính. Các bản báo cáo hệ thống chỉ ghi cơ chế, phạm vi và kiểm chứng; liên kết về file này cho tuning. Cập nhật ngày trên đầu file và mục thay đổi gần nhất bên dưới. Không tạo báo cáo mới cho từng thông số. `.docx` và bản tổng hợp tuần là tài liệu lịch sử giữ nguyên.
 
 ### Thay đổi gần nhất
+
+- 26/10/2026: bổ sung nguồn tuning VFX Saber tại mục [VFX bốn đòn Saber](#saber-vfx),
+  ghi đủ mặc định script/override scene hiện hành và các phép căn riêng từng đòn.
+  Đây là đồng bộ tài liệu trong lượt bàn giao animation; không đổi tham số gameplay.
+
+- 26/10/2026: thêm zoom khi tụ Q mức 1/pose cuối mức 2, mặc định **1.12× / 1.25×**, vào **0.12 giây thực**, trả khi lao **0.18 giây thực**, nhóm **SaberSkill → Charge Zoom**. Theo điều chỉnh cảm giác, đường vào dùng quintic ease-out để kéo mạnh ngay đầu rồi giảm tốc dần. Tách nguồn camera và dọn khi ngắt chiêu; giữ timing, cooldown, zoom impact và các override scene hiện có của người dùng.
+  Kiểm chứng trên bản sao với user data riêng: bản đầu `q_charge_zoom_validation.gd` **66/66** ở cả headless và cửa sổ đồ họa; đã xem ảnh trước tụ/mức 1/mức 2. Sau đổi đường vào ease-out, bộ này **80/80** headless, gồm kiểm tra kéo mạnh đầu, giảm tốc qua các khoảng thời gian bằng nhau và tới đúng đích ở cả hai mức. Các bộ Q Hold **52/52**, Impact **106/106**, Return **71/71**, Cooldown **107/107** đã qua ở bản đầu; 114 file scene/Word được đối chiếu không đổi.
 
 - 24/10/2026: triển khai thuộc tính, phân bổ thử/xác nhận, migration v2, Character/Equipment dữ liệu thật, yêu cầu/scaling Saber, Coin/Soul/thưởng EnemyBase và phần damage/duy trì Sentinel của Assimilation. Giữ các tuning combat, scene rig/map và tài liệu Word đang sửa. Bộ số mới là cấu hình thử; các luồng phụ thuộc chưa có nền vẫn chờ.
 

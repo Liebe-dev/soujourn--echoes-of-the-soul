@@ -98,6 +98,9 @@ Các đường dẫn tương đối dưới đây tính từ project gốc ở m
 
 ### Tài liệu hiện hành
 
+- Khi tiếp quản **animation/VFX combat Adel**, đọc [HANDOFF_anim.md](HANDOFF_anim.md)
+  trước khi sửa: yêu cầu và phản hồi đã chốt, nghiên cứu Limbus/After Effects,
+  trạng thái hai lớp VFX, lỗi resource dùng chung, bằng chứng và bước tiếp theo ngày 26/10/2026.
 - [Hướng dẫn tuning chung](../Bao_cao_ky_thuat/huong_dan_tuy_chinh.md) — nơi duy nhất quản lý vị trí chỉnh thông số runtime.
 - [Player](../Bao_cao_ky_thuat/player_technical_report.md) — HFSM, combo, Q, Sentinel, phần đã làm/chờ làm và kiểm chứng.
 - [Defense, Guard, Deflect, Stagger, Stamina](../Bao_cao_ky_thuat/defense_guard_deflect_stagger_stamina_report.md) — Fracture/Bleed, nhận đòn và hồi phục.

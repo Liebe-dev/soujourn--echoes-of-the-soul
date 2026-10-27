@@ -42,6 +42,7 @@
 [ext_resource type="Texture2D" uid="uid://dji80f7sdnle3" path="res://asset/Character/Adel/Saber attack/sabers4.png" id="39_krwnq"]
 [ext_resource type="Texture2D" uid="uid://catfmw53onoop" path="res://asset/Character/Adel/Saber attack/sabers5.png" id="40_87ms7"]
 [ext_resource type="Texture2D" uid="uid://du21a25834qo7" path="res://asset/Character/Adel/Saber attack/sabers6.png" id="41_pevka"]
+[ext_resource type="Script" uid="uid://dbhi0i8i8ffxr" path="res://scenes/adel/components/saber_swing_vfx.gd" id="saber_swing_vfx"]
 
 [sub_resource type="Gradient" id="Gradient_j5yna"]
 colors = PackedColorArray(0, 0.6666667, 0, 1, 1, 1, 1, 1)
@@ -51,6 +52,7 @@ gradient = SubResource("Gradient_j5yna")
 fill_to = Vector2(0, 0)
 
 [sub_resource type="SkeletonModification2DTwoBoneIK" id="SkeletonModification2DTwoBoneIK_nx6la"]
+resource_local_to_scene = true
 target_nodepath = NodePath("../L_Foot_Target")
 joint_one_bone_idx = 10
 joint_one_bone2d_node = NodePath("hip/L_upper_leg")
@@ -58,6 +60,7 @@ joint_two_bone_idx = 11
 joint_two_bone2d_node = NodePath("hip/L_upper_leg/L_foreleg")
 
 [sub_resource type="SkeletonModification2DTwoBoneIK" id="SkeletonModification2DTwoBoneIK_xin56"]
+resource_local_to_scene = true
 target_nodepath = NodePath("../R_Foot_Target")
 joint_one_bone_idx = 13
 joint_one_bone2d_node = NodePath("hip/R_upper_leg")
@@ -65,6 +68,7 @@ joint_two_bone_idx = 14
 joint_two_bone2d_node = NodePath("hip/R_upper_leg/R_foreleg")
 
 [sub_resource type="SkeletonModificationStack2D" id="SkeletonModificationStack2D_pptnm"]
+resource_local_to_scene = true
 enabled = true
 modification_count = 2
 modifications/0 = SubResource("SkeletonModification2DTwoBoneIK_nx6la")
@@ -10663,7 +10667,7 @@ texture = ExtResource("8_wu5lb")
 
 [node name="L_upper_arm" type="Bone2D" parent="Skeleton2D/hip/torso[merge]" unique_id=550548801]
 position = Vector2(44.817806, -67.62174)
-rotation = -0.010251023
+rotation = -0.010251018
 scale = Vector2(0.9998284, 0.9998284)
 rest = Transform2D(0.9999458, -0.010250827, 0.010250827, 0.9999458, 59.000057, -46.042194)
 
@@ -10789,7 +10793,7 @@ texture = ExtResource("6_xv1bw")
 visible = false
 position = Vector2(35, 16)
 rotation = -3.1018384
-scale = Vector2(0.9998308, 0.9998308)
+scale = Vector2(0.9998305, 0.9998305)
 rest = Transform2D(-0.9990432, -0.039737206, 0.039737206, -0.9990432, 35, 16)
 
 [node name="belly" type="Sprite2D" parent="Skeleton2D/hip/cloth_bone2" unique_id=1083849315]
@@ -10953,3 +10957,10 @@ position = Vector2(533, 516.99994)
 scale = Vector2(1.007, 1.007)
 texture = ExtResource("27_2pf0q")
 hframes = 3
+
+[node name="SaberSwingVFX" type="Node2D" parent="." unique_id=1940458754]
+script = ExtResource("saber_swing_vfx")
+effect_scale = Vector2(1.15, 1.15)
+residual_lifetime = 0.3
+finisher_residual_lifetime = 0.39
+residual_head_travel = 0.1
