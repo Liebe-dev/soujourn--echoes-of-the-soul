@@ -1,13 +1,14 @@
 class_name JumpAttackVFX
 extends Node2D
-## Approved jump effect: short AIR arc, then a world-anchored downward crush.
-## Geometry and materials age on the real clock, independently of animation/hit-stop.
+## Approved jump effect: short AIR arc, held descent crescent, then a downward crush.
+## Residuals age on the real clock; the held crescent follows the active dive state.
 
 const AIR_CLIP := &"jump_attack(air)"
 const LAND_CLIP := &"jump_attack(land)"
 const AIR_SHADER: Shader = preload("res://scenes/adel/components/jump_attack_air.gdshader")
 const CRUSH_SHADER: Shader = preload("res://scenes/adel/components/jump_attack_crush.gdshader")
 const GROUND_SHADER: Shader = preload("res://scenes/adel/components/jump_attack_ground_air.gdshader")
+const DESCENT_SHADER: Shader = preload("res://scenes/adel/components/jump_attack_descent.gdshader")
 
 @export var enabled := true
 @export_node_path("AnimationPlayer") var animation_player_path := NodePath("../AnimationPlayer")
@@ -30,11 +31,25 @@ const GROUND_SHADER: Shader = preload("res://scenes/adel/components/jump_attack_
 @export_range(0.02, 0.5, 0.001, "suffix:s") var crush_duration := 0.10
 @export_range(0.05, 0.8, 0.001, "suffix:s") var ground_air_lifetime := 0.27
 @export_range(1, 8, 1) var max_residuals := 3
+@export_group("Descent (source-frame pixels)")
+@export var descent_enabled := true
+@export var descent_offset_pixels := Vector2.ZERO
+@export var descent_scale := Vector2.ONE
+## Approved V6 curve, converted from the preview into source-frame coordinates.
+@export var descent_curve := PackedVector2Array([
+	Vector2(1058.461538, -20), Vector2(1238.461538, 129.230769),
+	Vector2(1250.769231, 407.692308), Vector2(990.769231, 556.923077),
+])
+@export_range(1.0, 300.0, 1.0, "suffix:px") var descent_width_pixels := 80.0
+@export_range(0.0, 1.0, 0.01) var descent_opacity := 1.0
 
 var _player: AnimationPlayer
 var _source: Sprite2D
 var _body: CharacterBody2D
 var _attached: MeshInstance2D
+var _descent: MeshInstance2D
+var _combat: CombatComponent
+var _descent_blocked := false
 var _effects: Array[Dictionary] = []
 var _markers: Dictionary = {}
 var _clip: StringName
@@ -61,11 +76,14 @@ func _ready() -> void:
 	_air_mesh = _build_air_mesh()
 	_attached = _new_mesh("AirAttached", _air_mesh, AIR_SHADER)
 	_setup_air(_attached, air_attached_opacity, 0.0)
+	_descent = _new_mesh("DescentAttached", _build_descent_mesh(), DESCENT_SHADER)
 	_markers[AIR_CLIP] = _read_frame_marker(AIR_CLIP, 1)
 	_markers[LAND_CLIP] = _read_frame_marker(LAND_CLIP, 2)
 	_player.animation_started.connect(_on_animation_started)
 
 func _on_animation_started(clip: StringName) -> void:
+	if clip == AIR_CLIP:
+		_descent_blocked = false
 	_clip = clip
 	_emitted = false
 	_last_position = -1.0
@@ -77,7 +95,24 @@ func _process(_delta: float) -> void:
 		clear_effects()
 		return
 	_sample_animation()
+	_sample_descent()
 	_tick_effects(Time.get_ticks_usec())
+
+func _sample_descent() -> void:
+	_descent.visible = false
+	if not enabled or not descent_enabled or _descent_blocked or not is_instance_valid(_body) or not _source.is_visible_in_tree():
+		return
+	# AIR can finish with current_animation empty while combat holds its last pose.
+	# Resolve lazily: the parent Player constructs combat after the rig's _ready().
+	if _combat == null:
+		_combat = _body.get("combat") as CombatComponent
+	if _combat == null or not _combat.is_jump_attacking or _combat.is_jump_attack_hanging or _body.is_on_floor() or _source.frame != 1:
+		return
+	var adjustment := Transform2D(Vector2(descent_scale.x, 0), Vector2(0, descent_scale.y), descent_offset_pixels)
+	_descent.global_transform = _source_frame_transform() * adjustment
+	_descent.z_index = _source_depth() + 1
+	(_descent.material as ShaderMaterial).set_shader_parameter("opacity", descent_opacity)
+	_descent.visible = true
 
 func _sample_animation() -> void:
 	_attached.visible = false
@@ -191,6 +226,9 @@ func _spawn_air(frame_transform: Transform2D, born: int) -> void:
 	_effects.append({"kind": AIR_CLIP, "nodes": [node], "born": born, "life": air_lifetime})
 
 func _spawn_landing(frame_transform: Transform2D, floor_y: float) -> void:
+	# LAND owns the visual handoff, even before combat/source state catches up.
+	_descent_blocked = true
+	_descent.visible = false
 	_reserve_effect()
 	var crush := _new_mesh("LandingCrush", _build_crush_mesh(0.0, floor_y), CRUSH_SHADER)
 	var mat := crush.material as ShaderMaterial
@@ -245,10 +283,39 @@ func _free_effect(record: Dictionary) -> void:
 func clear_effects() -> void:
 	if is_instance_valid(_attached):
 		_attached.visible = false
+	if is_instance_valid(_descent):
+		_descent.visible = false
 	for record in _effects:
 		_free_effect(record)
 	_effects.clear()
 	_air_born = -1
+
+func _build_descent_mesh() -> ArrayMesh:
+	if descent_curve.size() != 4:
+		push_warning("JumpAttackVFX descent_curve needs four control points.")
+		return ArrayMesh.new()
+	var vertices := PackedVector2Array()
+	var uv := PackedVector2Array()
+	var indices := PackedInt32Array()
+	var peak := 4.0 / 5.5
+	var normalization := pow(peak, 4.0) * pow(1.0 - peak, 1.5)
+	var count := 420
+	for i in range(count + 1):
+		var t := float(i) / count
+		var v := 1.0 - t
+		var point := descent_curve[0]*v*v*v + descent_curve[1]*3.0*v*v*t + descent_curve[2]*3.0*v*t*t + descent_curve[3]*t*t*t
+		var tangent := ((descent_curve[1]-descent_curve[0])*3.0*v*v + (descent_curve[2]-descent_curve[1])*6.0*v*t + (descent_curve[3]-descent_curve[2])*3.0*t*t).normalized()
+		var outward := Vector2(tangent.y, -tangent.x)
+		var belly := pow(t, 4.0) * pow(1.0 - t, 1.5) / normalization
+		var half_width := descent_width_pixels * 0.5 * (0.88 * belly + 0.12 * sin(PI * t))
+		vertices.append(point - outward * half_width)
+		vertices.append(point + outward * half_width)
+		uv.append(Vector2(t, 0))
+		uv.append(Vector2(t, 1))
+		if i < count:
+			var base := i * 2
+			indices.append_array(PackedInt32Array([base, base+1, base+2, base+1, base+3, base+2]))
+	return _mesh_from_arrays(vertices, uv, indices)
 
 func _build_crush_mesh(progress: float, floor_y: float) -> ArrayMesh:
 	var vertices := PackedVector2Array()

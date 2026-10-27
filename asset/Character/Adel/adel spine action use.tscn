@@ -43,6 +43,7 @@
 [ext_resource type="Texture2D" uid="uid://catfmw53onoop" path="res://asset/Character/Adel/Saber attack/sabers5.png" id="40_87ms7"]
 [ext_resource type="Texture2D" uid="uid://du21a25834qo7" path="res://asset/Character/Adel/Saber attack/sabers6.png" id="41_pevka"]
 [ext_resource type="Script" uid="uid://y1t0uj252vct" path="res://scenes/adel/components/jump_attack_vfx.gd" id="jump_attack_vfx"]
+[ext_resource type="Script" uid="uid://cw78wfea5etae" path="res://scenes/adel/components/saber_ready_vfx.gd" id="saber_ready_vfx"]
 [ext_resource type="Script" uid="uid://dbhi0i8i8ffxr" path="res://scenes/adel/components/saber_swing_vfx.gd" id="saber_swing_vfx"]
 
 [sub_resource type="Gradient" id="Gradient_j5yna"]
@@ -10968,3 +10969,6 @@ residual_head_travel = 0.1
 
 [node name="JumpAttackVFX" type="Node2D" parent="." unique_id=1304032775]
 script = ExtResource("jump_attack_vfx")
+
+[node name="SaberReadyVFX" type="Node2D" parent="."]
+script = ExtResource("saber_ready_vfx")

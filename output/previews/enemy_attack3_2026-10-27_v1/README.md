@@ -1,4 +1,4 @@
-# attack3 — preview 3 frame, chờ duyệt
+# attack3 — 3 frame đã duyệt và tích hợp
 
 - [PNG sprite sheet nền trong suốt](attack3.png): **2703 × 931**, ba ô **901 × 931** theo X.
 - [Bản xem có đường chia ô](preview.png).
@@ -12,4 +12,4 @@ Ba tư thế: đứng giơ rộng hai tay; hai tay quật xuống/vào trong v�
 
 Animation gốc đã đọc: `hframes=3`, `vframes=1`, vị trí (1007,522), scale (0.9,0.9), các frame 0/1/2 tại 0/0.4/0.6 giây, độ dài 0.9 giây. Không thay các thông số này; bản đọc lưu ở `original_animation.txt`.
 
-**Chỉ preview. Chờ người dùng phê duyệt mới thay `asset/Enemies/sample/attack/attack3.png` trong game.**
+**Đã được người dùng duyệt bằng lệnh “duyệt” và thay vào game.** Đã chép nguyên PNG `attack3.png` ở đầu tài liệu vào `asset/Enemies/sample/attack/attack3.png`, giữ khổ 2703 × 931 và ba frame theo X. Không đổi cảnh, animation hoặc file import. `preview_validation.json` ghi kiểm tra trước khi tích hợp. Bản sao ảnh cũ và kết quả đối chiếu nằm ở `../../integration/enemy_attack3_2026-10-27_v1/`.

@@ -10,6 +10,7 @@ Cập nhật: **27/10/2026**. Đây là file dùng chung: khi thêm hoặc đổ
 - [Combo, đánh trên không, jump attack và hitbox Player](#tan-cong)
 - [VFX bốn đòn Saber: vị trí, hướng và vệt dư](#saber-vfx)
 - [VFX jump attack: cung dập đất và khí thấp](#jump-vfx)
+- [VFX Saber Ready: vẩy kiếm nhanh](#ready-vfx)
 - [Defense, Guard, Deflect, Stagger và hit-stop](#phong-thu)
 - [Q Saber: charge, damage, zoom và freeze](#skill-q)
 - [Dark Sentinel: entry, rút HP và debug](#sentinel)
@@ -258,10 +259,13 @@ Script: `res://scenes/adel/components/jump_attack_vfx.gd`. Node mới hiện **k
 override tham số trong rig hoặc Player/map**; các số bên dưới là mặc định script
 đang dùng. Không chỉnh node `SaberSwingVFX` để căn hiệu ứng nhảy/đáp này.
 
-Bản đã duyệt giữ cung AIR, bỏ khói và lớp kéo thêm để bọc kiếm. Khi đáp, cung
+Bản đã duyệt giữ cung AIR, thêm cung **Descent V6** khi giữ pose cuối lao xuống.
+Descent là một cung trắng cong liền mạch, phần phình thấp gần lưỡi kiếm, chỉ phủ
+một phần lưỡi và vẽ phía trước sprite. Khi đáp, cung
 trắng chính có chân dày chạm đất, **bị ép thấp xuống nền**, rồi chỉ còn hai nét
 khí trắng sát chân dạt ra hai bên và đứt mỏng. Không dùng kiểu co đuôi/đầu của
-bốn đòn Saber cho pha kết thúc LAND. Đây chỉ là hình ảnh; damage, hitbox,
+bốn đòn Saber cho pha kết thúc LAND; LAND vẫn bỏ khói và lớp bọc kiếm riêng.
+Đây chỉ là hình ảnh; damage, hitbox,
 frame nguồn và tốc độ lao xuống không đổi.
 
 - **Enabled** (`enabled=true`): bật/tắt cả component; tắt sẽ dọn các lớp đang còn.
@@ -285,6 +289,33 @@ frame nguồn và tốc độ lao xuống không đổi.
   cùng lúc (một gói LAND gồm cung + khí), bỏ gói cũ nhất khi vượt.
 - Hai NodePath mặc định: `animation_player_path=../AnimationPlayer`,
   `source_sprite_path=../TestAttackSprite`; chỉ đổi khi đổi cấu trúc rig.
+- **Descent (source-frame pixels)**: `descent_enabled=true` bật riêng cung lúc
+  lao xuống; `descent_offset_pixels=(0,0)` dời cung, X dương ra trước và **Y
+  dương xuống dưới** khi nhân vật nhìn phải. `descent_scale=(1,1)` kéo dài/ngắn
+  X/Y riêng cung này. Cả hai theo phép lật sprite; Placement chung phía trên
+  vẫn áp dụng thêm trước khi vẽ. `descent_opacity=1.0` là độ phủ (0..1).
+  Màu riêng pha lao xuống hiện là **`#b4b6be`**, chỉnh uniform **`tint`**
+  trong `scenes/adel/components/jump_attack_descent.gdshader`: mặc định RGBA
+  `(180/255,182/255,190/255,1)`, có `source_color`; không có override màu từ
+  component/scene. Chỉ shader Descent dùng màu này; AIR và LAND giữ màu cũ.
+  `descent_width_pixels=80` là bề rộng danh nghĩa theo pixel nguồn; profile
+  thu hai đầu và dồn phần phình xuống dưới nên bề rộng thực nhỏ hơn chút.
+  `descent_curve` có **4 điểm Bézier** theo thứ tự đầu cao, control 1,
+  control 2, đầu thấp: `(1058.461538,-20)`, `(1238.461538,129.230769)`,
+  `(1250.769231,407.692308)`, `(990.769231,556.923077)`. Đổi 2 control point
+  để bẻ cung; giữ 4 phần tử. Các số trên là default script, hiện **không có
+  override Descent trong rig/Player/map**. Width/curve dựng mesh khi mở scene:
+  chạy lại scene sau khi đổi; offset/scale/opacity được đọc mỗi frame.
+
+Descent đọc trạng thái combat thực: đang jump attack, đã hết chuẩn bị, chưa
+chạm sàn và sprite còn frame 1. **Không phụ thuộc `current_animation` còn tên
+AIR**, vì clip có thể kết thúc trong lúc pose vẫn được giữ. Cung đi theo Player
+và hướng kiếm suốt pha rơi, kể cả lúc hit-stop giữ nguyên tư thế. **Ngay khi
+VFX LAND phát**, `_spawn_landing()` tắt cung Descent và khóa nó đến lần bắt
+đầu AIR tiếp theo, nên không bật lại nếu trạng thái combat cập nhật chậm.
+Cung cũng tắt khi bị ngắt đòn, ẩn sprite hoặc tắt component. Đây là một lớp giữ theo trạng
+thái, **không có lifetime riêng, không sinh vệt dư liên tục**; `air_lifetime`
+vẫn chỉ điều khiển cung AIR ngắn cũ. Không phát Descent chỉ vì nhảy/rơi thường.
 
 Mốc phát đọc từ track frame thật: **`jump_attack(air)` frame 1 tại 0.18s**;
 **`jump_attack(land)` frame 2 tại 0s**, frame cuối là frame 3 ở 0.025s.
@@ -296,10 +327,64 @@ lật theo đòn mới; AIR gắn pose còn theo sprite trong tuổi ngắn củ
 
 Hình học cung ở `_build_air_mesh()` / `_build_crush_mesh()`; nét khí ở
 `jump_attack_ground_air.gdshader`, phép tiêu cung ở `jump_attack_crush.gdshader`.
+Descent ở `_build_descent_mesh()` / `_sample_descent()` và
+`jump_attack_descent.gdshader`; shader chỉ vẽ lõi trắng mượt, không thêm brush,
+glow, smoke hoặc chi tiết chưa có trong V6 đã duyệt.
 Đây là vị trí chỉnh hình sâu hơn; không cần sửa bitmap/ba frame gốc. Test riêng:
 `tests/adel/jump_vfx_validation.gd`; quay Player/input thật bằng
-`tests/adel/jump_vfx_capture.gd`. Cả hai cần project/dữ liệu thử riêng có custom
+`tests/adel/jump_vfx_capture.gd`. Kiểm tra trạng thái Descent:
+`tests/adel/jump_descent_vfx_validation.gd`; chụp ảnh game hai hướng/rơi dài/
+hit-stop/chuyển LAND: `tests/adel/jump_descent_vfx_capture.gd`. Tất cả cần
+project/dữ liệu thử riêng có custom
 user directory chứa `CodexSaberVFX`, tránh dùng save chơi thật.
+
+<a id="ready-vfx"></a>
+### VFX Saber Ready — bản đã duyệt, 27/10/2026
+
+Chọn **`res://asset/Character/Adel/adel spine action use.tscn` → SaberReadyVFX**;
+trong Player là **SpinePivot/SpineRig/SaberReadyVFX**. Script
+`res://scenes/adel/components/saber_ready_vfx.gd`; shader
+`res://scenes/adel/components/saber_ready_slash.gdshader`. Hiện node mới **không
+có override trong rig/Player/map**; các số dưới là mặc định script đang dùng.
+
+Hiệu ứng vẩy kiếm trắng: nét ngắn trên đầu ở pose giữa, cung mảnh trước đầu
+kiếm ở pose cuối rồi thu nhanh. Dùng lại `saber_attack_1.png`; không sửa sheet,
+nhịp Ready hoặc logic combat. Lớp gắn pose mất khi đổi clip và có tuổi tối đa
+ngắn kể cả freeze; vệt dư giữ transform thế giới lúc sinh, vẫn tan qua đổi
+animation, hit-stop, time scale và pause.
+
+- **Enabled** (`enabled=true`): tắt sẽ dọn các lớp đang còn.
+- **Placement (source-frame pixels)**: `effect_offset_pixels=(0,0)` và
+  `effect_scale=(1,1)` căn cả hai vùng theo pixel frame Ready **1371×1030**.
+  Offset X dương ra phía trước khi nhân vật nhìn phải; cả transform tự lật khi
+  nhân vật nhìn trái. Scale là hệ số X/Y, không phải world pixel.
+- **Curve (four source-frame control points)**: có thể bẻ đường cong trong
+  Inspector, mỗi vùng giữ đúng **4 điểm**. Điểm 0 là đầu đường phía đuôi nét,
+  điểm 3 là đầu đường phía mũi nét; điểm 1/2 kéo độ cong và hướng tiếp tuyến.
+  `overhead_points=[(870,116),(955,60),(1100,170),(1145,260)]`;
+  `front_points=[(1110,225),(1220,320),(1340,665),(1210,755)]`.
+  `overhead_width=200`, `front_width=235` là bề rộng dải ánh xạ theo pixel nguồn;
+  bề dày nét nhìn thấy còn phụ thuộc texture. Hình học dựng khi khởi tạo: sửa
+  scene rồi chạy lại để xem thay đổi, không coi chỉnh Remote là lưu lâu dài.
+- **Appearance**: `ink_texture=res://asset/VFX/Adel/Saber/saber_attack_1.png`;
+  `attached_opacity=0.94`, `residual_opacity=0.84`, không đơn vị (0..1).
+- **Lifetime (real seconds)**: `attached_lifetime=0.012` là tuổi tối đa của nét
+  trên đầu/lớp chính phía trước; nét trên đầu còn mất ngay khi rời pose giữa.
+  `residual_lifetime=0.105` cho vệt phía trước, khoảng một phần ba lifetime
+  combo Saber hiện tại. `max_residuals=3` giới hạn vệt dư cùng lúc, bỏ vệt cũ
+  nhất khi vượt. Các lifetime là **giây thực**, không phải thời gian animation.
+- Hai NodePath mặc định là `animation_player_path=../AnimationPlayer` và
+  `source_sprite_path=../TestAttackSprite`; chỉ đổi khi đổi cấu trúc rig.
+
+Component đọc mốc từ **resource Ready hiện đang được phát**: frame 1 tại
+**0.345s**, frame 2 tại **0.35s** thời gian animation. Pose giữa chỉ **5 ms**;
+vượt qua mốc vẫn phát cung phía trước, không cần renderer bắt trúng frame 1.
+`AdelAnimationComponent.ready_pose(true)` thay clip bằng biến thể chỉ có frame
+2 từ 0s (sau một số lần thả Defense/Guard): đó là giữ pose, **không phát VFX**.
+Không cache mốc từ clip gốc qua lần thay resource, và không đổi key animation
+để kéo dài pose giữa. Test `tests/adel/ready_vfx_validation.gd`; capture Player
+bằng input thật ở `tests/adel/ready_vfx_capture.gd`, chạy trong cấu hình/save
+thử riêng có custom user directory chứa `CodexSaberVFX`.
 
 <a id="phong-thu"></a>
 ## 5. Defense, Guard, Deflect, Stagger và hit-stop
@@ -972,6 +1057,24 @@ Khi có thông số mới hoặc chuyển node/script: sửa ngay phần hệ th
 Giữ nội dung hiện hành ngay tại mục đang có, thay mô tả đã bị thay thế thay vì chồng nhiều đoạn đính chính. Các bản báo cáo hệ thống chỉ ghi cơ chế, phạm vi và kiểm chứng; liên kết về file này cho tuning. Cập nhật ngày trên đầu file và mục thay đổi gần nhất bên dưới. Không tạo báo cáo mới cho từng thông số. `.docx` và bản tổng hợp tuần là tài liệu lịch sử giữ nguyên.
 
 ### Thay đổi gần nhất
+
+- 27/10/2026: tích hợp cung **Descent V6** đã duyệt vào **JumpAttackVFX**, giữ
+  phần phình thấp gần kiếm, theo Player trong lúc giữ pose AIR lao xuống rồi
+  tắt khi đáp. Chỉnh riêng tại nhóm **Descent (source-frame pixels)** trong
+  [VFX jump attack](#jump-vfx). Test mới **23/23**; hồi quy Jump **33/33**,
+  Saber **68/68**, Ready **29/29**. Ảnh input/physics thật bắt 3/25 mẫu rơi ở
+  hai hướng, 8 mẫu trong hit-stop, 0 mẫu sai pose/hiện sai, cuối sạch.
+  Bằng chứng ở `adel-jump-descent-integration-2026-10-27/` trong gốc artifact
+  ghi ở `Context/Tai_lieu_ban_dao/HANDOFF_anim.md`; không tạo video đợt này.
+
+- 27/10/2026: tích hợp VFX **SaberReadyVFX** theo preview đã duyệt, hai vùng
+  cong trắng, vệt dư **0.105 giây thực**. Chỗ căn vị trí, bẻ 4 control point,
+  bề rộng, opacity và lifetime ở [VFX Saber Ready](#ready-vfx). Nhánh chỉ giữ
+  pose cuối sau Guard không phát vệt; giữ nguyên sprite, timing và combat.
+  Test Ready **29**, hồi quy Saber **68**, Jump **33**, đều failures=0; capture
+  input/physics thật hai hướng, hit-stop và 39 mẫu held Ready qua mốc vẩy có
+  **0 vệt thừa**. Bằng chứng ở `adel-ready-integration-2026-10-27/` trong gốc
+  artifact ghi ở `Context/Tai_lieu_ban_dao/HANDOFF_anim.md`.
 
 - 27/10/2026: tích hợp bản VFX jump attack đã duyệt tại **JumpAttackVFX**, giữ
   AIR, bỏ smoke/lớp bọc kiếm; LAND ép cung xuống sàn rồi còn hai nét khí thấp.

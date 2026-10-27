@@ -40,9 +40,20 @@ Component chỉ xử lý hình ảnh; hitbox, sát thương và nhịp combat kh
 Rig còn có component `JumpAttackVFX` cho `jump_attack(air)` và
 `jump_attack(land)` (FALL theo cách gọi của người dùng). Component dùng lại
 `saber_attack_1.png` để dựng cung trắng; khi đáp, cung ép tiêu xuống nền và
-hai nét khí thấp dạt sang hai bên. Không có khói hay lớp VFX bọc thêm cây kiếm.
+hai nét khí thấp dạt sang hai bên. Pha đáp không có khói hay lớp bọc kiếm riêng.
+Khi giữ pose cuối AIR lao xuống, cung **Descent V6** màu `#b4b6be` mượt phủ một phần
+lưỡi kiếm và bám Player; phần phình nằm thấp gần kiếm. Cung này dùng mesh và
+`jump_attack_descent.gdshader`, không dùng brush bitmap, tắt khi LAND/ngắt đòn
+và không sinh vệt dư dồn lên nhau. AIR ngắn và hiệu ứng đáp giữ cơ chế cũ.
 Hướng dẫn tham số và thời gian thực nằm tại
 [VFX jump attack](../../../../Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#jump-vfx).
+
+## Saber Ready
+
+`SaberReadyVFX` trong rig dùng lại nét trắng để dựng một nét vẩy ngắn trên đầu,
+rồi cung mảnh phía trước tan nhanh. Bản Ready chỉ giữ pose cuối không phát vệt.
+Các điểm bẻ cong, bề rộng, vị trí và tuổi thực được quản lý tại
+[VFX Saber Ready](../../../../Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#ready-vfx).
 
 ## Kiểm tra
 
@@ -54,3 +65,7 @@ Chạy bằng `--script` trong cấu hình riêng có user directory chứa
 
 `tests/adel/saber_vfx_capture.gd` điều khiển scene combat thật qua input game
 và chụp cả hai hướng; nhận `-- --output=<thư mục ảnh>`.
+
+`tests/adel/jump_descent_vfx_validation.gd` kiểm tra ranh giới chuẩn bị/rơi/đáp,
+hit-stop, hướng, hủy và cleanup. `tests/adel/jump_descent_vfx_capture.gd` chụp
+ảnh tĩnh hai hướng từ input/physics thật; cũng dùng thư mục dữ liệu thử riêng.

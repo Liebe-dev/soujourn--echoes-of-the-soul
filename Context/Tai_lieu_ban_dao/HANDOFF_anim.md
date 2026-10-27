@@ -3,6 +3,135 @@
 **Snapshot: 26/10/2026, Asia/Saigon.** Project: `D:/Godot Project/soujourn--echoes-of-the-soul`.
 File này ở `D:/Godot Project/soujourn--echoes-of-the-soul/Context/Tai_lieu_ban_dao/HANDOFF_anim.md`.
 
+## Cập nhật 27/10/2026 — cung Descent V6 đã duyệt và tích hợp
+
+Người dùng đã duyệt ảnh
+`C:/Users/xuank/.codex/visualizations/2026/10/25/01a170fc-5832-7430-b538-78ebad4ad7b3/adel-jump-descent-preview-2026-10-27-v6-lower-belly/lower_belly_preview.png`.
+Đã đưa **đúng cung trắng mượt V6** vào pha giữ frame cuối AIR lao xuống:
+đầu trên thanh, phần phình kéo thấp gần lưỡi kiếm, chỉ phủ một phần lưỡi.
+Vùng khoanh đỏ của người dùng hướng dẫn vị trí/tỉ lệ, không phải khuôn phải
+chép sát. Không thêm brush, glow, smoke hoặc đổi hình sau khi duyệt.
+
+Những hướng đã bị thay thế trong vòng preview này: nét quá thấp ở cạnh kiếm;
+khối lớn che toàn bộ lưỡi; cung V4 kéo quá gần chuôi; V5 đưa lên cao nhưng
+phình quá cao. V6 giữ đầu trên, dồn bề dày xuống thấp và đưa đầu thấp gần kiếm.
+Người dùng đã đổi yêu cầu từ che toàn bộ sang **chỉ phủ một phần**; lấy yêu cầu
+sau làm chuẩn. Y dương trong Godot xuống dưới; trước đây câu chữ “lên trên,
+Y dương” có mâu thuẫn, các vòng ảnh đã giải quyết bằng vị trí nhìn thấy/duyệt.
+
+Source hiện hành: `scenes/adel/components/jump_attack_vfx.gd`, thêm
+`jump_attack_descent.gdshader` cùng thư mục. Vẫn node **JumpAttackVFX** trong
+`asset/Character/Adel/adel spine action use.tscn`, Player ở
+**SpinePivot/SpineRig/JumpAttackVFX**; không sửa scene rig hoặc frame PNG trong
+đợt này. Thông số mới/đơn vị/default/override và vị trí chỉnh ở
+`Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#jump-vfx`, nhóm **Descent
+(source-frame pixels)**. Có offset, scale, width, 4 control point, opacity,
+công tắc riêng; hiện không có override Descent trong scene.
+
+**Đã xác minh từ code và chạy thật:** Player phát `jump_attack(air)`, giữ
+sprite frame 1 khi clip kết thúc, combat hết hanging và lao xuống; AIR có thể
+không còn tên trong `current_animation`. `_sample_descent()` đọc combat
+`is_jump_attacking && !is_jump_attack_hanging`, chưa chạm sàn, sprite hiện và
+frame 1. Cung đi theo Player/hướng suốt lúc rơi, không dùng lifetime ngắn AIR
+và không sinh residual liên tục. LAND/ngắt đòn/ẩn sprite/tắt component làm nó
+mất ngay; LAND nhận tiếp cung crush + khí thấp cũ. Hit-stop giữ cung của pha
+rơi còn đang diễn ra; các residual AIR/LAND vẫn tuổi thực như trước. Không đổi
+combat, physics, damage, hitbox, timing, bốn Saber hay Ready.
+
+**Kiểm tra thực chạy đợt này:** `tests/adel/jump_descent_vfx_validation.gd`
+**23 checks, 0 failures** trên Player/combat thật, gồm hết AIR, held pose, rơi
+thường không phát, hai hướng, ngắt/disable/ẩn source, LAND, CombatTime hit-stop
+và owner cleanup. Hồi quy Jump **33/33**, Saber **68/68**, Ready **29/29**;
+các số là các suite khác nhau, không phải 153 kịch bản thị giác độc lập.
+`tests/adel/jump_descent_vfx_capture.gd` điều khiển input/physics thật, chụp
+ảnh native OpenGL: **3 mẫu rơi phải, 25 mẫu rơi trái dài**, **8 mẫu trong
+hit-stop**, **0 mẫu hiện sai trạng thái, 0 mẫu sai pose**; hai lần LAND bắt đủ,
+cuối không còn cung rơi/residual. Lần trái nâng điểm rơi thêm **360 world px**
+chỉ trong harness để quan sát rơi dài, không đổi gameplay nguồn. Đã xem ảnh
+cả hai hướng và LAND: cong mượt, phủ một phần kiếm, không dư cung rơi lúc đáp.
+
+Bằng chứng ngoài repo:
+`C:/Users/xuank/.codex/visualizations/2026/10/25/01a170fc-5832-7430-b538-78ebad4ad7b3/adel-jump-descent-integration-2026-10-27/`.
+`gameplay-stills/` chứa `right_descent.png`, `left_long_descent.png`,
+`right_landing.png`, `left_landing.png`, `capture_summary.json`. Log
+`descent-tests*`, `jump_vfx-regression*`, `saber_vfx-regression*`,
+`ready_vfx-regression*`, `capture*`. Chỉ ảnh tĩnh, **không tạo video** theo
+yêu cầu gần nhất. Project/config/save thử riêng, tái dùng import/class cache
+hiện có; không tuyên bố thử import từ checkout trắng. Godot MCP không có
+session kết nối; dùng tiến trình thử riêng. Log có warning Bone2D cũ và một
+warning cổng FMOD live update đang được dùng khi hai lượt kiểm tra chạy cùng
+lúc; không có script/shader error trong các lượt này.
+
+**Điều chỉnh tiếp theo cùng ngày theo yêu cầu người dùng:** khi VFX
+`jump_attack(land)` phát thì tắt cung lao xuống ngay. `_spawn_landing()` nay
+ẩn `_descent` và đặt `_descent_blocked`; `_sample_descent()` không được bật
+lại lớp này đến `_on_animation_started(AIR_CLIP)` của đòn mới. Không phụ thuộc
+combat hoặc frame đổi kịp trong cùng tick. Test mô phỏng LAND phát khi trạng
+thái combat còn báo rơi: trước sửa **25 checks, 2 failures**, sau sửa **25/25**;
+hồi quy AIR/LAND **33/33**. Log/bằng chứng ở thư mục cùng gốc artifact
+**`adel-jump-landing-handoff-2026-10-27/`**. Không có tham số Inspector mới.
+
+**Đổi màu tiếp theo:** người dùng yêu cầu riêng cung pha lao xuống là
+**`#b4b6be`**. Đã đổi default uniform `tint : source_color` trong
+`jump_attack_descent.gdshader`; geometry V6, opacity, handoff LAND và các VFX
+khác giữ nguyên. Hướng dẫn tuning ghi vị trí/default màu mới.
+
+**Còn chờ:** cảm nhận của người dùng khi chơi bản đã tích hợp; chưa kiểm chứng
+mọi nền/slope/camera hoặc độ trùng pixel với hitbox. Skill Q chưa có thiết kế/
+preview mới được duyệt, không triển khai. Giữ các sửa enemy/output/Ready và
+scene tuning có sẵn; chưa commit/push. Junction của project thử được tháo sau
+kiểm tra, phải dựng lại nếu chạy cấu hình artifact đó.
+
+## Cập nhật 27/10/2026 — Saber Ready đã duyệt và tích hợp
+
+Người dùng duyệt preview **`adel-ready-preview-2026-10-27-v1/final/`** rồi yêu cầu
+tiếp tục theo quy trình cũ. Ready là **vẩy kiếm nhanh ra trước**: nét trắng ngắn
+trên đầu ở frame 1, một cung mảnh trước mũi kiếm ở frame 2, vệt dư khoảng 0.1s.
+Vùng đỏ trong `D:/Downloads/saber_ready.png` chỉ định vị/hướng/tầm, được bẻ lại
+thành đường cong mượt; không chép nguyên polygon. Không smoke hay lớp bọc kiếm.
+
+Đã thêm **SaberReadyVFX** vào rig
+`asset/Character/Adel/adel spine action use.tscn`. Source:
+`scenes/adel/components/saber_ready_vfx.gd`, `saber_ready_slash.gdshader` và UID;
+dùng lại `asset/VFX/Adel/Saber/saber_attack_1.png`. Không sửa texture/frame,
+`AdelAnimationComponent`, Player/combat/hitbox, bốn Saber hoặc Jump VFX. Mặc định
+vệt dư **0.105 giây thực**, cap lớp gắn pose **0.012 giây thực**; giữ vệt theo
+thế giới lúc phát qua đổi pose/hướng, vẫn tan trong freeze/hit-stop/pause.
+
+Điểm quan trọng: `AdelAnimationComponent.ready_pose(true)` thay entry cùng tên
+`saber_ready` bằng resource chỉ giữ frame 2 từ 0s. Component đọc lại resource
+hiện tại mỗi lần play/thay clip, **chỉ phát khi có marker frame 1 rồi frame 2**.
+Frame thật là 1 tại **0.345s**, 2 tại **0.35s**, pose giữa chỉ 5 ms; skip pose
+giữa vẫn bắt mốc và phát cung phía trước. Nhánh chỉ giữ pose cuối không phát.
+
+Chỉnh tại **rig → SaberReadyVFX** hoặc **Player → SpinePivot/SpineRig/SaberReadyVFX**.
+Vị trí/scale, hai dãy 4 control point để tự bẻ cung, bề rộng/opacity/lifetime
+được quản lý tại `Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#ready-vfx`.
+Hiện không có override node mới trong rig/Player/map. Geometry dựng lúc khởi tạo.
+
+Kiểm tra thực chạy: `tests/adel/ready_vfx_validation.gd` **29 checks, 0 failures**,
+gồm variant resource thực của Player, skip frame 5 ms, hủy, quay hướng, clock,
+hit-stop, pause/capacity/cleanup. Hồi quy Saber **68/68**, Jump **33/33**. Capture
+`tests/adel/ready_vfx_capture.gd` dùng input/physics thật: Ready tự vào sau đánh
+thường, hai hướng; cú trái có CombatTime hit-stop 160 ms. Sau thả Guard có
+**39 mẫu** qua mốc 0.35s của held Ready và **0 mẫu phát vệt thừa**, cuối sạch.
+Đây là kiểm tra scene sàn phẳng, không phải nghiệm thu mọi camera/đám đông.
+
+Bằng chứng tại gốc artifact ngoài repo đã nêu trong mục Jump bên dưới, thư mục
+**`adel-ready-integration-2026-10-27/`**: `gameplay/` có 307 frame timestamp và
+ba pose; `ready-tests*`, `saber-regression*`, `jump-regression*`, `capture*` là
+log lượt này. GIF `adel_saber_ready_ingame_normal.gif` / `_slow.gif` là clip
+gameplay 5.1 / 10.2 giây. Test dùng project/config/save riêng. Junction thử sẽ
+được tháo sau lượt kiểm tra, cần dựng lại trước khi chạy lại cấu hình artifact.
+Capture xác nhận cuối ở `gameplay-final/`, log `capture-final*`, cũng 307 frame:
+bộ đếm 39 mẫu held Ready yêu cầu cả `_ready_final_frame=true` lẫn resource
+không có marker vẩy; 0 mẫu có vệt thừa. Clip GIF trên lấy từ `gameplay/` và
+đã được review thị giác riêng; bản quay cuối không đổi code/hình VFX.
+
+**Còn chờ:** phản hồi người dùng sau khi chơi Ready đã tích hợp; **VFX skill Q
+chưa có preview/duyệt mới, chưa triển khai**. Không tự làm Q từ lệnh duyệt Ready.
+Các thay đổi enemy/output ngoài lượt này được giữ nguyên; chưa commit/push.
+
 ## Cập nhật 27/10/2026 — VFX jump attack đã duyệt và tích hợp
 
 Phần snapshot 26/10 bên dưới vẫn là lịch sử bốn đòn Saber. **Ưu tiên source và
@@ -55,9 +184,9 @@ làm bằng chứng jump VFX**. Các log `jump-tests*`, `saber-regression*`,
 riêng, không dùng save chơi thật. Rà tham chiếu vẫn ghi lỗi UID dialogue/BG cũ
 và 8 warning legacy đã nêu trong snapshot; không có tham chiếu VFX mới hỏng.
 
-**Còn chờ:** phản hồi sau khi người dùng chơi bản tích hợp; VFX ready và skill Q
-chưa được thiết kế/duyệt hoặc triển khai trong lượt này. Không suy ra lệnh “duyệt”
-cho jump thành quyền làm các VFX còn lại. Chưa commit/push.
+**Tại thời điểm tích hợp Jump:** Ready và skill Q còn chờ. Ready đã được duyệt
+và tích hợp ở cập nhật mới hơn phía trên; skill Q vẫn chờ thiết kế/duyệt riêng.
+Không suy ra quyền làm các VFX khác từ lệnh duyệt Jump. Chưa commit/push.
 
 ## 1. Tiếp quản nhanh và mức độ bằng chứng
 
