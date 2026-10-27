@@ -1,0 +1,67 @@
+{
+  "status": "preview_only_pending_approval",
+  "sheet_width": 2703,
+  "sheet_height": 931,
+  "hframes": 3,
+  "vframes": 1,
+  "logical_cell_width": 901.0,
+  "frames": [
+    {
+      "frame": 0,
+      "file": "frame_1.png",
+      "slot_x": 0.0,
+      "slot_width": 901.0,
+      "slot_height": 931,
+      "manual_translation": [
+        0,
+        0
+      ],
+      "rotation_degrees": 0,
+      "alpha_autocrop": false,
+      "object_auto_center": false,
+      "high_res_size": [
+        1234,
+        1275
+      ]
+    },
+    {
+      "frame": 1,
+      "file": "frame_2.png",
+      "slot_x": 901.0,
+      "slot_width": 901.0,
+      "slot_height": 931,
+      "manual_translation": [
+        0,
+        0
+      ],
+      "rotation_degrees": 0,
+      "alpha_autocrop": false,
+      "object_auto_center": false,
+      "high_res_size": [
+        1234,
+        1275
+      ]
+    },
+    {
+      "frame": 2,
+      "file": "frame_3.png",
+      "slot_x": 1802.0,
+      "slot_width": 901.0,
+      "slot_height": 931,
+      "manual_translation": [
+        0,
+        0
+      ],
+      "rotation_degrees": 0,
+      "alpha_autocrop": false,
+      "object_auto_center": false,
+      "high_res_size": [
+        1234,
+        1275
+      ]
+    }
+  ],
+  "game_assets_unchanged": true,
+  "runtime_animation_tested": false,
+  "preview_sha256": "04767562F131C1FAAFC57AD6D7205C4745D2992D9B23450B6A8F899FE88B374F"
+}

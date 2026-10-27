@@ -1,0 +1,43 @@
+{
+  "sheet_width": 2703,
+  "sheet_height": 931,
+  "hframes": 3,
+  "vframes": 1,
+  "logical_frame_width": 901.0,
+  "frames": [
+    {
+      "frame": 0,
+      "file": "frame_1.png",
+      "source_x": 0.0,
+      "source_y": 0,
+      "source_width": 901.0,
+      "source_height": 931,
+      "working_width": 901,
+      "working_height": 931
+    },
+    {
+      "frame": 1,
+      "file": "frame_2.png",
+      "source_x": 901.0,
+      "source_y": 0,
+      "source_width": 901.0,
+      "source_height": 931,
+      "working_width": 901,
+      "working_height": 931
+    },
+    {
+      "frame": 2,
+      "file": "frame_3.png",
+      "source_x": 1802.0,
+      "source_y": 0,
+      "source_width": 901.0,
+      "source_height": 931,
+      "working_width": 901,
+      "working_height": 931
+    }
+  ],
+  "game_asset": {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack3.png",
+    "Hash": "E524F77498293D7C51FD4B8460D08520E0EA9B3A56B1BD527C415AAEFAE30EDB"
+  }
+}

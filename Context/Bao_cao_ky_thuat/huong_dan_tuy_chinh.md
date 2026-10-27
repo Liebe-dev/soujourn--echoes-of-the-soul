@@ -1,6 +1,6 @@
 # Hướng dẫn tùy chỉnh thông số game
 
-Cập nhật: **26/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
+Cập nhật: **27/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
 
 ## Mục lục
 
@@ -9,6 +9,7 @@ Cập nhật: **26/10/2026**. Đây là file dùng chung: khi thêm hoặc đổ
 - [Di chuyển, nhảy và dash](#di-chuyen)
 - [Combo, đánh trên không, jump attack và hitbox Player](#tan-cong)
 - [VFX bốn đòn Saber: vị trí, hướng và vệt dư](#saber-vfx)
+- [VFX jump attack: cung dập đất và khí thấp](#jump-vfx)
 - [Defense, Guard, Deflect, Stagger và hit-stop](#phong-thu)
 - [Q Saber: charge, damage, zoom và freeze](#skill-q)
 - [Dark Sentinel: entry, rút HP và debug](#sentinel)
@@ -247,6 +248,58 @@ thay một Texture rồi coi là tương thích.
 Inspector `Remote` chỉ thử trong lần chạy; lưu ở node scene gốc để dùng lâu dài.
 Thử từng đòn, nối đòn, quay hai phía và hit-stop; mở hitbox thật để kiểm tra vùng
 đánh. Bản render kiểm tra hình vệt chưa phải phép chứng minh pixel VFX trùng collider.
+
+<a id="jump-vfx"></a>
+### VFX jump attack — bản duyệt tối giản, 27/10/2026
+
+Scene gốc: **`res://asset/Character/Adel/adel spine action use.tscn` → JumpAttackVFX**.
+Trong Player: **`res://scenes/adel/playable_adel.tscn` → SpinePivot/SpineRig/JumpAttackVFX**.
+Script: `res://scenes/adel/components/jump_attack_vfx.gd`. Node mới hiện **không có
+override tham số trong rig hoặc Player/map**; các số bên dưới là mặc định script
+đang dùng. Không chỉnh node `SaberSwingVFX` để căn hiệu ứng nhảy/đáp này.
+
+Bản đã duyệt giữ cung AIR, bỏ khói và lớp kéo thêm để bọc kiếm. Khi đáp, cung
+trắng chính có chân dày chạm đất, **bị ép thấp xuống nền**, rồi chỉ còn hai nét
+khí trắng sát chân dạt ra hai bên và đứt mỏng. Không dùng kiểu co đuôi/đầu của
+bốn đòn Saber cho pha kết thúc LAND. Đây chỉ là hình ảnh; damage, hitbox,
+frame nguồn và tốc độ lao xuống không đổi.
+
+- **Enabled** (`enabled=true`): bật/tắt cả component; tắt sẽ dọn các lớp đang còn.
+- **Placement (source-frame pixels)**: `effect_offset_pixels=(0,0)` là offset
+  theo pixel của frame nguồn 1371×976; `effect_scale=(1,1)` là hệ số X/Y của
+  cả cung và khí. Cả hai áp dụng trước transform/lật hướng của sprite.
+  `floor_y_pixels=923` là mặt đất trong frame khi xem rig độc lập hoặc không
+  có va chạm sàn. `snap_to_floor=true` dùng điểm tiếp xúc sàn thật khi Player
+  đang chạm đất, nên khí và điểm tiêu của cung vẫn bám sàn khi đổi scale/offset.
+  Component chỉ đọc va chạm; không sửa collider hoặc di chuyển nhân vật.
+- **Appearance**: `ink_texture` dùng lại
+  `res://asset/VFX/Adel/Saber/saber_attack_1.png`, không sửa PNG. Các opacity
+  không đơn vị: `air_attached_opacity=0.96`, `air_residual_opacity=0.78`,
+  `landing_opacity=0.96`, `ground_air_opacity=0.82` (0..1).
+- **Lifetime (real seconds)**: `air_lifetime=0.07` cho cả tuổi tối đa lớp AIR
+  gắn pose và vệt AIR dư; lớp gắn pose cũng mất ngay khi chuyển clip.
+  `crush_hold=0.012` giữ cung LAND đầy đủ; `crush_duration=0.10` là thời gian
+  ép cung xuống đất. Cung hết trong `crush_hold + crush_duration + 0.013`,
+  hiện **0.125 giây thực**. `ground_air_lifetime=0.27` cho khí thấp; khí có
+  tuổi riêng, không kéo dài cung. `max_residuals=3` giới hạn số gói hiệu ứng
+  cùng lúc (một gói LAND gồm cung + khí), bỏ gói cũ nhất khi vượt.
+- Hai NodePath mặc định: `animation_player_path=../AnimationPlayer`,
+  `source_sprite_path=../TestAttackSprite`; chỉ đổi khi đổi cấu trúc rig.
+
+Mốc phát đọc từ track frame thật: **`jump_attack(air)` frame 1 tại 0.18s**;
+**`jump_attack(land)` frame 2 tại 0s**, frame cuối là frame 3 ở 0.025s.
+Tên người dùng gọi “FALL” tương ứng clip `jump_attack(land)` trong project.
+Các mốc là **thời gian animation**, còn tuổi VFX dùng `Time.get_ticks_usec()`:
+hit-stop, freeze, attack speed, pause hay chuyển animation không kéo dài tuổi.
+Cung/khí LAND cố định theo thế giới lúc sinh, không chạy theo nhân vật hoặc
+lật theo đòn mới; AIR gắn pose còn theo sprite trong tuổi ngắn của nó.
+
+Hình học cung ở `_build_air_mesh()` / `_build_crush_mesh()`; nét khí ở
+`jump_attack_ground_air.gdshader`, phép tiêu cung ở `jump_attack_crush.gdshader`.
+Đây là vị trí chỉnh hình sâu hơn; không cần sửa bitmap/ba frame gốc. Test riêng:
+`tests/adel/jump_vfx_validation.gd`; quay Player/input thật bằng
+`tests/adel/jump_vfx_capture.gd`. Cả hai cần project/dữ liệu thử riêng có custom
+user directory chứa `CodexSaberVFX`, tránh dùng save chơi thật.
 
 <a id="phong-thu"></a>
 ## 5. Defense, Guard, Deflect, Stagger và hit-stop
@@ -872,6 +925,31 @@ Slot và backup nằm ở `user://`, dùng menu Project → Open User Data Folde
 - Khung thiết kế vẫn từ **Project Settings → Display → Window → Size → Viewport Width/Height** `1920×1080`; **Stretch Mode** `viewport`, **Stretch Aspect** `keep` và runtime Window.content_scale_aspect Keep. Đây là giá trị project, không override map; đổi cỡ cửa sổ không đổi vùng nhìn world/HUD hoặc kéo méo tỷ lệ, có letterbox theo tỷ lệ màn hình. Chưa thêm render scale, chất lượng đồ họa, brightness hoặc màn hình/refresh selector.
 - Tự nạp/lưu **`user://video.cfg`**, schema version `1`; file tạm `.tmp` và bản trước `.bak` cùng đường dẫn. Config hợp lệ ưu tiên DEFAULTS; main lỗi định dạng/schema có thể đọc backup, thông số sai kiểu/ngoài miền dùng default an toàn. Preview chỉ giữ trong RAM; Keep mới ghi file và cập nhật confirmed. Ghi thất bại hoàn tác runtime và giữ confirmed trước. Không sửa checkpoint hoặc `controls.cfg`; không lưu FPS thực đo được. VSync yêu cầu qua DisplayServer, driver/renderer có thể quyết định trạng thái hiệu dụng; FPS Limit là trần engine, không cam kết phần cứng đạt mức đó.
 
+### Ẩn/hiện hitbox và hurtbox khi debug
+
+Trong game **Esc → Debug - Combat shapes → Show hitboxes / Show hurtboxes**.
+Hai công tắc độc lập, mặc định **tắt**; giữ xuyên mở lại pause/đổi scene trong
+cùng phiên, không ghi save/config. Chỉ hiện và vẽ ở debug build. Bật/tắt ngay khi
+đang pause; sau Resume tiếp tục bám collider thật theo vị trí, scale và hướng.
+
+- Scene `res://scenes/UI/game_pause_menu.tscn` →
+  **VBoxContainer/CollisionDebug/Toggles/Hitboxes** và **Hurtboxes**:
+  CheckButton `button_pressed=false`, không override ở Player/map hiện tại.
+- Script `res://scenes/UI/combat_collision_debug.gd`: hai bool static
+  `hitboxes_visible=false`, `hurtboxes_visible=false`, không export/không đơn vị.
+  `pause.gd` đồng bộ mỗi lần mở menu; overlay được tạo một lần trong scene chơi.
+- **Đỏ** `HITBOX_COLOR=(1,0.15,0.2,0.45)`: CollisionShape2D đang enabled của
+  Area2D có layer 4/5 (bitmask 8/16) và đang monitoring; chỉ thấy khi cửa sổ đòn mở. Bao gồm
+  Saber/combo/Q impact, jump attack và đòn melee/leap của SpineEnemy.
+- **Xanh** `HURTBOX_COLOR=(0.15,0.65,1,0.40)`: collider thân CharacterBody2D
+  có `take_damage` trên layer 2/3 (bitmask 2/4), là vùng nhận đòn hiện hành của Player/EnemyBase.
+  Đây không phải vùng detection/lock-on hoặc collider địa hình. Màu là hằng script,
+  RGBA 0–1, không có override scene; đổi alpha cuối để tăng/giảm độ phủ.
+- Hình vẽ đọc Shape2D và global transform thật, bỏ shape disabled/layer không
+  phù hợp; theo dõi cả collider sinh thêm/xóa trong runtime. Không sửa `disabled`,
+  `monitoring`, kích thước, layer/mask, damage hoặc animation/VFX. Vùng cast tìm
+  mục tiêu khi lao Q không phải hitbox gây damage và không được vẽ thành đòn đánh.
+
 ### Input Map và debug
 
 <a id="controls-settings"></a>
@@ -894,6 +972,22 @@ Khi có thông số mới hoặc chuyển node/script: sửa ngay phần hệ th
 Giữ nội dung hiện hành ngay tại mục đang có, thay mô tả đã bị thay thế thay vì chồng nhiều đoạn đính chính. Các bản báo cáo hệ thống chỉ ghi cơ chế, phạm vi và kiểm chứng; liên kết về file này cho tuning. Cập nhật ngày trên đầu file và mục thay đổi gần nhất bên dưới. Không tạo báo cáo mới cho từng thông số. `.docx` và bản tổng hợp tuần là tài liệu lịch sử giữ nguyên.
 
 ### Thay đổi gần nhất
+
+- 27/10/2026: tích hợp bản VFX jump attack đã duyệt tại **JumpAttackVFX**, giữ
+  AIR, bỏ smoke/lớp bọc kiếm; LAND ép cung xuống sàn rồi còn hai nét khí thấp.
+  Các tham số mặc định/override và đồng hồ thực ở [mục VFX jump attack](#jump-vfx).
+  Kiểm tra riêng **33**, hồi quy Saber **68**, jump damage **42**, đều failures=0;
+  capture Player/input thật cả hai hướng và hit-stop, khí khớp sàn phẳng thử
+  với sai số 0 world pixel, cuối lượt không còn VFX. Không coi là nghiệm thu
+  VFX trùng collider ở mọi cảnh hoặc thay đổi damage/timing combat.
+
+- 27/10/2026: thêm **Esc → Debug - Combat shapes** với hai công tắc ẩn/hiện
+  hitbox đỏ và hurtbox xanh; mặc định tắt, chỉ giữ trong phiên debug. Overlay đọc
+  collider thật của Player/địch, không đổi physics hoặc các tuning combat/VFX.
+  Kiểm chứng trên bản sao và dữ liệu riêng: kiểm tra tích hợp có render **17/17**,
+  hồi quy debug địch headless **30/30**, hồi Q/debug pause headless **107/107**.
+  Đã xem ảnh menu, hitbox hoạt động và hurtbox của địch sinh thêm; không có script
+  error trong các lượt cuối. Các số này không phải nghiệm thu độ khớp VFX/hitbox.
 
 - 26/10/2026: bổ sung nguồn tuning VFX Saber tại mục [VFX bốn đòn Saber](#saber-vfx),
   ghi đủ mặc định script/override scene hiện hành và các phép căn riêng từng đòn.

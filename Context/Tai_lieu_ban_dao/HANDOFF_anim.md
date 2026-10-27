@@ -3,6 +3,62 @@
 **Snapshot: 26/10/2026, Asia/Saigon.** Project: `D:/Godot Project/soujourn--echoes-of-the-soul`.
 File này ở `D:/Godot Project/soujourn--echoes-of-the-soul/Context/Tai_lieu_ban_dao/HANDOFF_anim.md`.
 
+## Cập nhật 27/10/2026 — VFX jump attack đã duyệt và tích hợp
+
+Phần snapshot 26/10 bên dưới vẫn là lịch sử bốn đòn Saber. **Ưu tiên source và
+cập nhật này cho jump attack**. Người dùng đã duyệt bản preview
+`adel-jump-preview-2026-10-27-v4-minimal-crush/final/`, sau các lần sửa:
+
+- AIR frame cuối đúng và được giữ. FALL là cú chém từ trên xuống dập đất,
+  cần chân cung dày chạm nền và phản ứng không khí dưới chân.
+- Bản có smoke nhiễu/xám và lớp kéo riêng để che kiếm bị loại: khói lạc phong
+  cách, quá nhiều chi tiết. Bản chỉ co đuôi cung vẫn trông như slash thường.
+- Bản chốt: **bỏ smoke và lớp bọc kiếm**, cung chính ép thấp tiêu xuống đất;
+  hai nét khí trắng sát chân dạt sang hai bên rồi đứt mỏng. Không sửa frame PNG.
+
+Đã gắn **`JumpAttackVFX`** vào
+`asset/Character/Adel/adel spine action use.tscn`, nên Player dùng chung rig tự
+nhận hiệu ứng. Script mới `scenes/adel/components/jump_attack_vfx.gd` và ba shader
+`jump_attack_air.gdshader`, `jump_attack_crush.gdshader`,
+`jump_attack_ground_air.gdshader` dùng lại `asset/VFX/Adel/Saber/saber_attack_1.png`.
+Bốn đòn Saber/scene tuning của người dùng không đổi. Component chỉ đọc clip/frame
+và sàn; không sửa Player/combat/hitbox, damage hoặc timing nguồn.
+
+Tên “FALL” người dùng dùng tương ứng **`jump_attack(land)`** trong source.
+Mốc frame thật: AIR frame 1 tại 0.18s; LAND frame 2 tại 0s, frame 3 tại 0.025s.
+Phát một lần mỗi clip; tuổi là thời gian thực, không bị kéo dài bởi hit-stop,
+freeze, pause hoặc đổi animation. LAND giữ transform thế giới lúc sinh; AIR có
+lớp gắn pose ngắn và vệt dư riêng. Khi Player có tiếp xúc sàn, căn điểm tiêu cung
+và khí vào sàn thật; khi xem rig độc lập dùng Y=923 pixel nguồn.
+
+Chỗ chỉnh: **rig → JumpAttackVFX** hoặc **Player → SpinePivot/SpineRig/JumpAttackVFX**.
+Danh mục duy nhất về default/override/đơn vị:
+`Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#jump-vfx`. Hiện không có override
+tham số của node mới trong rig/Player/map.
+
+**Kiểm tra thực chạy trong lượt tích hợp**: `tests/adel/jump_vfx_validation.gd`
+**33 checks, 0 failures**, gồm marker, hai hướng, world anchor, bỏ lớp bọc kiếm,
+capacity/cleanup, near-zero time scale, CombatTime hit-stop và pause. Hồi quy
+Saber **68/68**, jump damage **42/42**. Capture
+`tests/adel/jump_vfx_capture.gd` điều khiển Player bằng input thật: **nhảy rồi
+giữ xuống + đánh**, hai hướng; cú trái yêu cầu CombatTime hit-stop 120 ms.
+Đã bắt đủ AIR/LAND hai hướng, sai số Y giữa khí và tiếp xúc sàn **0 world pixel**
+trong scene phẳng thử, cuối lượt không còn VFX. Không coi đây là test trùng khít
+pixel VFX/hitbox hoặc mọi nền/slope/camera.
+
+Bằng chứng ở:
+`C:/Users/xuank/.codex/visualizations/2026/10/25/01a170fc-5832-7430-b538-78ebad4ad7b3/adel-jump-integration-2026-10-27/`.
+`gameplay-v2/` là capture thành công (262 ảnh có timestamp và bốn pose); thư mục
+`gameplay/` cũ là lượt harness nhấn attack thường do thiếu giữ xuống, **không dùng
+làm bằng chứng jump VFX**. Các log `jump-tests*`, `saber-regression*`,
+`jump-damage-regression*`, `capture-v2*` là kết quả lượt này. Cấu hình/save thử
+riêng, không dùng save chơi thật. Rà tham chiếu vẫn ghi lỗi UID dialogue/BG cũ
+và 8 warning legacy đã nêu trong snapshot; không có tham chiếu VFX mới hỏng.
+
+**Còn chờ:** phản hồi sau khi người dùng chơi bản tích hợp; VFX ready và skill Q
+chưa được thiết kế/duyệt hoặc triển khai trong lượt này. Không suy ra lệnh “duyệt”
+cho jump thành quyền làm các VFX còn lại. Chưa commit/push.
+
 ## 1. Tiếp quản nhanh và mức độ bằng chứng
 
 1. Đọc `Context/Tai_lieu_ban_dao/AGENTS.md` và `HANDOFF.md`, sau đó đối chiếu Git/source/scene trước khi sửa. Các đường dẫn `res://...` trong file này tính từ project gốc nêu trên.

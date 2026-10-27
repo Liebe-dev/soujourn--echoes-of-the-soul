@@ -1,0 +1,122 @@
+[
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack1_1.png.import",
+    "Hash": "F464D39BF74F094948709DBE050B0CCD1BDD39B7E07D2486790046FC7AE84840"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack1_2.png.import",
+    "Hash": "57C5F2550A74586211097F61E766DC3180C8A3FCB260DEF7EF677F1AA7A3BE11"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack1_3.png.import",
+    "Hash": "25B928FAC0EA07BD20E0073FA4117B13017231D3F03320DAD161BE2EB3424DD7"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack2.png",
+    "Hash": "C73C4D79521A64E4A80E1B9E4820F9F5A7AE4840869F9234EA33BB435627BE8A"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack2.png.import",
+    "Hash": "67F93B1EDAA7E98664A4697DDEC6ADC7E4F6B58936EDE9F5B4F3345E328B9F50"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack3.png",
+    "Hash": "E524F77498293D7C51FD4B8460D08520E0EA9B3A56B1BD527C415AAEFAE30EDB"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack3.png.import",
+    "Hash": "2F8FC947617C41BF5ACBE94400BDB6C6E835F2486F5ED9606BB81B2D7B025365"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\scenes\\enemy\\enemy_spine.tscn",
+    "Hash": "0CB4541A834E700159E897E55C94A2FD828B32EC007E1A1B06DB9AEF3A6F3376"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\body.png",
+    "Hash": "F0443EA7631E42D2154EF6EBBF11747E888406C55C9D7A2F6C5F5DDA3CC854B8"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\body.png.import",
+    "Hash": "78EE39DB8693ACB9D36E8868D561F719A4DF2381A3802CF8A622FDC2D25131DA"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\head.png",
+    "Hash": "346912B449C933C8058EBD0FF5516B56722074CF9026951FEA7C2E76ADC2113E"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\head.png.import",
+    "Hash": "0FFB7D1111EC59C0C3D380B02A719F9427E8529191973D6C6EE40E34580AC2D7"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\lef leg.png",
+    "Hash": "1F4976EB426829A751A16BAA4382E3D00F7F3C8C53AED60A8CE48662B889C267"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\lef leg.png.import",
+    "Hash": "30000C1CC4AA15B30BC6C37B641E51A369A3DBD27E74E886979228F47322F4E7"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\left hand.png",
+    "Hash": "CC5B7F3D353D1355EFAFC50A33C111BC59031B03C2DAB57AC3EB15233BB195CA"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\left hand.png.import",
+    "Hash": "01EA060699BBA7C3C3A709A83740FCF010F06A0DA136B56865D7CA9B0A3A6EA2"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\left palm.png",
+    "Hash": "3B7D1882F6DA4706002E74B7A5D6A66FE2CB0A53AAB53040B5AD18C2B9967ECA"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\left palm.png.import",
+    "Hash": "E2341B5D4D0F94F92AFC0B8C10C163AF24312C343AA6C5133FFA82275D556087"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right bicep.png",
+    "Hash": "96885A3B8BE7630C17B262A8698E518D4054FCA6DD0EF6647BE771F91B1E5D11"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right bicep.png.import",
+    "Hash": "F2FAA61F256708EB7834A5627778BA3F4E482134B6D203EE7EB31AE4E82DA635"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right hand.png",
+    "Hash": "51038C61F086F7C64A2D9F2EB86321EDA2A91E157AF7E811B558C65DDF9305DA"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right hand.png.import",
+    "Hash": "77134500E3F029011D52426D4655A988BA593F3CAB47483BFA0635F374E851C0"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right leg.png",
+    "Hash": "3DD39F2ED6C34176C3C0B61BD22E013B58CE3BFDBDDEA6BBE92BF4879F7A26AA"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right leg.png.import",
+    "Hash": "76DF7506B19E0B8ABE950DE837D76C5713B725EF101EE55739FAE80570EC66E2"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right palm.png",
+    "Hash": "3AC9A800484DA9DC4A0B07E4212B4D5721447D69F6BF05C350C8F692C44A33E5"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right palm.png.import",
+    "Hash": "4B5D7B07C238E3CC542F5D47F2EBB19AAD9C7680ED9C20307A8DCF1C3C655BB9"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\tail.png",
+    "Hash": "2EAA28B47F23BAEF67CCB01B64E90839C0D871607B7DA5AFB2C0E793C0518674"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\tail.png.import",
+    "Hash": "C2D752C137FADF1694AAF8574863EC47B97B817DA2961C0E2941143DEEBD655B"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\template.png",
+    "Hash": "C6C6B57D8B90715A446359EABD51EF5C81ABF02A7D75789575B408B88FDC7705"
+  },
+  {
+    "Path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\template.png.import",
+    "Hash": "99E4B77398A3318933DCFA2B4655896F43F34E3FF6A71289D4025C471A3AAC7A"
+  }
+]

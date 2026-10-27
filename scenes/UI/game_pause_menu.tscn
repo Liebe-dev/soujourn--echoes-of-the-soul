@@ -147,6 +147,38 @@ button_pressed = true
 text = "Skill cooldowns"
 tooltip_text = "Turn off to clear the current Q cooldown and keep casting without waiting. Session only."
 
+[node name="CollisionDebug" type="VBoxContainer" parent="VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="VBoxContainer/CollisionDebug"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+text = "Debug - Combat shapes"
+
+[node name="Toggles" type="HBoxContainer" parent="VBoxContainer/CollisionDebug"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Hitboxes" type="CheckButton" parent="VBoxContainer/CollisionDebug/Toggles"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Show hitboxes"
+tooltip_text = "Red: active attack shapes for Player and enemies. Session only."
+
+[node name="Hurtboxes" type="CheckButton" parent="VBoxContainer/CollisionDebug/Toggles"]
+custom_minimum_size = Vector2(0, 44)
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Show hurtboxes"
+tooltip_text = "Blue: body shapes that receive hits for Player and enemies. Session only."
+
+[node name="Hint" type="Label" parent="VBoxContainer/CollisionDebug"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Red: active attack  |  Blue: receives hits"
+
 [node name="fade_trans" type="ColorRect" parent="."]
 visible = false
 layout_mode = 1

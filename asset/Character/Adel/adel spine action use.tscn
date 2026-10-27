@@ -42,6 +42,7 @@
 [ext_resource type="Texture2D" uid="uid://dji80f7sdnle3" path="res://asset/Character/Adel/Saber attack/sabers4.png" id="39_krwnq"]
 [ext_resource type="Texture2D" uid="uid://catfmw53onoop" path="res://asset/Character/Adel/Saber attack/sabers5.png" id="40_87ms7"]
 [ext_resource type="Texture2D" uid="uid://du21a25834qo7" path="res://asset/Character/Adel/Saber attack/sabers6.png" id="41_pevka"]
+[ext_resource type="Script" uid="uid://y1t0uj252vct" path="res://scenes/adel/components/jump_attack_vfx.gd" id="jump_attack_vfx"]
 [ext_resource type="Script" uid="uid://dbhi0i8i8ffxr" path="res://scenes/adel/components/saber_swing_vfx.gd" id="saber_swing_vfx"]
 
 [sub_resource type="Gradient" id="Gradient_j5yna"]
@@ -10667,7 +10668,7 @@ texture = ExtResource("8_wu5lb")
 
 [node name="L_upper_arm" type="Bone2D" parent="Skeleton2D/hip/torso[merge]" unique_id=550548801]
 position = Vector2(44.817806, -67.62174)
-rotation = -0.010251018
+rotation = -0.010251017
 scale = Vector2(0.9998284, 0.9998284)
 rest = Transform2D(0.9999458, -0.010250827, 0.010250827, 0.9999458, 59.000057, -46.042194)
 
@@ -10720,7 +10721,7 @@ metadata/_local_pose_override_enabled_ = true
 [node name="L_foreleg" type="Bone2D" parent="Skeleton2D/hip/L_upper_leg" unique_id=1866317577]
 position = Vector2(21.260056, 137.47556)
 rotation = 0.27694732
-scale = Vector2(0.99985844, 0.99985844)
+scale = Vector2(0.9998584, 0.9998584)
 rest = Transform2D(0.63829863, 0.7696372, -0.7696372, 0.63829863, 21.260056, 137.47556)
 metadata/_local_pose_override_enabled_ = true
 
@@ -10793,7 +10794,7 @@ texture = ExtResource("6_xv1bw")
 visible = false
 position = Vector2(35, 16)
 rotation = -3.1018384
-scale = Vector2(0.9998305, 0.9998305)
+scale = Vector2(0.99983037, 0.99983037)
 rest = Transform2D(-0.9990432, -0.039737206, 0.039737206, -0.9990432, 35, 16)
 
 [node name="belly" type="Sprite2D" parent="Skeleton2D/hip/cloth_bone2" unique_id=1083849315]
@@ -10964,3 +10965,6 @@ effect_scale = Vector2(1.15, 1.15)
 residual_lifetime = 0.3
 finisher_residual_lifetime = 0.39
 residual_head_travel = 0.1
+
+[node name="JumpAttackVFX" type="Node2D" parent="." unique_id=1304032775]
+script = ExtResource("jump_attack_vfx")

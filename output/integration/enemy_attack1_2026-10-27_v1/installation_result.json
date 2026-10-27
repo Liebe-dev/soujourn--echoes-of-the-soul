@@ -1,0 +1,29 @@
+{
+  "status": "installed",
+  "approval": "User: thay vào đi",
+  "files": [
+    {
+      "file": "attack1_1.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack1_1.png",
+      "sha256": "F2AF796091D47E619E9B3EBD4D679F5266D604809E9E1120643B01AECF60EB15",
+      "matches_approved_preview": true
+    },
+    {
+      "file": "attack1_2.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack1_2.png",
+      "sha256": "9EA9A93C4CAF81A6091F5B0F8D0BEC6ADBB3B0ACC2FA512251795C1E21F303EA",
+      "matches_approved_preview": true
+    },
+    {
+      "file": "attack1_3.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack1_3.png",
+      "sha256": "DBB28BFF08A33BAAB9AC87236D428172F638BCAD794D8383A39A230D507EAF79",
+      "matches_approved_preview": true
+    }
+  ],
+  "copied_verbatim": true,
+  "changed_scene_or_animation": false,
+  "unchanged_other_files": 30,
+  "editor_connected": false,
+  "backup": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\integration\\enemy_attack1_2026-10-27_v1\\originals"
+}

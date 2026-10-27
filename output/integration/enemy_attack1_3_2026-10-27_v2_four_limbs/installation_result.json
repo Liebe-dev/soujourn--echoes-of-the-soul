@@ -1,0 +1,12 @@
+{
+  "status": "installed",
+  "approved_by_user": true,
+  "file": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack1_3.png",
+  "width": 964,
+  "height": 441,
+  "sha256": "E2673CF876053D03D54D9E0D0009DCA29AD7C9A1492FD5BE3524CB07782D4C80",
+  "matches_approved_preview": true,
+  "backup": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\integration\\enemy_attack1_3_2026-10-27_v2_four_limbs\\originals\\attack1_3.png",
+  "unchanged_other_files": 10,
+  "scene_and_animation_unchanged": true
+}

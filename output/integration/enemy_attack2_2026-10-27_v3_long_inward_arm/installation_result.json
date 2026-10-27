@@ -1,0 +1,17 @@
+{
+  "status": "installed",
+  "approval": "User: duyệt, thay đi",
+  "file": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack2.png",
+  "source": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\previews\\enemy_attack2_2026-10-27_v3_long_inward_arm\\attack2.png",
+  "width": 3823,
+  "height": 704,
+  "hframes": 3,
+  "vframes": 1,
+  "sha256": "7E3F8CF2317B8001322D0786504BB6B695DD9A9EFFE4069872990ABCF0BCF89A",
+  "matches_approved_preview": true,
+  "copied_verbatim": true,
+  "backup": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\integration\\enemy_attack2_2026-10-27_v3_long_inward_arm\\originals\\attack2.png",
+  "scene_and_animation_unchanged": true,
+  "import_sidecar_unchanged": true,
+  "unchanged_other_files": 10
+}

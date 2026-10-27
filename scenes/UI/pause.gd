@@ -2,6 +2,7 @@ extends Control
 const ChargedFinish = preload("res://scenes/adel/components/charged_skill_finish.gd")
 const EnemyDebugSettings = preload("res://scenes/enemy/enemy_debug_settings.gd")
 const SkillDebugSettings = preload("res://scenes/adel/components/skill_debug_settings.gd")
+const CombatCollisionDebug = preload("res://scenes/UI/combat_collision_debug.gd")
 
 var _is_transitioning := false
 
@@ -11,6 +12,7 @@ func _ready() -> void:
 	_setup_camera_settings()
 	_setup_enemy_debug()
 	_setup_skill_debug()
+	_setup_collision_debug()
 
 func _ui_actor() -> Node:
 	var node := get_parent()
@@ -43,6 +45,7 @@ func pause_and_unpause() -> void:
 		_sync_camera_settings()
 		_sync_enemy_debug()
 		_sync_skill_debug()
+		_sync_collision_debug()
 		move_to_front()
 		$VBoxContainer/resume.grab_focus()
 
@@ -165,3 +168,41 @@ func _on_skill_cooldowns_toggled(enabled: bool) -> void:
 		if skill != null and skill.has_method("reset_cooldown"):
 			skill.reset_cooldown()
 	_sync_skill_debug()
+
+func _setup_collision_debug() -> void:
+	var panel := get_node_or_null("VBoxContainer/CollisionDebug")
+	if panel == null: return
+	panel.visible = OS.is_debug_build()
+	panel.get_node("Toggles/Hitboxes").toggled.connect(_on_hitboxes_toggled)
+	panel.get_node("Toggles/Hurtboxes").toggled.connect(_on_hurtboxes_toggled)
+	_sync_collision_debug()
+	if OS.is_debug_build():
+		_ensure_collision_overlay.call_deferred()
+
+func _ensure_collision_overlay() -> void:
+	var actor := _ui_actor()
+	if actor == null: return
+	var world := actor.get_parent()
+	if world.has_node("CombatCollisionDebug"): return
+	var overlay := CombatCollisionDebug.new()
+	overlay.name = "CombatCollisionDebug"
+	world.add_child(overlay)
+
+func _sync_collision_debug() -> void:
+	var panel := get_node_or_null("VBoxContainer/CollisionDebug")
+	if panel == null: return
+	panel.get_node("Toggles/Hitboxes").set_pressed_no_signal(CombatCollisionDebug.shows_hitboxes())
+	panel.get_node("Toggles/Hurtboxes").set_pressed_no_signal(CombatCollisionDebug.shows_hurtboxes())
+
+func _can_change_collision_debug() -> bool:
+	return OS.is_debug_build() and visible and get_tree().paused and not _is_transitioning and not ChargedFinish.is_freezing()
+
+func _on_hitboxes_toggled(enabled: bool) -> void:
+	if not _can_change_collision_debug(): return
+	CombatCollisionDebug.hitboxes_visible = enabled
+	_sync_collision_debug()
+
+func _on_hurtboxes_toggled(enabled: bool) -> void:
+	if not _can_change_collision_debug(): return
+	CombatCollisionDebug.hurtboxes_visible = enabled
+	_sync_collision_debug()

@@ -35,6 +35,15 @@ Hit-stop, freeze, thay đổi attack speed và chuyển animation không kéo d�
 
 Component chỉ xử lý hình ảnh; hitbox, sát thương và nhịp combat không thay đổi.
 
+## Jump attack
+
+Rig còn có component `JumpAttackVFX` cho `jump_attack(air)` và
+`jump_attack(land)` (FALL theo cách gọi của người dùng). Component dùng lại
+`saber_attack_1.png` để dựng cung trắng; khi đáp, cung ép tiêu xuống nền và
+hai nét khí thấp dạt sang hai bên. Không có khói hay lớp VFX bọc thêm cây kiếm.
+Hướng dẫn tham số và thời gian thực nằm tại
+[VFX jump attack](../../../../Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#jump-vfx).
+
 ## Kiểm tra
 
 `tests/adel/saber_vfx_validation.gd` kiểm tra marker, hai lớp VFX, chuyển
