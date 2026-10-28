@@ -1,6 +1,6 @@
 # Hướng dẫn tùy chỉnh thông số game
 
-Cập nhật: **27/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
+Cập nhật: **28/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
 
 ## Mục lục
 
@@ -13,6 +13,7 @@ Cập nhật: **27/10/2026**. Đây là file dùng chung: khi thêm hoặc đổ
 - [VFX Saber Ready: vẩy kiếm nhanh](#ready-vfx)
 - [Defense, Guard, Deflect, Stagger và hit-stop](#phong-thu)
 - [Q Saber: charge, damage, zoom và freeze](#skill-q)
+- [VFX Q: cung lao, tiêu đuôi khi trúng và slash hồi](#q-vfx)
 - [Dark Sentinel: entry, rút HP và debug](#sentinel)
 - [Enemy: AI, damage, hitbox và death](#enemy)
 - [Camera, mouse pan, khóa mục tiêu và zoom](#camera)
@@ -635,6 +636,73 @@ Các giá trị dưới đây phân biệt mặc định script và override hi�
 - **Full Impact Slow Motion Duration** (`full_impact_slow_motion_duration`): scene gốc `0.5`; script `0.36`.
 
 
+<a id="q-vfx"></a>
+### VFX Q: cung lao và slash hồi
+
+Mở `res://asset/Character/Adel/adel spine action use.tscn` → **SaberSkillVFX**.
+Trong Player là **SpinePivot/SpineRig/SaberSkillVFX**. Script:
+`res://scenes/adel/components/saber_skill_vfx.gd`; shader:
+`res://scenes/adel/components/saber_skill_arc.gdshader`.
+Hai ảnh runtime `res://asset/VFX/Adel/Saber/skill_q_lunge.png` và
+`skill_q_slash.png` là đúng **brush V4 hai răng cưa, đuôi thu nhọn** đã duyệt.
+Mesh đọc biên alpha của ảnh rồi tiêu từ đuôi về đầu nối kiếm; không sửa PNG
+nhân vật. Giá trị dưới đây ghi riêng mặc định script và override rig hiện tại.
+
+- **Enabled** (`enabled=true`): bật/tắt toàn bộ VFX Q; tắt sẽ dọn ngay vệt còn lại.
+  NodePath `animation_player_path=../AnimationPlayer`,
+  `source_sprite_path=../TestAttackSprite` chỉ đổi khi thay cấu trúc rig.
+- **Appearance**: **Tint** (`tint=#ef241e`, alpha 1, script và rig như nhau)
+  đổi màu lõi của cả cung lao và slash `_6`. **Highlight Tint**
+  (`highlight_tint=#f55d58`, alpha 1, script mặc định, không override) đổi màu
+  các nét nhạt đặc trên lõi; shader phân loại nét vẽ theo bảng màu tham chiếu,
+  không giữ sai số màu/viền mờ của ảnh gen. `dash_opacity=1.0`,
+  `slash_opacity=1.0` chỉnh độ phủ riêng, không đơn vị (0..1), không override.
+  Alpha tổng dùng `tint.a`; alpha của `highlight_tint` không dùng riêng.
+  Phần đỏ có sẵn sau sống đao trong PNG nhân vật không chịu hai màu này.
+- **Lunge (source-frame pixels)**: `dash_offset_pixels=(0,0)` dịch cung,
+  `dash_scale=(1,1)` phóng theo X/Y, hệ số không đơn vị.
+  **Dash Texture** (`dash_texture`) mặc định là ảnh `skill_q_lunge.png` trên.
+  **Dash Frame Rect** (`dash_frame_rect=Rect2(-120,505,1063,181.77942)`)
+  là vùng đặt **phần nét có alpha** trong frame nguồn `_4`: X/Y là vị trí,
+  Width/Height là kích thước pixel nguồn, đều dương. Padding trong PNG tự bỏ
+  qua khi căn. Các trường này không có override scene.
+  `dash_z_offset=1` là chênh lớp vẽ so với tổng Z của sprite: scene hiện có
+  source Z=250 nên cung lao Z=251, đè lên nhân vật.
+- **Recovery slash (source-frame pixels)**: `slash_offset_pixels=(0,0)`,
+  `slash_scale=(1,1)` căn riêng cung `_6`. **Slash Texture** (`slash_texture`)
+  mặc định `skill_q_slash.png`; **Slash Frame Rect**
+  (`slash_frame_rect=Rect2(64.18893,40.96652,1057.6809,699.0335)`) căn nét trong
+  frame nguồn `_6`, cùng đơn vị và ý nghĩa như Dash Frame Rect. Không override.
+  `slash_z_offset=-1` đặt sau sprite (Z=249 trong scene hiện tại).
+- Tọa độ/offset là **pixel frame nguồn**, Y dương hướng xuống, X dương sang
+  phải trong ảnh nguồn; tự lật cùng hướng nhân vật. Scale không phải kích
+  thước world pixel. Các trường Bézier `dash_outer_points`,
+  `dash_inner_points`, `slash_points`, `slash_width` của bản cung phẳng đã bỏ;
+  hình dạng răng/đuôi giờ nằm trong ảnh đã duyệt. Muốn cao/thấp hoặc dài/ngắn,
+  dùng Scale hoặc Frame Rect; sửa hình cụ thể cần sửa/duyệt ảnh. Sau khi đổi
+  texture hoặc Frame Rect, lưu scene và chạy lại vì mesh đầy đủ cùng biên alpha
+  được dựng/cache lúc khởi tạo. Offset/scale của slash được chốt
+  lúc phát, vệt dư không tiếp tục chạy theo nhân vật. Không coi chỉnh Remote
+  là giá trị đã lưu lâu dài.
+- **Lifetime (real seconds)**: `slash_hold` mặc định script **0.012s**, rig
+  đang override **0.02s**; `slash_lifetime` mặc định script **0.18s**, rig
+  đang override **0.25s**. Đây là **giây thực**; lifetime là tổng tuổi gồm hold.
+  Hai override do người dùng đã căn được giữ nguyên trong lượt tích hợp brush.
+  Sau hold, vệt ngắn và mỏng dần. Đổi animation bình thường vẫn cho
+  dư hết tuổi; hủy/ngắt Q dọn ngay. Đồng hồ dùng `Time.get_ticks_usec()` và
+  xử lý cả lúc pause/hit-stop/freeze, không kéo dài theo thời gian game.
+
+Cung `_4` giữ nguyên suốt lúc lao, bám Player. Khi xác nhận trúng, giữ gốc
+thế giới ở điểm chạm theo frame `_4`, rồi tiêu từ **đuôi nhọn → đầu tù nối
+kiếm** (nhìn phải: trái → phải). Thời gian tiêu lấy trực tiếp từ hit-stop
+được Player chấp nhận, hiện tap/charged/full **0.065/0.075/0.1 giây thực**
+(mặc định script và scene như nhau, nhóm **SaberSkill → Impact Timing** phía trên).
+Không có lifetime impact riêng; tắt hit-stop làm cung này mất ngay. Hụt
+thì tắt cung lao ngay khi sang `_6`; `_6` vẫn phát slash riêng. Tint/opacity
+và Highlight Tint được cập nhật khi vệt đang hiển thị. Cung lao tiêu trái →
+phải, slash tiêu từ đuôi dưới-phải → đầu trên-trái khi nhìn phải; tự lật theo
+nhân vật. Chỉ VFX đổi, các tuning combat giữ nguyên.
+
 <a id="sentinel"></a>
 ## 7. Dark Sentinel: entry, rút HP và debug
 
@@ -1057,6 +1125,27 @@ Khi có thông số mới hoặc chuyển node/script: sửa ngay phần hệ th
 Giữ nội dung hiện hành ngay tại mục đang có, thay mô tả đã bị thay thế thay vì chồng nhiều đoạn đính chính. Các bản báo cáo hệ thống chỉ ghi cơ chế, phạm vi và kiểm chứng; liên kết về file này cho tuning. Cập nhật ngày trên đầu file và mục thay đổi gần nhất bên dưới. Không tạo báo cáo mới cho từng thông số. `.docx` và bản tổng hợp tuần là tài liệu lịch sử giữ nguyên.
 
 ### Thay đổi gần nhất
+
+- 28/10/2026: thay cung Q phẳng bằng **brush V4 hai răng cưa, đuôi thu nhọn**
+  đã duyệt, giữ ảnh runtime riêng và màu mẫu **#ef241e / #f55d58**. Mục
+  [VFX Q](#q-vfx) cập nhật Texture/Frame Rect thay trường Bézier cũ, thêm
+  Highlight Tint và ghi đúng override hold/lifetime **0.02/0.25s** đang có.
+  Q VFX **98**, Saber **68**, Jump **33**, Ready **29**, Descent **25**,
+  gameplay Q **160**: **413 checks, 0 failures**. Capture Forward+ D3D12:
+  201 frame input/physics thật, trúng phải + hụt trái, 4 mẫu tiêu trong 65ms,
+  0 mẫu mất cung giữa dash và cuối sạch. Pixel native khớp cả hai màu mẫu.
+  Bằng chứng `adel-q-brush-integration-2026-10-28/` ở gốc preview ngoài Git.
+
+- 28/10/2026: tích hợp **SaberSkillVFX** theo Q V4 đã duyệt, đổi cả hai cung
+  sang **#df5c55**. Chỗ chỉnh ở [VFX Q](#q-vfx); thời gian tiêu khi trúng lấy
+  hit-stop thực, chiều đuôi nhọn → đầu nối kiếm; hụt tắt cung lao ngay.
+  Q VFX **89/89**, hồi quy Saber **68/68**, Jump **33/33**, Ready **29/29**,
+  Descent **25/25**, gameplay Q **160/160**, tổng **404 checks, 0 failures**.
+  Capture native 200 frame bằng input/physics thật: trúng phải + hụt trái,
+  4 mẫu tiêu trong hit-stop tap 65 ms, 0 mẫu mất cung giữa dash, cuối sạch.
+  Video chỉ quay tap; ba tier/hai hướng được kiểm tra bằng suite Q VFX.
+  Bằng chứng ở `adel-q-vfx-integration-2026-10-28/` trong gốc preview ngoài
+  Git ghi tại `Context/Tai_lieu_ban_dao/HANDOFF_anim.md`.
 
 - 27/10/2026: tích hợp cung **Descent V6** đã duyệt vào **JumpAttackVFX**, giữ
   phần phình thấp gần kiếm, theo Player trong lúc giữ pose AIR lao xuống rồi

@@ -1,12 +1,269 @@
 # Bàn giao animation / VFX combat Adel
 
-**Snapshot: 26/10/2026, Asia/Saigon.** Project: `D:/Godot Project/soujourn--echoes-of-the-soul`.
+**Cập nhật: 28/10/2026, Asia/Saigon; snapshot gốc 26/10.** Project: `D:/Godot Project/soujourn--echoes-of-the-soul`.
 File này ở `D:/Godot Project/soujourn--echoes-of-the-soul/Context/Tai_lieu_ban_dao/HANDOFF_anim.md`.
+
+## Hiện hành 28/10/2026 — Q brush V4 hai răng cưa đã duyệt và tích hợp
+
+**Yêu cầu mới nhất đã chốt:** sau cung phẳng, người dùng muốn chất nét theo
+`D:/Downloads/Layer 2.png`: răng cưa chỉ ở biên trong, hướng về đầu nhọn,
+biên ngoài liền mạch, lõi kín và vài nét nhạt vẽ lên lõi. Sau khi giảm còn
+bốn răng, người dùng gạch bỏ hai răng gần đuôi và gọt dải biên trong để đuôi
+thu mảnh hơn, áp cho cả hai cung. Đã duyệt **brush V4 hai răng cưa**; đây là
+đợt V4 khác với V4 cung phẳng lịch sử bên dưới. Màu mới lấy trực tiếp từ
+ảnh mẫu: lõi **#ef241e**, nét nhạt **#f55d58**, thay #df5c55 cho riêng Q.
+
+**Đã tích hợp:**
+
+- `asset/VFX/Adel/Saber/skill_q_lunge.png` và `skill_q_slash.png` là bản sao
+  nguyên hash của hai PNG đã duyệt tại
+  `D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/adel-q-vfx-brush-preview-2026-10-28-v4-two-teeth-tapered/`.
+  Đây là **asset chạy game**, không phải đưa cả thư mục preview vào repo.
+- `scenes/adel/components/saber_skill_vfx.gd` đọc biên alpha ảnh thành dải
+  mesh, bỏ khoảng padding khi căn theo Frame Rect trong pixel frame nguồn.
+  Lunge đi từ trái → phải, slash từ dưới-phải → trên-trái khi nhìn phải;
+  tự lật theo facing. Giữ hai răng và đuôi của ảnh, không dựng gần giống bằng
+  răng cưa ngẫu nhiên. Biên ảnh cache theo texture, mesh đầy đủ dựng lúc ready.
+- `saber_skill_arc.gdshader` đọc alpha/nét vẽ và ánh xạ về hai màu mẫu, loại
+  fringe alpha mờ; lõi được giữ đặc. `tint` và `highlight_tint` chỉnh độc lập.
+  Các trường Bézier cũ không còn dùng, thay bằng Texture/Frame Rect. Nguồn
+  tuning hiện hành duy nhất: `Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#q-vfx`.
+- Giữ nguyên signal/lifecycle Q: giữ cung suốt lao, trúng tiêu theo accepted
+  hit-stop thực 65/75/100ms, hụt tắt cung lao ngay, `_6` có slash riêng; pause,
+  freeze không kéo dài đồng hồ; hủy dọn ngay. Source frame `_4` cache vẫn giữ
+  đúng vị trí lúc sang `_5`, Z lunge/source=251/250, slash=249 trong scene này.
+- Rig có các override người dùng đã chỉnh từ trước lượt này:
+  `slash_hold=0.02`, `slash_lifetime=0.25` **giây thực**; đã giữ nguyên.
+  Script mặc định vẫn 0.012/0.18. Chỉ cập nhật override `tint` cũ sang màu mới.
+  Không sửa producer Q, ảnh `sabers4/5/6`, Player hoặc VFX Saber/Jump/Ready.
+
+**Kiểm tra thực chạy:** Q VFX **98/98** (thêm texture, hai màu và hướng tiêu
+slash), Saber **68**, Jump **33**, Ready **29**, Descent **25**, gameplay Q
+**160**: tổng **413 checks, 0 failures** trên mirror/cache và dữ liệu riêng.
+Lượt đầu 98/1 do override tint cũ trong rig, đã sửa đúng màu đã duyệt; không
+xóa override thời gian để làm test qua. Không coi số checks là từng ấy tình
+huống thị giác độc lập. Bone2D warnings cũ còn; không có script error ở lượt cuối.
+
+Capture **Forward+ D3D12** theo renderer game, không ép Compatibility:
+201 frame input/physics thật, trúng phải + hụt trái, 4 mẫu tiêu trong hit-stop
+tap 65ms, 0 mẫu mất cung giữa dash, cuối sạch. Pixel native lõi/nét nhạt đúng
+RGB(239,36,30)/RGB(245,93,88): dash 5932/959 pixel, slash 10216/838 pixel.
+Các tier 75/100ms có suite, chưa quay native riêng. Bằng chứng tại
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/adel-q-brush-integration-2026-10-28/`:
+Thư mục `capture/` chứa `dash_0.png`, `slash_0.png`, `slash_1.png`,
+`impact_*.png`, `capture_summary.json`, `timeline.json`; log test/capture và
+`INTEGRATION_NOTES.md` ở gốc evidence. Chín file cần bảo toàn giữ nguyên hash;
+rig khác đúng dòng Tint mới, đã dựng lại dòng cũ và đối chiếu SHA256 để xác nhận.
+Ảnh trong capture là từ component production; không gắn overlay VFX thay thế.
+
+**Giới hạn và bước tiếp theo:** nghiệm thu cảm giác ở map chơi, nhiều mục tiêu
+và camera do người dùng thử tiếp. Nét đỏ/xước đã vẽ sẵn trong `sabers4/6.png`
+vẫn hiện cùng VFX, có thể che một phần silhouette; đây là nguồn người dùng
+đã sửa, không tự xóa. Không chờ duyệt triển khai nữa; nếu có nhận xét mới,
+căn Texture/Frame Rect/Scale hoặc làm preview ảnh mới theo quy trình cũ.
+Preview/evidence chỉ lưu ngoài Git; không commit/push, không force reload editor.
+
+## Lịch sử 28/10/2026 — Q V4 cung phẳng, màu #df5c55 (đã thay hình/màu)
+
+**Đã chốt:** người dùng duyệt V4, sau đó yêu cầu đổi màu **#df5c55**. Cả
+cung lao `_4` và slash `_6` đã dùng màu này. Một cung cong mượt liền mạch,
+đuôi nhọn, đầu còn lại là **mặt cắt chéo tù nối đao**, không móc nhọn.
+Phần đỏ có sẵn trong PNG giữ nguyên. Cung `_4` đè lên Player; khi nhìn phải,
+**đuôi nhọn bên trái mất trước → đầu nối kiếm bên phải mất sau**. Đây là
+chiều V4 được duyệt, thay cho chiều V2/V3 lịch sử bên dưới.
+
+**Đã triển khai và xác minh:**
+
+- `scenes/adel/components/saber_skill_vfx.gd` (`SaberSkillVFX`) và
+  `saber_skill_arc.gdshader` dựng mesh production, không dùng overlay preview.
+  Node mới trong `asset/Character/Adel/adel spine action use.tscn`; khi chơi
+  là `SpinePivot/SpineRig/SaberSkillVFX`. Không override export trong scene.
+- `scenes/adel/components/saber_weapon_skill.gd` thêm các signal
+  `lunge_started`, `impact_confirmed(hit_stop_seconds)`,
+  `recovery_started(hit_confirmed)`, `ended(interrupted)` để nối vòng đời.
+  Giữ timing/damage/cooldown cùng các giá trị người dùng đã căn.
+- Cung `_4` giữ suốt pha lao, bám Player. Khi xác nhận trúng, giữ gốc thế
+  giới tại chạm theo transform frame `_4` đã cache, không nhảy theo bounds
+  texture `_5`. Tiêu đuôi bằng thời gian hit-stop **thực sự được chấp nhận**,
+  hiện 65/75/100 ms; hit-stop tắt thì mất ngay. Hụt tắt cung lao khi sang `_6`.
+- Slash `_6` riêng, giữ hình 0.012s, tổng tuổi 0.18s **thực**, ngắn và mỏng
+  dần. Vệt dư đứng trong thế giới, tiếp tục qua Ready, pause/freeze/hit-stop;
+  ngắt Q dọn ngay. Q4 Z=251/source=250; Q6 source−1=249 trong scene hiện tại.
+- Tham số/tọa độ/đơn vị/mặc định/override xem nguồn tuning duy nhất:
+  `Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#q-vfx`. Chỉnh màu ở
+  **SaberSkillVFX → Appearance → Tint**. README cơ chế:
+  `asset/VFX/Adel/Saber/README.md`.
+
+**Kiểm tra thực chạy:** `tests/adel/skill_vfx_validation.gd` **89/89** gồm ba
+tier/hai hướng, giữ cung, màu/lớp, accepted hit-stop, duplicate hit, gốc
+impact, miss, cancel, pause/expiry và freeze trả zoom cuối chiêu. Hồi quy
+Saber VFX **68**, Jump **33**, Ready **29**, Descent **25**, gameplay Q **160**;
+tổng **404 checks, 0 failures**. Không coi số checks là từng ấy tình huống
+thị giác độc lập. Các lượt dùng bản mirror/cache và user data riêng, không
+save chơi thật; cảnh báo Bone2D cũ vẫn còn, không phải script error mới.
+
+`tests/adel/skill_vfx_capture.gd` quay input/physics thật, component production:
+200 frame, trúng phải + hụt trái, 4 mẫu tiêu trong hit-stop tap 65 ms,
+0 mẫu mất cung giữa dash, cuối không còn dash/slash. Màu lõi native được
+đối chiếu RGB(223,92,85): dash 9,564 pixel, slash 9,350 pixel trong capture mới.
+Suite Q VFX 89/89 đã chạy lại sau cập nhật PNG nguồn. Video chỉ
+quay **tap**; charge 75/100 ms có suite nhưng chưa quay native riêng.
+
+**Bằng chứng tích hợp:**
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/adel-q-vfx-integration-2026-10-28/`.
+Hai video hiện hành: `final/q_v4_df5c55_ingame_hit_miss_current_assets_normal.mp4`
+(~3.33s), `final/q_v4_df5c55_ingame_hit_miss_current_assets_slow_4x.mp4`
+(~13.32s), đều giải mã được. `capture-current-assets/`,
+`review_frames_current_assets/`, `video_manifest_current_assets.json`,
+`pixel_color_check_current_assets.json`, `*-tests*`/`*-regression*` và
+`INTEGRATION_NOTES.md` ở cùng gốc. Bản `capture/`/video không có
+`current_assets` là lịch sử trước lần PNG mới nhất, không gửi lại.
+
+Trong lúc tích hợp, hash `sabers4.png`/`sabers6.png` thay đổi do hoạt động
+ngoài các chỉnh sửa của tác vụ, lần lượt 16:37/16:42; cache editor import
+16:43, sau capture đầu 16:39. AI không ghi đè/khôi phục hai PNG: chúng nay
+có thêm nét đỏ xước, giữ nguyên. 6/8 file cần bảo toàn giữ hash từ đầu lượt;
+đã lấy baseline mới, quay lại với cache khớp MD5 nguồn và xác nhận **8/8 hash
+ổn định qua lượt cuối** (`protected_hashes_current_assets_before/after.json`).
+Không so nhầm các hash này với Git sạch vì PNG và scene đã có sửa từ trước.
+Toàn bộ preview/evidence ngoài Git, không commit/push; junction mirror được
+tháo sau kiểm tra. Không force reload/save cửa sổ editor người dùng.
+
+**Không còn chờ duyệt triển khai Q V4.** Nếu tiếp tục, đọc source và trạng thái
+Git trước, hỏi cảm giác trong game khi người dùng có nhận xét mới. Độ đẹp
+ở mọi map, nhiều địch hoặc mọi tình huống camera chưa được nghiệm thu.
+
+**V4 preview trắng là lịch sử đã được duyệt**, còn lưu tại
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/adel-q-vfx-preview-2026-10-28-v4-flat-cut/`.
+V3 thất bại vì cap bị nhô thành móc và chiều tiêu sai; V4 bỏ móc, dùng hai
+biên Bézier có đầu cuối khác nhau cho mặt cắt chéo, đảo chiều về đuôi → kiếm.
+V2 từng dùng Z=51 nhưng tổng source=250 nên vẫn ở sau: phải so tổng Z qua
+ancestor, không chỉ Z của sprite con. Bản slash cũ để lại khối gần chữ nhật
+khi về Ready: thu thêm bề rộng theo `(1-progress)^0.75` đã xử lý.
+
+**V3 bên dưới là lịch sử đã bị yêu cầu sửa tiếp.** Người dùng yêu cầu
+`saber_skill_4` đè lên nhân vật, dày hơn và cong theo ref đầu tù. V3 chuyển
+cung lao ra lớp trước đúng nghĩa render: source có tổng Z=250 (Player 200
+cộng sprite 50), VFX Z=251; V2 từng đặt Z=51 nên ở sau Player. Không chuyển vị
+trí cú đánh thấp thành slash trên đầu. Hai đường cong inner/outer mới tạo
+thân dày và đầu loe/tù nối lưỡi đao, đuôi nhọn; trắng liền mạch, giữ đỏ gốc.
+Giữ chiều thu trúng mũi đao → phía sau và nhánh hụt của V2; không sửa hình,
+độ sâu hay nhịp tiêu skill_6 trong V3.
+
+V3 nằm tại
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/adel-q-vfx-preview-2026-10-28-v3-foreground/`.
+`final/q_v3_foreground_hit_miss_normal.mp4` (~3.33s),
+`final/q_v3_foreground_hit_miss_slow_4x.mp4` (~13.32s); `capture/` là nguồn
+native, `video_manifest.json`, `review_frames/`, `PREVIEW_NOTES.md` ghi chi tiết.
+200 frame input/physics thật, trúng phải + hụt trái, 4 mẫu tiêu trong hit-stop
+65 ms, không mẫu mất cung giữa dash, cuối sạch; giữ speed scene=2811. Đã
+kiểm source 9/9 hash không đổi và MP4 giải mã được. Video review xác nhận
+cung đè hai chân, dày/cong hơn, đầu tù nối đao, đỏ còn, không clipping/remnant
+mới và cuối sạch. Chỉ preview ngoài Git,
+junction thử tháo sau kiểm tra. Chờ duyệt V3 trước khi tích hợp.
+
+**V2 video bên dưới là lịch sử.** Người dùng sửa rằng
+chiều thu ở V1 ngược: V2 tiêu từ phía mũi đao/phía trước về phía sau (nhìn
+phải: phải → trái). Đồng thời đổi silhouette theo ref mới: **đuôi nhọn, đầu
+tù nối lưỡi đao**, vẫn một cung trắng mượt liền mạch, giữ phần đỏ gốc; áp cho
+cung lao và cung slash `_6`. Không lấy màu/glow/nhiều vệt song song trong ref.
+
+Vị trí:
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/adel-q-vfx-preview-2026-10-28-v2-blunt-video/`.
+Hai MP4 mới nhất trong `final/`: `q_v2_blunt_hit_miss_normal_r2.mp4` (~3.32s)
+và `q_v2_blunt_hit_miss_slow_4x_r2.mp4` (~13.30s). `capture-final-v2/` là nguồn đúng,
+200 frame có timestamp, một cú trúng phải + hụt trái bằng input/physics/Q
+thật, overlay chỉ gắn tạm trong memory của bản thử. Có 4 mẫu vệt đang tiêu
+trong hit-stop 65 ms thực, không mẫu nào mất cung giữa lúc dash, cuối sạch.
+Scene lunge_speed thực giữ **2811**; không đổi timing/gameplay production.
+Các tier 75/100 ms chưa quay riêng. Bản chậm chỉ đổi tốc độ xuất video.
+
+`PREVIEW_NOTES.md`, `video_manifest_v2.json`, `review_frames_v2/`,
+`source_hashes_before/after.json` ghi chi tiết. Đã kiểm 9/9 file production
+nguyên hash, MP4 giải mã được. `capture/` cũ trước `capture-final/` có lỗi
+căn camera lúc impact, **không dùng làm preview**; bản cuối đã sửa camera
+thử, không sửa camera game. Bản video đầu còn khối trắng gần chữ nhật ở cuối
+slash khi về Ready; R2 đã cho bề rộng slash thu thêm theo `(1-progress)^0.75`,
+giữ hình đầy đủ ban đầu. Các MP4 không có `_r2` đã bị thay thế, không gửi lại.
+Video review đã xác nhận R2: cap nối đao hai hướng, chiều tiêu đúng, hụt tắt
+cung lao, phần cuối thu mỏng không còn khối chữ nhật; đủ để gửi chờ duyệt.
+Junction thử được tháo sau kiểm tra; file ở
+ngoài Git. Chờ người dùng duyệt V2 trước khi tích hợp Q.
+
+Phần sau mô tả **V1 lịch sử**, đặc biệt chiều tiêu V1 đã bị V2 thay thế:
+
+Người dùng cung cấp ba ảnh khoanh xanh cho `saber_skill_4/5/6`. Xanh chỉ gợi
+vị trí/tầm; bẻ lại thành **cung trắng cong mượt, liền mạch**. Phần đỏ sau sống
+đao có sẵn trong PNG phải giữ nguyên. Cung thấp ở `_4` tồn tại suốt lúc phóng;
+khi trúng và sang `_5`, thu từ đuôi về phía đầu trong thời gian hit-stop lúc
+va chạm; hụt thì tắt ngay. `_6` có cung slash riêng trên đầu như đòn thường.
+
+Đã dựng **preview ảnh, chưa tích hợp và chưa được duyệt** tại
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/adel-q-vfx-preview-2026-10-28-v1/`:
+`q_vfx_overview.png` và `q_vfx_tail_timing.png`; `references/` giữ ba ảnh người
+dùng, `PREVIEW_NOTES.md` có điểm bẻ cung/giả định/cách chạy renderer. Giữ mọi
+file này cục bộ, ngoài Git. Không tạo video trong lượt này.
+
+Đã xác minh từ code: hụt đi thẳng `_4` → `_6`, không qua `_5`. Hit-stop lần
+trúng đầu có default **65/75/100 ms thực** theo tier, không thấy override ở
+Player scene. Không dùng `impact_pose_duration=0.05` (giây game) hoặc freeze
+zoom-return muộn ở cuối charged Q để định tuổi vệt này. Khi tích hợp cần đọc
+xác nhận hit thật, giữ transform của cung `_4` tại va chạm thay vì dời theo
+sprite `_5`, và dùng clock thực. Thứ tự thu cung `_6` hiện là suy luận theo
+pose từ phía trước/thấp lên đầu kiếm cao phía sau, chưa đo quỹ đạo liên tục.
+Vệt dư `_6` đang đề xuất 0.18 giây thực, còn chờ duyệt/tuning.
+
+Kiểm tra đợt preview: render native Godot 4.7 OpenGL thành công, 9 file source
+được bảo vệ giữ nguyên hash, gồm ba PNG skill và rig/Player/skill code. Đã
+xem ảnh; không đổi asset đỏ, shader/combat production hoặc hitbox. **Chưa
+kiểm thử runtime đồng bộ hit-stop/hụt/hai hướng cho VFX Q**, chưa chạy suite
+gameplay vì đây là preview ảnh. Bước tiếp theo: chờ phản hồi/duyệt của người
+dùng trước khi tạo component Q và kiểm tra tích hợp.
+
+## Cập nhật 28/10/2026 — vị trí lưu preview mới
+
+**Từ nay lưu mọi preview mới tại:**
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/`.
+Giữ mỗi lượt trong thư mục con có tên rõ; Skill Q tiếp theo cũng dùng gốc này.
+Đây là đường dẫn người dùng chỉ định, không tạo lại preview trong
+`D:/Godot Project/soujourn--echoes-of-the-soul/output/previews/` hoặc gốc
+visualizations cũ. Source/asset đã tích hợp vẫn nằm trong project Godot.
+
+**Chỉ lưu cục bộ, không đưa bộ preview vào Git:** không `git add`, commit hoặc
+push ảnh/GIF/ref/log/project thử trong thư mục Output preview. Không chép bộ
+này trở lại repository để sao lưu. Gốc mới nằm ngoài repository; `.gitignore`
+của game thêm `/output/previews/` để bỏ qua preview mới nếu thư mục cũ được
+tạo lại. Những bản preview từng có trong lịch sử Git vẫn là lịch sử; lượt này
+không xóa lịch sử hoặc tự commit/push. Các file đã xóa trong working tree
+vẫn chờ người dùng quyết định commit việc dọn.
+
+Đã chuyển toàn bộ preview, ảnh, GIF, ref và bằng chứng/log/project thử của chat
+từ gốc visualizations cũ sang đây, giữ nguyên tên và cấu trúc thư mục. **8.912
+file, 606.419.875 byte (khoảng 578 MB)** được đối chiếu SHA-256 từng file trước
+khi dọn bản cũ. Danh sách và hash ở
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/TRANSFER_manifest_2026-10-28.json`.
+Các đường dẫn tuyệt đối tới preview trong bản bàn giao đã đổi sang gốc mới;
+những đường dẫn con ở các mục dưới ghép vào gốc này.
+
+**Phân biệt với lượt dọn trước:** `output/previews` trong project đã bị xóa
+195 file (khoảng 85 MB) theo lệnh dọn của người dùng. Lượt này khôi phục được
+**159 file có bản lưu Git**, từ commit `f5d1a2bcf01cc6640aa3bbaa71721391686fe5f1`,
+vào thư mục con **`enemy-previews-recovered-from-git-2026-10-28/output/previews/`**
+của gốc mới. `RECOVERY_NOTES.md` trong thư mục khôi phục ghi nguồn. Đây là
+phiên bản đã commit; **36 file còn lại và sửa chưa commit của các file đã xóa
+chưa được khôi phục**. Không coi bộ khôi phục là bản đầy đủ của working tree
+trước dọn. Không phục hồi file trở lại `output/previews` của project.
+
+Các script/manifest/log bên trong bộ preview lịch sử được chuyển nguyên byte,
+nên có thể còn chuỗi đường dẫn máy cũ. Đó là provenance; trước khi chạy lại
+harness, sửa cấu hình/output sang gốc mới và dựng lại mirror/junction cần
+thiết. Không chạy script archive rồi để nó ghi preview vào vị trí cũ. Việc
+chuyển file không phải chạy lại test hay nghiệm thu lại VFX.
 
 ## Cập nhật 27/10/2026 — cung Descent V6 đã duyệt và tích hợp
 
 Người dùng đã duyệt ảnh
-`C:/Users/xuank/.codex/visualizations/2026/10/25/01a170fc-5832-7430-b538-78ebad4ad7b3/adel-jump-descent-preview-2026-10-27-v6-lower-belly/lower_belly_preview.png`.
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/adel-jump-descent-preview-2026-10-27-v6-lower-belly/lower_belly_preview.png`.
 Đã đưa **đúng cung trắng mượt V6** vào pha giữ frame cuối AIR lao xuống:
 đầu trên thanh, phần phình kéo thấp gần lưỡi kiếm, chỉ phủ một phần lưỡi.
 Vùng khoanh đỏ của người dùng hướng dẫn vị trí/tỉ lệ, không phải khuôn phải
@@ -51,7 +308,7 @@ chỉ trong harness để quan sát rơi dài, không đổi gameplay nguồn. �
 cả hai hướng và LAND: cong mượt, phủ một phần kiếm, không dư cung rơi lúc đáp.
 
 Bằng chứng ngoài repo:
-`C:/Users/xuank/.codex/visualizations/2026/10/25/01a170fc-5832-7430-b538-78ebad4ad7b3/adel-jump-descent-integration-2026-10-27/`.
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/adel-jump-descent-integration-2026-10-27/`.
 `gameplay-stills/` chứa `right_descent.png`, `left_long_descent.png`,
 `right_landing.png`, `left_landing.png`, `capture_summary.json`. Log
 `descent-tests*`, `jump_vfx-regression*`, `saber_vfx-regression*`,
@@ -176,7 +433,7 @@ trong scene phẳng thử, cuối lượt không còn VFX. Không coi đây là 
 pixel VFX/hitbox hoặc mọi nền/slope/camera.
 
 Bằng chứng ở:
-`C:/Users/xuank/.codex/visualizations/2026/10/25/01a170fc-5832-7430-b538-78ebad4ad7b3/adel-jump-integration-2026-10-27/`.
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/adel-jump-integration-2026-10-27/`.
 `gameplay-v2/` là capture thành công (262 ảnh có timestamp và bốn pose); thư mục
 `gameplay/` cũ là lượt harness nhấn attack thường do thiếu giữ xuống, **không dùng
 làm bằng chứng jump VFX**. Các log `jump-tests*`, `saber-regression*`,
@@ -358,9 +615,9 @@ Chi tiết đầy đủ/ý nghĩa/đơn vị ở hướng dẫn tuning chung; c�
 
 ## 7. Kết quả kiểm tra và bằng chứng để mở lại
 
-Gốc artifact ngoài repo, vẫn tồn tại lúc bàn giao:
+Gốc preview và bằng chứng ngoài repo, đã chuyển ngày 28/10/2026:
 
-`C:/Users/xuank/.codex/visualizations/2026/10/25/01a170fc-5832-7430-b538-78ebad4ad7b3/`
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/`
 
 Tên bên dưới ghép vào gốc này. Chúng là **kết quả lịch sử đã thực chạy**, không phải các test được chạy lại trong lượt chỉ viết tài liệu.
 

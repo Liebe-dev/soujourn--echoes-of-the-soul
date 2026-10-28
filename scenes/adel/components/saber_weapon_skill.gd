@@ -9,6 +9,10 @@ const SkillDebugSettings = preload("res://scenes/adel/components/skill_debug_set
 const ChargeZoom = preload("res://scenes/adel/components/skill_charge_zoom.gd")
 
 signal cooldown_changed(slot: StringName, remaining: float, total: float)
+signal lunge_started
+signal impact_confirmed(hit_stop_seconds: float)
+signal recovery_started(hit_confirmed: bool)
+signal ended(interrupted: bool)
 
 @export_group("Cooldown")
 @export_range(0.0, 120.0, 0.1, "or_greater", "suffix:s") var tap_cooldown: float = 5.0
@@ -253,6 +257,7 @@ func _start_lunge() -> void:
 	_remaining_distance = lunge_distance * ([1.0, charged_distance_multiplier, full_distance_multiplier][tier])
 	_body.velocity = Vector2.ZERO
 	_enter(S.SKILL_DASH, &"saber_skill_4")
+	lunge_started.emit()
 
 func _lunge(delta: float) -> void:
 	var step := minf(_remaining_distance, lunge_speed * delta)
@@ -342,7 +347,8 @@ func _on_target_hit(target: Node2D) -> void:
 	if not _active or _body.state_machine.current != S.SKILL_IMPACT: return
 	if not _confirmed:
 		_confirmed = true
-		_body._request_hit_stop([tap_hit_stop_duration, charged_hit_stop_duration, full_hit_stop_duration][tier], false)
+		var accepted: float = _body._request_hit_stop([tap_hit_stop_duration, charged_hit_stop_duration, full_hit_stop_duration][tier], false)
+		impact_confirmed.emit(accepted)
 	if tier == 0 or not _valid_enemy(target): return
 	var duration: float = charged_stun_duration if tier == 1 else full_stun_duration
 	if duration <= 0.0: return
@@ -370,6 +376,7 @@ func _start_recovery() -> void:
 	var speed: float = _body.spine_anim.get_animation(clip).length / maxf(_recovery_duration(), 0.01)
 	_body.spine_anim.play(clip, -1.0, speed)
 	_body.spine_anim.advance(0.0)
+	recovery_started.emit(_confirmed)
 	if tier > 0 and _confirmed:
 		CombatTime.set_actor_exempt(_body, true)
 		CombatTime.request(self, &"skill_recovery", recovery_slow_motion_scale, charged_recovery_duration)
@@ -416,6 +423,7 @@ func cancel() -> void:
 		CombatTime.remove(_body, &"hit_stop")
 	_manual_animation = false
 	CombatTime.remove(self)
+	ended.emit(not _finishing)
 
 func _exit_tree() -> void:
 	cancel()

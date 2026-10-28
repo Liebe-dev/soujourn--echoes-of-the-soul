@@ -6,6 +6,9 @@
 /output/**/isolated_appdata/
 /output/**/isolated_localappdata/
 
+# Local-only previews; canonical storage is outside the game repository.
+/output/previews/
+
 # Godot-specific ignores
 .import/
 export.cfg

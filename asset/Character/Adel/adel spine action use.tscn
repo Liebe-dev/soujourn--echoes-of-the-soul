@@ -44,6 +44,7 @@
 [ext_resource type="Texture2D" uid="uid://du21a25834qo7" path="res://asset/Character/Adel/Saber attack/sabers6.png" id="41_pevka"]
 [ext_resource type="Script" uid="uid://y1t0uj252vct" path="res://scenes/adel/components/jump_attack_vfx.gd" id="jump_attack_vfx"]
 [ext_resource type="Script" uid="uid://cw78wfea5etae" path="res://scenes/adel/components/saber_ready_vfx.gd" id="saber_ready_vfx"]
+[ext_resource type="Script" uid="uid://d1v6dvryhyp33" path="res://scenes/adel/components/saber_skill_vfx.gd" id="saber_skill_vfx"]
 [ext_resource type="Script" uid="uid://dbhi0i8i8ffxr" path="res://scenes/adel/components/saber_swing_vfx.gd" id="saber_swing_vfx"]
 
 [sub_resource type="Gradient" id="Gradient_j5yna"]
@@ -10669,7 +10670,7 @@ texture = ExtResource("8_wu5lb")
 
 [node name="L_upper_arm" type="Bone2D" parent="Skeleton2D/hip/torso[merge]" unique_id=550548801]
 position = Vector2(44.817806, -67.62174)
-rotation = -0.010251017
+rotation = -0.010251014
 scale = Vector2(0.9998284, 0.9998284)
 rest = Transform2D(0.9999458, -0.010250827, 0.010250827, 0.9999458, 59.000057, -46.042194)
 
@@ -10795,7 +10796,7 @@ texture = ExtResource("6_xv1bw")
 visible = false
 position = Vector2(35, 16)
 rotation = -3.1018384
-scale = Vector2(0.99983037, 0.99983037)
+scale = Vector2(0.99983007, 0.99983007)
 rest = Transform2D(-0.9990432, -0.039737206, 0.039737206, -0.9990432, 35, 16)
 
 [node name="belly" type="Sprite2D" parent="Skeleton2D/hip/cloth_bone2" unique_id=1083849315]
@@ -10970,5 +10971,11 @@ residual_head_travel = 0.1
 [node name="JumpAttackVFX" type="Node2D" parent="." unique_id=1304032775]
 script = ExtResource("jump_attack_vfx")
 
-[node name="SaberReadyVFX" type="Node2D" parent="."]
+[node name="SaberReadyVFX" type="Node2D" parent="." unique_id=1950377127]
 script = ExtResource("saber_ready_vfx")
+
+[node name="SaberSkillVFX" type="Node2D" parent="." unique_id=1614398558]
+script = ExtResource("saber_skill_vfx")
+tint = Color(0.9372549, 0.14117647, 0.11764706, 1)
+slash_hold = 0.02
+slash_lifetime = 0.25

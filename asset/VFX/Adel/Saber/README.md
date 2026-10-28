@@ -1,6 +1,6 @@
 # Adel Saber VFX
 
-Bốn PNG là đúng bộ hình VFX trắng đã duyệt, dùng cho `saber_attack_1/2/3/4`.
+Bốn PNG `saber_attack_*.png` là bộ hình VFX trắng đã duyệt cho combo 1/2/3/4.
 PNG giữ nguyên nền đen và toàn bộ nét xước/quầng sáng. Shader chuyển độ sáng
 thành độ phủ khi vẽ, nên trong game không xuất hiện hình chữ nhật đen.
 
@@ -55,6 +55,25 @@ rồi cung mảnh phía trước tan nhanh. Bản Ready chỉ giữ pose cuối 
 Các điểm bẻ cong, bề rộng, vị trí và tuổi thực được quản lý tại
 [VFX Saber Ready](../../../../Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#ready-vfx).
 
+## Skill Q
+
+`SaberSkillVFX` trong rig dùng `skill_q_lunge.png` và `skill_q_slash.png`,
+sao nguyên ảnh **brush V4 hai răng cưa, đuôi vuốt nhọn** đã duyệt. Biên ngoài
+liền mạch, răng chỉ ở biên trong, hướng về đầu nhọn; nét nhạt là màu vẽ trên
+lõi kín. Shader ánh xạ lõi/nét nhạt thành hai màu mẫu **#ef241e / #f55d58**
+và loại viền alpha rất mờ, không sửa PNG nguồn. Hai ảnh này là tài nguyên
+chạy game; các ảnh/video preview vẫn ở thư mục ngoài Git.
+
+Mesh đi theo biên alpha của ảnh; khi tiêu, cắt dần từ phía đuôi và thu ngang
+dải, giữ hướng răng/nét nhạt. Cung lao ở lớp trước Player, giữ suốt `_4`;
+xác nhận trúng thì tiêu
+từ đuôi nhọn tới mặt cắt tù nối kiếm bằng thời gian hit-stop thực được chấp
+nhận. Gốc vệt được giữ ở điểm chạm theo frame `_4`; hụt tắt ngay khi sang `_6`.
+`_6` phát slash riêng, vệt dư vẫn tiêu qua đổi animation và freeze. Ngắt Q
+dọn ngay; ảnh nguồn cùng các nét đỏ trên đao giữ nguyên.
+Thông số và cách bẻ cung tại
+[VFX Q trong hướng dẫn tuning chung](../../../../Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#q-vfx).
+
 ## Kiểm tra
 
 `tests/adel/saber_vfx_validation.gd` kiểm tra marker, hai lớp VFX, chuyển
@@ -69,3 +88,8 @@ và chụp cả hai hướng; nhận `-- --output=<thư mục ảnh>`.
 `tests/adel/jump_descent_vfx_validation.gd` kiểm tra ranh giới chuẩn bị/rơi/đáp,
 hit-stop, hướng, hủy và cleanup. `tests/adel/jump_descent_vfx_capture.gd` chụp
 ảnh tĩnh hai hướng từ input/physics thật; cũng dùng thư mục dữ liệu thử riêng.
+
+`tests/adel/skill_vfx_validation.gd` kiểm tra VFX Q qua ba tier, hai hướng,
+hit/whiff, interruption, real-time expiry và freeze cuối chiêu.
+`tests/adel/skill_vfx_capture.gd` chụp component production bằng input Q thật;
+không gắn overlay preview. Cả hai cần user directory có `CodexSaberVFX`.

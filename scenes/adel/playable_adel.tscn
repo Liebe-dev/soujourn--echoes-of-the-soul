@@ -304,6 +304,7 @@ process_mode = 3
 visible = false
 
 [node name="PauseMenu" parent="Camera2D/UI_Layer" unique_id=183142544 instance=ExtResource("pause_flow")]
+visible = false
 
 [node name="DodgeCooldown" type="Timer" parent="." unique_id=982212932]
 wait_time = 0.06
