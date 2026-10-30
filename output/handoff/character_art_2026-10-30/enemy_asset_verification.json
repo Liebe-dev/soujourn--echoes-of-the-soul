@@ -1,0 +1,161 @@
+{
+  "verified_date_local": "2026-10-30",
+  "method": "Read image dimensions and SHA256; compare to preserved installation records; no engine tests rerun",
+  "parts": [
+    {
+      "name": "body.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\body.png",
+      "width": 303,
+      "height": 263,
+      "sha256": "F0443EA7631E42D2154EF6EBBF11747E888406C55C9D7A2F6C5F5DDA3CC854B8",
+      "matches_v2": true
+    },
+    {
+      "name": "head.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\head.png",
+      "width": 99,
+      "height": 188,
+      "sha256": "346912B449C933C8058EBD0FF5516B56722074CF9026951FEA7C2E76ADC2113E",
+      "matches_v2": true
+    },
+    {
+      "name": "lef leg.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\lef leg.png",
+      "width": 181,
+      "height": 229,
+      "sha256": "1F4976EB426829A751A16BAA4382E3D00F7F3C8C53AED60A8CE48662B889C267",
+      "matches_v2": true
+    },
+    {
+      "name": "left hand.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\left hand.png",
+      "width": 139,
+      "height": 208,
+      "sha256": "CC5B7F3D353D1355EFAFC50A33C111BC59031B03C2DAB57AC3EB15233BB195CA",
+      "matches_v2": true
+    },
+    {
+      "name": "left palm.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\left palm.png",
+      "width": 159,
+      "height": 79,
+      "sha256": "3B7D1882F6DA4706002E74B7A5D6A66FE2CB0A53AAB53040B5AD18C2B9967ECA",
+      "matches_v2": true
+    },
+    {
+      "name": "right bicep.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right bicep.png",
+      "width": 128,
+      "height": 106,
+      "sha256": "96885A3B8BE7630C17B262A8698E518D4054FCA6DD0EF6647BE771F91B1E5D11",
+      "matches_v2": true
+    },
+    {
+      "name": "right hand.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right hand.png",
+      "width": 163,
+      "height": 131,
+      "sha256": "51038C61F086F7C64A2D9F2EB86321EDA2A91E157AF7E811B558C65DDF9305DA",
+      "matches_v2": true
+    },
+    {
+      "name": "right leg.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right leg.png",
+      "width": 148,
+      "height": 191,
+      "sha256": "3DD39F2ED6C34176C3C0B61BD22E013B58CE3BFDBDDEA6BBE92BF4879F7A26AA",
+      "matches_v2": true
+    },
+    {
+      "name": "right palm.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\right palm.png",
+      "width": 144,
+      "height": 85,
+      "sha256": "3AC9A800484DA9DC4A0B07E4212B4D5721447D69F6BF05C350C8F692C44A33E5",
+      "matches_v2": true
+    },
+    {
+      "name": "tail.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\images\\tail.png",
+      "width": 361,
+      "height": 232,
+      "sha256": "2EAA28B47F23BAEF67CCB01B64E90839C0D871607B7DA5AFB2C0E793C0518674",
+      "matches_v2": true
+    }
+  ],
+  "attacks": [
+    {
+      "name": "attack1_1.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack1_1.png",
+      "width": 660,
+      "height": 384,
+      "sha256": "F2AF796091D47E619E9B3EBD4D679F5266D604809E9E1120643B01AECF60EB15",
+      "matches_install_record": true,
+      "install_record": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\integration\\enemy_attack1_2026-10-27_v1\\installation_result.json"
+    },
+    {
+      "name": "attack1_2.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack1_2.png",
+      "width": 568,
+      "height": 492,
+      "sha256": "9EA9A93C4CAF81A6091F5B0F8D0BEC6ADBB3B0ACC2FA512251795C1E21F303EA",
+      "matches_install_record": true,
+      "install_record": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\integration\\enemy_attack1_2026-10-27_v1\\installation_result.json"
+    },
+    {
+      "name": "attack1_3.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack1_3.png",
+      "width": 964,
+      "height": 441,
+      "sha256": "E2673CF876053D03D54D9E0D0009DCA29AD7C9A1492FD5BE3524CB07782D4C80",
+      "matches_install_record": true,
+      "install_record": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\integration\\enemy_attack1_3_2026-10-27_v2_four_limbs\\installation_result.json"
+    },
+    {
+      "name": "attack2.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack2.png",
+      "width": 3823,
+      "height": 704,
+      "sha256": "7E3F8CF2317B8001322D0786504BB6B695DD9A9EFFE4069872990ABCF0BCF89A",
+      "matches_install_record": true,
+      "install_record": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\integration\\enemy_attack2_2026-10-27_v3_long_inward_arm\\installation_result.json"
+    },
+    {
+      "name": "attack3.png",
+      "path": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\asset\\Enemies\\sample\\attack\\attack3.png",
+      "width": 2703,
+      "height": 931,
+      "sha256": "04767562F131C1FAAFC57AD6D7205C4745D2992D9B23450B6A8F899FE88B374F",
+      "matches_install_record": true,
+      "install_record": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\integration\\enemy_attack3_2026-10-27_v1\\installation_result.json"
+    }
+  ],
+  "historical_rig_status": "passed",
+  "historical_rig_poses": [
+    {
+      "animation": "walk",
+      "time": 0.0
+    },
+    {
+      "animation": "walk",
+      "time": 0.5
+    },
+    {
+      "animation": "run",
+      "time": 0.25
+    },
+    {
+      "animation": "run",
+      "time": 0.75
+    },
+    {
+      "animation": "detect player",
+      "time": 0.2
+    },
+    {
+      "animation": "RESET",
+      "time": 0.0
+    }
+  ],
+  "engine_tests_rerun": false
+}

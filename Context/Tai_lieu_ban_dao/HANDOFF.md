@@ -1,8 +1,105 @@
 # Bàn giao Soujourn Echoes of the Soul
 
-**Ngày kiểm tra:** 24/10/2026, múi giờ Asia/Saigon.  
+**Ngày kiểm tra gần nhất:** 30/10/2026, múi giờ Asia/Saigon; phạm vi lượt này là bàn giao art/asset.
 **Mục đích:** giúp chat mới tiếp quản đúng trạng thái, giữ công việc người dùng và phân biệt thiết kế với triển khai.  
-**Nhiệm vụ gần nhất:** tiếp quản và triển khai nền chỉ số/trang bị/Coin/Soul theo lựa chọn mới của người dùng; xem cập nhật ngay dưới. Snapshot bàn giao ban đầu được giữ để đối chiếu.
+**Nhiệm vụ gần nhất:** hoàn thiện thiết kế Đản theo art Uyển, gần nhất làm bàn tay lộ ra có cảm giác già nua; chuẩn bị bàn giao sang chat mới. Đọc cập nhật 30/10 dưới đây trước. Các cập nhật gameplay 24/10 và mục 1–10 phía sau là lịch sử của nhánh khác, không phải kết quả kiểm tra gameplay ngày 30/10.
+
+## Cập nhật bàn giao art/asset — 30/10/2026
+
+### Tiếp quản ngay: mục tiêu và trạng thái
+
+- Project `P = D:/Godot Project/soujourn--echoes-of-the-soul`. Nhánh đang làm là **art nhân vật và asset**, không tự chuyển sang Observe/chỉ số/VFX gameplay chỉ vì các mục lịch sử bên dưới có nhắc đến chúng.
+- Mục tiêu hiện hành: hoàn thiện **Đản**, cha xứ nhà thờ làng ở đầu arc, boss đầu Adel đối mặt, chủng **Hallow**, tương đối có tuổi, tóc trắng. Người dùng đưa bản phác riêng và muốn hoàn thiện theo **minh họa Uyển gốc**, không dùng tỷ lệ chibi của sprite Adel cho minh họa Đản.
+- Yêu cầu gần nhất nguyên ý: **tiếp tục từ bản khoanh nhẹ trước bụng còn lộ một bàn tay, làm bàn tay trông già nua**. Đã tạo ảnh mới và hiển thị. **Chưa có lời duyệt cuối sau ảnh này**, chưa có yêu cầu biến Đản thành sprite/tách lớp/rig/tích hợp game.
+- Bản để tiếp tục mặc định: [dan_current_aged_hand.png](../../output/handoff/character_art_2026-10-30/dan_current_aged_hand.png). Bản người dùng chỉ đích danh trước khi sửa tay: [dan_before_aged_hand.png](../../output/handoff/character_art_2026-10-30/dan_before_aged_hand.png). Bản thứ hai là nguồn của bản mới nhất, không phải ảnh giấu cả hai bàn tay.
+- Thư mục tài nguyên bàn giao `A = P/output/handoff/character_art_2026-10-30/`: có **14 PNG sao chép nguyên byte**, `resource_manifest.json` ghi đường dẫn gốc, bản sao, vai trò, kích thước và SHA256; `verification.json`, `enemy_asset_verification.json` ghi kiểm tra. Có `.gdignore`, không được game dùng. Bản HANDOFF trước cập nhật giữ ở `A/HANDOFF_before_art_update.md` để đối chiếu.
+
+### Yêu cầu và quyết định hình ảnh
+
+**Đản — yêu cầu hiện hành:**
+
+- Giữ nhận diện bản phác: mặt nam trưởng thành dài/góc cạnh, mắt hơi mệt, mũi dài, nét cười nhẹ; tóc trắng thẳng ngang vai, râu cằm nhỏ; vòng halo elip nghiêng mảnh có các chóp nhọn. Không thay bằng kính, râu bện dài hoặc kiểu tóc của nhân vật ảnh tham chiếu.
+- Người dùng chuyển hướng trang phục sang **Công giáo La Mã** và nêu phối chasuble Gothic bên ngoài với lớp đen kiểu pellegrina bên trong. Đã phát triển hướng đó trong preview: trắng ngà–đen–vàng trầm, cổ giáo sĩ đen có tab trắng, cổ vai đen viền vàng, dải đen dọc giữa có thập giá hình học và ít họa tiết vàng. Đây là thiết kế fantasy đã dùng trong ảnh, chưa phải trang phục được nghiệm thu về nghi lễ/lịch sử.
+- Dáng cuối: đứng toàn thân, **hai cẳng tay bắt chéo nhẹ trước bụng**, khuỷu tay thấp/thả lỏng; một bàn tay lộ ra tựa lên cẳng tay/cổ tay đối diện, tay kia khuất trong tay áo. **Không khoanh cao ôm bắp tay trước ngực**; không đặt tay trên cằm; **không cây gậy**.
+- Người dùng từng yêu cầu giấu cả hai bàn tay nhưng **sau đó chọn lại đích danh bản còn lộ tay** và yêu cầu làm già bàn tay. Yêu cầu mới đã thay lựa chọn giấu tay cũ.
+- Chi tiết tay mới: khớp/ngón gầy, nếp nhăn, gân và mạch máu nhẹ theo nét 2D; giữ tư thế, không làm già thêm mặt hay đổi áo. Ảnh đã được tạo; đánh giá cuối mức độ già của tay còn chờ người dùng.
+- Style minh họa: nét 2D anime gọn, màu lì, mảng đổ bóng kiểm soát, bảng màu trầm như art Uyển gốc. Giữ các phần người dùng không yêu cầu sửa. Ảnh Đản hiện là **minh họa nền xám sáng**, không phải sprite PNG đã tách nền.
+
+**Uyển — yêu cầu lịch sử còn có giá trị khi quay lại:**
+
+- Từ art Uyển gốc tạo sprite dùng trong game theo nét/tỷ lệ/dáng idle Adel; chiều cao thấp hơn Adel một chút. **97%/thấp hơn 3% là giả định trợ lý từng nêu, chưa được người dùng chốt số và chưa có xuất chuẩn hóa chiều cao thực tế cạnh Adel.**
+- Người dùng đã bỏ chỉnh nhìn thẳng, giữ mặt hơi nghiêng của `exec-05733226-...png`. Sau đó giảm nếp gấp ở tay áo/váy, bỏ khuyên tai; từng thử váy lót trắng xám mờ 40% phủ giày, rồi **bỏ hoàn toàn váy lót**, tay áo ít nếp. Bản sprite sau các sửa này: `A/uyen_latest_sprite.png`, PNG trong suốt 852×1846.
+- Giữ tóc đen đuôi ngựa bên trái người xem/hoa trắng, mắt xám, blouse trắng–cà vạt đen–gile đen/vàng, đai chéo, váy đen dài, giày đen và kiếm trong bao. Hai tay thả theo idle Adel. Chưa thay sprite/rig Adel hay đưa Uyển vào scene.
+- Đã làm preview **21 bộ phận**, tham khảo `P/asset/Character/Adel/layers/Adel spine action use/`. Bàn tay đi liền cẳng tay; có đầu, hai lọn tóc, tóc đuôi ngựa, thân trên/dưới, hông/đai, hai cánh tay, hai cẳng tay, hai đùi, hai cẳng chân, hai giày, ba mảng váy, kiếm trong bao. Đây là các lớp **được vẽ lại/vẽ bù phần khuất**, không phải cắt giữ nguyên từng pixel của sprite và chưa căn vào rig.
+
+**Quy tắc làm asset đã được người dùng nhấn mạnh:**
+
+- Với thay asset, trình preview rồi chờ duyệt đúng lần trước khi ghi đè vào game; duyệt một ảnh không tự cấp quyền thay mọi ảnh khác.
+- Khi cần khớp rig cũ, vẽ trên đúng khung/hướng/kích thước từng PNG gốc, giữ tên, alpha vùng khớp, vị trí và cách chia frame. Giữ nguyên các giá trị rig/scene/animation người dùng đã căn. Không tự xoay, dịch tâm, thêm padding hay sắp xếp lại các phần để ép vào rig.
+- Preview atlas được bố trí để xem rõ và phải được phân biệt với tọa độ atlas/rig thật. Thao tác cắt/đóng gói không chứng minh khớp chuyển động.
+
+### File và phiên bản Đản cần tìm
+
+Cache ảnh gốc `G = C:/Users/xuank/.codex/generated_images/01a1722e-0438-7060-84ea-76648f36bf4e/`. Các tên dưới đây là file trực tiếp trong `G`; nguồn/bản sao đầy đủ xem `A/resource_manifest.json`.
+
+- **Mới nhất:** `exec-df3063f2-51fe-45d9-a882-ad4b5226cdae.png` → `A/dan_current_aged_hand.png`, 1051×1496; SHA256 `AAE179B547B991385670FFA9207DAF6B5563F9328F2810700B1880CE2450B982`.
+- **Nguồn được người dùng chọn, khoanh nhẹ trước bụng/lộ một bàn tay:** `exec-a7b18e41-bfc8-4719-b8a4-4c7d447a4f42.png` → `A/dan_before_aged_hand.png`, 1051×1496; SHA256 `D3867B7B3D5E6E484477E4E09F87132F45C48EEB9E403E174D72C8375F6493E8`.
+- Minh họa hoàn thiện đầu tiên, khung nửa người, dùng làm nguồn mặt/áo và tham chiếu tư thế tay: `exec-e2676550-05ca-4a7a-bcae-68332479071b.png` → `A/dan_initial_portrait.png`, 1051×1497.
+- Phác Đản của người dùng: `C:/Users/xuank/AppData/Local/Temp/codex-clipboard-627323ea-a467-475f-a8b9-3739459cbb74.png` → `A/dan_user_sketch.png`, 561×800. Có bản sao nên không cần phụ thuộc Temp.
+- Ảnh **chỉ tham chiếu dáng đứng**: `D:/Downloads/Layer 23.png` → `A/pose_reference_only_no_staff.png`, 2310×3080. Bản quyền/thiết kế của ảnh này không được chuyển thành quyết định về khuôn mặt, gậy hay phụ kiện Đản.
+- Biến thể không dùng làm điểm tiếp tục: tay ở cằm `exec-18a12ac0-ed51-4cbc-adfc-b3a56f6e1728.png`; hai bàn tay thả cùng mức `exec-9ce91b38-720a-4bba-981e-20a78a873de0.png`; khoanh cao trước ngực `exec-2dc58e13-b1bf-4500-a085-b15063349327.png`; giấu cả hai tay `exec-bbad5d3c-2f76-4585-8469-0160d28835eb.png`. **Đã xác minh bốn file vẫn tồn tại trong G ngày 30/10**, nhưng không sao chép vào A để tránh chọn nhầm.
+
+### Nguồn Uyển/Adel và chênh lệch file hiện tại
+
+- Minh họa Uyển gốc: `D:/Adobe Photoshop/Sojourn Echoes of the Soul/Side Character/Uyen/splash art.png`, 2254×3421 → `A/uyen_original_illustration.png`. **Dùng art này làm style cho minh họa Đản.**
+- Sprite Adel: `D:/Adobe Photoshop/Sojourn Echoes of the Soul/Project Adel/Adel idle.png`, 268×867 → `A/adel_idle_style_reference.png`. Dùng style/dáng này cho **sprite Uyển**. Hai file Photoshop xuất PNG gốc vẫn có hash trùng kết quả đọc trước trong chat.
+- Bản Uyển mặt hơi nghiêng được chọn: `G/exec-05733226-c2a9-44c7-aa00-96c4c97151d9.png` → `A/uyen_chosen_three_quarter_base.png`.
+- Sprite Uyển mới nhất trước tách: `G/exec-61253656-e9ac-439c-b16a-4ef6ef406359.png` → `A/uyen_latest_sprite.png`; SHA256 `AA5589925AAF736CAC0FDAC2121F63D05168C7FD2BE34514CF79941EFB2724DC`.
+- Khuôn chia lớp Adel hiện có: `P/asset/Character/Adel/layers/Adel spine action use/`, gồm PNG, `layers.json`, `doc.json` (canvas PSD 1920×1080); scene `P/asset/Character/Adel/adel spine action use.tscn`. Có cả tên thường và biến thể `[merge]`; đừng coi mọi file là bộ phận độc lập cần nhân đôi.
+- **Chênh lệch xác minh 30/10:** `P/output/previews/` hiện trống. Bộ đã từng xuất/hiển thị ở `output/previews/uyen_parts_2026-10-28_v1/` (21 PNG, `uyen_parts_preview.png`, ZIP, manifest và prompt JSON) **không còn tại đường dẫn đó**. Không xác minh được ai hoặc thao tác nào làm mất file; không coi link preview/ZIP cũ còn dùng được. Không tự dựng lại hay thay thế asset trong lượt bàn giao.
+- Còn đủ **5 sheet sinh ảnh nguồn của bộ tách Uyển**, đã sao chép vào A để có thể phục hồi nếu người dùng yêu cầu: `uyen_parts_sheet_A_head_torso_uncorrected.png` từ `G/exec-43e24be5-5e6d-4775-a59b-638eacd492be.png`; `uyen_parts_sheet_B_limbs.png` từ `exec-24a57dce-63a9-461f-ba30-8d77550e7b3b.png`; `uyen_parts_sheet_C_skirt_equipment_uncorrected.png` từ `exec-064ef7a4-320a-4b84-98ac-5ab7292bb0b4.png`; `uyen_parts_corrected_torso.png` từ `exec-37855fd9-2e37-4335-a5e6-6e3be8255df8.png`; `uyen_parts_corrected_hip.png` từ `exec-1dda867d-0bb1-4642-85b8-6cf8413ef1d0.png`.
+- Sheet A gốc còn dính tay áo vào thân, sheet C còn lặp cán kiếm trên hông; dùng **hai sheet corrected** cho thân/hông. Những PNG này không tự chứa tọa độ khớp của sprite ban đầu. Không nói đã phục hồi 21 PNG chỉ vì còn 5 sheet.
+
+### Asset quái đã hoàn thành trước nhánh Đản/Uyển
+
+- Người dùng muốn thay thiết kế lấy từ ảnh mạng bằng thiết kế mới, giữ hình dáng/cách đi để animation còn khớp. Hướng đã duyệt: vỏ trắng sáng bị nứt/vỡ tiết chế, da than đen có khói đen mỏng, thương tích cũ/máu khô ít, không máu chảy, đuôi dạng dải đỏ sẫm. Khớp là mảng đen 2D phẳng, không mặt cắt 3D.
+- **Đã kiểm tra lại 30/10:** 10 PNG ở `P/asset/Enemies/sample/images/` trùng SHA256 với `P/output/integration/enemy_parts_2026-10-26_v2_redo/parts/`: `body.png` 303×263; `head.png` 99×188; `lef leg.png` 181×229 (giữ lỗi chính tả tên); `left hand.png` 139×208; `left palm.png` 159×79; `right bicep.png` 128×106; `right hand.png` 163×131; `right leg.png` 148×191; `right palm.png` 144×85; `tail.png` 361×232.
+- **Đã kiểm tra lại 30/10:** 5 ảnh ở `P/asset/Enemies/sample/attack/` trùng hash trong các `installation_result.json` tương ứng bên dưới: `attack1_1.png` 660×384, `attack1_2.png` 568×492, `attack1_3.png` 964×441, `attack2.png` 3823×704, `attack3.png` 2703×931. `attack2`/`attack3` dùng strip ba frame ngang bằng nhau; bảo toàn canvas và vị trí từng frame, đặc biệt 3823 không chia hết cho 3 theo pixel nguyên.
+- `output/integration/enemy_attack1_2026-10-27_v1/`: hồ sơ thay ba frame attack1 và `originals/`. **Riêng attack1_3 đã được thay tiếp bằng v2 bên dưới**, đừng lấy hash attack1_3 v1 làm tiêu chuẩn cuối.
+- `output/integration/enemy_attack1_3_2026-10-27_v2_four_limbs/`: bản sửa đủ tay/chân phía xa, đã duyệt/thay; hash cuối `E2673CF876053D03D54D9E0D0009DCA29AD7C9A1492FD5BE3524CB07782D4C80`.
+- `output/integration/enemy_attack2_2026-10-27_v3_long_inward_arm/`: bản v3 đã duyệt/thay; frame 1 giơ tay ngoài, frame 2 quật chéo vào trong, tay dài dưới hàm, vuốt khuất; hash cuối `7E3F8CF2317B8001322D0786504BB6B695DD9A9EFFE4069872990ABCF0BCF89A`.
+- `output/integration/enemy_attack3_2026-10-27_v1/`: đã duyệt/thay; hash cuối `04767562F131C1FAAFC57AD6D7205C4745D2992D9B23450B6A8F899FE88B374F`.
+- Các thư mục **integration vẫn có** hồ sơ JSON/README và nơi lưu originals; các đường dẫn `output/previews/enemy_*` mà hồ sơ cũ trỏ tới **không còn trong output/previews hiện tại**. Lấy asset trong game và hash hồ sơ integration làm bằng chứng hiện trạng; không mặc nhiên dùng link preview cũ.
+- Bản ảnh mạng tham chiếu ban đầu còn ở `D:/Downloads/wolf_ego_chp3.png`. Bộ phần cũ trước thay nằm trong `output/integration/enemy_parts_2026-10-26_v1/originals/`; bản căn sai v1 trước làm lại được lưu trong `enemy_parts_2026-10-26_v2_redo/before_redo/`.
+- `images/template.png` và `death.png` không nằm trong phạm vi đã thay của chat này. README bộ phần v2 còn nói các attack chưa thay vì nó được viết **trước** các lượt thay attack1/2/3; đó là ghi chú theo thời điểm, không phải hiện trạng attack ngày 30/10.
+
+### Những cách đã thử không phù hợp và giới hạn
+
+- Lần đầu thay phần quái có xoay/dịch/căn lại ảnh, lệch ý muốn giữ rig; người dùng yêu cầu làm lại. Bộ v2 vẽ theo canvas/hướng gốc thay cho cách ép ảnh đã duyệt vào rig. Không lặp lại tự động sắp xếp các phần.
+- Attack1_3 từng thiếu tay/chân phía sau, đã sửa v2. Attack2 từng để bàn vuốt ngoài lộ ra/hướng ra ngoài, đã sửa thành cẳng tay dài quật vào trong, vuốt bị che. Không quay về các bản này khi tìm file cache.
+- Uyển từng quá cao/theo tỷ lệ minh họa; đã tạo bản compact. Chỉnh nhìn thẳng bị người dùng hủy; bản có váy lót mờ cũng đã bị bỏ. Preview tách lớp vẽ lại các vùng khuất nên chưa chứng minh giữ nguyên pixel hay khớp rig Adel.
+- Đản từng khoanh cao trước ngực, tay ở cằm, hai tay thả bên nhau, hoặc giấu cả hai bàn tay; đều đã được thay bằng lựa chọn cụ thể mới hơn. Dùng đúng file người dùng chỉ tên, không chỉ dùng ảnh sinh cuối nếu người dùng đã quay lại ảnh cũ.
+- Đường dẫn attachment có thể bị giao diện gửi dạng `/C:/Users/...png`, gây `os error 123`. Dùng đường dẫn Windows chuẩn `C:/Users/...png` hoặc `C:\Users\...png`; các file Đản/Uyển đã xác minh vẫn đọc được sau chuẩn hóa. Không yêu cầu gửi lại chỉ vì dấu `/` thừa trước ổ đĩa.
+- Một lượt sinh bàn tay già bị ngắt, không có kết quả lưu trong store; đã gọi lại ImageGen và có file `exec-df3063f2-...png`. Không ghi lượt bị ngắt là hoàn thành; không có bằng chứng đây là từ chối chính sách.
+- PowerShell từng không khởi động do `CreateProcessSecurityEnvironment`/`0x80070020`; là lỗi khởi chạy đã gặp, không phải PNG hỏng. Các lần kiểm tra bàn giao hiện tại đã chạy được.
+- Khi đóng gói PNG bằng System.Drawing, vẽ bằng source/destination rectangle với đơn vị pixel; `DrawImageUnscaled` từng làm sai kích thước hiển thị do DPI. `Add-Type` C# trên runtime .NET 10 từng cần thêm `System.Drawing.Common`, `System.Drawing.Primitives`, các assembly `System.Private.Windows.*`; không lấy lỗi helper đóng gói làm bằng chứng ảnh sinh lỗi.
+
+### Kiểm tra thực chạy và điều chưa xác minh
+
+- **Xác minh 30/10:** 14 ảnh tài nguyên trong A tồn tại, đọc được kích thước và hash; từng bản sao trùng nguyên byte với nguồn. Đản mới nhất/nguồn trước sửa tay/portrait và cả bốn biến thể trung gian đã được kiểm tra tồn tại. Hai file PNG người dùng xuất từ Photoshop có hash không đổi so với lần đọc trước trong chat.
+- **Xác minh 30/10:** 10 phần quái khớp v2; 5 ảnh attack khớp hồ sơ cài đặt cuối; kích thước giữ như trên. Kết quả máy đọc trong `A/enemy_asset_verification.json`. Đây là kiểm tra file/hash, không phải chạy lại animation.
+- **Bằng chứng lịch sử có file:** `output/integration/enemy_parts_2026-10-26_v2_redo/installed_validation.json` ghi `status=passed`, 6 tư thế, đủ 10 phần: walk 0/0.5s, run 0.25/0.75s, `detect player` 0.2s, RESET 0s; có `installed_rig_check.png`. Cảnh báo Bone2D cuối vốn có trong rig. Lượt bàn giao chỉ đọc kết quả này, **không chạy lại Godot/gameplay**.
+- **Bằng chứng lịch sử trong chat, hiện thiếu artifact:** preview tách Uyển 21 PNG từng được ghép, xem bằng mắt và kiểm tra số file/góc alpha/hash nguồn. Vì thư mục kết quả không còn, không coi những kiểm tra đó là xác minh lại 30/10.
+- **Chưa xác minh/chưa làm:** nghiệm thu tay già của Đản; độ chính xác nghi lễ/lịch sử của áo fantasy; sprite/rig/animation Đản; chiều cao Uyển tương đối Adel ở độ phân giải game; pivot/overlap/khớp chuyển động bộ tách Uyển; gameplay/export hiện tại và trạng thái editor Godot hôm nay. Không suy ra các điều này từ việc tạo được PNG.
+- **Git hiện tại trước bàn giao:** nhánh `main`, HEAD `2ab87da`; working tree có sửa VFX/gameplay/tài liệu của công việc khác. Danh sách lưu ở `A/git_status_before_handoff.txt`: gồm `HANDOFF_anim.md`, hướng dẫn tuning, nghiên cứu animation, stats, saber_hitbox, playable_adel và các file Blood/Hit/Particles/tests chưa track. Không chỉnh/reset/commit chúng trong nhánh art này. Bản bàn giao 24/10 ghi HEAD cũ `dc45428` là lịch sử.
+
+### Việc dang dở và bước tiếp theo
+
+1. Chat mới đọc cập nhật này và `AGENTS.md`, kiểm tra Git/file trước khi làm; mở `A/dan_current_aged_hand.png` và `A/dan_before_aged_hand.png` để xác nhận đúng nhánh hình ảnh. Báo ngắn kết quả kiểm tra, tiếp tục chỉnh theo phản hồi của người dùng, giữ tay khoanh thấp/không gậy. Chưa có yêu cầu hình ảnh tiếp thì không tự chọn thiết kế mới hoặc tích hợp asset.
+2. Nếu người dùng duyệt Đản và yêu cầu làm sprite/tách lớp: xác định đúng ảnh đã chọn và khuôn/dáng xuất, trình preview. Việc này chưa được làm; duyệt art không tự chứng minh tương thích rig.
+3. Nếu quay lại Uyển: dùng `A/uyen_latest_sprite.png`; nếu cần bộ 21 PNG, phục hồi có kiểm soát từ 5 sheet và hai bản corrected, ghép preview từ chính các file đã tách. Giữ phân biệt vẽ lại/vẽ bù với cắt pixel; căn tỷ lệ/pivot sau khi có đúng yêu cầu, không thay Adel.
+4. Nếu quay lại quái: dùng asset hiện hành + JSON integration đã kiểm tra; giữ tên/kích thước/hướng/ba frame ngang/rig. `death.png` hoặc `template.png` chỉ làm khi có yêu cầu mới. Không cài lại bộ cũ để phục vụ xem preview.
+5. Lượt bàn giao chỉ sửa HANDOFF này và tạo bản sao tài nguyên trong A, không sinh ảnh mới, không thay PNG game/scene, không commit/push. Các bản minh họa đều còn là preview cho đến khi người dùng chỉ định dùng vào game.
 
 ## Cập nhật tiếp quản — 24/10/2026
 

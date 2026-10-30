@@ -10,6 +10,9 @@
 [ext_resource type="Script" uid="uid://bhyw5qdkhk5en" path="res://scenes/adel/components/jump_attack_hitbox.gd" id="71_jump_hitbox"]
 [ext_resource type="PackedScene" path="res://scenes/UI/game_pause_menu.tscn" id="pause_flow"]
 [ext_resource type="Script" uid="uid://ce3kn3wd1byld" path="res://scenes/adel/components/saber_weapon_skill.gd" id="saber_skill"]
+[ext_resource type="Script" path="res://scenes/adel/components/saber_hit_slash_vfx.gd" id="saber_hit_slash"]
+[ext_resource type="Script" path="res://scenes/adel/components/player_blood.gd" id="player_blood"]
+[ext_resource type="Script" path="res://scenes/adel/components/battle_hit_particles.gd" id="battle_particles"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_ybq6y"]
 radius = 7.652174
@@ -332,6 +335,15 @@ charged_impact_slow_motion_duration = 0.44
 full_impact_zoom_duration = 0.4
 full_impact_slow_motion_scale = 0.37
 full_impact_slow_motion_duration = 0.5
+
+[node name="SaberHitSlashVFX" type="Node2D" parent="."]
+script = ExtResource("saber_hit_slash")
+
+[node name="PlayerBlood" type="Node" parent="."]
+script = ExtResource("player_blood")
+
+[node name="BattleHitParticles" type="Node2D" parent="."]
+script = ExtResource("battle_particles")
 
 [connection signal="body_entered" from="WeaponPivot/SaberHitbox/Hitbox" to="WeaponPivot/SaberHitbox" method="_on_hitbox_body_entered"]
 [connection signal="timeout" from="DodgeCooldown" to="." method="_on_dodge_cooldown_timeout"]

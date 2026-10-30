@@ -1,5 +1,6 @@
 extends RefCounted
 class_name StatsComponent
+signal stagger_threshold_restored(tier: int)
 ## Active D1 gameplay-stats model used by the ui.gd facade.
 ##
 ## Owns state and model logic for HP, stamina, flask, debuffs, and stagger.
@@ -124,15 +125,17 @@ func apply_damage(dmg: int, _hit_from_global: Vector2 = Vector2.INF, skip_stagge
 	result.died = hp <= 0
 	return result
 
-func restore_stagger_thresholds() -> void:
+func restore_stagger_thresholds(notify: bool = true) -> void:
 	stagger_tiers_ready = [true, true]
 	_deferred_thresholds = [false, false]
 	stagger_lock_hp = -1
 	stagger_lock_timer = 0.0
+	if notify:
+		for tier in stagger_tiers_ready.size(): stagger_threshold_restored.emit(tier)
 
 func suspend_stagger_thresholds() -> void:
 	stagger_thresholds_enabled = false
-	restore_stagger_thresholds()
+	restore_stagger_thresholds(false)
 
 func resume_stagger_thresholds() -> void:
 	stagger_thresholds_enabled = true
@@ -146,6 +149,7 @@ func restore_one_stagger_threshold() -> bool:
 		stagger_tiers_ready[tier] = true
 		stagger_lock_hp = -1
 		stagger_lock_timer = 0.0
+		stagger_threshold_restored.emit(tier)
 		return true
 	return false
 

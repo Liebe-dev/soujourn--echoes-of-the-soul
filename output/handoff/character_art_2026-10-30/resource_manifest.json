@@ -1,0 +1,156 @@
+[
+  {
+    "name": "dan_current_aged_hand.png",
+    "source": "C:\\Users\\xuank\\.codex\\generated_images\\01a1722e-0438-7060-84ea-76648f36bf4e\\exec-df3063f2-51fe-45d9-a882-ad4b5226cdae.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\dan_current_aged_hand.png",
+    "role": "Latest generated Dan preview; elderly visible hand; not explicitly finally approved",
+    "width": 1051,
+    "height": 1496,
+    "bytes": 1652527,
+    "sha256": "AAE179B547B991385670FFA9207DAF6B5563F9328F2810700B1880CE2450B982",
+    "copy_matches": true
+  },
+  {
+    "name": "dan_before_aged_hand.png",
+    "source": "C:\\Users\\xuank\\.codex\\generated_images\\01a1722e-0438-7060-84ea-76648f36bf4e\\exec-a7b18e41-bfc8-4719-b8a4-4c7d447a4f42.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\dan_before_aged_hand.png",
+    "role": "User-selected base; gentle low folded arms; one bare hand visible",
+    "width": 1051,
+    "height": 1496,
+    "bytes": 1640804,
+    "sha256": "D3867B7B3D5E6E484477E4E09F87132F45C48EEB9E403E174D72C8375F6493E8",
+    "copy_matches": true
+  },
+  {
+    "name": "dan_initial_portrait.png",
+    "source": "C:\\Users\\xuank\\.codex\\generated_images\\01a1722e-0438-7060-84ea-76648f36bf4e\\exec-e2676550-05ca-4a7a-bcae-68332479071b.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\dan_initial_portrait.png",
+    "role": "Initial finished portrait; identity and low-arm pose reference",
+    "width": 1051,
+    "height": 1497,
+    "bytes": 1499922,
+    "sha256": "82BF57120E62C205F01D2FFB17CDC8717BC51D67DBCFC4FA510CD997241529C1",
+    "copy_matches": true
+  },
+  {
+    "name": "dan_user_sketch.png",
+    "source": "C:\\Users\\xuank\\AppData\\Local\\Temp\\codex-clipboard-627323ea-a467-475f-a8b9-3739459cbb74.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\dan_user_sketch.png",
+    "role": "User unfinished design; identity source",
+    "width": 561,
+    "height": 800,
+    "bytes": 79886,
+    "sha256": "4B68163517A7AEA3DCFACE8A8D49BF59EB5573367C89E93417AC8AFA2093F6B2",
+    "copy_matches": true
+  },
+  {
+    "name": "pose_reference_only_no_staff.png",
+    "source": "D:\\Downloads\\Layer 23.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\pose_reference_only_no_staff.png",
+    "role": "Standing pose reference only; its staff, glasses, braid and clothes are not Dan design",
+    "width": 2310,
+    "height": 3080,
+    "bytes": 2095111,
+    "sha256": "335CE51305D9AFCAFD48FB32FBA000364E93B2BA08F651F7E9AA7A80A0FAAA10",
+    "copy_matches": true
+  },
+  {
+    "name": "uyen_latest_sprite.png",
+    "source": "C:\\Users\\xuank\\.codex\\generated_images\\01a1722e-0438-7060-84ea-76648f36bf4e\\exec-61253656-e9ac-439c-b16a-4ef6ef406359.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\uyen_latest_sprite.png",
+    "role": "Latest sprite reference; no underskirt; no earrings; simple sleeves",
+    "width": 852,
+    "height": 1846,
+    "bytes": 945036,
+    "sha256": "AA5589925AAF736CAC0FDAC2121F63D05168C7FD2BE34514CF79941EFB2724DC",
+    "copy_matches": true
+  },
+  {
+    "name": "uyen_chosen_three_quarter_base.png",
+    "source": "C:\\Users\\xuank\\.codex\\generated_images\\01a1722e-0438-7060-84ea-76648f36bf4e\\exec-05733226-c2a9-44c7-aa00-96c4c97151d9.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\uyen_chosen_three_quarter_base.png",
+    "role": "User-selected three-quarter face before subsequent costume edits",
+    "width": 852,
+    "height": 1846,
+    "bytes": 1156235,
+    "sha256": "D03C17C1126169F5B056335D0AF56FB1FEC1EABD22CD5A689EA1BCAC6B3803F4",
+    "copy_matches": true
+  },
+  {
+    "name": "uyen_original_illustration.png",
+    "source": "D:\\Adobe Photoshop\\Sojourn Echoes of the Soul\\Side Character\\Uyen\\splash art.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\uyen_original_illustration.png",
+    "role": "User original illustration; style reference for Dan, design reference for Uyen",
+    "width": 2254,
+    "height": 3421,
+    "bytes": 2929784,
+    "sha256": "B1A03904DE9CF75CC9A327D918D04882E128CBA3A7A54131CAC3816858CBA4A2",
+    "copy_matches": true
+  },
+  {
+    "name": "adel_idle_style_reference.png",
+    "source": "D:\\Adobe Photoshop\\Sojourn Echoes of the Soul\\Project Adel\\Adel idle.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\adel_idle_style_reference.png",
+    "role": "User actual game sprite; style and idle pose reference for Uyen",
+    "width": 268,
+    "height": 867,
+    "bytes": 186759,
+    "sha256": "B7649302AFB1A1172F79FEB7ED9E6EE0363589053924D262FC39E9E5DADF0507",
+    "copy_matches": true
+  },
+  {
+    "name": "uyen_parts_sheet_A_head_torso_uncorrected.png",
+    "source": "C:\\Users\\xuank\\.codex\\generated_images\\01a1722e-0438-7060-84ea-76648f36bf4e\\exec-43e24be5-5e6d-4775-a59b-638eacd492be.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\uyen_parts_sheet_A_head_torso_uncorrected.png",
+    "role": "Generated raw head/hair/torso sheet; sleeves attached to torso were later corrected",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 1401741,
+    "sha256": "0F6198AC36CB0D4F0D78C9C723D28DD33BC9A3006731CE34683918C751F554E3",
+    "copy_matches": true
+  },
+  {
+    "name": "uyen_parts_sheet_B_limbs.png",
+    "source": "C:\\Users\\xuank\\.codex\\generated_images\\01a1722e-0438-7060-84ea-76648f36bf4e\\exec-24a57dce-63a9-461f-ba30-8d77550e7b3b.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\uyen_parts_sheet_B_limbs.png",
+    "role": "Generated ten limb pieces; underlying regions repainted",
+    "width": 1619,
+    "height": 971,
+    "bytes": 627091,
+    "sha256": "A56565DDA34661BA5512085F9F72326FFC956775E94328EA98822688BFDA4B6D",
+    "copy_matches": true
+  },
+  {
+    "name": "uyen_parts_sheet_C_skirt_equipment_uncorrected.png",
+    "source": "C:\\Users\\xuank\\.codex\\generated_images\\01a1722e-0438-7060-84ea-76648f36bf4e\\exec-064ef7a4-320a-4b84-98ac-5ab7292bb0b4.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\uyen_parts_sheet_C_skirt_equipment_uncorrected.png",
+    "role": "Generated raw skirt/equipment sheet; duplicate sword handle on hip was later corrected",
+    "width": 1422,
+    "height": 1106,
+    "bytes": 617690,
+    "sha256": "CAD4F3518027F6E9664E24141EEE9EE648965440BE85B63F46DA80471FC247FA",
+    "copy_matches": true
+  },
+  {
+    "name": "uyen_parts_corrected_torso.png",
+    "source": "C:\\Users\\xuank\\.codex\\generated_images\\01a1722e-0438-7060-84ea-76648f36bf4e\\exec-37855fd9-2e37-4335-a5e6-6e3be8255df8.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\uyen_parts_corrected_torso.png",
+    "role": "Corrected torso only; sleeves removed; vest buttons split one plus two",
+    "width": 1536,
+    "height": 1024,
+    "bytes": 1178886,
+    "sha256": "DD30E447D3351F7DA2FCB9DC9C2CD29FD9744A149C78887172A78672EE45BFBE",
+    "copy_matches": true
+  },
+  {
+    "name": "uyen_parts_corrected_hip.png",
+    "source": "C:\\Users\\xuank\\.codex\\generated_images\\01a1722e-0438-7060-84ea-76648f36bf4e\\exec-1dda867d-0bb1-4642-85b8-6cf8413ef1d0.png",
+    "copy": "D:\\Godot Project\\soujourn--echoes-of-the-soul\\output\\handoff\\character_art_2026-10-30\\uyen_parts_corrected_hip.png",
+    "role": "Corrected hip/belts only; sword grip removed",
+    "width": 1528,
+    "height": 1029,
+    "bytes": 1003149,
+    "sha256": "1908911D31BB07CDF098F650040AF2CA33B57930E5F7CC5F88187F74DFDDF97C",
+    "copy_matches": true
+  }
+]

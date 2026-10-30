@@ -14,6 +14,12 @@ var _hit_targets: Dictionary = {}
 var _swing_damage := 20
 var _generation := 0
 
+func get_active_attack_name() -> StringName:
+	return _active_attack_name
+
+func get_attack_generation() -> int:
+	return _generation
+
 func _ready() -> void:
 	hitbox_shape.disabled = true
 	hitbox_animation.animation_finished.connect(_on_hitbox_animation_finished)

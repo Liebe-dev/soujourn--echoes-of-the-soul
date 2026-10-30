@@ -1,6 +1,8 @@
 # Hướng dẫn tùy chỉnh thông số game
 
+
 Cập nhật: **30/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
+
 
 ## Mục lục
 
@@ -9,6 +11,8 @@ Cập nhật: **30/10/2026**. Đây là file dùng chung: khi thêm hoặc đổ
 - [Di chuyển, nhảy và dash](#di-chuyen)
 - [Combo, đánh trên không, jump attack và hitbox Player](#tan-cong)
 - [VFX bốn đòn Saber: vị trí, hướng và vệt dư](#saber-vfx)
+- [Dấu chém trên địch khi Saber trúng: màu, chiều dài, fade và lớp vẽ](#saber-hit-slash)
+- [Máu bám Player: hai vị trí, dưới mắt và hồi vạch](#player-blood)
 - [VFX jump attack: cung dập đất và khí thấp](#jump-vfx)
 - [VFX Saber Ready: vẩy kiếm nhanh](#ready-vfx)
 - [Defense, Guard, Deflect, Stagger và hit-stop](#phong-thu)
@@ -250,6 +254,189 @@ thay một Texture rồi coi là tương thích.
 Inspector `Remote` chỉ thử trong lần chạy; lưu ở node scene gốc để dùng lâu dài.
 Thử từng đòn, nối đòn, quay hai phía và hit-stop; mở hitbox thật để kiểm tra vùng
 đánh. Bản render kiểm tra hình vệt chưa phải phép chứng minh pixel VFX trùng collider.
+
+<a id="saber-hit-slash"></a>
+### Dấu chém trúng địch — đã duyệt 29/10/2026
+
+Chọn **`res://scenes/adel/playable_adel.tscn` → SaberHitSlashVFX**. Script:
+`res://scenes/adel/components/saber_hit_slash_vfx.gd`; shader:
+`res://scenes/adel/components/saber_hit_slash.gdshader`. Node mới chỉ gắn script,
+**không có override tham số trong Player hoặc instance map**; dưới đây là mặc
+định script đang chạy. Dấu này khác vệt vung kiếm ở `SaberSwingVFX`.
+
+- **Enabled** (`enabled=true`): bật/tắt dấu trúng, tắt sẽ dọn các dấu còn sống.
+- **Appearance**: `tint=#EDF3F7`, `opacity=1.0` (0..1). Giữ viền tối và alpha PNG;
+  shader tô phần lõi sáng theo tint. Không đổi palette Q.
+- **Length Scale** (`length_scale=1.30`): kéo theo **trục dài của từng nét**, quanh
+  cùng tâm; độ dày vuông góc trục vẫn ×1.00. Cả hình lẫn transform tự phản chiếu
+  theo facing của đòn lúc trúng; đổi facing sau đó không lật lại dấu cũ.
+- `attack_widths=[118,122,124,134]`: bề rộng tham chiếu của toàn PNG trước khi kéo
+  dài, đơn vị world px ở scale địch 1; nhân scale toàn cục địch tại lúc sinh.
+  `attack_axes_degrees=[-32.88,-11.79,-0.91,-0.92]` là góc trục dài trong PNG.
+  Cả hai mảng dùng index 0–3 cho Saber Attack 1–4; sửa width đổi cả kích thước
+  cơ sở, còn Length Scale chỉ kéo dài và giữ độ dày.
+- `target_offset=(0,0)`: dịch tâm trong tọa độ local địch, X dương sang phải,
+  Y dương xuống dưới. Mặc định tâm là tâm hình collision `CollisionShape2D`
+  của địch, fallback vị trí địch nếu thiếu shape. Dấu theo vị trí địch; nếu
+  địch bị xóa thì giữ vị trí cuối và hoàn tất fade.
+- **Lifetime (unpaused real seconds)**: `fade_duration=0.20s` là 200ms fade alpha
+  tuyến tính **sau** hold hit-stop thực đã được chấp nhận. Hold lấy từ
+  `PlayableAdel._request_hit_stop()`, không có export hold trùng lặp tại VFX:
+  combo 1–3 hiện 0.035s, đòn 4 là 0.055s, hit-stop tắt thì hold 0. Các mục
+  hit-stop gốc vẫn chỉnh trong nhóm Inspector hiện có ở phần Defense bên dưới.
+  Nhiều mục tiêu cùng swing dùng chung deadline hold, không cộng dồn thời gian.
+  Đồng hồ wall time không bị kéo bởi attack speed/time_scale; **pause SceneTree
+  dừng tuổi dấu**, resume tiếp phần còn lại. Khác với vệt vung cũ vốn tan cả khi pause.
+- `max_marks=24`: giới hạn tổng dấu sống của Player, bỏ dấu cũ nhất nếu vượt;
+  chỉ ảnh hưởng hiển thị, không giới hạn số mục tiêu nhận damage.
+- **Textures**: `attack_textures` kế thừa bốn PNG
+  `res://asset/VFX/Adel/Hit/saber_hit_1.png` … `saber_hit_4.png`, chép nguyên
+  bốn ảnh 1–4 được duyệt. Không dùng ảnh sheet preview hay sửa bitmap nhân vật.
+- NodePath mặc định: `hitbox_path=../WeaponPivot/SaberHitbox`,
+  `source_sprite_path=../SpinePivot/SpineRig/TestAttackSprite`.
+
+**Trigger và lớp vẽ:** nghe `SaberHitbox.target_hit` chỉ sau accepted damage,
+giữ dedup mỗi mục tiêu/swing hiện có. Mới hỗ trợ bốn đòn combo; Q và jump không
+tự phát dấu này. Dấu được tạo ngay trong callback hit, không chờ animation/timer.
+Z tuyệt đối của dấu là **effective Z sprite Player − 2**; vệt kiếm đã duyệt là
+effective Z − 1. Cấu hình scene hiện hành: Player frame 250, vệt kiếm 249,
+dấu trúng 248, enemy body 100 (cộng tiếp Z chung của map khi có). Do đó thứ tự
+là **enemy < dấu trúng < VFX kiếm**. Khi chỉnh Z scene/map, giữ enemy body bên
+dưới dải Player/VFX này. Không thay Z enemy hoặc vệt kiếm để tích hợp component.
+
+Kiểm thử: `tests/adel/hit_slash_validation.gd`; kiểm hình game/input thật:
+`tests/adel/hit_slash_capture.gd`. Chạy trên project/dữ liệu thử có custom user
+directory chứa `CodexSaberVFX`, không chạy với save chơi thật.
+
+<a id="player-blood"></a>
+### Máu bám Player — duyệt 29/10/2026
+
+Mở `res://scenes/adel/playable_adel.tscn` → **PlayerBlood**. Script
+`res://scenes/adel/components/player_blood.gd`, shader `player_blood.gdshader`
+cùng thư mục. Node chỉ gắn script, **không có override scene**; giá trị dưới
+đây là mặc định đang dùng:
+
+- `enabled=true`: bật/tắt máu bám; tắt dọn ngay dữ liệu và trả material gốc.
+- `tint=#850505`, `opacity=0.8`: màu lớp máu và alpha trước khi hòa với sprite.
+  Giữ alpha gốc của cơ thể, độ đậm texture máu và đường nét tối của nhân vật.
+- **Lifetime (unpaused real seconds)**: `recovery_fade=3.0s` là thời gian tan
+  tuyến tính khi đúng vạch hồi, `unrecovered_timeout=150.0s` là tuổi tối đa
+  trước khi bắt đầu cùng fade nếu vạch chưa hồi. Hai giá trị là lựa chọn cụ
+  thể trong khoảng người dùng yêu cầu vài giây / 2–3 phút, có thể chỉnh lại.
+  Đồng hồ wall time dừng khi SceneTree pause/menu; không bị time_scale,
+  hit-stop hoặc tốc animation kéo dài. Đổi pose không đặt lại tuổi.
+- `max_groups=4` (1–4): số nhóm stagger còn hiển thị tối đa; mỗi nhóm hai vết
+  cơ thể, bỏ nhóm cũ nhất khi vượt. Bốn nhóm cho phép một vạch hồi/bị gãy lại
+  trong khi lớp cũ còn tan. Alpha chồng dùng giá trị lớn nhất, không làm vết
+  chồng thành khối đậm đặc hơn mức opacity.
+
+**Luật cố định đã duyệt:** mỗi HP stagger do đòn trực tiếp được chấp nhận tạo
+hai vị trí khác nhau trong bốn vùng **thân / bắp tay phải / chân A / chân B**.
+Mỗi vị trí bốc độc lập một trong tám mẫu atlas, được trùng mẫu hoặc chọn lại
+vùng ở lần stagger sau. Một vệt dưới mắt cố định ngoài pool luôn đi kèm khi
+còn bất kỳ nhóm nào, lấy alpha lớn nhất trong các nhóm còn sống. Khi mặt bị
+quay lưng/che khuất, giữ trạng thái nhưng không vẽ lên tóc, mặt nạ hoặc tay
+đang che. Không random lại khi đổi frame, FBF ↔ rig hoặc lật hướng.
+
+**Điểm nối lifecycle:** `PlayableAdel.take_damage()` tạo nhóm ở nhánh HP
+stagger thật với `stagger_tier`; không tạo do hết stamina, deflect, i-frame,
+bleed tick hay tự tiêu HP. `StatsComponent.stagger_threshold_restored(tier)`
+phát từ `restore_one_stagger_threshold()` và lệnh hồi toàn bộ, nên bình chỉ
+cho nhóm đúng vạch tan; safe zone/full heal cho các nhóm liên quan tan.
+`suspend_stagger_thresholds()` của Sentinel reset cờ với `notify=false`, không
+coi việc ẩn vạch/đổi mode là hồi. Hết stun không xóa máu. Chết hoặc
+`restore_checkpoint_state()` dọn toàn bộ; không ghi máu vào save.
+
+**Căn vị trí/hình:** `res://asset/VFX/Adel/Blood/player_blood_mapping.json`
+là dữ liệu cho 16 sheet / 31 frame FBF đang được rig sử dụng và 9 binding
+sprite của rig (hai biến thể thân/tay/đầu, ba chân). FBF tra theo tên texture,
+`hframes`, frame; `center`, `size`, `region` dùng pixel trong một frame nguồn,
+`angle` tính độ, X phải/Y xuống. Polygon vùng và lọc chất liệu tránh áo bị
+nhuộm lên tay che, da, đai hoặc vũ khí. Rig dùng đường node, tâm/kích thước
+chuẩn hóa 0–1 theo texture bộ phận, góc độ; material theo đúng phần thân và
+thứ tự che khuất sẵn có. Cỡ thân giữ ×1.4 của preview rig đã duyệt. Không sửa
+bitmap/animation gốc. Thêm texture hoặc frame mới phải bổ sung mapping cùng
+lượt, kiểm ở hai hướng; không dùng điểm neo màn hình chung cho mọi pose.
+
+Atlas `player_blood_atlas.png` nguyên bản alpha tám mẫu đã dùng trong preview;
+`atlas_cells` trong JSON cắt vùng alpha mỗi mẫu. Shader chỉ dùng alpha atlas
+và tint, không đổi texture nhân vật. `frame_pre_draw` đồng bộ material sau
+animation để tránh mất vết một frame khi đổi clip. Kiểm thử:
+`tests/adel/player_blood_validation.gd`; capture native:
+`tests/adel/player_blood_capture.gd`, chỉ chạy bản project/save thử riêng có
+custom user directory `CodexSaberVFX…`.
+
+<a id="battle-particles"></a>
+### Particles máu/xương — V3 duyệt và tích hợp 30/10/2026
+
+Mở `res://scenes/adel/playable_adel.tscn` → **BattleHitParticles**, script
+`res://scenes/adel/components/battle_hit_particles.gd`. Node chỉ gắn script,
+**không có override scene**; các map hiện tại kế thừa các mặc định bên dưới.
+Không đổi override Q/Saber, hit-stop, damage, camera hoặc rig khi chỉnh hạt.
+
+- `enabled=true`; tắt dọn hạt ở process kế tiếp. `max_particles=96` là trần
+  sprite sống đồng thời của một Player; khi đầy, xóa hạt cũ nhất trước khi
+  thêm hạt mới. Không giảm số mục tiêu nhận damage hoặc tạo hit giả. Ở mật độ
+  bình thường, quota mỗi burst giữ đúng bản duyệt; quá trần có thể cắt phần
+  đuôi của burst cũ. Sprite thuộc Player nên đổi scene/xóa Player dọn cả hạt.
+- Nhóm **Profiles** có thứ tự **Q nhấn / Q tụ 1 / Q tụ 2 / Player HP stagger**:
+  `blood_counts=[4,8,10,8]`, `bone_counts=[2,3,5,0]` → tổng **6/11/15/8**;
+  `speeds=[720,1080,1560,660]` world px/s;
+  `reaches=[165,270,405,156]` world px;
+  `lifetimes=[0.42,0.48,0.55,0.44]` giây thực không pause.
+  Giữ cả bốn phần tử khi sửa array. Q lấy tier thật tại accepted contact;
+  lượng Player cố định, không tăng theo damage/tier stagger.
+- Nhóm **Appearance and motion**: `spawn_half_extents=(12,15)` world px,
+  tức vùng sinh rộng 24/cao 30 quanh neo. `q_anchor_ratio=(0.32,-0.08)`
+  nhân rộng/cao collider theo world và lật X theo hướng Q;
+  `player_anchor_offset=(0,-20)` world px. Neo gốc là tâm shape collider
+  được biến đổi qua global transform. Mục tiêu không có collider dùng
+  `global_position`. Sau sinh, hạt không đi theo mục tiêu hoặc Player.
+- `blood_base_size=(10,16)`, `bone_base_size=(10,14)` là khoảng random
+  cạnh dài sprite trước hệ số `size_multiplier=1.5`. Kết quả **15–24 px
+  máu, 15–21 px xương** trong world, giữ tỉ lệ ảnh. Atlas texture filter
+  Linear; không nhân theo zoom camera hoặc scale cơ thể.
+- `motion_variation=0.10`: tốc và tầm random độc lập ±10%.
+  `bone_motion_multiplier=0.75`: xương dùng 75% tốc/tầm profile;
+  `bone_extra_lifetime=0.10s`: sống thêm 100ms.
+- `main_angles_degrees=(0,8)` xuống nhẹ so với ngang; các hạt được chia
+  đều theo khoảng góc với jitter 0.2–0.8 mỗi ô. Mỗi nhóm máu/xương có ít
+  nhất bốn hạt dành đúng một hạt cho `upward_angles_degrees=(8,12)` lên
+  nhẹ. Q có 5/6, 10/11, 13/15 hạt gần ngang; Player 7/8. Hướng X Q theo
+  facing lúc trúng; Player theo vận tốc knockback thực của HP stagger.
+- `blood_gravity=110`, `bone_gravity=240` world px/s²;
+  `bone_spin=(-5,5)` rad/s. Máu không spin, trục dài của cell hướng theo
+  đường bay; ưu tiên cell có rộng/cao >1.6 cho các giọt trừ giọt cuối.
+  Xương random góc ban đầu. RNG production tự random, không khóa seed preview.
+- `fade_duration=0.13s`: alpha tuyến tính trong 130ms cuối lifetime.
+  Quãng đường theo hướng ban đầu là `reach × (1-exp(-speed × age/reach))`,
+  cộng độ rơi `gravity × age²/2`. Reach là tham số tiệm cận của thành phần
+  ngang/dọc theo lực, không phải khoảng rơi tối đa hoặc khoảng bắt buộc đạt.
+
+**Thời gian và trigger:** chỉ `SaberHitbox.target_hit` được chấp nhận trong
+Q impact tạo burst địch. Nghe `SaberWeaponSkill.impact_confirmed` để giữ
+cụm ban đầu qua **hit-stop thực được chấp nhận**, dùng chung deadline cho
+các mục tiêu cùng swing; không chép lại 65/75/100ms thành tuning particles.
+Sau hold, tuổi hạt dùng wall time; pause dừng cả hold/motion/fade, time_scale
+không kéo dài tuổi. HP stagger Player phát sau `damage.apply_stagger` trong
+nhánh đòn trực tiếp của `take_damage`, lấy vận tốc knockback đã áp dụng.
+Đòn combo/jump, Q hụt/rejected, hit Player thường, iframe, deflect, hết
+stamina, Bleed và tự tiêu HP không phát. Chết/restore checkpoint dọn hạt;
+ngắt Q hoặc địch chết/xóa không xóa hạt đã sinh, chúng tan trong world.
+
+**Lớp và asset:** Q dùng effective Z của TestAttackSprite −3, thấp hơn dấu
+chém −2 và VFX kiếm −1, trên enemy hiện hành. Hạt HP stagger dùng Z thấp
+hơn toàn bộ Sprite2D cơ thể trong Skeleton2D và FBF, cập nhật mỗi process
+khi đổi pose/facing. Không dời máu bám ra sau cơ thể. Fixture hiện có Q 247,
+stagger 193; đây là kết quả từ cây scene, không phải Z tuyệt đối khóa mọi map.
+`asset/VFX/Adel/Particles/blood_bone_sheet.png` và `cells.json` là sheet V3
+nguyên hash, 10 cell máu/8 xương, màu chính/bóng **#850505/#480303** và
+**#FBF1E1/#786D65** đã nằm trong bitmap. JSON ghi rect pixel/axis radian;
+không đổi palette hoặc vẽ lại asset khi tích hợp.
+
+Kiểm thử production: `tests/adel/battle_particles_validation.gd`, chỉ chạy
+project/save thử có custom directory `CodexSaberVFXParticlesIntegration`.
+Capture và phạm vi bằng chứng xem bàn giao animation hiện hành.
 
 <a id="jump-vfx"></a>
 ### VFX jump attack — bản duyệt tối giản, 27/10/2026

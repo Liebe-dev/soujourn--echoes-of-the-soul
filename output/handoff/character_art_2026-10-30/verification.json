@@ -1,0 +1,16 @@
+{
+  "resource_count": 14,
+  "all_copies_match": true,
+  "head": "2ab87da",
+  "branch": "main",
+  "previous_handoff_sha256": "CE27732E3D3D1979660E97DD817D737452BFA46158B9EFC2F49B4CA220C64A39",
+  "uyen_prior_parts_directory_exists": false,
+  "no_new_images_generated": true,
+  "historical_sections_preserved": true,
+  "handoff_image_links_verified": 2,
+  "game_parts_match": 10,
+  "game_attacks_match": 5,
+  "handoff_sha256": "2298BFE17AFAD53B2F7F1C7D2A69B3BAC41A0091D8EF94EE70ABFF0DF456D383",
+  "utf8_valid": true,
+  "diff_check_passed": true
+}
