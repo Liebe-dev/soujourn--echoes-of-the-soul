@@ -1,7 +1,295 @@
 # Bàn giao animation / VFX combat Adel
 
-**Cập nhật: 28/10/2026, Asia/Saigon; snapshot gốc 26/10.** Project: `D:/Godot Project/soujourn--echoes-of-the-soul`.
+**Cập nhật: 30/10/2026, Asia/Saigon; giữ snapshot 28/10 và lịch sử từ 26/10.** Project: `D:/Godot Project/soujourn--echoes-of-the-soul`.
 File này ở `D:/Godot Project/soujourn--echoes-of-the-soul/Context/Tai_lieu_ban_dao/HANDOFF_anim.md`.
+
+## Hiện hành 30/10/2026 — particles V3 đã duyệt và tích hợp
+
+Người dùng đã **duyệt V3**, cho phép đưa particles vào game. Component mới
+`PlayableAdel/BattleHitParticles`, script
+`scenes/adel/components/battle_hit_particles.gd`, node không có scene override.
+Sheet/cell data nguyên byte preview tại `asset/VFX/Adel/Particles/`.
+Giữ Q brush hai răng cưa của snapshot 28/10, hit slash và máu bám đã tích hợp.
+
+- Chỉ accepted Q impact trên địch và HP stagger Player do đòn trực tiếp.
+  Q nhấn/tụ 1/tụ 2 **6/11/15** hạt (**4/2, 8/3, 10/5 máu/xương**);
+  Player **8 máu cố định**. Cỡ/vùng sinh/tốc/tầm/lifetime/gravity/fade đúng V2,
+  hướng gần ngang và lớp sau Player đúng V3. Không phát ở combo/jump,
+  Q hụt/rejected, ordinary Player hit, iframe/deflect, cạn stamina,
+  Bleed hoặc tự tiêu HP.
+- Q giữ cụm qua accepted hit-stop từ `impact_confirmed`, chung deadline mỗi
+  swing; không thêm timing Q riêng. HP stagger gọi sau `damage.apply_stagger`
+  trong `take_damage`, lấy vận tốc knockback đã áp dụng. Khác prototype ở
+  điểm này: không giữ cờ chờ từ mọi signal damage để tránh lẫn nguồn mất HP.
+- Sprite world anchored; địch chết/xóa hoặc Q ngắt không kéo/mất burst cũ.
+  Pause dừng tuổi; slow motion không kéo dài. Chết/restore checkpoint dọn
+  ngay; sprite top-level vẫn là con của component để xóa cùng Player/scene.
+  Trần **96 sprite/Player**, đầy thì bỏ hạt cũ nhất, không chặn target damage.
+  Lớp Q cập nhật source Z −3; stagger cập nhật thấp hơn mọi Sprite2D cơ thể
+  rig/FBF. Không đổi vị trí/lớp material máu bám.
+
+**Đã chạy:** bộ mới `battle_particles_validation.gd` **95/95**; hồi quy máu
+bám **134**, dấu chém **84**, Saber VFX **68**, Q VFX **98**, gameplay Q
+**160**, guard/stamina **96**, Fracture **80**, tổng **815 checks headless,
+0 failures**. Gồm hai hướng, nhiều accepted target, dedup, rejected/whiff,
+đòn kết liễu queued deletion, ngắt Q, world anchoring, pause/time_scale,
+đổi rig/FBF, quá trần, chết/respawn và xóa scene/owner. Kiểm cơ học không
+được diễn giải thành 815 tình huống gameplay độc lập.
+
+Native Forward+/D3D12 exit 0: **233 frame**, **23 checks qua**, **64 mẫu lớp
+stagger**, 0 mẫu sai; quota đúng **6/11/15/8**, Q có accepted hold khoảng
+65/75/100ms, alpha tan có trung gian. GIF thường **11.64s**, chậm 0.33×
+**11.16s**; bốn PNG peak đã được xem. Capture dùng input/physics Q thật,
+`Player.take_damage` thật, observer chỉ đọc component production để ghi số
+liệu. AI/vitals/HUD tắt và camera đóng khung QA; không coi là kiểm mọi map,
+UI/nền/crowd hoặc đo hiệu năng gameplay. Hai hướng/nhiều target/lifecycle
+được kiểm headless; capture native gồm Q hướng phải và Player knockback trái.
+
+**Bảo toàn:** baseline 125 source/runtime/asset so với trước tích hợp có
+**123 nguyên hash**, chỉ Player script/scene khác đúng dự kiến do nối node,
+trigger và cleanup. Hai asset particles khớp hash V3; Q brush/rig/animation,
+collider, camera, damage và toàn bộ tuning cũ nguyên hash. Git vẫn **main /
+2ab87da**, giữ các thay đổi chưa commit của lượt hit slash/máu bám và các
+thay đổi tài liệu khác trong workspace; không commit/push hoặc force reload.
+
+Media, log, manifest, source snapshot và project thử tại
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/soujourn-particles-integration-2026-10-30/`.
+Project thử dùng custom user directory và APPDATA riêng; FmodManager chỉ bị
+tắt trong clone vì mismatch API có sẵn, không đổi audio/settings thật. Log
+cuối không script/render error; warnings Bone2D/UID nguồn vẫn còn. Tuning đầy
+đủ ở [hướng dẫn chung](../Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#battle-particles).
+Các mục preview dưới đây là lịch sử trước duyệt, không phải tác vụ còn chờ.
+
+## Lịch sử preview 30/10/2026 — V3 stagger sau Player, hướng văng gần ngang
+
+Hai yêu cầu mới: **particles stagger ở sau nhân vật** và **đa số hạt văng
+ra trước, hạn chế góc trên**. V3 giữ nguyên lượng/cỡ/tốc/tầm/vùng sinh, màu,
+shading và thời gian tan của V2; vẫn chỉ là preview, chưa tích hợp particles.
+
+- Hạt Player stagger dùng Z thấp hơn toàn bộ sprite cơ thể trong Skeleton2D
+  và FBF; cập nhật khi chạy để không nổi lên trước khi đổi pose. Máu bám trên
+  áo/mặt vẫn ở material nhân vật như trước. Nhánh lớp Q giữ source depth −3.
+- Hướng chính theo lực Q/hướng knockback Player, **0–8° xuống nhẹ**; chỉ
+  một hạt của nhóm có ít nhất bốn phần tử lệch lên **8–12°**. Kết quả Q nhấn
+  5/6 gần ngang, tụ 1 10/11, tụ 2 13/15; Player 7/8. Không đổi chiều lực
+  Player sang facing; chỉ thu góc quạt gần ngang.
+- Native Forward+/D3D12 exit 0: **224 frame**, GIF thường **11.49s**, chậm
+  0.33× **11.19s**. **23 checks native qua**, gồm 56 mẫu hạt stagger ở sau
+  sprite Player đang hiện, 0 mẫu sai lớp. **78 kiểm góc/thông số qua**; đây
+  là các kiểm cơ học, không phải 101 tình huống gameplay độc lập.
+
+Đã xem PNG peak Q tụ 2 và stagger để kiểm hướng, che khuất; log cuối không
+script/render error, Bone2D warnings nguồn còn. Hash source/runtime được
+lưu cùng bằng chứng, không sửa runtime game. Các giới hạn hai hướng/nhiều
+mục tiêu/pause/kill của preview trước vẫn còn. Media/log/project tại
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/soujourn-particles-q-stagger-2026-10-30-v3-behind-forward/`.
+V2/V1 giữ nguyên; quy trình vẫn preview → duyệt → tích hợp.
+
+## Lịch sử preview 30/10/2026 — particles V2 tăng cỡ/lượng/vùng sinh/tốc/tầm
+
+Người dùng yêu cầu so với V1: **cỡ ×1.5, lượng ×1.5, vùng sinh ×3, tốc và
+tầm văng ×3**. V2 chỉ là preview chỉnh tiếp, **chưa duyệt tích hợp particles**.
+Giữ phạm vi Q trúng địch và Player HP stagger, không mở sang hit thường/jump.
+
+- Q nhấn **6 hạt (4 máu/2 xương)**, tụ 1 **11 (8/3)**, tụ 2 **15 (10/5)**;
+  Player HP stagger **8 máu cố định**. Tổng lượng nhân 1.5 rồi làm tròn gần
+  nhất, phần .5 lên: 4→6, 7→11, 10→15, 5→8. Phân bổ xương làm tròn trong
+  tổng này, không cộng thêm hạt ngoài quota.
+- Sprite lớn ×1.5 theo cả hai chiều; vùng jitter quanh cùng neo rộng/cao ×3,
+  half-extents từ (4,5) lên **(12,15)** world px. Không nhân offset neo trên
+  cơ thể hoặc góc quạt. Tốc Q **720/1080/1560**, Player **660** world px/s;
+  tham số tầm **165/270/405/156** world px. Giữ lifetime/gravity/shading/fade,
+  tỉ lệ tốc/tầm xương 75%, hit-stop, Q charge và tuning source hiện có.
+- Khung QA rộng hơn 1440×720 và dịch camera để xem trọn quỹ đạo mới; hệ số
+  cỡ/tốc/tầm tính trong world, không lấy kích thước GIF trên màn hình làm đơn vị.
+
+Capture Forward+/D3D12 cuối exit 0: **244 frame**, GIF thường **11.53s**, chậm
+0.33× **11.64s**. **22 checks native + 103 kiểm hệ số/hình học qua**, gồm số
+sprite thực, kích thước sprite và vùng sinh trong từng burst. Các kiểm cơ học
+này không phải 125 tình huống gameplay độc lập. **125/125 hash runtime/source/
+asset giữ nguyên** và baseline vẫn khớp V1. Rà PNG peak cả bốn profile; log
+cuối không script/render error, Bone2D warnings nguồn còn. Phạm vi chưa chứng
+minh của V1 (hai hướng/nhiều mục tiêu/pause/kill) vẫn giữ nguyên.
+
+Media/log/project và `multiplier_verification.json` tại
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/soujourn-particles-q-stagger-2026-10-30-v2/`.
+V1 bên dưới là lịch sử và được giữ nguyên. Quy trình vẫn preview → duyệt →
+tích hợp; không commit/push, không force reload editor hoặc sửa source runtime.
+
+## Lịch sử preview 29/10/2026 — V1 particles chỉ cho Q trúng và Player HP stagger
+
+Người dùng thu hẹp phạm vi: **chỉ Q trúng địch** và **Player bị HP stagger**
+mới có particles; Q tụ lực tăng lượng, tốc và tầm, Player dùng lượng cố định.
+Đây là yêu cầu preview, **chưa duyệt tích hợp particles**. Bản plan hit thường,
+Saber 4/jump hoặc Player nhận hit thường phát hạt đã bị thay thế.
+
+Preview V1 dùng sheet máu/xương V4 nguyên ảnh: Q nhấn **4 hạt (3 máu/1 xương)**,
+tụ mức 1 **7 (5/2)**, tụ mức 2 **10 (7/3)**; tốc cơ sở 240/360/520 world px/s,
+tham số tầm 55/90/135 world px. Player HP stagger **5 giọt máu**, không xương,
+tốc 220, tham số tầm 52. Đây là các mốc thử để người dùng xem, chưa là tuning
+runtime đã khóa. Hạt ưu tiên nét dài, xương có mặt bóng phẳng rõ, bay trong
+world và tan; Q giữ đỉnh theo accepted hit-stop 65/75/100ms có sẵn.
+
+Capture Forward+/D3D12 có 344 frame, GIF thường 11.12s và chậm 0.33×/11.10s.
+Q dùng input/physics và tier thật, không rút thời gian tụ gốc; Player gọi
+`take_damage` thật để gây HP stagger, AI/vitals/HUD tắt. Prototype particles
+ở project thử; Q brush/máu bám là source production hiện có. **22 checks qua**:
+đúng bốn burst và lượng/profile, tầm Q tăng dần, fade có alpha trung gian,
+ordinary Saber accepted contact, ordinary Player hit, stamina exhaustion và
+Q hụt không phát burst. Kiểm callback ordinary Saber không phải một pass input
+Saber quay native riêng. Chưa chứng minh hai hướng/nhiều mục tiêu/pause/kill
+của prototype. Rà PNG peak cả bốn profile; log cuối không script/render error,
+Bone2D warnings cũ còn. **125/125 hash runtime/source/asset giữ nguyên**.
+
+Media, log, project riêng và ghi chú tại
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/soujourn-particles-q-stagger-2026-10-29-v1/`.
+Xem [plan particles hiện hành](Ke_hoach_battle_vfx.md#b-particles-cho-địch-và-player--phạm-vi-mới-2910).
+Giữ preview → duyệt → tích hợp; không đưa prototype/capture vào Git hoặc sửa
+tuning cũ để làm bản thử. Project thử tiếp tục tắt riêng FmodManager do lỗi API
+cũ như các lượt trước, source audio/settings thật không đổi.
+
+## Hiện hành 29/10/2026 — máu bám Player đã duyệt và tích hợp
+
+Người dùng duyệt riêng **máu bám lên người Player** sau lượt tích hợp dấu
+chém. Phạm vi gồm **hai vết cơ thể ngẫu nhiên + một vệt cố định dưới mắt**
+sau HP stagger do đòn trực tiếp; đi theo mọi animation FBF và rig hiện dùng,
+không giới hạn ở hai ảnh preview. Particles vẫn chưa được tích hợp.
+
+- `PlayableAdel/PlayerBlood`, script `scenes/adel/components/player_blood.gd`
+  và shader `player_blood.gdshader` dùng atlas tám mẫu alpha nguyên bản đã
+  lưu trong preview rig. Runtime atlas/data ở `asset/VFX/Adel/Blood/`.
+- `#850505`, alpha 0.8; thân rig giữ cỡ ×1.4 đã preview. Mỗi stagger chọn
+  hai vùng khác nhau trong thân/tay/chân A/chân B, mỗi vùng chọn độc lập
+  1/8 mẫu (được trùng). Giữ danh tính vết/mẫu/tuổi khi đổi clip/frame/facing.
+  Vệt dưới mắt nằm ngoài pool; luôn có khi còn nhóm máu, chỉ phần da đang
+  lộ được vẽ, không nhuộm tóc/mặt nạ/tay che.
+- Dữ liệu mapping gồm **16 sheet / 31 frame FBF**, **9 binding rig** cho
+  hai bộ thân/tay/đầu và ba biến thể chân. FBF dùng pixel frame + polygon vùng
+  + lọc chất liệu; rig hòa trong material từng sprite để giữ che khuất.
+  Không vẽ máu vào PNG nhân vật hoặc sửa animation nguồn.
+- Mỗi nhóm liên kết `stagger_tier`. Đúng vạch hồi thì fade **3s thực**;
+  vạch chưa hồi thì **150s** bắt đầu cùng fade. Đây là lựa chọn trong khoảng
+  người dùng yêu cầu vài giây / 2–3 phút. Pause dừng tuổi, slow motion/hit-stop
+  không kéo tuổi. Hết choáng không xóa; chết/restore checkpoint dọn hết.
+- Signal mới `StatsComponent.stagger_threshold_restored(tier)` phát khi
+  hồi một vạch hoặc lệnh hồi toàn bộ (kể cả cờ đã sẵn sàng do Sentinel).
+  `suspend_stagger_thresholds()` dùng `notify=false`: đổi mode/ẩn vạch không
+  bị coi là hồi vạch. Không đổi công thức damage, threshold, hồi bình hoặc
+  Sentinel. Vết mới chỉ phát trong nhánh HP stagger thật của `take_damage`,
+  không phát do i-frame, deflect, cạn stamina, bleed tick hoặc tự tiêu HP.
+- Node không override export. Tuning và cách thêm mapping tại
+  [máu bám Player](../Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#player-blood).
+
+**Kiểm tra thực chạy:** máu **134**, Fracture **80**, Guard/Stamina **96**,
+Sentinel Entry **59**, Sentinel Drain **36**, Player Refactor **46**,
+dấu chém **84**, Saber VFX **68**, Q VFX **98**: **701 checks, 0 failures**.
+Capture Forward+/D3D12 cuối exit 0: **138 PNG**, **277 frame motion** qua
+stagger → idle/run → combo → Q → jump → dash, **0 frame mất material máu**;
+giữ nguyên nhóm/mẫu/tuổi và cuối fade còn 0 nhóm. Rà hình 31 frame FBF và
+36 mẫu rig nhìn phải bằng contact sheet; hướng trái có capture tương ứng.
+Đây không phải kiểm mọi frame/key hoặc mọi map chơi. Capture kết hợp thêm
+máu đã có sẵn + combo bằng input/physics thật: 8 hit hai hướng, 0 mẫu sai
+lớp giữa địch/dấu chém/vệt kiếm, 16 PNG; không thay renderer VFX bằng overlay.
+
+Manifest trước lượt máu: 48 file, **45 nguyên hash**, ba file đổi đúng dự
+kiến (Player script/scene, StatsComponent). Manifest rig cũ **42/42 nguyên**;
+atlas runtime nguyên hash atlas preview. Giữ Q hai răng, mọi bitmap nhân vật,
+vệt Saber/Jump/Ready và dấu trúng đã duyệt. Bone2D warnings cũ còn; log cuối
+không có script/render error. Lượt thử đầu sai cách gọi một scene suite cũ
+và lỗi cleanup trong harness capture đã được sửa ở runner, không sửa gameplay
+để làm các suite qua. Project thử tắt riêng FmodManager như lượt dấu chém vì
+lỗi API FMOD sẵn có; audio không được kiểm, settings nguồn không đổi.
+
+Kiểm tra/bằng chứng lượt này được ghi trong
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/soujourn-player-blood-integration-2026-10-29/`.
+Suite mới `player_blood_validation.gd`; capture native
+`player_blood_capture.gd`. Kết quả cuối, điều kiện test và giới hạn ở
+`INTEGRATION_NOTES.md`, `regression_results.json`, `capture/capture_summary.json`.
+Capture phân biệt một hit stagger thật với fixture hiện đủ bốn vùng để rà
+mapping; không ghi fixture đó là random gameplay. Camera QA riêng, AI/HUD
+tắt; audio không thuộc nghiệm thu này. Không sửa camera/project settings
+thật hoặc save người chơi; không force reload editor, commit hoặc push.
+
+## Hiện hành 29/10/2026 — dấu chém trúng Saber 1–4 đã duyệt và tích hợp
+
+Người dùng duyệt preview V2 rồi chốt lớp vẽ **enemy < dấu trúng < VFX kiếm**;
+yêu cầu không làm thêm preview trước khi tích hợp. Phạm vi duyệt này là dấu
+chém của bốn đòn combo, không bao gồm particles hoặc máu bám Player/máu dưới mắt.
+Các nhóm còn lại tiếp tục theo [kế hoạch battle VFX](Ke_hoach_battle_vfx.md).
+
+**Đối chiếu nền 28/10:** vẫn nhánh `main`, HEAD `2ab87da` (`vfx complete`).
+Q brush hai răng cưa, hai màu và override 0.02/0.25s thực vẫn nguyên. Manifest
+74 nguồn của preview V2 có 72 hash không đổi; hai nguồn khác đúng dự kiến là
+Player scene thêm component và SaberHitbox thêm hai getter chỉ đọc. Diff
+Player script chỉ thêm tham chiếu component và chuyển duration hit-stop đã
+được chấp nhận cho nó. Không đổi rig, bitmap nhân vật, vệt kiếm cũ, Q, damage,
+collider, animation, camera hoặc project settings. Source mới đang ở working
+tree; không commit/push hoặc force reload editor.
+
+**Runtime mới:**
+
+- `asset/VFX/Adel/Hit/saber_hit_1.png` … `saber_hit_4.png` chép nguyên hash
+  bốn ảnh người dùng đưa, đúng thứ tự Saber Attack 1–4. Shader giữ alpha/viền
+  tối và tô lõi `#EDF3F7`.
+- `scenes/adel/components/saber_hit_slash_vfx.gd` nghe accepted `target_hit`,
+  tạo dấu ngay trong callback; miss, rejected damage, Q và jump không tạo dấu
+  combo. Dedup mỗi mục tiêu/swing và hit-stop cũ giữ nguyên.
+- Dài ×1.30 theo trục riêng của từng ảnh, dày ×1.00; phản chiếu toàn transform
+  theo hướng đòn. Neo tâm collider mục tiêu, theo địch; địch chết/xóa thì giữ
+  vị trí cuối để tan hết. Mỗi mục tiêu có dấu riêng, tối đa 24 dấu đang sống.
+- Giữ đỉnh qua hit-stop thực đã được chấp nhận (combo 35/55ms hiện có), sau đó
+  fade alpha tuyến tính **200ms thời gian thực không pause**. Nhiều mục tiêu
+  cùng swing dùng chung hạn giữ; slow motion không kéo tuổi, pause dừng tuổi.
+- Node `PlayableAdel/SaberHitSlashVFX` chỉ gắn script, **không override** export.
+  Z tuyệt đối = effective Z frame Player − 2, dưới vệt kiếm Z − 1 và trên enemy
+  theo dải Z hiện hành. Hướng dẫn tuning duy nhất tại
+  [mục dấu chém trúng](../Bao_cao_ky_thuat/huong_dan_tuy_chinh.md#saber-hit-slash).
+
+**Kiểm tra thực chạy 29/10:** suite mới `hit_slash_validation.gd` **84 checks**;
+hồi quy Saber **68**, Ready **29**, Jump **33**, Descent **25**, Q VFX **98**:
+tổng **337 checks, 0 failures**. Bao gồm accepted/rejected/miss, hai hướng,
+đúng hình/màu/transform/lớp, nhiều mục tiêu, follow, kill, giới hạn/cleanup,
+thời gian thực và pause. Đây không phải 337 tình huống thị giác độc lập.
+
+Capture `hit_slash_capture.gd` dùng Player + SpineEnemy production, input và
+physics thật, **Forward+ / D3D12**: 8 hit (4 đòn × 2 hướng), dấu có sẵn trong
+cả 8 callback, **0 mẫu sai lớp**, 16 PNG peak/fade, cuối không còn dấu. Camera
+cố định để so hình, AI/vitals tắt trong harness; chưa thay cho nghiệm thu người
+chơi trên mọi map/nền/UI. Bone2D warnings nguồn còn. Bản sao kiểm thử có save
+riêng và tắt riêng autoload FmodManager vì lỗi API FMOD sẵn có khi import;
+audio không được kiểm trong lượt này, audio/project settings thật không đổi.
+
+Bằng chứng và bản source tích hợp tại
+`D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/soujourn-hit-slash-integration-2026-10-29/`:
+`capture/`, log, `regression_results.json`, `source_preservation.json` và
+`INTEGRATION_NOTES.md`. Không đưa capture/project thử vào Git. Preview V2
+lịch sử giữ nguyên ở thư mục `soujourn-hit-slash-motion-2026-10-29-v2-fade200-longer/`.
+
+## Snapshot nền — bản bàn giao cuối lượt 28/10/2026
+
+- **Đã xác minh trong lượt bàn giao này:** nhánh `main`, HEAD **`2ab87da` —
+  `vfx complete`** (28/10/2026 19:59:38 +07:00); working tree sạch trước khi
+  sửa tài liệu. Hai PNG Q runtime đã tracked và vẫn khớp SHA256 bản đã duyệt.
+  Không fetch, chạy lại game/test hoặc xem lại video trong lượt bàn giao.
+- **Đã hoàn thành:** combo Saber 1–4, jump AIR/LAND, cung giữ khi lao xuống,
+  Ready và Q brush hai răng cưa. Q brush là thay đổi hình/màu mới nhất, đã
+  được duyệt và tích hợp. Không có phần code đã được giao nào đang bỏ dở.
+- **Palette hiện hành:** combo/Ready/AIR/LAND trắng tiết chế; cung giữ pha
+  lao xuống `#b4b6be`; riêng Q có lõi `#ef241e`, nét nhạt `#f55d58`.
+  Các đoạn lịch sử yêu cầu Q trắng hoặc `#df5c55` đã được thay thế.
+- **Đọc theo thứ tự:** mục 1 để tiếp quản; phần Q brush ngay dưới để biết
+  kết quả mới nhất; mục 3 cho bài học ref/nhận xét; mục 4 cho file; mục 10
+  cho phần chưa chứng minh và bước tiếp. Các cập nhật có ngày cũ là lịch sử,
+  không biến câu “Q chưa triển khai” của ngày 27/10 thành trạng thái hiện tại.
+- **Nguồn tuning duy nhất:**
+  `D:/Godot Project/soujourn--echoes-of-the-soul/Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md`
+  tại các anchor `saber-vfx`, `jump-vfx`, `ready-vfx`, `q-vfx`.
+  Preview/ref/evidence mới ở `D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/`,
+  chỉ lưu cục bộ. Asset runtime đã duyệt nằm trong `asset/VFX/Adel/Saber/`.
+- **Mức bằng chứng:** 413 checks và capture Q là kết quả thực chạy của lượt
+  tích hợp trước đó, đã mở log đối chiếu lại; không ghi là vừa rerun trên
+  HEAD mới. Quan sát video là lịch sử khảo sát có URL/timestamp; nguyên tắc
+  thiết kế rút ra không phải mô tả mã nguồn hay tiêu chuẩn nội bộ của Limbus.
 
 ## Hiện hành 28/10/2026 — Q brush V4 hai răng cưa đã duyệt và tích hợp
 
@@ -333,11 +621,11 @@ hồi quy AIR/LAND **33/33**. Log/bằng chứng ở thư mục cùng gốc arti
 `jump_attack_descent.gdshader`; geometry V6, opacity, handoff LAND và các VFX
 khác giữ nguyên. Hướng dẫn tuning ghi vị trí/default màu mới.
 
-**Còn chờ:** cảm nhận của người dùng khi chơi bản đã tích hợp; chưa kiểm chứng
-mọi nền/slope/camera hoặc độ trùng pixel với hitbox. Skill Q chưa có thiết kế/
-preview mới được duyệt, không triển khai. Giữ các sửa enemy/output/Ready và
-scene tuning có sẵn; chưa commit/push. Junction của project thử được tháo sau
-kiểm tra, phải dựng lại nếu chạy cấu hình artifact đó.
+**Giới hạn:** chưa kiểm chứng mọi nền/slope/camera hoặc độ trùng pixel với
+hitbox. Câu “Q chưa có preview/duyệt” là trạng thái tại 27/10 và đã hết hiệu
+lực: Q brush đã duyệt/tích hợp ngày 28/10 ở đầu file. Junction của project
+thử đã tháo, phải dựng lại nếu chạy cấu hình artifact đó; trạng thái Git
+hiện tại xem mục 9, không lấy trạng thái chưa commit của lượt cũ làm chuẩn.
 
 ## Cập nhật 27/10/2026 — Saber Ready đã duyệt và tích hợp
 
@@ -385,9 +673,10 @@ bộ đếm 39 mẫu held Ready yêu cầu cả `_ready_final_frame=true` lẫn 
 không có marker vẩy; 0 mẫu có vệt thừa. Clip GIF trên lấy từ `gameplay/` và
 đã được review thị giác riêng; bản quay cuối không đổi code/hình VFX.
 
-**Còn chờ:** phản hồi người dùng sau khi chơi Ready đã tích hợp; **VFX skill Q
-chưa có preview/duyệt mới, chưa triển khai**. Không tự làm Q từ lệnh duyệt Ready.
-Các thay đổi enemy/output ngoài lượt này được giữ nguyên; chưa commit/push.
+**Giới hạn:** cần phản hồi khi chơi Ready trên các map/camera khác. Q từng
+chưa được duyệt tại snapshot Ready ngày 27/10; nay đã được duyệt/tích hợp
+bằng lệnh riêng ngày 28/10, xem đầu file. Các sửa enemy/output được giữ
+nguyên; trạng thái Git hiện tại ở mục 9.
 
 ## Cập nhật 27/10/2026 — VFX jump attack đã duyệt và tích hợp
 
@@ -448,14 +737,14 @@ Không suy ra quyền làm các VFX khác từ lệnh duyệt Jump. Chưa commit
 ## 1. Tiếp quản nhanh và mức độ bằng chứng
 
 1. Đọc `Context/Tai_lieu_ban_dao/AGENTS.md` và `HANDOFF.md`, sau đó đối chiếu Git/source/scene trước khi sửa. Các đường dẫn `res://...` trong file này tính từ project gốc nêu trên.
-2. Công việc chính hiện tại là **bốn VFX trắng cho `saber_attack_1/2/3/4`**, trên rig `res://asset/Character/Adel/adel spine action use.tscn`. Đã tích hợp **phương án 2**: lớp gắn frame + vệt dư độc lập. Không còn là bản plan chưa tích hợp.
-3. Thay đổi hình học gần nhất đã hoàn thành: **đòn 3 kéo dài về sau, nâng lên ngang vai, phẳng và chỉ hơi nghiêng**, đi ngược đòn 4. Đã gửi ảnh/gameplay cho người dùng. **Chưa có phản hồi nghiệm thu thị giác cuối cùng của người dùng sau bản này**; yêu cầu tiếp theo là viết bàn giao, không phải thêm một hiệu ứng mới.
-4. Nguồn tuning duy nhất: `Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md`, mục **VFX bốn đòn Saber**, anchor `saber-vfx`. Đọc cả mặc định script và override scene; không đặt lại số người dùng đã căn.
-5. Xem bằng chứng mới nhất ở mục 7; dùng thư mục `saber-attack3-shoulder/final`, không lấy các preview cũ làm kết quả hiện hành.
+2. Xác nhận đủ bốn component trên rig nguồn: **SaberSwingVFX**, **JumpAttackVFX**, **SaberReadyVFX**, **SaberSkillVFX**. Trong Player chúng ở `SpinePivot/SpineRig/`. Các animation và logic chiến đấu hiện hữu được giữ; không tự thêm frame thân người/hitbox/damage/camera.
+3. Thay đổi mới nhất là **Q brush V4 hai răng cưa, đuôi thu nhọn**, đã duyệt và tích hợp. Xem hai PNG runtime và ảnh native ở phần đầu. Combo đòn 3 ngang vai/kéo về sau là thành quả trước đó, không phải nhiệm vụ đang chờ làm; chưa có phép nghiệm thu khách quan toàn quỹ đạo/hitbox.
+4. Đối chiếu đủ bốn anchor tuning nêu đầu file. Đặc biệt Q có override scene **hold 0.02s / lifetime 0.25s thực**, khác script **0.012 / 0.18**; combo có scale/lifetime override riêng. Giữ giá trị người dùng đã căn.
+5. Kiểm tra đường dẫn preview/evidence và hash trước khi dùng. Kết quả Q mới ở `adel-q-brush-integration-2026-10-28/`; combo đòn 3 ở `saber-attack3-shoulder/final/`. Mirror thử đã tháo junction, cần dựng lại nếu chạy; test dùng dữ liệu riêng. Báo ngắn phần đã xác minh và chênh lệch mới trước khi tiếp tục yêu cầu tiếp theo.
 
 Phân biệt các mức sau trong toàn bộ bản bàn giao:
 
-- **Xác minh lúc bàn giao:** đã đọc file/source, Git, override hiện hành, đường dẫn và nội dung báo cáo. Lượt viết bàn giao chỉ sửa tài liệu, sao chép ref nguyên vẹn; không chạy lại game/test.
+- **Xác minh lúc bàn giao 28/10:** đã đọc source, Git, override, đường dẫn, log và hash ảnh Q; ghi `handoff-verification-2026-10-28.json` và chép nguyên ref màu vào evidence Q. Lượt này sửa tài liệu, không chạy lại game/test hoặc xem lại video.
 - **Kiểm thử lịch sử có bằng chứng:** các lượt thực sự chạy trước đó trong chat, có log/ảnh/GIF tại vị trí ghi dưới. Không có nghĩa mọi thay đổi ngoài phạm vi vừa xuất hiện trong checkout đều đã được test lại.
 - **Quan sát video:** những đoạn đã xem/tiến từng ảnh trong lượt nghiên cứu; không phải đã xem trọn mọi video.
 - **Phân tích/giả thuyết:** kết luận thiết kế từ hình ảnh, cần đánh giá trong game; không phải mô tả mã nguồn nội bộ của Limbus.
@@ -465,7 +754,7 @@ Phân biệt các mức sau trong toàn bộ bản bàn giao:
 
 ### Điều người dùng muốn đạt được
 
-- Combat theo hướng Limbus Company: **dứt khoát, mạnh, có sức nặng vũ khí**, không nhiều màu hoặc hiệu ứng rối mắt. Palette VFX là **trắng**, có xám trung tính/quầng sáng tiết chế; ref vàng chỉ dùng cấu trúc nét, không lấy màu vàng.
+- Combat theo hướng Limbus Company: **dứt khoát, mạnh, có sức nặng vũ khí**, ít màu và ít lớp gây rối. Combo/Ready/AIR/LAND dùng trắng/xám tiết chế; cung giữ khi lao xuống là **#b4b6be**. Riêng Q đã được đổi sang **#ef241e / #f55d58** theo ref màu mới. Ref vàng trước đó chỉ dùng cấu trúc, không lấy palette vàng.
 - Người dùng thấy FBF hiện tại **đã đủ dứt khoát và nặng**. Điểm yếu là cảm giác hơi khựng và thiếu hình mô tả quỹ đạo/vùng đánh. Mục tiêu VFX là bù chuyển động giữa các pose, không mặc định thêm frame thân người hoặc làm animation mềm đi.
 - FBF ba frame: chuẩn bị → motion blur mạnh, gần pose cuối → tư thế cuối. Không có đủ ảnh để đọc toàn bộ vùng quét kiếm; vệt phải giúp người chơi hình dung tầm đánh và hướng lực.
 - Vệt là **một cung/lưỡi liềm liền khối**, có cạnh cắt rõ, đầu/đuôi thuôn; xước mảnh chạy theo cung và glow vừa phải. Không tách thành nhiều vệt phụ độc lập hoặc vòng sáng trang trí làm mất đường chém chính.
@@ -475,8 +764,8 @@ Phân biệt các mức sau trong toàn bộ bản bàn giao:
 ### Hai phương án từng đề nghị và trạng thái thật
 
 - **Phương án 1 / A:** chỉ vệt độc lập tự tan/thu. Đây vẫn là hướng đối chiếu thiết kế; chưa có bằng chứng một đợt A/B có kiểm soát đã chọn được bản thắng.
-- **Phương án 2 / B — hiện đang dùng:** lớp theo frame làm rõ đỉnh chém, mất ngay khi hết frame được chọn/đổi animation và không fade; vệt dư nhẹ/ít chi tiết hơn tiếp tục chuyển động và thu lại độc lập.
-- Hai lớp là **Sprite2D riêng trong game**, không vẽ đè vào ba PNG frame nhân vật. Cùng dùng bitmap slash của từng đòn; shader/độ đậm/detail khác nhau giữa hai lớp. Không có hai bộ bitmap riêng bắt buộc cho hai lớp.
+- **Phương án 2 / B — đang dùng cho combo 1–4:** lớp theo frame làm rõ đỉnh chém, mất ngay khi hết frame được chọn/đổi animation và không fade; vệt dư nhẹ/ít chi tiết hơn tiếp tục chuyển động và thu lại độc lập. Đây không phải khẳng định mọi pha Jump/Ready/Q đều có cùng hai lớp.
+- Hai lớp combo là **Sprite2D riêng trong game**, không vẽ đè vào ba PNG frame nhân vật. Cùng dùng bitmap slash của từng đòn; shader/độ đậm/detail khác nhau giữa hai lớp. Jump/Ready/Q dùng component mesh/shader riêng theo pha; Q hiện có hai PNG VFX độc lập với PNG nhân vật.
 - Người dùng đã nhiều lần chuyển từ plan sang lệnh thực hiện; phần VFX và các sửa hướng/hình học nêu dưới đã được cho làm. Khi người dùng nói plan/chưa làm ở nhiệm vụ mới, tiếp tục giữ giới hạn đó. Bản bàn giao không tự cấp quyền mở rộng camera, hit-stop, damage, hitbox, Q hoặc animation khác.
 - Không có mode A/B hoàn chỉnh trong UI. Đặt Attached Opacity về 0 chỉ là cách thử tắt lớp chính; chưa tương đương một nghiên cứu A/B đã cân lại đầy đủ lớp dư.
 
@@ -510,14 +799,14 @@ Các bài học thiết kế rút ra — là phân tích, không phải “quy t
 3. Tách chức năng **đường chém** khỏi **phản hồi va chạm**. Vệt xuất hiện cả khi chém hụt; flash/impact ở mục tiêu chỉ nên thêm khi hit được xác nhận. Vệt Saber mới chưa phải một hệ impact mới.
 4. Vệt cũ phải hạ vai trò nhanh sau đỉnh chém: ngắn/mảnh/ít nét hơn, tránh cạnh tranh với đòn kế. Không có lifetime chung nào đã đo đáng tin từ video.
 5. Độ nặng phối hợp pose, chuyển động cả người/vũ khí, tiếp xúc, phản ứng địch và camera. Chưa có thử nghiệm tắt từng thành phần nên không định lượng phần đóng góp.
-6. Các nhân vật mới có mức trang trí khác nhau. Học cấu trúc thông tin/nhịp, giữ palette trắng và mức tiết chế do người dùng đặt ra.
+6. Các nhân vật mới có mức trang trí khác nhau. Học cấu trúc thông tin/nhịp, giữ palette và mức tiết chế người dùng đã chốt cho từng đòn; Q đỏ mới không phải lý do đổi toàn bộ combo trắng sang đỏ.
 
 **Giới hạn cần giữ:** không suy ra số frame tác giả vẽ, duration hit-stop chuẩn, unscaled time, một shader chung, node sống qua đổi clip hay hitbox thật của Limbus từ trailer/GIF. Giữ pose nhưng VFX đổi có thể là hình được dựng sẵn. Các bước tiến frame của player không phải phép đếm frame artwork.
 
 ### 3.2. Video After Effects: cách vệt biến mất
 
 Nguồn người dùng yêu cầu xem: https://www.youtube.com/watch?v=WCWH8AnEvbI .
-Ghi nhận từ lượt xem/tiến khung video trong lịch sử chat, **không xem lại video trong lượt viết bàn giao**; chưa lưu phép đo timing/timestamp chi tiết thành báo cáo repo.
+Ghi nhận từ lượt xem/tiến khung video trong lịch sử chat, **không xem lại video trong lượt viết bàn giao 28/10**; chưa lưu phép đo timing/timestamp chi tiết thành báo cáo repo. Tên công cụ AE bên dưới là ghi chép lịch sử; nếu cần tái tạo chính xác timeline/project AE thì phải mở lại đối chiếu, không coi là source project đã có.
 
 - Quan sát được cách **Mask Path** kéo hình/dải từ dạng gọn ra dài rồi co lại trong lúc tiếp tục đi; **Polar Coordinates** biến đường/dải thành cung.
 - Điều người dùng gọi “fade out” thực chất cần **chuyển động kết thúc và thay hình**, không chỉ alpha giảm đều trên một lưỡi liềm đứng yên.
@@ -535,7 +824,82 @@ Ghi nhận từ lượt xem/tiến khung video trong lịch sử chat, **không 
 - Hướng không chỉ là dấu sweep: người dùng thấy ngược cả vệt lẫn cách mất. Phải kiểm tra **đầu dày/đuôi nhọn ở ảnh bung hết** và **hướng chuyển động lúc thu** cùng lúc.
 - Đòn 4 cần tách “dài cung theo Y” với “bề dày nét”: ép phẳng toàn hình và giảm stroke width là hai chỉnh khác nhau. Đòn 3 về sau cần cùng logic ngang vai, ngược hướng, dài về sau, hơi nghiêng.
 
+### 3.4. Các bài học bổ sung từ Jump, Ready và Q (27–28/10)
+
+1. **Đáp mạnh cần kết thúc lực xuống nền.** AIR cuối đúng chưa đủ: người dùng
+   muốn LAND cho cảm giác vừa rơi mạnh xuống đất, có khí thấp dưới chân. Bản
+   khói nhiều bị xem lạc phong cách; lớp bọc kín lưỡi kiếm bị yêu cầu bỏ. Bản
+   đã duyệt ép cung xuống sàn, còn hai nét khí thấp dạt hai bên, không tan như
+   một slash thông thường. “VFX đủ vùng” phải đi cùng cách kết thúc lực của đòn.
+2. **Cung giữ khi lao xuống khác vệt dư AIR.** Người dùng đổi từ che toàn bộ
+   sang chỉ phủ một phần kiếm, giữ cung mượt ở phía trên đầu lưỡi, rồi hạ
+   phần phình gần kiếm (Descent V6). Cung này theo Player/hướng suốt pha rơi,
+   tắt ngay khi LAND phát và có chốt chống bật lại trong cùng tick, kể cả
+   combat chưa kịp đổi trạng thái. Màu riêng #b4b6be không lan sang AIR/LAND.
+3. **Ready là vẩy nhanh, không phải đòn lớn.** Nét ngắn trên đầu rồi cung
+   mảnh phía trước, dư khoảng 0.105s. Frame giữa thực chỉ 5ms: bắt mốc bằng
+   tiến trình clip, không đòi renderer thấy đúng frame đó. Variant Ready chỉ
+   giữ pose cuối sau Guard không được phát vệt; đọc resource hiện hành thay
+   vì chỉ dựa vào tên animation. Tốc độ đọc đòn quan trọng hơn thêm độ phủ.
+4. **Q có vòng đời riêng được người dùng chốt.** Cung `_4` giữ suốt thời
+   gian phóng; trúng mới tiêu trong accepted hit-stop, hụt tắt ngay lúc hồi;
+   `_6` phát slash riêng. Quan sát video Limbus không chứng minh cơ chế này:
+   đây là yêu cầu của Adel, nay đã có signal/clock production và test riêng.
+5. **Tách hướng hình khỏi hướng tiêu và lớp vẽ.** Q từng bị sai chiều tiêu
+   nhiều lần; bản hiện hành tiêu đuôi → đầu nối kiếm. Đầu nối phải là mặt
+   cắt tù, không thành móc nhô lên. “Đè lên nhân vật” là tổng Z qua ancestor,
+   không phải đưa vị trí đòn thấp lên đầu; Z=51 vẫn ở sau Player+sprite=250.
+   Câu “lên trên, Y dương” từng mâu thuẫn: Godot Y dương xuống dưới, lấy ảnh
+   đã duyệt làm chuẩn và nói rõ trục hay lớp vẽ trước khi chỉnh.
+6. **Đơn giản không đồng nghĩa mảng phẳng.** Q cung phẳng đã đúng vùng nhưng
+   người dùng muốn chất brush theo `Layer 2.png`. Bản xước cả hai biên/lỗ
+   xuyên lõi chưa đúng. Yêu cầu cuối: ngoài mượt, trong có răng cùng hướng
+   về đầu nhọn, lõi kín, nét nhạt là màu vẽ lên lõi; giảm 8→4→2 răng, bỏ hai
+   răng gần đuôi và gọt mảnh đuôi. Giữ hai răng gần đầu tù. Đây là quyết
+   định thị giác của người dùng, không suy ra từ “Limbus luôn dùng răng cưa”.
+7. **Ảnh gen và màu runtime là hai việc cần kiểm riêng.** Bảng màu mới được
+   lấy từ pixel mẫu: #ef241e / #f55d58. PNG gen có sai số màu/alpha nhưng
+   đúng hình đã duyệt; dùng nguyên ảnh làm alpha/nét vẽ, shader khóa hai màu
+   và loại fringe mờ. Đã kiểm pixel native khớp cả hai. Hash ảnh runtime
+   khớp ảnh được duyệt không đồng nghĩa mọi RGB của ảnh gen vốn chính xác.
+8. **Ảnh peak và capture trả lời các câu hỏi khác nhau.** PNG chỉ VFX ở độ
+   dài tối đa cho phép duyệt nét/lõi/răng; ảnh/gameplay thật kiểm vị trí,
+   hướng, trúng/hụt, layer, clock và chuyển pha. Khung xanh người dùng vẽ
+   là hitbox giả định, mảng đỏ/xanh chỉ hướng dẫn vùng; không chép polygon
+   hoặc đổi collider để ép khớp preview. Dùng source frame pixels, không
+   dùng pixel screenshot làm world unit.
+
 ## 4. Triển khai hiện hành và vị trí tìm file
+
+### Bản đồ component và nguồn tuning (đã đối chiếu 28/10)
+
+Tất cả đường `res://` dưới đây bắt đầu tại
+`D:/Godot Project/soujourn--echoes-of-the-soul/`. Rig chung là
+`asset/Character/Adel/adel spine action use.tscn`; Player
+`scenes/adel/playable_adel.tscn` instance rig ở `SpinePivot/SpineRig`.
+
+- **Combo 1–4:** node `SaberSwingVFX`, `scenes/adel/components/saber_swing_vfx.gd`,
+  shader `saber_slash.gdshader`; bốn `asset/VFX/Adel/Saber/saber_attack_*.png`.
+  Tuning anchor `saber-vfx`. Hướng/căn đòn 3/4 ở phần combo bên dưới.
+- **Jump AIR/LAND và cung giữ rơi:** node `JumpAttackVFX`,
+  `scenes/adel/components/jump_attack_vfx.gd`; shader `jump_attack_air`,
+  `jump_attack_crush`, `jump_attack_ground_air`, `jump_attack_descent`
+  (đuôi `.gdshader` cùng thư mục). Dùng lại `saber_attack_1.png`; cung Descent
+  là mesh riêng. Tuning `jump-vfx`. Tên clip thật **`jump_attack(land)`**;
+  người dùng từng gọi pha này “fall”, không tự đổi tên animation theo lời gọi.
+- **Ready:** node `SaberReadyVFX`, `scenes/adel/components/saber_ready_vfx.gd`,
+  `saber_ready_slash.gdshader`; dùng lại `saber_attack_1.png`, tuning `ready-vfx`.
+- **Q:** node `SaberSkillVFX`, `scenes/adel/components/saber_skill_vfx.gd`,
+  `saber_skill_arc.gdshader`; hai `asset/VFX/Adel/Saber/skill_q_*.png` cùng
+  `.import`. Producer signal ở `scenes/adel/components/saber_weapon_skill.gd`,
+  tuning `q-vfx`. Không còn dùng các trường Bézier của Q cung phẳng.
+- **Tests/capture:** `tests/adel/` có các cặp `{saber_vfx,jump_vfx,ready_vfx,
+  jump_descent_vfx,skill_vfx}_{validation,capture}.gd`; gameplay Q dùng
+  `saber_skill_validation.tscn`, skeleton dùng `skeleton_instance_validation.gd`.
+- **Ref/video:** `Context/Bao_cao_ky_thuat/nghien_cuu_animation_combat_limbus.md`
+  và `Context/Tai_lieu_ban_dao/refs_anim/`. Snapshot ref màu Q được bổ sung
+  trong evidence ngoài repo, xem mục 8. README cơ chế chung
+  `asset/VFX/Adel/Saber/README.md` trỏ về hướng dẫn tuning.
 
 ### Source, scene và tài nguyên thật trong repo
 
@@ -601,6 +965,10 @@ Chi tiết đầy đủ/ý nghĩa/đơn vị ở hướng dẫn tuning chung; c�
 - Project checker lịch sử vẫn có **1 duplicate UID** `uid://560h85egf0du` giữa `asset/UI/dialogueUI/main.tscn` và `asset/BG/main.tscn`, cùng 8 warning tham chiếu legacy/test camera. Đây không phải toàn project đã sạch.
 - Trong phép thử editor còn thấy test camera cũ tham chiếu lớp `CameraRoom`/`CameraMotionPreferences` không còn có. Đã ghi tách biệt, chưa sửa trong phạm vi VFX/resource.
 
+Các kết quả checker/UID/test camera ở đoạn này là **lịch sử**, chưa chạy lại
+project checker trong lượt bàn giao 28/10; không khẳng định số warning hiện
+tại vẫn đúng 1+8. Đã kiểm tra lại ba scene legacy nêu trên vẫn không tồn tại.
+
 ## 6. Cách đã thử không đạt và bài học triển khai
 
 1. **Preview nhiều chi tiết/màu, hoặc chỉ nét đơn giản thiếu vùng quét:** người dùng yêu cầu tối giản trắng nhưng đủ chất liệu sản phẩm cuối; cần tách duyệt silhouette, hướng, vùng đánh và hoàn thiện brush/glow, không nhầm một preview vector với bitmap hoàn thiện.
@@ -612,6 +980,28 @@ Chi tiết đầy đủ/ý nghĩa/đơn vị ở hướng dẫn tuning chung; c�
 7. **Căn đòn 3 mới với Offset Y=-55:** đã dài/phẳng hơn nhưng centroid nét sáng còn hơi thấp hơn bản cũ trong cùng điều kiện. Đây là bản thử trong `saber-attack3-shoulder/`, **không phải final**. Đổi thành **-80** ở thư mục `final/`; đo lại xác nhận cao hơn.
 8. **Đếm/encode frame khi đang quay:** PNG compression từng làm mất nhịp quan sát. Capture hiện buffer ảnh trong RAM, lưu PNG sau, lưu timestamp thật và resample khi xuất GIF. Không tính timing theo số frame GIF (GIF còn gộp frame trùng).
 9. **Đổ lỗi lỗi Drawing cho shader/fade, plugin hoặc cache chỉ từ triệu chứng:** đã loại trừ bằng thử riêng; test hai instance dùng chung stack mới khóa đúng nguyên nhân. Tách instance Resource, không xóa skeleton hoặc disable tính năng vẽ để che lỗi.
+10. **Q dùng Z của sprite con thay tổng Z:** V2 đặt VFX=51 nhưng Player+sprite=250,
+    vẫn ở sau nhân vật. Tính qua ancestor và dùng offset so source; hiện lunge
+    251, slash 249. Không sửa tọa độ Y để chữa lỗi thứ tự vẽ.
+11. **Q đầu tù thành móc và thu sai chiều:** bản cung phẳng V3 bị yêu cầu sửa;
+    V4 cắt mặt chéo tù, đuôi → đầu kiếm. Slash dư cũ từng còn khối gần chữ nhật
+    khi vào Ready, đã bổ sung thu bề rộng. Bản brush mới giữ logic đó và thay
+    hình bằng đúng PNG đã duyệt, không lấy V4 cung phẳng làm hình hiện hành.
+12. **Chỉ nhắc mã màu trong prompt imagegen:** ảnh vẫn có sai số RGB, alpha và
+    fringe. Không tuyên bố “y hệt màu” chỉ từ prompt. Giữ shape được duyệt,
+    dùng shader ánh xạ hai màu rồi kiểm pixel native; ref/PNG/artifact và màu
+    runtime có bằng chứng riêng. Nét xước xuyên lỗ/rách cả hai biên của brush V1
+    cũng đã bị thay bằng yêu cầu lõi kín, ngoài mượt, trong hai răng ở mục 3.4.
+13. **Q đổi default script nhưng quên override scene:** lượt đầu 98 checks/1 fail
+    vì rig còn tint cũ #df2722. Chỉ đổi dòng tint sang #ef241e; giữ hold/lifetime
+    người dùng đã căn 0.02/0.25. Không xóa toàn bộ override để ép test qua.
+14. **Capture bị lệch camera hoặc định lượng từ GIF:** zoom impact từng trả về
+    authored offset cũ khiến nhân vật ra mép ảnh; sửa camera **trong harness**,
+    không sửa camera production. FFconcat mặc định lượng tử hóa 25fps từng làm
+    nhịp xuất sai: dùng timestamp native và `option framerate 1000` cho từng
+    ảnh đầu vào, rồi xuất 60fps; bản slow chỉ đổi tốc độ video. Script encode
+    lịch sử ở `adel-q-vfx-preview-2026-10-28-v4-flat-cut/encode_video.py`, FFmpeg
+    bundled cục bộ ở `adel-q-vfx-preview-2026-10-28-v2-blunt-video/_tools/`.
 
 ## 7. Kết quả kiểm tra và bằng chứng để mở lại
 
@@ -619,9 +1009,26 @@ Gốc preview và bằng chứng ngoài repo, đã chuyển ngày 28/10/2026:
 
 `D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/`
 
+### Mới nhất toàn nhánh: Q brush hai răng cưa (28/10)
+
+`adel-q-brush-integration-2026-10-28/` là evidence production mới nhất:
+`capture/` chứa ảnh peak/impact/hụt và 201 frame có timestamp;
+`q-vfx-tests-final*`, `*-regression*`, `capture*` là các log đã chạy.
+`approved_asset_hashes.json`, `native_color_check.json`,
+`protected_hashes_before/after.json`, `INTEGRATION_NOTES.md` ghi phạm vi.
+Chi tiết số checks/màu/hit-stop và giới hạn ở phần Q brush đầu file.
+
+Lượt bàn giao bổ sung **`handoff-verification-2026-10-28.json`**: HEAD, hash
+source hiện tại, kiểm ảnh runtime còn khớp bản đã duyệt, và đường ref màu.
+Đây là xác minh file/log, không phải một lần chạy lại 413 checks.
+Hai PNG peak riêng đã duyệt ở
+`adel-q-vfx-brush-preview-2026-10-28-v4-two-teeth-tapered/`.
+**Chưa xuất MP4 mới cho Q brush trong lượt tích hợp này**; các MP4 V2/V3/V4
+cung phẳng hoặc `#df5c55` là lịch sử, không gửi chúng như video của brush đỏ.
+
 Tên bên dưới ghép vào gốc này. Chúng là **kết quả lịch sử đã thực chạy**, không phải các test được chạy lại trong lượt chỉ viết tài liệu.
 
-### Mới nhất: đòn 3 ngang vai, kéo dài về sau
+### Combo 1–4: đòn 3 ngang vai, kéo dài về sau (26/10)
 
 Thư mục **`saber-attack3-shoulder/final/`**:
 
@@ -658,6 +1065,26 @@ Thư mục **`saber-attack3-shoulder/final/`**:
 
 ## 8. Ref người dùng và tài nguyên bên ngoài
 
+### Ref màu Q và hình brush đã duyệt (28/10)
+
+- Gốc người dùng: **`D:/Downloads/Layer 2.png`**, 556×148, palette đã lấy
+  từ pixel: #ef241e (mảng chính), #f55d58 (nét nhạt). Không dùng nền trắng
+  của ref như nền VFX; PNG runtime là alpha trong suốt.
+- Bản sao nguyên byte ổn định:
+  `D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/adel-q-brush-integration-2026-10-28/references/Layer_2_reference_red.png`.
+  SHA256 **`3E522A404EE7D79B7BB08B9CB85C5F6C69F1C994B19589F0EB23A4F22C724600`**.
+- Hai ảnh brush cuối: thư mục preview V4 two-teeth-tapered ở đầu file,
+  `q_lunge_two_teeth_tapered_preview.png`, `q_slash_two_teeth_tapered_preview.png`.
+  File `PREVIEW_SPEC.json` tại đó lưu prompt và diễn giải nét trắng gạch xóa.
+  Ảnh annotation không có đường local được cung cấp trong tin nhắn cuối;
+  mô tả đã chốt là **xóa hai răng gần đầu nhọn, giữ hai răng gần đầu tù,
+  gọt biên trong để đuôi mảnh dần** cho cả hai cung. Không vẽ các nét trắng
+  annotation lên VFX hoặc đo tọa độ từ ảnh đã bị resize trong chat.
+- Các vòng brush V1/V2/V3 ở thư mục cùng tiền tố là lịch sử: V1 xước/lỗ,
+  V2 răng chỉ biên trong + lõi kín + nét nhạt, V3 bốn răng + đỏ từ ref,
+  V4 còn hai răng + đuôi thu nhọn. Hai asset runtime khớp hash V4;
+  xem `approved_asset_hashes.json` thay vì đoán theo tên “vfx complete”.
+
 ### Bản sao ổn định trong repo
 
 Trong lượt bàn giao đã copy **10 file nguyên byte**, đối chiếu SHA-256, tổng 1,300,787 byte tới:
@@ -680,61 +1107,78 @@ Trong lượt bàn giao đã copy **10 file nguyên byte**, đối chiếu SHA-2
 
 ## 9. Trạng thái Git và phần ngoài phạm vi
 
-Xác minh lúc bàn giao: nhánh **main**, HEAD **`bdff79c` — `quy hoạch đô thị`**. Không fetch để xác minh remote mới nhất. Source và Git hiện tại có ưu tiên hơn HEAD/nhánh trong `HANDOFF.md` cũ. Chat VFX này không tự commit/push các thay đổi nêu dưới.
+**Xác minh mới ngày 28/10/2026:** nhánh **main**, HEAD
+**`2ab87da` — `vfx complete`**, commit timestamp 19:59:38 +07:00. Hai commit
+trước là `f5d1a2b` (`vfx small update`) và `5cad301` (`vfx update`). Working
+tree **sạch ở đầu lượt bàn giao**, trước khi sửa file này. Các PNG Q, component,
+shader và tests Q đã tracked; câu “VFX còn untracked” ở snapshot cũ đã hết hiệu lực.
+`git status` hiển thị `main...origin/main` không có ahead/behind tại lần đọc;
+chưa fetch/xác minh trạng thái máy chủ, không suy ra một lần push vừa được thực hiện.
 
-Phần trực tiếp thuộc công việc animation/VFX trong chat:
+Không phải agent vừa commit trong lượt bàn giao: đây là trạng thái Git đã
+quan sát được. Agent không tự commit/push. Lượt bàn giao chỉ cập nhật file
+này và chép ref màu/ghi snapshot kiểm chứng ngoài repo; không đổi gameplay,
+scene tuning hoặc tài liệu Word. HEAD của `HANDOFF.md` tổng và các snapshot
+ngày cũ có thể khác; source/Git hiện tại cùng snapshot đầu file này có ưu tiên.
 
-- Sửa rig `asset/Character/Adel/adel spine action use.tscn`: gắn component VFX; về sau Local To Scene cho stack và hai IK. Scene có tuning do người dùng căn; không reset toàn file.
-- Mới: `scenes/adel/components/saber_swing_vfx.gd`, `saber_slash.gdshader`, `.uid`; `asset/VFX/Adel/Saber/`; `tests/adel/saber_vfx_validation.gd`, `saber_vfx_capture.gd`, `skeleton_instance_validation.gd` và `.uid`.
-- Sửa `scenes/enemy/enemy_spine.tscn`: Local To Scene cho stack. Xóa ba scene legacy và cập nhật pause wrapper như mục 5.
-- Nghiên cứu mới: `Context/Bao_cao_ky_thuat/nghien_cuu_animation_combat_limbus.md`.
-- Lượt bàn giao: điền file này, thêm pointer trong `HANDOFF.md`, đồng bộ mục VFX trong hướng dẫn tuning chung và README trỏ về đó, lưu `refs_anim/`. **Không đổi giá trị/code gameplay trong lượt viết bàn giao**.
+Các công việc VFX đã có trong source: bốn component/asset/test ở mục 4;
+Local To Scene cho skeleton/IK, xóa scene legacy và pause wrapper ở mục 5.
+Giữ các sửa enemy, rig float/pose, PNG `sabers4/6` và hệ thống zoom/cooldown
+có sẵn của người dùng. Hash trong evidence xác minh **phạm vi từng lượt**,
+không chứng minh mọi asset/nhánh khác đã được kiểm thử hoặc bằng Git HEAD.
 
-Những thay đổi khác được thấy khi bàn giao, **không nhận là do công việc VFX và chưa kiểm chứng lại trong lượt này**:
-
-- `Context/artbook.docx`, `Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md` đã có sửa trước lượt bàn giao; giữ phần người dùng/nhánh khác, đặc biệt mục zoom Q vừa được bổ sung.
-- `scenes/adel/playable_adel.tscn`, `scenes/adel/components/saber_weapon_skill.gd`; mới `skill_charge_zoom.gd`/`.uid`, `tests/adel/q_charge_zoom_validation.gd`/`.uid`. Hướng dẫn chung ghi nghiên cứu/kiểm tra của nhánh zoom Q; **không coi các số test đó là test của chat VFX**.
-- Mười PNG trong `asset/Enemies/sample/images/` (body/head/lef leg/left hand/left palm/right bicep/right hand/right leg/right palm/tail) đang sửa, cùng thư mục `output/` untracked. Giữ nguyên; chưa xác minh tác giả hoặc nội dung mọi thay đổi này.
-- Rig Adel vốn có các chênh float nhỏ ở L_upper_arm/cloth_bone2 trước phần sửa VFX. Không sửa lại chỉ để làm diff sạch.
-
-Kiểm tra lại `git status --short`/diff ngay khi tiếp quản. Phần lớn file VFX/test còn untracked; bảo toàn chúng, tránh `git clean`, reset/checkout đè, và không tự commit toàn working tree.
+Preview/ref/GIF/video/log/project thử chỉ ở gốc ngoài repo đã chỉ định;
+`.gitignore` có `/output/previews/` (đã kiểm lại). Hai PNG Q runtime trong
+`asset/VFX/Adel/Saber/` là bản đã duyệt để game dùng và được tracked hợp lệ.
+Đây không phải quyền chép toàn bộ bộ preview vào Git. Kiểm tra lại
+`git status --short`/diff khi tiếp quản và bảo toàn mọi sửa mới sau snapshot.
 
 ## 10. Việc dang dở, giả định và bước tiếp theo
 
 ### Chưa được chứng minh hoặc chưa được người dùng nghiệm thu
 
-- Chưa có phản hồi cuối sau preview đòn 3 mới nhất. “Gần đường kiếm hơn” là đánh giá thị giác đã review, không phải đã nội suy/đo được quỹ đạo thật liên tục giữa ba frame.
+- Combo đòn 3 đã chỉnh/triển khai; Jump, Ready, Descent và Q brush đều đã được duyệt theo các lượt riêng. Không có bước chờ duyệt cũ đang chặn việc dùng bản hiện hành. “Gần đường kiếm hơn” vẫn là đánh giá thị giác, không phải đã đo được quỹ đạo liên tục giữa ba frame.
 - Chưa có phép xác nhận pixel VFX trùng hitbox thật hoặc vùng có damage toàn bộ theo cung. Hộp xanh của ref là giả định; capture tập trung hình vệt không thay thế test collider.
 - Chưa có A/B có kiểm soát giữa một lớp và hai lớp để kết luận khách quan B tốt hơn A. Hiện đã chọn triển khai B theo lệnh người dùng, không phải kết quả nghiên cứu A/B thắng.
-- Chưa chạy lại mọi suite của project sau các thay đổi Q/enemy asset song song; không tuyên bố toàn game sạch lỗi. Các UID/test camera cũ ở mục 5 còn ngoài phạm vi.
+- Đã có 413 checks trong lượt tích hợp Q brush; chưa chạy lại mọi suite của project hoặc checker legacy trong lượt bàn giao này. Không tuyên bố toàn game sạch lỗi. UID/test camera ở mục 5 là phát hiện lịch sử cần kiểm lại nếu tiếp quản nhánh đó.
 - Lifetime/độ sáng/tầm vươn vẫn là số tuning, chưa được nghiệm thu cho mọi tốc đánh, mọi camera/nền sáng hoặc đám đông. Với real time, một hit-stop rất dài có thể khiến vệt tan hết trong khi nhân vật vẫn freeze; đây là điều cần đánh giá cảm giác, không phải lỗi clock đã biết.
 - Không có tác vụ code bắt buộc nào đang bỏ dở trong phần điều chỉnh đã được giao. Bước kế tiếp là tiếp quản đúng trạng thái và nhận/áp dụng phản hồi cụ thể, không tự thêm hạt, impact, rung/zoom hoặc thêm frame nhân vật.
 
 ### Trình tự khuyến nghị cho chat mới
 
-1. Đối chiếu source và override trong rig/player/map với hướng dẫn tuning. Xem ảnh peak đòn 3 và GIF mới nhất ở mục 7, rồi đối chiếu ref đỏ/xanh và thanh kiếm. Nếu source đã khác, báo rõ snapshot khác ở đâu.
+1. Đối chiếu HEAD/Git với `2ab87da`, source và override trong rig/player/map với hướng dẫn tuning. Xem hai PNG Q hiện hành, `capture/dash_0.png`, `slash_0.png`, nhánh hụt và ảnh impact trong `adel-q-brush-integration-2026-10-28/`. Chỉ dùng evidence combo/Jump/Ready tương ứng khi sửa họ đó. Báo rõ nếu source đã khác snapshot.
 2. Xác nhận yêu cầu mới/việc người dùng muốn tiếp tục. Nếu chỉ tiếp quản, báo ngắn phần đã xác minh và phần cần phản hồi; không coi bàn giao là lệnh tự chỉnh mọi hệ thống.
-3. Khi chỉnh silhouette tiếp: chọn index đúng, thay một nhóm hình học nhỏ, áp cả main/residual. Muốn kéo về sau thì kiểm pivot/front extent; muốn mảnh ngang thì tách scale Y, rotation, offset Y và stroke width. Giữ chiều full-length lẫn chiều thu và thử cả hai hướng.
+3. Khi sửa hình: xác định đúng component/pha. Combo dùng array index 0–3 và cả main/residual; Q dùng Texture/Frame Rect, không còn các control point cũ. Sửa bitmap thì tạo preview riêng ở chiều dài tối đa, chờ duyệt rồi tích hợp; sửa vị trí/scale bằng code không cần gen lại hình. Muốn kéo về sau cần neo phía trước; muốn mảnh ngang tách Y scale, rotation, offset và bề dày. Kiểm cả ảnh full-length lẫn chiều tiêu và hai hướng.
 4. Nếu cần kiểm vùng đánh: bật debug hitbox thật và thử vào/ra mép vùng, chém hụt/trúng, nối nhanh, chuyển hướng, không/trên đất, bị ngắt; xác minh collider trong WeaponPivot thay vì hộp ref. Thay hitbox/damage/timing cần nằm trong yêu cầu được chốt.
-5. Nếu được yêu cầu so A/B: dùng cùng silhouette/timing/hitbox/camera/hit-stop; chỉ thay cấu trúc/lượng VFX, tránh đổi nhiều yếu tố một lúc. Ghi rõ kết quả người dùng cảm nhận và phần có số đo riêng.
-6. Sau thay đổi: chạy suite VFX phù hợp, render/capture thực tế, đọc log; chỉ chạy thêm suite combat/skill/skeleton nếu phạm vi/thất bại mới yêu cầu. Cập nhật hướng dẫn tuning, README/bàn giao và gửi hình/gameplay đủ để đánh giá kết quả thật.
+5. Nếu người dùng muốn so A/B: làm trên cùng combo/timing/hitbox/camera/hit-stop, cân riêng bản chỉ residual và bản B hiện tại; không đổi nhiều nhóm tham số cùng lúc. Nếu sửa Q, ưu tiên trúng/hụt, các tier 65/75/100ms, giữ cung lao dài, hủy và freeze cuối chiêu. Giữ script mặc định và scene override tách biệt.
+6. Sau thay đổi: chạy suite VFX phù hợp, render/capture thật và đọc log; thêm suite combat/skill/skeleton khi phạm vi/thất bại yêu cầu. Q dùng `skill_vfx_validation.gd` (baseline 98); đụng producer Q cân nhắc `saber_skill_validation.tscn` (160); shared skeleton dùng suite 14 checks. Các baseline không phải số bắt buộc giữ nguyên khi thêm kiểm tra hữu ích. Cập nhật hướng dẫn tuning cùng lượt, README/bàn giao theo phạm vi và gửi bằng chứng thị giác thật.
 
 ## 11. Môi trường chạy lại an toàn và giới hạn công cụ
 
 - Godot đã dùng: **`D:/Godot_v4.7-stable_win64.exe`**, runtime 4.7 stable. Python đã dùng cho đọc ảnh/đo/encode: **`C:/Users/xuank/AppData/Local/Programs/Python/Python313/python.exe`**, có PIL/numpy.
 - Dùng skill Godot phù hợp: `godot-gdscript`, `godot-shaders`, `godot-animation`, `godot-resources`; `diagnosing-bugs` khi lỗi có repro; `imagegen` khi thật sự cần tạo/sửa bitmap. Căn transform/shader không cần sinh lại ảnh. Với video chứng minh, quy trình `walkthrough-artifacts` đã yêu cầu review trước khi gửi.
-- Chạy test trên project copy/mirror có custom user directory riêng, redirect APPDATA/LOCALAPPDATA. **Hai script VFX/capture và skeleton validation chặn nếu user dir không chứa `CodexSaberVFX`**; đây là guard bảo vệ save chơi thật.
+- Chạy test trên project copy/mirror có custom user directory riêng, redirect APPDATA/LOCALAPPDATA. Các suite VFX/capture và skeleton chặn nếu user dir không chứa **`CodexSaberVFX`**; gameplay Q `saber_skill_validation` cần **`CodexSaberSkill`**. Đây là guard bảo vệ save chơi thật. Mirror/config Q brush dùng `CodexSaberVFXQBrush`, tạm đổi tên riêng cho suite gameplay rồi khôi phục.
+- Khi cần import texture hoặc đăng ký class mới, dùng scan/import phù hợp trước test. Những lượt này tái dùng import/class/extension/UID cache, không phải checkout trắng. Các junction `addons`, `asset`, `bin`, `scenes`, `soujournAudio`, `tests`, `.godot/imported` của mirror evidence đã tháo, không chạy ngay cấu hình archive như thể còn đủ source.
 - Lệnh mẫu sau khi đã chuẩn bị bản thử riêng (thay đường dẫn placeholder, không chạy thẳng với save thật):
 
 ```powershell
 & "D:/Godot_v4.7-stable_win64.exe" --path "<project-thu-rieng>" --headless --audio-driver Dummy --max-fps 120 --quit-after 4000 --script res://tests/adel/saber_vfx_validation.gd
 & "D:/Godot_v4.7-stable_win64.exe" --path "<project-thu-rieng>" --headless --audio-driver Dummy --quit-after 1200 --script res://tests/adel/skeleton_instance_validation.gd
 & "D:/Godot_v4.7-stable_win64.exe" --path "<project-thu-rieng>" --rendering-method gl_compatibility --audio-driver Dummy --disable-vsync --quit-after 1800 --script res://tests/adel/saber_vfx_capture.gd -- --output="<thu-muc-capture-tuyet-doi>"
+& "D:/Godot_v4.7-stable_win64.exe" --path "<project-thu-rieng>" --headless --audio-driver Dummy --script res://tests/adel/skill_vfx_validation.gd
+& "D:/Godot_v4.7-stable_win64.exe" --path "<project-thu-rieng>" --audio-driver Dummy --max-fps 120 --quit-after 1500 --script res://tests/adel/skill_vfx_capture.gd -- --output="<thu-muc-capture-Q-tuyet-doi>"
 ```
 
-- Capture dùng **scene combat thật, input game thật**, giữ Player/physics/hitbox/animation. Nó giấu UI không liên quan, dời/khóa AI địch, vô hiệu simulation vitals, đặt camera zoom 2.1 để tập trung. Vì vậy video không chứng minh phản ứng khi đánh trúng địch; hit-stop thật được suite gọi `CombatTime` kiểm riêng.
-- Headless không thay cho xem shader thật; đã dùng OpenGL Compatibility cho ảnh/GIF. Không khẳng định mọi renderer/GPU đều đã test.
+- Capture dùng **scene combat thật, input game thật**, giữ Player/physics/hitbox/animation. Harness giấu UI không liên quan, dời/khóa AI địch, vô hiệu simulation vitals. Capture combo cũ zoom 2.1 chủ yếu để xem vệt, không chứng minh phản ứng hit. Q brush mới thực sự có một hit + một miss, zoom thử 1.575, offset `(50*facing,-35)`, giữ lunge scene **2811**; hit-stop lấy signal thật. Đây là căn camera trong fixture, không phải đổi camera game.
+- Headless không thay cho xem shader thật. Combo/Jump/Ready lịch sử có OpenGL Compatibility; Q brush mới có **Forward+ D3D12** trên RTX2050, kiểm được hai màu native. Không suy ra mọi renderer/GPU đều đã test. Các lệnh mẫu nên bọc bằng `Start-Process -WindowStyle Hidden -Wait`, redirect stdout/stderr và kiểm exit code khi chạy từ công cụ; `--quit-after` là giới hạn frame, không phải giây.
+- `skill_vfx_validation.gd` cố ý để biến `skill` không gắn type `SaberWeaponSkill`: runner SceneTree nạp quá sớm từng làm autoload `CombatTime` chưa resolve khi ép type/preload chuỗi. Component production vẫn typed. Giữ thứ tự ready/bind deferred của Player/rig khi refactor.
 - Godot MCP từng có session rồi mất kết nối; không giả định trạng thái editor. Kiểm tra tool/session trước, tránh force reload làm mất sửa chưa lưu. Các editor/process thử đã tự kết thúc; không dừng process của người dùng để “dọn”.
 - Shell thường từng vấp lỗi launcher MXC `0x80070020`; lệnh có quyền mở rộng qua auto-review chạy được trong các lượt trước. Đây là giới hạn công cụ, không phải lỗi project. Launch helper Windows bằng `Start-Process -WindowStyle Hidden`; chỉ dọn junction trong thư mục thử đã kiểm đường dẫn, không đệ quy theo junction vào project thật.
 
-**Điểm tiếp quản cuối:** giữ thành quả và tuning hiện tại; chờ phản hồi thị giác mới nhất rồi chỉnh có mục tiêu. Đã hoàn thành điều chỉnh đòn 3 và sửa lỗi stack dùng chung; chưa có bằng chứng Limbus dùng đúng kiến trúc runtime này và chưa có nghiệm thu rằng mọi vệt khớp collider/quỹ đạo liên tục tuyệt đối.
+**Điểm tiếp quản cuối:** combo, Jump/Descent, Ready và Q brush đã tích hợp;
+Q hai răng cưa/đuôi nhọn là bản mới nhất đã duyệt. Giữ tuning và asset hiện
+tại, đối chiếu trạng thái mới rồi tiếp tục theo nhận xét/yêu cầu cụ thể.
+Không có code đã giao còn dang dở; còn đánh giá cảm giác trên nhiều map,
+camera, nhiều địch và độ khớp collider. Không có bằng chứng Limbus dùng
+đúng kiến trúc runtime này, cũng chưa có nghiệm thu quỹ đạo tuyệt đối từ
+nguồn FBF ba frame.

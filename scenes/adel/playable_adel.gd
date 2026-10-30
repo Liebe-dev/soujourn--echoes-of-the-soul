@@ -10,6 +10,9 @@ const StaggerImpact = preload("res://scenes/adel/components/stagger_impact.gd")
 @onready var spine_pivot = $SpinePivot
 @onready var weapon_pivot: Node2D = $WeaponPivot
 @onready var saber_hitbox: SaberHitbox = $WeaponPivot/SaberHitbox
+@onready var hit_slash_vfx: SaberHitSlashVFX = $SaberHitSlashVFX
+@onready var player_blood: PlayerBlood = $PlayerBlood
+@onready var battle_particles: BattleHitParticles = $BattleHitParticles
 @onready var jump_hitbox: JumpAttackHitbox = $WeaponPivot/JumpAttackHitbox
 @onready var weapon: WeaponData = $WeaponHolder/Saber
 @onready var attack_hitbox: Area2D = $AttackHitbox
@@ -205,6 +208,7 @@ func _ready() -> void:
 	deflect_slow_motion.finished.connect(_on_deflect_slow_motion_finished)
 	defense = DefenseComponent.new(deflect_window, deflect_delay)
 	saber_hitbox.hit_confirmed.connect(_on_saber_hit_confirmed)
+	player_blood.setup(stats, spine_rig)
 	dash = DashComponent.new(self, dodge_cooldown)
 
 	ghost_trail = AdelGhostTrail.new()
@@ -219,6 +223,7 @@ func _ready() -> void:
 	var hud := _find_hud()
 	if hud != null: sentinel_state.presentation_changed.connect(hud.present_sentinel)
 	saber_skill.setup(self)
+	battle_particles.setup(self)
 	if hud != null:
 		# Gameplay owns the cooldown clock; HUD only receives presentation updates.
 		saber_skill.cooldown_changed.connect(hud.set_weapon_ability_presentation)
@@ -412,6 +417,8 @@ func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 	var hit: Dictionary = health.apply_damage(dmg, hit_from_global, exhausted)
 	# Damage can synchronously respawn or remove this Player from the tree.
 	if hit.get("died", false):
+		player_blood.clear_blood()
+		battle_particles.clear_effects()
 		stagger_impact.cancel()
 		var camera := get_node_or_null("Camera2D") as Camera2D
 		if camera != null and camera.has_method("cancel_hit_stop_zoom"): camera.cancel_hit_stop_zoom()
@@ -427,8 +434,10 @@ func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 	if exhausted:
 		_apply_stamina_exhaustion(hit_from_global)
 	elif hit.get("staggered", false) and not hit.get("skip_player_stagger", false):
+		player_blood.add_stagger(int(hit.get("stagger_tier", -1)))
 		var direction := Vector2(-float(facing_direction), 0.0) if defense_result == DefenseComponent.HitResult.GUARD else damage.compute_knockback_dir(hit_from_global, facing_direction)
 		damage.apply_stagger(direction)
+		if damage.is_stunned: battle_particles.add_player_stagger(velocity)
 	elif hit.get("damage_taken", 0) > 0:
 		damage.start_invulnerability(DamageComponent.HIT_INVULN_SEC)
 
@@ -550,6 +559,8 @@ func exit_rest() -> void:
 	snap_feet_to_floor()
 
 func restore_checkpoint_state(saved_position: Vector2, face_left: bool, keep_resting: bool = false) -> void:
+	player_blood.clear_blood()
+	battle_particles.clear_effects()
 	if damage != null: damage.reset()
 	vitals.cancel_transients()
 	end_sentinel()
@@ -953,7 +964,8 @@ func _request_hit_stop(duration: float, camera_zoom: bool = true) -> float:
 
 func _on_saber_hit_confirmed(attack_name: StringName) -> void:
 	if attack_name == &"saber_skill": return
-	_request_hit_stop(finisher_hit_stop_duration if attack_name == &"saber_attack_4" else attack_hit_stop_duration, false)
+	var accepted := _request_hit_stop(finisher_hit_stop_duration if attack_name == &"saber_attack_4" else attack_hit_stop_duration, false)
+	hit_slash_vfx.apply_hit_stop(attack_name, accepted)
 
 func _exit_tree() -> void:
 	CombatTime.remove(self)

@@ -1,0 +1,30 @@
+ M Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md
+ M Context/Bao_cao_ky_thuat/nghien_cuu_animation_combat_limbus.md
+ M Context/Tai_lieu_ban_dao/HANDOFF_anim.md
+ M scenes/UI/stats_component.gd
+ M scenes/adel/components/saber_hitbox.gd
+ M scenes/adel/playable_adel.gd
+ M scenes/adel/playable_adel.tscn
+?? Context/Tai_lieu_ban_dao/Ke_hoach_battle_vfx.md
+?? asset/VFX/Adel/Blood/
+?? asset/VFX/Adel/Hit/
+?? asset/VFX/Adel/Particles/
+?? output/handoff/
+?? scenes/adel/components/battle_hit_particles.gd
+?? scenes/adel/components/player_blood.gd
+?? scenes/adel/components/player_blood.gd.uid
+?? scenes/adel/components/player_blood.gdshader
+?? scenes/adel/components/player_blood.gdshader.uid
+?? scenes/adel/components/saber_hit_slash.gdshader
+?? scenes/adel/components/saber_hit_slash.gdshader.uid
+?? scenes/adel/components/saber_hit_slash_vfx.gd
+?? scenes/adel/components/saber_hit_slash_vfx.gd.uid
+?? tests/adel/battle_particles_validation.gd
+?? tests/adel/hit_slash_capture.gd
+?? tests/adel/hit_slash_capture.gd.uid
+?? tests/adel/hit_slash_validation.gd
+?? tests/adel/hit_slash_validation.gd.uid
+?? tests/adel/player_blood_capture.gd
+?? tests/adel/player_blood_capture.gd.uid
+?? tests/adel/player_blood_validation.gd
+?? tests/adel/player_blood_validation.gd.uid
