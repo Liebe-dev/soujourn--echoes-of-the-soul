@@ -6,11 +6,16 @@ var _physics_was_enabled := false
 var _process_was_enabled := false
 var _animations: Array = []
 var _areas: Array = []
+var _uses_ai_state := false
 
 func _ready() -> void:
 	_body = get_parent() as CharacterBody2D
 	if _body == null:
 		queue_free()
+		return
+	_uses_ai_state = _body.has_method("apply_ai_stun")
+	if _uses_ai_state:
+		_body.apply_ai_stun(remaining)
 		return
 	_physics_was_enabled = _body.is_physics_processing()
 	_process_was_enabled = _body.is_processing()
@@ -29,6 +34,10 @@ func _ready() -> void:
 		node.set_deferred("monitoring", false)
 
 func extend(duration: float) -> void:
+	if _uses_ai_state and is_instance_valid(_body):
+		_body.apply_ai_stun(duration)
+		remaining = _body.get_ai_stun_remaining()
+		return
 	remaining = maxf(remaining, duration)
 
 func _physics_process(delta: float) -> void:
@@ -37,6 +46,11 @@ func _physics_process(delta: float) -> void:
 		return
 	if _body_is_dead():
 		queue_free()
+		return
+	if _uses_ai_state:
+		# The FSM owns timer, gravity and attack cleanup for supported enemies.
+		remaining = _body.get_ai_stun_remaining()
+		if not _body.is_ai_stunned(): queue_free()
 		return
 	# Combat remains frozen by global hit-stop; gravity still acts during stun.
 	remaining -= delta
@@ -49,6 +63,7 @@ func _body_is_dead() -> bool:
 	return ("is_dead" in _body and _body.is_dead) or ("current_health" in _body and _body.current_health <= 0)
 
 func _exit_tree() -> void:
+	if _uses_ai_state: return
 	if not is_instance_valid(_body) or not _body.is_inside_tree() or _body.is_queued_for_deletion(): return
 	if _body_is_dead(): return
 	_body.set_physics_process(_physics_was_enabled)

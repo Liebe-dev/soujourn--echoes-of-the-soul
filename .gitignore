@@ -8,6 +8,8 @@
 
 # Local-only previews; canonical storage is outside the game repository.
 /output/previews/
+/output/fsm_validation/
+/output/fsm_editor_check.log
 
 # Godot-specific ignores
 .import/

@@ -230,6 +230,11 @@ func _ready() -> void:
 	spine_anim.animation_finished.connect(_on_spine_anim_finished)
 	spine_anim.play("idle")
 	refresh_gameplay_cursor()
+
+## AI reads the gameplay model, independent of the HUD being present.
+func get_ai_health_ratio() -> float:
+	return clampf(float(stats.hp) / maxi(stats.max_hp, 1), 0.0, 1.0)
+
 func get_player_vitals() -> RefCounted:
 	return vitals
 

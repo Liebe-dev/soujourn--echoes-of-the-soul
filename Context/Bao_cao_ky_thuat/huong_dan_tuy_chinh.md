@@ -1,6 +1,6 @@
 # Hướng dẫn tùy chỉnh thông số game
 
-Cập nhật: **28/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
+Cập nhật: **30/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
 
 ## Mục lục
 
@@ -725,6 +725,52 @@ Debug: mở `res://scenes/UI/hud.tscn` → **SentinelDebugControls**. `debug_key
 ### Chọn đúng scene
 
 Enemy chiến đấu hiện hành: `res://scenes/enemy/spine_enemy.tscn` → **SpineEnemy**. Rig animation: `res://scenes/enemy/enemy_spine.tscn` → AnimationPlayer. `wobtear_enemy.tscn` là EnemyBase tuần tra tối thiểu. Map có thể override từng instance; sửa scene gốc để đổi chung, sửa instance để đổi riêng.
+
+### FSM và Utility AI — cập nhật sáng 30/10/2026
+
+Chọn root **SpineEnemy** trong `res://scenes/enemy/spine_enemy.tscn` → **AI Decisions**. Script là `spine_enemy.gd`. Prefab `res://scenes/enemy/utility_enemy.tscn` kế thừa scene này và chỉ override **Decision Mode = Utility (1)**. Scene gốc dùng **FSM (0)**; `utility_ai_test.tscn` có **UtilityEnemy** bên trái và **FSMEnemy** bên phải để so sánh, không override thêm các trường dưới. Đã đối chiếu các scene/resource hiện tại: ngoài `decision_mode = 1` ở prefab Utility, các thông số AI mới đều dùng mặc định script, chưa có override `.tscn`/`.tres` khác. Instance trong map và giá trị Remote vẫn cần kiểm tra riêng khi tuning.
+
+| Nhóm AI Decisions và tên biến | Mặc định script | Ý nghĩa và đơn vị |
+| --- | --- | --- |
+| Decision Mode — `decision_mode` | FSM `0` | Chọn luật FSM hoặc Utility `1`; cùng dùng bộ thực thi FSM, animation và physics. |
+| Utility Profile — `utility_profile` | `UtilityProfile.new()` | Resource khai báo trong `enemy_utility_profile.gd`; chứa Curve và trọng số, có thể lưu Resource riêng để dùng lại. |
+| Utility Think Interval — `utility_think_interval` | `0.2` | Giây game giữa các lần chấm điểm; code chặn tối thiểu 0,05. Nhận damage, đổi tầm nhìn hoặc trạng thái có thể buộc tính lại sớm. |
+| Utility Weighted Selection — `utility_weighted_selection` | `false` | Tắt: chọn điểm cao kèm ngưỡng giữ hành động; bật: chọn ngẫu nhiên có trọng số trong nhóm điểm cao. |
+| Utility Top Ratio — `utility_top_ratio` | `0.85` | Hệ số so với điểm tốt nhất; chỉ lấy điểm dương từ 85% điểm tốt nhất trở lên khi chọn ngẫu nhiên. Không phải xác suất 85%. |
+| Utility Switch Margin — `utility_switch_margin` | `0.08` | Chênh lệch điểm cho phép để giữ hành động hiện tại, miền điểm 0–1; giảm đổi quyết định vì dao động nhỏ. |
+| Utility Ally Radius — `utility_ally_radius` | `500` | Đơn vị world; đếm Enemy khác còn sống trong nhóm `enemy_ai_agents`, trong bán kính và có đường nhìn qua địa hình. |
+
+Mở **Utility Profile → Response Curves** để chỉnh đáp ứng. Các điểm dưới là `(đầu vào chuẩn hóa, điểm đầu ra)`; code clamp cả hai về 0–1. Đây là cấu hình khởi đầu, chưa có nghiệm thu cân bằng chơi thử. Resource mặc định được tạo từ script; chưa có resource scene override các đường cong hoặc trọng số này.
+
+| Curve trong profile | Điểm mặc định | Đầu vào |
+| --- | --- | --- |
+| `health_confidence` | `(0,0), (0.2,0.1), (0.6,0.8), (1,1)` | Tỷ lệ HP Enemy. |
+| `flee_need` | `(0,1), (0.2,1), (0.6,0), (1,0)` | Tỷ lệ HP Enemy; nhu cầu chạy mạnh nhất ở ≤20%, về 0 từ 60%. |
+| `player_weakness` | `(0,1), (1,0)` | Tỷ lệ HP Player được nhìn thấy gần nhất. |
+| `attack_distance` | `(0,1), (1,0.7)` | Khoảng cách ngang / tầm của đòn được xét. Điều kiện ngoài tầm vẫn loại hành động trước lựa chọn. |
+| `threat_distance` | `(0,1), (1,0)` | Khoảng cách ngang / `flee_safe_distance`; chỉ là áp lực nhìn thấy khi dùng cho bộ đếm phản công. |
+| `ally_support` | `(0,0), (1,1)` | Số đồng đội hợp lệ / `full_support_allies`. |
+
+Trong **Utility Profile → Action Weights**, các mặc định script lần lượt là `melee_weight = 1`, `leap_weight = 0.9`, `chase_weight = 0.65`, `flee_weight = 1`, `patrol_weight = 1`, `idle_weight = 1`; trọng số miền 0–1, không có đơn vị. `full_support_allies = 3` đồng đội là mức bão hòa hỗ trợ. Đổi trọng số không cấp quyền tấn công khi khuất tầm nhìn hoặc sai tầm. Khi phản công bắt buộc đã bật, scorer loại Flee/Idle không phù hợp và ưu tiên đòn hợp lệ; chọn ngẫu nhiên không được cho quái chạy lại ngay.
+
+**Detection → Sight Obstacle Mask** (`sight_obstacle_mask`) mặc định script **1**, không override scene. Chọn các lớp vật lý của tường/địa hình; helper `enemy_sight.gd::can_see()` dùng tia giữa hai tâm collider và bỏ qua Enemy/target. Tường chỉ có hình ảnh, không có collider trên lớp được chọn sẽ không chặn phát hiện. Script prototype `s_1e_1.gd` cũng có export này mặc định 1, không override hiện tại. Cơ chế hiện chưa là hình nón FOV hay tìm đường quanh tường.
+
+### Chạy trốn và phản công — Survival
+
+Chọn root **SpineEnemy** hoặc **UtilityEnemy** → **Survival**. Cả sáu trường sau đều chưa có scene override; mặc định nằm trong `spine_enemy.gd`. Các thời lượng là **giây game**, chịu pause/slow motion, không phải giây thực.
+
+| Tên biến | Mặc định script và scene kế thừa | Ý nghĩa |
+| --- | --- | --- |
+| `flee_health_ratio` | `0.2` | FSM bắt đầu chạy ở ≤20% HP. Đặt 0 để tắt chạy trốn cho cả FSM và Utility. Utility dùng Curve `flee_need` để tính mức muốn chạy khi trường này còn dương. |
+| `flee_recover_ratio` | `0.35` | Ngưỡng hồi HP kết thúc chạy/làm mới cơ chế ở FSM; Utility làm mới khi đáp ứng `flee_need` về 0. |
+| `flee_safe_distance` | `600` | Đơn vị world; khoảng an toàn và mẫu số chuẩn hóa threat. |
+| `flee_max_duration` | `3.0` | Quỹ giây game thực sự ở FLEE trong lần giao chiến; nghỉ/choáng/đổi trạng thái ngắn không cấp lại quỹ. Hết quỹ thì FLEE không còn được chọn. |
+| `counterattack_threat_threshold` | `0.5` | Ngưỡng threat 0–1; phải **lớn hơn**, bằng ngưỡng cũng ngắt bộ đếm liên tục. |
+| `counterattack_pressure_duration` | `3.0` | Số giây game pressure phải liên tục vượt ngưỡng để quay lại vồ rồi đánh. Có thể đếm khi đang rút lui hoặc chờ sau lúc hết quỹ chạy. |
+
+Với Curve mặc định, threat nhìn thấy = clamp(`1 - khoảng cách ngang / 600`, 0, 1); vì vậy >0,5 là Player nhìn thấy cách dưới 300 đơn vị world. FSM dùng công thức tuyến tính này; Utility dùng Curve `threat_distance` trong profile. Khuất tầm nhìn thì threat dùng cho phản công bằng 0, dù vẫn nhớ vị trí cũ. Threat ≤ ngưỡng, tường che, choáng hoặc đòn đang cam kết làm đứt bộ đếm trước lúc phản công được bật.
+
+Khi đã phản công: cấp đúng một opener mới, quay mặt từ Windup, vồ theo tầm/độ cao/đứng đất, giữ Land/Recovery rồi Melee nếu đủ tầm; không đánh xuyên tường. Sau đó giữ chiến đấu tới khi mất/đổi mục tiêu hoặc hồi đủ điều kiện. Choáng vẫn ngắt đòn; chết dọn toàn bộ dữ liệu. Các biến Remote `flee_time`, `flee_pressure_time`, `flee_exhausted`, `counterattack_active` và `get_flee_threat()` là dữ liệu theo dõi, không phải cấu hình khởi tạo cần lưu vào scene. Bảng debug của scene so sánh hiển thị trực tiếp các giá trị này.
 
 ### HP, EXP và hành vi
 

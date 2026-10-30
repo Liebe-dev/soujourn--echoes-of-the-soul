@@ -1,4 +1,6 @@
 extends EnemyPrototype
+const Sight = preload("res://scenes/enemy/enemy_sight.gd")
+@export_flags_2d_physics var sight_obstacle_mask: int = 1
 
 @onready var hurtbox: Area2D = $HurtBox
 @onready var detection_area: Area2D = $DetectionArea
@@ -14,6 +16,7 @@ var memory_timer: float = 0.0
 var lunge_timer: float = 0.0
 var is_player_in_sight: bool = false
 var lunge_cooldown: float = 0.0
+var last_seen_position := Vector2.ZERO
 
 func _ready() -> void:
 	# Gọi hàm _ready() từ script gốc [cite: 1]
@@ -28,6 +31,7 @@ func _ready() -> void:
 	detection_area.body_exited.connect(_on_detection_exited)
 
 func _physics_process(delta: float) -> void:
+	_refresh_sight()
 	# Trọng lực [cite: 2]
 	if not is_on_floor():
 		velocity += get_gravity() * delta
@@ -73,7 +77,7 @@ func _handle_patrol(delta: float) -> void:
 		velocity.x = 0 # [cite: 3]
 
 func _handle_chase(delta: float) -> void:
-	if target_player == null:
+	if not is_instance_valid(target_player):
 		_return_to_patrol()
 		return
 		
@@ -85,19 +89,19 @@ func _handle_chase(delta: float) -> void:
 			return
 
 	# Xoay mặt về phía người chơi
-	var direction_to_player = sign(target_player.global_position.x - global_position.x)
+	var direction_to_player = sign(last_seen_position.x - global_position.x)
 	if direction_to_player != 0:
 		patrol_direction = direction_to_player
 		_update_facing()
 	
 	# Kiểm tra khoảng cách để vồ (lunge)
-	var distance_to_player = abs(global_position.x - target_player.global_position.x)
-	if distance_to_player <= lunge_range and lunge_cooldown <= 0:
+	var distance_to_player = abs(global_position.x - last_seen_position.x)
+	if is_player_in_sight and distance_to_player <= lunge_range and lunge_cooldown <= 0:
 		ai_state = "lunge"
 		lunge_timer = lunge_duration
 		_set_animation("lunge") 
 	else:
-		velocity.x = chase_speed * patrol_direction
+		velocity.x = minf(chase_speed, distance_to_player / maxf(delta, 0.001)) * direction_to_player
 
 func _handle_lunge(delta: float) -> void:
 	lunge_timer -= delta
@@ -127,9 +131,11 @@ func _update_facing() -> void:
 # ----------------- TÍN HIỆU (SIGNALS) -----------------
 
 func _on_detection_entered(body: Node2D) -> void:
-	if body.is_in_group("Player"):
+	if body.is_in_group("Player") and Sight.can_see(self, body, sight_obstacle_mask):
 		target_player = body
 		is_player_in_sight = true
+		last_seen_position = body.global_position
+		memory_timer = chase_memory_time
 		ai_state = "chase"
 		_set_animation("chase")
 
@@ -137,6 +143,18 @@ func _on_detection_exited(body: Node2D) -> void:
 	if body == target_player:
 		is_player_in_sight = false
 		memory_timer = chase_memory_time
+
+
+func _refresh_sight() -> void:
+	is_player_in_sight = false
+	for body in detection_area.get_overlapping_bodies():
+		if not body.is_in_group("Player") or not Sight.can_see(self, body, sight_obstacle_mask): continue
+		if target_player != body or ai_state in ["walk", "idle"]:
+			_on_detection_entered(body)
+		is_player_in_sight = true
+		last_seen_position = body.global_position
+		memory_timer = chase_memory_time
+		break
 
 func _on_hurtbox_body_entered(body: Node2D) -> void:
 	if body.is_in_group("Player") and body.has_method("take_damage"):
