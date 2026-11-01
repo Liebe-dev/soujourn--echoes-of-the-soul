@@ -107,7 +107,7 @@ Mở `res://scenes/adel/weapon/saber.tscn` → node **Saber → Combat** hoặc 
 - `combo_finisher_multiplier`: hệ số đòn 4, mặc định 1.2 → cơ sở 20 thành 24 trước modifier khác.
 - `animation_prefix`: tên đầu animation dùng cho combo. `stamina_cost`, `combo_length`, `attack_active_start/end` là dữ liệu vũ khí, nhưng không mặc nhiên điều khiển mọi luồng hiện tại. Combo coordinator vẫn dùng giới hạn bốn đòn; active hitbox hiện hành do AnimationPlayer của SaberHitbox sở hữu.
 
-`hitbox_offset`/`hitbox_size` trên WeaponData hiện cấu hình `AttackHitbox` legacy qua coordinator, không thay shape đang dùng của SaberHitbox. Để đổi vùng đánh thật, dùng đường dẫn trong mục căn hitbox bên dưới.
+Combo 1–4 và Q dùng chung hình chữ nhật **PlayableAdel/AttackHitbox/CollisionShape2D**, đúng vùng được căn trong Player scene. Runtime không còn cộng thêm offset hoặc đổi kích thước từ WeaponData. `hitbox_offset`/`hitbox_size` còn lưu trên WeaponData là dữ liệu cũ, hiện không điều khiển vùng damage; chỉnh trực tiếp node theo mục căn hitbox bên dưới.
 
 Scene `res://scenes/adel/weapon/saber.tscn` → **Saber**.
 
@@ -130,8 +130,8 @@ Scene `res://scenes/adel/weapon/saber.tscn` → **Saber**.
 
 **Hitbox**
 
-- **Hitbox Offset** (`hitbox_offset`): scene gốc `Vector2(166, 0)`; script `Vector2.ZERO`.
-- **Hitbox Size** (`hitbox_size`): scene gốc `Vector2(152.58, 124.5)`; script `Vector2.ZERO`.
+- **Hitbox Offset** (`hitbox_offset`): dữ liệu cũ không còn áp dụng vào combo; scene gốc còn lưu `Vector2(166, 0)`; script `Vector2.ZERO`.
+- **Hitbox Size** (`hitbox_size`): dữ liệu cũ không còn áp dụng vào combo; scene gốc còn lưu `Vector2(152.58, 124.5)`; script `Vector2.ZERO`.
 
 **Attack Timing**
 
@@ -168,10 +168,13 @@ Vận tốc lao xuống: `JUMP_ATTACK_FALL_SPEED` trong `res://scenes/adel/compo
 
 ### Căn hitbox và animation
 
-- Combo: Player scene → **WeaponPivot/SaberHitbox/Hitbox/CollisionShape2D**, chỉnh Shape/Position/Rotation. **WeaponPivot/SaberHitbox/AnimationPlayer** có các clip `saber_attack_1/2/3/4`; chỉnh track `disabled` để căn cửa sổ damage và track transform để căn vùng đánh theo từng đòn. Nếu có key ghi đè, chỉ kéo shape ngoài AnimationPlayer sẽ bị key đặt lại lúc chơi.
-- Jump: **WeaponPivot/JumpAttackHitbox/Hitbox/CollisionShape2D** là shape riêng. Chỉnh kích thước/offset tại đây; thời gian mở theo hang/fall/land của component.
-- Collider nhận hit Player: **PlayableAdel/CollisionShape2D**. Collider thân không phải hitbox tấn công. `AttackHitbox` là đường legacy, không dùng nó để căn SaberHitbox hiện hành.
+- Combo 1–4 và Q (cập nhật 31/10/2026): Player scene → **AttackHitbox/CollisionShape2D** → **Shape → Size** để chỉnh tầm ngang/dọc (pixel local); **Transform → Position** để chỉnh tâm, **Rotation** để chỉnh góc. Scene gốc giữ `RectangleShape2D.size = Vector2(163.2899, 97)`, Position `Vector2(99.35505, 15.5)`, Rotation `0`; node cha AttackHitbox Position `Vector2.ZERO`, Scale `Vector2.ONE`. Đây là giá trị scene, không có mặc định script ghi đè. Bốn đòn và Q dùng chung vùng này, tự lật trái/phải theo hướng nhìn; chỉnh vùng này ảnh hưởng cả dò trúng Q khi lao và damage của Q/combo; đừng đặt offset X thêm ở node cha để căn hướng trái.
+- **WeaponPivot/SaberHitbox/AnimationPlayer** mở/tắt rectangle bằng **Call Method track** trên node SaberHitbox: `_set_combo_window_enabled(false)` lúc `0s`, `true` lúc mở và `false` lúc đóng; không có key transform đặt lại vùng đã căn. Chỉnh thời điểm các key `true/false` để đổi cửa sổ damage. Thời gian game giữ nguyên: đòn 1–3 mở `0.15–0.20s`, đòn 4 mở `0.15–0.30s`; nhân tốc độ attack/slow motion như animation. Method chạy ngay theo thứ tự key; lúc mở có truy vấn shape trực tiếp nên vẫn ghi nhận hit khi một update vượt cả cửa sổ hoặc hết clip. Signal overlap tiếp tục nhận mục tiêu đi vào trong cửa sổ, danh sách target ngăn damage lặp. Đây là sửa lỗi bỏ lỡ hit ngày 31/10/2026, không kéo dài thời gian active; mục tiêu chỉ đi vào sau lúc đóng không nhận hit muộn.
+- Jump: **WeaponPivot/JumpAttackHitbox/CollisionShape2D** là shape riêng. Chỉnh kích thước/offset tại đây; thời gian mở theo hang/fall/land của component.
+- Collider nhận hit Player: **PlayableAdel/CollisionShape2D**. Collider thân không phải hitbox tấn công. Node `WeaponPivot/SaberHitbox/SkillHitbox`, shape capsule tấn công cũ và signal đi kèm đã được xóa; không còn vùng tấn công capsule riêng cho Q.
 - Animation hình: **SpinePivot/SpineRig/AnimationPlayer** thuộc rig Adel. Ready sau Defense/Stagger chỉ frame cuối; Q hoàn tất dùng đủ chuỗi. Thời gian khóa Defense ở phần 5 độc lập với việc kéo key pose.
+
+Đã kiểm tra lại headless ngày 31/10/2026 sau khi Q dùng chung rectangle, trên Player và SpineEnemy thật cùng probe nhỏ trong dữ liệu lưu riêng: `tests/adel/combat_hitbox_regression.gd` đạt **72/72** (combo 1–3 bước thường/vượt cửa sổ/vượt cả clip, không damage muộn; Q ba mức, hai hướng, quái trước/sau, mục tiêu gần nhất, chạm mép sau khi lao và tường); `tests/adel/combo_hitbox_validation.gd` đạt **163/163** (hình chữ nhật bốn đòn và Q, hai hướng, biên vùng, không damage lặp, chỉnh scene áp dụng cả Q, capsule đã xóa). Bước thời gian lớn được mô phỏng bằng `AnimationPlayer.advance()`, không phải đo tụt FPS thực tế trên máy người dùng.
 
 <a id="saber-vfx"></a>
 ### VFX bốn đòn Saber — cập nhật 26/10/2026
@@ -735,7 +738,7 @@ Mở Player scene → **SaberSkill**, không phải node WeaponHolder/Saber. Sou
 
 Freeze vẫn nhận một input buffer mới nhất; không có tham số export riêng cho số lượng buffer. Không đổi `attack_input_buffer` để kéo dài freeze hay tích nhiều hành động. Trong freeze, Defense cần còn giữ; các điều kiện hành động được kiểm tra lại sau mở băng. Q buffer vẫn phải qua kiểm tra cooldown; với hồi mặc định đang chạy sẽ không được thực hiện lại. Khi Q nhận quyền điều khiển sau tiếp đất, `SaberWeaponSkill.begin()` xóa cờ `_playing_land_anim` của clip đã bị thay để đi/chạy có thể ngắt Ready ngay sau skill; đứng yên vẫn chơi đủ Ready gốc. Không có thông số tuning mới cho sửa animation này.
 
-Q dùng shape của **WeaponPivot/SaberHitbox/Hitbox/CollisionShape2D**; `SaberHitbox.begin_skill_window()` lấy Position/Rotation từ key đầu của clip hitbox **saber_attack_1**. Muốn đổi offset Q hiện tại thì chỉnh các key đó, nó sẽ ảnh hưởng cả đòn 1; chưa có export offset Q độc lập. Q dừng ở enemy đầu tiên. Vùng dò va chạm lunge lấy collider thân Player; không kéo collider detect để tăng damage area. Miễn damage của Q thường chỉ trong lunge; không nhầm với Q Sentinel đang ở thiết kế.
+Q dùng chung **PlayableAdel/AttackHitbox/CollisionShape2D** với combo 1–4; capsule tấn công riêng đã xóa ngày 31/10/2026. Kích thước/offset/góc xem mục căn hitbox Player; chỉnh rectangle ảnh hưởng cả combo và Q. `_first_enemy_contact()` trong `saber_weapon_skill.gd` dùng rectangle và global transform hiện tại để dò trúng trong lúc lao; `begin_skill_window()` mở chính rectangle đó ở pha impact, `sample_skill_damage()` gây damage qua cùng vùng. Q giữ danh sách target để một đối tượng không nhận damage lặp. `_valid_lunge_target()` kiểm tâm hurtbox của enemy theo hướng lao: quái phía sau không kích hoạt impact và được loại khỏi phép dò tiếp. Nhiều enemy đã ở trong vùng sẽ chọn đối tượng phía trước gần nhất làm contact; cast tiếp cận tới điểm rectangle thực sự chạm để tránh dừng trước mép mà không damage. Tường vẫn chặn thân qua `move_and_collide`; không đổi mask hoặc thời gian skill. Miễn damage của Q thường chỉ trong lunge; không nhầm với Q Sentinel đang ở thiết kế.
 
 Scene `res://scenes/adel/playable_adel.tscn` → **SaberSkill**.
 

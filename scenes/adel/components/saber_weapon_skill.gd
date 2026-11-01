@@ -285,19 +285,38 @@ func _valid_enemy(node) -> bool:
 	if "is_dead" in node and node.is_dead: return false
 	return not ("current_health" in node and node.current_health <= 0)
 
+func _valid_lunge_target(node: Node2D) -> bool:
+	if not _valid_enemy(node): return false
+	var center := node.global_position
+	var hurtbox := node.get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if hurtbox != null and hurtbox.shape != null:
+		center = hurtbox.global_transform * hurtbox.shape.get_rect().get_center()
+	return (center.x - _body.global_position.x) * _direction >= 0.0
+
 func _first_enemy_contact(motion: Vector2) -> Dictionary:
-	var shape: CollisionShape2D = _body.get_node("CollisionShape2D")
+	var shape: CollisionShape2D = _body.saber_hitbox.hitbox_shape
 	_query.shape = shape.shape
 	_query.transform = shape.global_transform
 	_query.collision_mask = enemy_detection_mask
 	_query.collide_with_bodies = true
 	_query.collide_with_areas = false
-	_query.exclude = [_body.get_rid()]
+	var initial_exclusions: Array[RID] = [_body.get_rid()]
+	_query.exclude = initial_exclusions
 	var space := _body.get_world_2d().direct_space_state
 	# cast_motion ignores initial overlaps; inspect them explicitly first.
 	_query.motion = Vector2.ZERO
+	var nearest: Node2D
+	var nearest_distance := INF
 	for item in space.intersect_shape(_query, 64):
-		if _valid_enemy(item.collider): return {"body": item.collider, "fraction": 0.0}
+		if _valid_lunge_target(item.collider):
+			var distance: float = absf(item.collider.global_position.x - _body.global_position.x)
+			if distance < nearest_distance:
+				nearest = item.collider
+				nearest_distance = distance
+		# A rear overlap must neither trigger impact nor mask a forward target.
+		initial_exclusions.append(item.rid)
+	if nearest != null: return {"body": nearest, "fraction": 0.0}
+	_query.exclude = initial_exclusions
 	# World/legacy bodies share a layer; filter non-damage bodies from this query.
 	for attempt in 32:
 		_query.transform = shape.global_transform
@@ -305,11 +324,13 @@ func _first_enemy_contact(motion: Vector2) -> Dictionary:
 		var cast := space.cast_motion(_query)
 		if cast.size() < 2 or cast[0] >= 1.0: return {}
 		_query.motion = Vector2.ZERO
-		_query.transform.origin += motion * cast[1] + motion.normalized() * 0.05
+		# Stop where the damage rectangle overlaps, rather than at the safe gap.
+		var contact_motion := (motion * cast[1]).move_toward(motion, 0.05)
+		_query.transform.origin += contact_motion
 		var overlaps := space.intersect_shape(_query, 64)
 		var excluded := false
 		for item in overlaps:
-			if _valid_enemy(item.collider): return {"body": item.collider, "fraction": cast[0]}
+			if _valid_lunge_target(item.collider): return {"body": item.collider, "fraction": contact_motion.length() / maxf(motion.length(), 0.000001)}
 			var exclusions: Array[RID] = _query.exclude
 			if not item.rid in exclusions:
 				exclusions.append(item.rid)

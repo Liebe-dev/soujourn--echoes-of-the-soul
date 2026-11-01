@@ -50,7 +50,7 @@ func _draw() -> void:
 		if collider == null: continue
 		var color := Color.TRANSPARENT
 		if collider is Area2D and (collider.collision_layer & HITBOX_LAYERS) != 0:
-			# The legacy AttackHitbox keeps an enabled shape while monitoring is off.
+			# Only monitored areas participate in damage detection.
 			if shows_hitboxes() and collider.monitoring:
 				color = HITBOX_COLOR
 		elif collider is CharacterBody2D and (collider.collision_layer & HURTBOX_LAYERS) != 0 and collider.has_method("take_damage"):

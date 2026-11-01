@@ -191,7 +191,6 @@ func _ready() -> void:
 		weapon,
 		$AttackHitbox
 	)
-	configure_attack_hitbox(combat.equipped_weapon)
 
 	damage = DamageComponent.new(self, stagger_knockback_distance, stagger_knockback_duration, stagger_stun_duration)
 	damage.knockback_deceleration_duration = stagger_knockback_deceleration_duration
@@ -863,12 +862,6 @@ func _on_damage_stagger_recovered() -> void:
 	else:
 		_play_ready(true)
 
-func configure_attack_hitbox(weapon: WeaponData) -> void:
-	attack_hitbox.position = weapon.hitbox_offset
-
-	var shape := attack_hitbox_shape.shape as RectangleShape2D
-	if shape:
-		shape.size = weapon.hitbox_size
 func enable_attack_hitbox() -> void:
 	combat.enable_attack_hitbox()
 

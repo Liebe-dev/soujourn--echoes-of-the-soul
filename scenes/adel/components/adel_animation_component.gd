@@ -73,6 +73,8 @@ func face(direction: int) -> void:
 	var weapon_scale := absf(_body.weapon_pivot.scale.x)
 	_body.spine_pivot.scale.x = -spine_scale if direction < 0 else spine_scale
 	_body.weapon_pivot.scale.x = -weapon_scale if direction < 0 else weapon_scale
+	var attack_scale := absf(_body.attack_hitbox.scale.x)
+	_body.attack_hitbox.scale.x = -attack_scale if direction < 0 else attack_scale
 
 
 func jump_start() -> void:

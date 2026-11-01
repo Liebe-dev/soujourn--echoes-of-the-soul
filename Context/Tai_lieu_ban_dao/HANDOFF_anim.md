@@ -1,9 +1,80 @@
 # Bàn giao animation / VFX combat Adel
 
-**Cập nhật: 30/10/2026, Asia/Saigon; giữ snapshot 28/10 và lịch sử từ 26/10.** Project: `D:/Godot Project/soujourn--echoes-of-the-soul`.
+**Cập nhật: 31/10/2026, Asia/Saigon; giữ các snapshot VFX 26–30/10 bên dưới.** Project: `D:/Godot Project/soujourn--echoes-of-the-soul`.
 File này ở `D:/Godot Project/soujourn--echoes-of-the-soul/Context/Tai_lieu_ban_dao/HANDOFF_anim.md`.
 
-## Hiện hành 30/10/2026 — particles V3 đã duyệt và tích hợp
+## Hiện hành 31/10/2026 — hitbox chữ nhật dùng chung; đang plan hệ vũ khí/FBF
+
+### Tiếp quản nhanh: mục tiêu hiện tại và quyền thực hiện
+
+- Gọi `P = D:/Godot Project/soujourn--echoes-of-the-soul`; `O = D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview`. Đọc cập nhật này trước. Các mô tả capsule tấn công, đường legacy và HEAD cũ ở snapshot 26–30/10 là lịch sử, đã được thay bằng hiện trạng dưới đây. Yêu cầu VFX/thẩm mỹ chưa bị thay thế vẫn giữ giá trị.
+- **Đã hoàn thành phần gameplay được giao:** combo 1–4 dùng rectangle AttackHitbox; sửa lỗi Q dừng bởi quái phía sau và combo 1–3 mất hit; sau đó chuyển cả Q sang cùng rectangle và xóa capsule tấn công Q. Không còn tác vụ fix hai lỗi này đang chờ triển khai.
+- **Công việc mới nhất chỉ ở mức PLAN:** cách mở rộng vũ khí mà không phải vẽ lại toàn thân FBF cho mỗi món. Chưa được giao sửa kiến trúc vũ khí, tạo bộ Resource/moveset mới, tách ảnh hay vẽ lại frame. Đừng coi đề xuất trong mục plan là thiết kế đã duyệt hoặc lệnh thực hiện.
+- Đọc `P/Context/Tai_lieu_ban_dao/AGENTS.md` và mục liên quan của `P/Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md`. `HANDOFF.md` tổng hiện có nhánh art Đản/Uyển; đó là phạm vi khác, không thay yêu cầu animation/vũ khí mới nhất của người dùng.
+
+### Yêu cầu và quyết định đã chốt
+
+**Hitbox — đã yêu cầu và triển khai:**
+
+- Người dùng xác nhận vấn đề là **Player đánh quái**, không phải vùng Player nhận đòn. Muốn cả bốn đòn thường dùng đúng **AttackHitbox chữ nhật phía trước** đang căn trong editor, thay capsule cũ.
+- Sau khi sửa hai lỗi, người dùng yêu cầu **đổi cả hitbox Q, loại bỏ/xóa capsule**. Hiện combo và Q cùng dùng `PlayableAdel/AttackHitbox/CollisionShape2D`; chỉnh vùng này ảnh hưởng cả hai. Capsule tấn công đã xóa khỏi scene/resource/signal và script.
+- Capsule thân tại `PlayableAdel/CollisionShape2D` vẫn là collider vật lý/nhận đòn của Player; đây không phải capsule tấn công đã yêu cầu xóa. JumpAttackHitbox vẫn là vùng riêng của jump attack.
+- Lượt này không sửa VFX bitmap/shader, tư thế FBF, damage nền, thời gian active combo hoặc timing/charge/cooldown của Q. Không commit/push hoặc force reload editor.
+
+**Vũ khí — yêu cầu người dùng, chưa chuyển thành dữ liệu runtime:**
+
+- Người dùng gọi vũ khí đang gắn bộ `saber_attack` là **Mechanical Combat Sword**, thuộc **Đao**.
+- Bảy loại gameplay: **Đại kiếm (rìu chiến), Kiếm dài, Đao, Dao, Cung (nỏ, súng), Thương (kích), Khiên**. Những món cùng loại dùng chung moveset/đặc điểm; các món trong ngoặc có hoạt ảnh khác nhưng vẫn thuộc loại đó.
+- Câu mô tả cũng có ý “mỗi vũ khí có một moveset riêng”; cách hiểu đang thảo luận là chia moveset theo loại/nhánh hoạt ảnh. Chưa chốt mọi ngoại lệ, phạm vi Q riêng từng món hay dùng chung, hoặc bộ động tác Ready/Jump/Guard của từng loại. Bảy loại không tự chứng minh chỉ cần đúng bảy bộ animation.
+
+### Hiện trạng code đã xác minh
+
+- **Rectangle duy nhất cho combo/Q:** `P/scenes/adel/playable_adel.tscn` → `AttackHitbox/CollisionShape2D`: RectangleShape2D Size `(163.2899, 97)`, Position `(99.35505, 15.5)`, Rotation `0`; node cha Position `(0,0)`, Scale `(1,1)` khi hướng phải. Đây là giá trị scene, không có runtime WeaponData ghi đè. Area layer `8`, mask `4`; shape đóng khi không đánh.
+- `P/scenes/adel/components/adel_animation_component.gd` → `face()` lật AttackHitbox theo facing, cùng với SpinePivot/WeaponPivot. Căn shape ở hướng phải gốc; không dịch thêm node cha để xử lý hướng trái.
+- `P/scenes/adel/playable_adel.gd`: đã bỏ lời gọi/hàm `configure_attack_hitbox()` vốn cộng offset WeaponData vào node cha và đổi size lúc ready. `hitbox_offset = (166,0)` và `hitbox_size = (152.58,124.5)` còn lưu trong Saber/WeaponData là dữ liệu cũ, không còn điều khiển vùng damage.
+- **Combo không mất cửa sổ ngắn:** `P/scenes/adel/components/saber_hitbox.gd` → `_set_combo_window_enabled()`. AnimationPlayer của SaberHitbox dùng **Call Method track** trên chính controller, chạy Immediate: false ở `0s`, true ở `0.15s`, false ở `0.20s` cho đòn 1–3 hoặc `0.30s` cho đòn 4. Lúc mở truy vấn shape ngay, rồi nhận thêm body_entered trong cửa sổ; dedup theo target. Key mở vẫn được xử lý khi một update vượt cả cửa sổ hoặc hết clip. Không còn track transform đặt lại vùng đã căn.
+- `stop_attack_window()`/generation ngăn callback tắt cũ vô hiệu hóa cửa sổ mới; `_combo_window_open` ngăn damage muộn sau đóng. Giữ các ranh giới này khi refactor.
+- **Q dùng cùng rectangle cả dò trúng lẫn damage:** `P/scenes/adel/components/saber_weapon_skill.gd` → `_first_enemy_contact()` lấy `saber_hitbox.hitbox_shape`, không lấy collider thân. `_valid_lunge_target()` lọc phía trước theo tâm hurtbox và hướng lao; rear overlap bị loại khỏi query. Khi nhiều mục tiêu đã overlap, chọn contact gần nhất theo chênh X của node enemy. Cast dùng điểm overlap thực để không dừng ở safe gap rồi hụt damage; tường vẫn chặn thân bằng `move_and_collide()`.
+- `SaberHitbox.begin_skill_window()` mở AttackHitbox ở impact; `sample_skill_damage()` truy vấn cùng shape. Danh sách target ngăn hit lặp. `contact_target` dùng chọn điểm dừng/feedback; query damage vẫn có thể nhận nhiều enemy cùng trong rectangle, không phải một cơ chế single-target mới.
+- Đã xóa `WeaponPivot/SaberHitbox/SkillHitbox`, shape resource `CapsuleShape2D_saber`, signal `_on_skill_hitbox_body_entered` và các biến skill_hitbox cũ. Controller `WeaponPivot/SaberHitbox` cùng AnimationPlayer vẫn tồn tại. `scenes/UI/combat_collision_debug.gd` chỉ đổi chú thích cho đúng trạng thái, không thay logic vẽ debug.
+- Tuning hiện hành được cập nhật tại **`P/Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md`**, mục 4 “Combo…hitbox Player” và mục Q. Dùng file này làm nguồn hướng dẫn chỉnh thông số; không lấy đường dẫn collider cũ ở snapshot dưới làm hiện trạng.
+
+### Kết quả kiểm tra và tài nguyên bằng chứng
+
+- **Kết quả cuối sau xóa capsule Q:** `P/tests/adel/combat_hitbox_regression.gd` đạt **72/72**, `P/tests/adel/combo_hitbox_validation.gd` đạt **163/163**; tổng **235 kiểm tra**, exit 0, không script/runtime error trong log cuối. Hai file `.gd.uid` đi kèm hiện có trong workspace.
+- Regression dùng Player và SpineEnemy thật: hai hướng; combo 1–3 bước thường, `0.14 → 0.21s`, hoặc advance vượt cả clip; không damage trước/sau cửa sổ; Q ba mức, rear overlap, mục tiêu phía trước, nearest contact, cast chạm mép, mục tiêu xa chưa bị đánh, tường chặn. Rectangle suite có probe nhỏ để phân biệt vùng góc chữ nhật với capsule cũ, damage một lần, chỉnh Position/Size áp dụng cả combo và Q, Q dò được góc rectangle ngoài collider thân, cancel đóng shape.
+- **Giới hạn:** bước dài được mô phỏng bằng `AnimationPlayer.advance()`, không đo tụt FPS thực trên máy người dùng. Đây là kiểm thử headless với AI/vitals và feedback camera/slow motion bị tắt trong fixture; không phải nghiệm thu thị giác native, mọi map/crowd hoặc mọi suite của game. Lượt ghi bàn giao chỉ kiểm file/log/hash, không chạy lại toàn bộ test. Bone2D warnings của rig vẫn là cảnh báo nguồn.
+- Kết quả trung gian **68/68 + 180/180 = 248** là trước khi Q bỏ capsule; không dùng làm số cuối. Trước fix: regression **68 checks/21 failures**; sau chỉ sửa combo còn **9 failures Q**; sau sửa Q còn **0**. Đây là số assertion lỗi, không phải 21 bug độc lập.
+- **Archive ổn định ngoài Git, đã copy và đối chiếu SHA-256 20 file trong lượt bàn giao:** `O/adel-hitbox-handoff-2026-10-31/`, có `evidence_manifest.json` ghi nguồn, bản sao, số byte và hash. `fix-q-combo/` chứa `before.*.log`, `combo-fix.*.log`, `after.*.log`, `rectangle.*.log` và `verification.json`; `q-shared-rectangle/` chứa `regression.*.log`, `rectangle.*.log`, `verification.json` của kết quả cuối 72/163.
+- Nguồn Temp tương ứng vẫn thấy khi bàn giao: `C:/Users/xuank/AppData/Local/Temp/codex-hitbox-fix-080edb5e331041a387cdfdb78f985946/` và `C:/Users/xuank/AppData/Local/Temp/codex-q-rectangle-97749d08b045433ebb31fb84b5dcca09/`. Ưu tiên archive ngoài Git vì Temp có thể bị dọn. Junction của project thử đã gỡ, không chạy lại mirror đó như một project đầy đủ.
+- Review ban đầu lưu tại `O/adel-hitbox-review-2026-10-30/`: `minimal-repro.json`, `review-final.json`, `REVIEW_SCOPE.json` và log. Chỉ là bằng chứng trạng thái trước sửa. `review.gd`/kết quả lần thử đầu có giả định sai về WeaponData/Q độc lập; không dùng số mismatch ban đầu làm danh sách bug.
+- Preview/GIF/video/log tiếp tục ở **O ngoài repo**, không push lên Git. Runtime asset trong `P/asset/` và source/test là phần khác, không áp quy tắc “preview không push” lên asset game đã duyệt.
+
+### Cách cũ không đạt và bài học cần giữ
+
+- Sửa `WeaponData.hitbox_offset/size` trước đây chỉ tác động AttackHitbox legacy, không sửa capsule đang gây damage. Đây là luồng legacy đã được tài liệu ghi nhận, không phải một phát hiện mới rằng mọi WeaponData đều hỏng. Hiện rectangle trong scene là nguồn hình học thực; tránh nối lại offset cũ làm vùng runtime lệch khỏi editor.
+- Chỉ key `disabled` theo trạng thái cuối frame làm đòn 1–3 mất toàn bộ khoảng active 50ms khi update vượt qua. Chỉ tăng lifetime hay kéo dài active sẽ đổi gameplay; bản sửa dùng sự kiện mở/đóng và query tại mốc mở, giữ thời gian cũ.
+- Q lấy overlap collider thân mà chưa lọc hướng từng dừng ngay vì quái phía sau, hoặc chọn sai đối tượng khi có cả trước/sau. Bản cuối vừa lọc hướng vừa dùng đúng rectangle; nếu cast và damage cùng shape, phải chạm tới điểm overlap, không dừng ở safe fraction còn hở.
+- Windows từng tạo junction/chạy executable không thành trong môi trường hạn chế; có lần gọi `& Godot...` không thu được exit code, không được tính là test đã chạy. Các lượt có bằng chứng dùng `Start-Process -WindowStyle Hidden -PassThru`, redirect stdout/stderr, `WaitForExit` có timeout và kiểm ExitCode. Đây là vấn đề cách chạy công cụ, không phải lỗi gameplay.
+
+### Plan hệ vũ khí/FBF — đề xuất chưa được chốt
+
+- **Đã xác minh source hiện có:** `P/scenes/adel/weapon/weapon_data.gd` là Node2D class `WeaponData`, mặc định `weapon_id="saber"`, `display_name="Saber"`, `animation_prefix="saber"`; `P/scenes/adel/weapon/saber.tscn` chưa đổi các tên này thành Mechanical Combat Sword. Tên Mechanical Combat Sword/loại Đao là thông tin người dùng cung cấp, chưa là enum/registry trong file WeaponData đã đọc.
+- Rig/runtime: `P/asset/Character/Adel/adel spine action use.tscn`, node `TestAttackSprite`, các track frame/texture/hframes. Sheet hiện tại ở `P/asset/Character/Adel/Saber attack/sabers1.png` … `sabers6.png`; các ảnh người dùng đã đưa cho thấy kiếm nằm trong hình FBF. Chưa audit toàn bộ PSD/layer nguồn để xác định phần nào đã tách sẵn. Thư mục nguồn art từng được nhắc: `D:/Adobe Photoshop/Sojourn Echoes of the Soul/Project Adel/` và `P/asset/Character/Adel/layers/Adel spine action use/`; đối chiếu file thực trước khi chọn nguồn chỉnh.
+- Đề xuất của AI: tách **loại gameplay** khỏi **ID moveset/nhánh hoạt ảnh**; ví dụ Mechanical Combat Sword → Đao → moveset Đao. Các biến thể rìu chiến/nỏ/súng/kích có thể dùng moveset khác mà vẫn thuộc loại người dùng đã chỉ định. Chưa tạo Resource mới, enum, cơ chế equip hay đổi tên `saber_*`.
+- Đề xuất pipeline: **FBF thân người dùng chung theo moveset + lớp hình vũ khí riêng căn theo từng frame + smear riêng khi cần + VFX riêng**. Món mới cùng moveset sẽ chủ yếu bổ sung hình vũ khí/góc vẽ/smear, không mặc nhiên vẽ lại toàn thân. Cần kiểm điểm cầm, xoay/phối cảnh và thứ tự che khuất trước/sau tay/thân. Một PNG chỉ xoay bằng code có thể không đáp ứng frame phối cảnh hoặc blur mạnh; không hứa mọi vũ khí mới chỉ cần một ảnh.
+- Nếu giữ sprite gộp người/kiếm như runtime hiện tại, thay WeaponData không tự thay kiếm trong bitmap; phải sửa/xuất lại những frame có vũ khí. Đây là hạn chế cách đóng ảnh, không chứng minh phải làm một moveset hoàn toàn riêng cho mỗi món.
+- Bước thử AI đã đề xuất: **một đòn Đao, hai mẫu vũ khí, dùng cùng động tác**, so chất lượng và công vẽ trước khi tách toàn bộ. Chưa được người dùng duyệt làm prototype, chưa có preview/artifact hay kết quả thực nghiệm cho phương án này. Không gọi đây là cách đã thử thành công/thất bại.
+
+### Git, phần dang dở và bước tiếp theo
+
+- **Đã xác minh lúc bàn giao:** branch `main`, HEAD **`b917dc1` — `quy hoạch nhẹ`**. Các sửa gameplay và hướng dẫn chưa commit: `scenes/adel/playable_adel.gd`, `playable_adel.tscn`, `components/adel_animation_component.gd`, `components/saber_hitbox.gd`, `components/saber_weapon_skill.gd`, `scenes/UI/combat_collision_debug.gd`, `Context/Bao_cao_ky_thuat/huong_dan_tuy_chinh.md`. Hai test mới và hai `.gd.uid` hiện untracked. Lượt bàn giao sửa thêm HANDOFF_anim.md; không commit/push/reset các thay đổi này.
+- **Dang dở:** thiết kế mở rộng vũ khí/FBF và nghiệm thu cảm giác hitbox mới trong gameplay thực. Không còn yêu cầu fix Q/combo bị bỏ dở; chưa nghiệm thu thị giác mọi VFX khớp vùng chữ nhật mới. Các bộ VFX/particles/hit slash/máu bám giữ nguyên; số test lịch sử phía dưới không phải các suite vừa chạy lại sau thay hitbox.
+- Chat mới: (1) đọc mục hiện hành và AGENTS, kiểm Git/source/tuning đang có; (2) báo ngắn khác biệt nếu file đã đổi sau snapshot; (3) tiếp tục **thảo luận plan** loại/moveset và pipeline FBF theo phản hồi, xác định phạm vi động tác dùng chung/Q riêng cùng ngoại lệ; (4) chỉ đọc/audit nguồn PSD, layer, rig để làm phương án cụ thể khi cần; (5) chờ lệnh thực hiện trước khi tạo/sửa/tách asset hay refactor. Nếu được giao thử, bắt đầu mẫu nhỏ đã mô tả, giữ baseline hitbox/timing, preview rồi chờ duyệt theo quy trình cũ.
+- Khi cần chạy lại hai suite hitbox: tạo project thử mới có custom user directory chứa cả **`CodexComboRectangle`** và **`CodexCombatHitbox`** (lượt này dùng `CodexComboRectangleCodexCombatHitbox20261031`), APPDATA/LOCALAPPDATA riêng, bỏ `_mcp_game_helper` chỉ trong config thử, tái dùng cache import/class/UID/extension phù hợp. Runner là SceneTree, gọi `--headless --path <project-thử> --script res://tests/adel/<suite>.gd`. Theo dõi exit code và lỗi log; số checks có thể đổi khi thêm kiểm tra thực sự hữu ích.
+- Các bài học Limbus/After Effects, hướng chém, fade bằng thay hình và quy trình preview vẫn ở **mục 3 “Những gì học từ ref và phản hồi”**, không bị thay bởi lượt hitbox này. Đó là quan sát/chuyển thể thị giác trong lịch sử, không là bằng chứng về kiến trúc nội bộ của Limbus. Ref ổn định ở `P/Context/Tai_lieu_ban_dao/refs_anim/`; preview nguồn và phạm vi kiểm chứng từng lượt theo các snapshot dưới.
+
+## Snapshot 30/10/2026 — particles V3 đã duyệt và tích hợp
 
 Người dùng đã **duyệt V3**, cho phép đưa particles vào game. Component mới
 `PlayableAdel/BattleHitParticles`, script

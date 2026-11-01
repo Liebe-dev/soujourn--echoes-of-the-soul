@@ -21,172 +21,68 @@ height = 112.49183
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_pvmv5"]
 size = Vector2(163.2899, 97)
 
-[sub_resource type="CapsuleShape2D" id="CapsuleShape2D_saber"]
-radius = 18.0
-height = 92.0
-
 [sub_resource type="Animation" id="Animation_saber_attack_1"]
 resource_name = "saber_attack_1"
 length = 0.3
 step = 0.05
-tracks/0/type = "value"
+tracks/0/type = "method"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Hitbox/CollisionShape2D:disabled")
+tracks/0/path = NodePath(".")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.15, 0.2),
 "transitions": PackedFloat32Array(1, 1, 1),
-"update": 1,
-"values": [true, false, true]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Hitbox/CollisionShape2D:position")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [Vector2(42, -18)]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Hitbox/CollisionShape2D:rotation")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [0.86]
+"values": [{"method": &"_set_combo_window_enabled", "args": [false]}, {"method": &"_set_combo_window_enabled", "args": [true]}, {"method": &"_set_combo_window_enabled", "args": [false]}]
 }
 
 [sub_resource type="Animation" id="Animation_saber_attack_2"]
 resource_name = "saber_attack_2"
 length = 0.3
 step = 0.05
-tracks/0/type = "value"
+tracks/0/type = "method"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Hitbox/CollisionShape2D:disabled")
+tracks/0/path = NodePath(".")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.15, 0.2),
 "transitions": PackedFloat32Array(1, 1, 1),
-"update": 1,
-"values": [true, false, true]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Hitbox/CollisionShape2D:position")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [Vector2(42, -18)]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Hitbox/CollisionShape2D:rotation")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [0.86]
+"values": [{"method": &"_set_combo_window_enabled", "args": [false]}, {"method": &"_set_combo_window_enabled", "args": [true]}, {"method": &"_set_combo_window_enabled", "args": [false]}]
 }
 
 [sub_resource type="Animation" id="Animation_saber_attack_3"]
 resource_name = "saber_attack_3"
 length = 0.3
 step = 0.05
-tracks/0/type = "value"
+tracks/0/type = "method"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Hitbox/CollisionShape2D:disabled")
+tracks/0/path = NodePath(".")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.15, 0.2),
 "transitions": PackedFloat32Array(1, 1, 1),
-"update": 1,
-"values": [true, false, true]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Hitbox/CollisionShape2D:position")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [Vector2(42, -18)]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Hitbox/CollisionShape2D:rotation")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [0.86]
+"values": [{"method": &"_set_combo_window_enabled", "args": [false]}, {"method": &"_set_combo_window_enabled", "args": [true]}, {"method": &"_set_combo_window_enabled", "args": [false]}]
 }
 
 [sub_resource type="Animation" id="Animation_saber_attack_4"]
 resource_name = "saber_attack_4"
 length = 0.45
 step = 0.05
-tracks/0/type = "value"
+tracks/0/type = "method"
 tracks/0/imported = false
 tracks/0/enabled = true
-tracks/0/path = NodePath("Hitbox/CollisionShape2D:disabled")
+tracks/0/path = NodePath(".")
 tracks/0/interp = 1
 tracks/0/loop_wrap = true
 tracks/0/keys = {
 "times": PackedFloat32Array(0, 0.15, 0.3),
 "transitions": PackedFloat32Array(1, 1, 1),
-"update": 1,
-"values": [true, false, true]
-}
-tracks/1/type = "value"
-tracks/1/imported = false
-tracks/1/enabled = true
-tracks/1/path = NodePath("Hitbox/CollisionShape2D:position")
-tracks/1/interp = 1
-tracks/1/loop_wrap = true
-tracks/1/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [Vector2(42, -18)]
-}
-tracks/2/type = "value"
-tracks/2/imported = false
-tracks/2/enabled = true
-tracks/2/path = NodePath("Hitbox/CollisionShape2D:rotation")
-tracks/2/interp = 1
-tracks/2/loop_wrap = true
-tracks/2/keys = {
-"times": PackedFloat32Array(0),
-"transitions": PackedFloat32Array(1),
-"update": 1,
-"values": [0.86]
+"values": [{"method": &"_set_combo_window_enabled", "args": [false]}, {"method": &"_set_combo_window_enabled", "args": [true]}, {"method": &"_set_combo_window_enabled", "args": [false]}]
 }
 
 [sub_resource type="AnimationLibrary" id="AnimationLibrary_saber_hitbox"]
@@ -241,27 +137,18 @@ scale = Vector2(1.8, 1.8)
 
 [node name="AttackHitbox" type="Area2D" parent="." unique_id=323120375]
 collision_layer = 8
+collision_mask = 4
 monitoring = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitbox" unique_id=729430378]
 position = Vector2(99.35505, 15.5)
 shape = SubResource("RectangleShape2D_pvmv5")
+disabled = true
 
 [node name="WeaponPivot" type="Node2D" parent="." unique_id=118253140]
 
 [node name="SaberHitbox" type="Node2D" parent="WeaponPivot" unique_id=2255556]
 script = ExtResource("70_saber_hitbox")
-
-[node name="Hitbox" type="Area2D" parent="WeaponPivot/SaberHitbox" unique_id=1440821768]
-collision_layer = 8
-collision_mask = 4
-
-[node name="CollisionShape2D" type="CollisionShape2D" parent="WeaponPivot/SaberHitbox/Hitbox" unique_id=154312721]
-position = Vector2(42, -18)
-rotation = 0.86
-shape = SubResource("CapsuleShape2D_saber")
-disabled = true
-debug_color = Color(0.9764706, 0.03137255, 0.1764706, 0.41960785)
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="WeaponPivot/SaberHitbox" unique_id=2255557]
 libraries/ = SubResource("AnimationLibrary_saber_hitbox")
@@ -345,5 +232,5 @@ script = ExtResource("player_blood")
 [node name="BattleHitParticles" type="Node2D" parent="."]
 script = ExtResource("battle_particles")
 
-[connection signal="body_entered" from="WeaponPivot/SaberHitbox/Hitbox" to="WeaponPivot/SaberHitbox" method="_on_hitbox_body_entered"]
+[connection signal="body_entered" from="AttackHitbox" to="WeaponPivot/SaberHitbox" method="_on_attack_hitbox_body_entered"]
 [connection signal="timeout" from="DodgeCooldown" to="." method="_on_dodge_cooldown_timeout"]
