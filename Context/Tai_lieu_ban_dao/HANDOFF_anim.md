@@ -1,9 +1,62 @@
 # Bàn giao animation / VFX combat Adel
 
-**Cập nhật: 31/10/2026, Asia/Saigon; giữ các snapshot VFX 26–30/10 bên dưới.** Project: `D:/Godot Project/soujourn--echoes-of-the-soul`.
+**Cập nhật: 03/11/2026, Asia/Saigon; giữ các snapshot 26–31/10 bên dưới.** Project: `D:/Godot Project/soujourn--echoes-of-the-soul`.
 File này ở `D:/Godot Project/soujourn--echoes-of-the-soul/Context/Tai_lieu_ban_dao/HANDOFF_anim.md`.
 
-## Hiện hành 31/10/2026 — hitbox chữ nhật dùng chung; đang plan hệ vũ khí/FBF
+## Hiện hành 03/11/2026 — Q dừng khi hurtbox chạm hurtbox
+
+- **Yêu cầu đã thực hiện:** khi Q lao tới, Player chỉ chuyển impact lúc hurtbox
+  thân Player chạm hurtbox quái, thay cho lúc AttackHitbox chạm quái. Trong
+  `scenes/adel/components/saber_weapon_skill.gd::_first_enemy_contact()`, source
+  shape đã chuyển từ `saber_hitbox.hitbox_shape` sang `PlayableAdel/CollisionShape2D`.
+  Query dùng global transform thật của collider thân, gồm offset/scale.
+- **Damage giữ nguyên:** combo và Q vẫn dùng rectangle
+  `PlayableAdel/AttackHitbox/CollisionShape2D`. Shape này chỉ được mở cho Q
+  ở impact; không gây damage sớm trong lúc lao và không còn quyết định điểm
+  dừng. Không tạo lại capsule tấn công Q. Collider thân có sẵn vẫn là capsule
+  vật lý/hurtbox. Chỉnh rectangle đổi damage reach; chỉnh collider thân có
+  thể đổi điểm dừng Q và va chạm/nhận đòn. Tuning xem hướng dẫn chung.
+- Giữ lọc quái phía sau, xử lý overlap ban đầu, sweep contact, tường chặn,
+  giới hạn quãng lao, tier/charge/cooldown, damage/stun, VFX/particles/máu bám.
+  Mục tiêu chỉ lọt tầm AttackHitbox nhưng hai hurtbox không chạm trong tầm
+  lao tối đa sẽ không làm Q impact. Không tự tăng tầm để bù luật mới.
+- **Kiểm thử cuối:** `combat_hitbox_regression.gd` **94/94**,
+  `combo_hitbox_validation.gd` **173/173**, gameplay Q **160/160**, Q VFX
+  **98/98**, particles **95/95**, hit slash **84/84**: tổng **704 checks
+  headless**, 0 failures/script errors. Kiểm ba tier/hai hướng, không impact
+  ở attack reach, tiếp xúc thân, không damage sớm, quái sau/trước, hết tầm,
+  tường, hitbox damage có chỉnh, đổi vị trí hurtbox tác động điểm dừng và
+  đổi hitbox tấn công không tác động điểm dừng.
+- Kiểm gameplay Q cũ được cập nhật hai assertion stun theo AI hiện hành:
+  `STUNNED` vẫn chạy physics cho gravity, đóng cửa sổ damage và ngắt attack.
+  Không thay runtime AI/stun. Baseline source trước sửa đã có bốn assertion
+  stun lỗi và một assertion wall lỗi; bản mới với assertion đúng đạt 160/160.
+  Fixture rectangle cũng reset contact_target/distance giữa các case; kiểm
+  dịch hurtbox 10px cho phép sai số cast 0.5px, không thay tuning runtime.
+- **Native Forward+/D3D12:** input Q nhấn thật ở cả hai hướng, **12 checks
+  qua**, 0 failures. Với quái cách 170px ban đầu, AttackHitbox đã phủ quái
+  nhưng thân còn cách nhau; Player tiến khoảng **72.155 world px**, rồi hai
+  mép hurtbox chạm với sai số khoảng **0.155px** và gây đúng 20 damage.
+  Đã xem hai ảnh contact. AI/vitals/HUD và camera/slow feedback tắt trong
+  harness, bật debug shapes để thấy blue hurtbox/red hitbox; không phải đo
+  hiệu năng hay nghiệm thu mọi map. Tất cả save/config thử được cách ly.
+- **Git lúc tiếp quản:** main / **a52ae16**; trước lượt này chỉ có một Word
+  requirement Observe chưa tracked, được giữ nguyên. Thay đổi runtime chỉ ở
+  shape query và chú thích trong `saber_weapon_skill.gd`; không sửa scene,
+  asset, các tuning xuất ra Inspector hoặc project.godot. Không commit/push,
+  không force reload editor. Log vẫn có Bone2D warnings nguồn.
+- Bằng chứng, baseline/final logs, source snapshot và project thử không cache:
+  `D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/adel-q-hurtbox-stop-2026-11-03/`.
+  Clone tắt riêng FmodManager/_mcp_game_helper và plugin editor, không sửa
+  config/audio thật. Prefix custom user dir của hai suite hitbox vẫn chứa
+  CodexComboRectangle/CodexCombatHitbox; runner trong evidence giữ cấu hình riêng.
+- **Plan vũ khí/FBF vẫn chưa triển khai.** Trong trao đổi 31/10 người dùng đã
+  chốt **moveset có Q mặc định, từng món được có Q riêng**; đây là quyết định
+  thiết kế, chưa có Resource/equip/asset mới. Lệnh 03/11 chỉ thực hiện thay
+  đổi điểm dừng Q bên trên. Mô tả rectangle dò dừng ở snapshot 31/10 dưới đây
+  là lịch sử đã được thay thế; rectangle gây damage vẫn giữ giá trị hiện hành.
+
+## Snapshot 31/10/2026 — hitbox chữ nhật dùng chung; đang plan hệ vũ khí/FBF
 
 ### Tiếp quản nhanh: mục tiêu hiện tại và quyền thực hiện
 

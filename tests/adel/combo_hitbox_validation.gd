@@ -31,6 +31,8 @@ func check(ok: bool, label: String) -> void:
 
 func reset(facing: int, point: Vector2) -> void:
 	p.saber_skill.cancel()
+	p.saber_skill.contact_target = null
+	p.saber_skill.distance_travelled = 0.0
 	p.saber_hitbox.stop_attack_window()
 	p.state_machine.resume_locomotion()
 	p._set_facing_direction(facing)
@@ -131,7 +133,7 @@ func _run() -> void:
 	await ticks(4)
 	check(probe.calls == 1, "edited rectangle position/size is used for damage")
 	check(p.attack_hitbox_shape.position == Vector2(135, -10), "animation does not reset edited position")
-	# Q damage and lunge detection use this same edited rectangle, both facings.
+	# Q damage uses the edited rectangle; lunge contact uses body hurtboxes.
 	var q_cases := [
 		{"point": Vector2(135, -10), "hit": true},
 		{"point": Vector2(170, 15), "hit": true},
@@ -155,7 +157,35 @@ func _run() -> void:
 		p.saber_skill._start_lunge()
 		p.saber_skill._lunge(1.0 / 60.0)
 		await ticks()
-		check(p.saber_skill.contact_target == probe and probe.calls == 1, "Q detects rectangle corner beyond body collider facing %d" % facing)
+		check(p.saber_skill.is_dashing() and p.saber_skill.contact_target == null and probe.calls == 0, "Q continues while attack rectangle alone reaches target facing %d" % facing)
+		for i in 10:
+			if not p.saber_skill.is_dashing(): break
+			p.saber_skill._lunge(1.0 / 60.0)
+			await ticks(1)
+		check(p.saber_skill.contact_target == probe, "Q stops on Player hurtbox contact facing %d" % facing)
+		var body := p.get_node("CollisionShape2D") as CollisionShape2D
+		var body_bounds: Rect2 = body.global_transform * body.shape.get_rect()
+		var target_shape := probe.get_child(0) as CollisionShape2D
+		var target_bounds: Rect2 = target_shape.global_transform * target_shape.shape.get_rect()
+		var gap := target_bounds.position.x - body_bounds.end.x if facing > 0 else body_bounds.position.x - target_bounds.end.x
+		check(absf(gap) < 0.2, "Q hurtbox edges meet within physics tolerance facing %d" % facing)
+		check(probe.calls == 0, "body contact does not bypass the edited damage rectangle facing %d" % facing)
+		# Changing attack reach must not move the stop; moving the body hurtbox must.
+		p.saber_skill.cancel()
+		await reset(facing, Vector2(170, 15))
+		p.saber_skill._direction = facing
+		var motion := Vector2(facing * 200.0, 0)
+		var before: Dictionary = p.saber_skill._first_enemy_contact(motion)
+		var old_attack_position: Vector2 = p.attack_hitbox_shape.position
+		p.attack_hitbox_shape.position.x += 100.0
+		var after_attack: Dictionary = p.saber_skill._first_enemy_contact(motion)
+		p.attack_hitbox_shape.position = old_attack_position
+		check(before.has("body") and after_attack.has("body") and is_equal_approx(float(before.get("fraction", -1)), float(after_attack.get("fraction", -2))), "editing attack reach does not move Q stop facing %d" % facing)
+		var old_body_position := body.position
+		body.position.x += facing * 10.0
+		var after_body: Dictionary = p.saber_skill._first_enemy_contact(motion)
+		body.position = old_body_position
+		check(after_body.has("body") and absf((float(before.get("fraction", -1)) - float(after_body.get("fraction", -1))) * motion.length() - 10.0) < 0.5, "editing body hurtbox moves Q stop facing %d" % facing)
 	p.saber_skill.cancel()
 	p.saber_hitbox.stop_attack_window()
 	await ticks()

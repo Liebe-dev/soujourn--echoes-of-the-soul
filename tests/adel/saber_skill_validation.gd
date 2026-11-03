@@ -179,8 +179,11 @@ func _run() -> void:
 		check(effect.left<=[0.065,0.075,0.1][tier] and effect.left>=[0.065,0.075,0.1][tier]-0.025,"tier %d hit-stop has its own duration"%tier)
 		var target_stun = enemy.get_node_or_null("WeaponSkillStun")
 		check((target_stun==null) if tier==0 else (target_stun!=null and target_stun.remaining>0),"tier %d stun rule"%tier)
+		var uses_ai_stun: bool = enemy.has_method("is_ai_stunned")
 		if tier>0:
-			check(not enemy.hitbox.monitoring and not enemy.is_physics_processing(),"stun disables enemy attack area and AI")
+			# Current enemies retain physics for gravity while STUNNED closes damage.
+			var attack_disabled: bool = enemy.is_ai_stunned() and not enemy._window_open if uses_ai_stun else not enemy.hitbox.monitoring and not enemy.is_physics_processing()
+			check(attack_disabled,"stun interrupts enemy attack decisions and damage window")
 		check(await reach(S.SKILL_RECOVERY),"impact advances into skill_6")
 		check(not p.is_skill_damage_immune(),"recovery is vulnerable")
 		if tier>0:
@@ -191,7 +194,8 @@ func _run() -> void:
 			CombatTime.actor_timeout(enemy,0.15,func():clocks.enemy=true)
 			await wait(0.19)
 			check(clocks.player and not clocks.enemy,"Player damage timers progress normally while world timers remain slow")
-			check(enemy._elapsed == frozen_attack_clock and hud.hp == 100,"stun freezes a running enemy attack and prevents HP damage throughout recovery")
+			var attack_paused: bool = enemy.is_ai_stunned() and not enemy._window_open and not enemy.animation_player.is_playing() if uses_ai_stun else enemy._elapsed == frozen_attack_clock
+			check(attack_paused and hud.hp == 100,"stun interrupts a running enemy attack and prevents HP damage throughout recovery")
 		check(await finished(),"tier %d recovery ends"%tier)
 		check(Engine.time_scale==1.0 and CombatTime._actor_exemptions.is_empty() and not p.dodge_cooldown.ignore_time_scale,"recovery restores world speed and timer ownership")
 		check(enemy.current_health==1000-expected,"no duplicate damage during hit-stop or recovery")

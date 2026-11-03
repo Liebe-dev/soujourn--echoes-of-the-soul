@@ -294,7 +294,8 @@ func _valid_lunge_target(node: Node2D) -> bool:
 	return (center.x - _body.global_position.x) * _direction >= 0.0
 
 func _first_enemy_contact(motion: Vector2) -> Dictionary:
-	var shape: CollisionShape2D = _body.saber_hitbox.hitbox_shape
+	# Lunge stops on body hurtbox contact; AttackHitbox only owns impact damage.
+	var shape := _body.get_node("CollisionShape2D") as CollisionShape2D
 	_query.shape = shape.shape
 	_query.transform = shape.global_transform
 	_query.collision_mask = enemy_detection_mask
@@ -324,7 +325,7 @@ func _first_enemy_contact(motion: Vector2) -> Dictionary:
 		var cast := space.cast_motion(_query)
 		if cast.size() < 2 or cast[0] >= 1.0: return {}
 		_query.motion = Vector2.ZERO
-		# Stop where the damage rectangle overlaps, rather than at the safe gap.
+		# Reach body contact, with the existing subpixel tolerance for overlap queries.
 		var contact_motion := (motion * cast[1]).move_toward(motion, 0.05)
 		_query.transform.origin += contact_motion
 		var overlaps := space.intersect_shape(_query, 64)

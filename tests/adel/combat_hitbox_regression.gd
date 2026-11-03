@@ -113,6 +113,20 @@ func _run() -> void:
 			await ticks()
 			check(p.saber_skill.contact_target == other and other.current_health < 1000, "Q selects forward overlap facing %d tier %d" % [facing, tier])
 			check(enemy.current_health == 1000, "forward Q does not damage rear enemy")
+			# The attack rectangle already reaches this target; bodies do not yet touch.
+			await reset(facing)
+			enemy.global_position = p.global_position + Vector2(facing * 180, 0)
+			await ticks()
+			start_q(facing, tier)
+			p.saber_skill._lunge(1.0 / 60.0)
+			await ticks(1)
+			check(p.saber_skill.is_dashing() and p.saber_skill.contact_target == null, "Q does not stop at attack reach facing %d tier %d" % [facing, tier])
+			check(enemy.current_health == 1000, "Q causes no early damage before body contact")
+			for i in 20:
+				if not p.saber_skill.is_dashing(): break
+				p.saber_skill._lunge(1.0 / 60.0)
+				await ticks(1)
+			check(p.saber_skill.contact_target == enemy and enemy.current_health < 1000, "Q reaches body contact and still damages facing %d tier %d" % [facing, tier])
 		# Sweep must still stop on the first enemy reached, before the farther one.
 		await reset(facing)
 		enemy.global_position = p.global_position + Vector2(facing * 270, 0)
@@ -126,7 +140,7 @@ func _run() -> void:
 		check(p.saber_skill.contact_target == enemy and enemy.current_health < 1000, "Q sweep hits first enemy facing %d" % facing)
 		check(p.saber_skill.distance_travelled > 0.0, "Q cast moves into damage contact")
 		check(other.current_health == 1000, "Q leaves farther enemy untouched")
-		# Multiple enemies already in the rectangle choose the nearest contact.
+		# Multiple enemies ahead still select the first body contact.
 		await reset(facing)
 		enemy.global_position = p.global_position + Vector2(facing * 95, 0)
 		other.global_position = p.global_position + Vector2(facing * 160, 0)
@@ -135,6 +149,17 @@ func _run() -> void:
 		p.saber_skill._lunge(1.0 / 60.0)
 		await ticks()
 		check(p.saber_skill.contact_target == enemy, "Q initial overlaps select nearest forward enemy")
+		# Tap range is measured by body travel, without adding attack reach.
+		await reset(facing)
+		enemy.global_position = p.global_position + Vector2(facing * 300, 0)
+		await ticks()
+		start_q(facing)
+		for i in 20:
+			if not p.saber_skill.is_dashing(): break
+			p.saber_skill._lunge(1.0 / 60.0)
+			await ticks(1)
+		check(p.saber_skill.contact_target == null and enemy.current_health == 1000, "Q whiffs if bodies cannot meet within tap travel facing %d" % facing)
+		check(absf(p.saber_skill.distance_travelled - p.saber_skill.lunge_distance) < 0.1, "Q maximum travel remains unchanged")
 		# Terrain remains a physical stop, never an enemy impact.
 		await reset(facing)
 		var wall := StaticBody2D.new()
