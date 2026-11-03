@@ -37,7 +37,7 @@ func _run() -> void:
 	enemy.position = Vector2(0, 0)
 	enemy.speed = 0.0
 	add_child(enemy)
-	await frames(10)
+	await frames(20)
 	enemy.set_physics_process(false)
 	var player := body(Vector2(350, -25), Vector2(20, 40), 3)
 	player.add_to_group("Player")
@@ -93,12 +93,12 @@ func _run() -> void:
 	enemy._update_state(0.016)
 	check(enemy.velocity.x > 0, "flee moves away from threat on left")
 	enemy.current_health = 40
-	check(enemy._evaluate_transition() == enemy.State.RUN, "healing above recovery threshold ends flee")
+	check(enemy._evaluate_transition() == enemy.State.FLEE, "healing does not split the single retreat")
 	enemy.current_health = 20
 	enemy.last_seen_position = enemy.position + Vector2(700, 0)
-	check(enemy._evaluate_transition() == enemy.State.IDLE, "safe distance ends flee")
-	enemy._enter_state(enemy.State.IDLE)
-	check(enemy._evaluate_transition() == enemy.State.IDLE, "safe low-health enemy waits instead of chasing back into danger")
+	check(enemy._evaluate_transition() == enemy.State.FLEE, "distance does not split the single retreat")
+	enemy._tick_flee_response(enemy.flee_max_duration + 0.01)
+	check(enemy._evaluate_transition() == enemy.State.RUN, "retreat ends in combat without waiting for pursuit")
 	enemy.flee_health_ratio = 0.0
 	enemy._enter_state(enemy.State.RUN)
 	check(enemy._evaluate_transition() != enemy.State.FLEE, "zero threshold disables flee")

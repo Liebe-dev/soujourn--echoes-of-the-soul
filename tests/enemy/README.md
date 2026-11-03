@@ -1,41 +1,37 @@
 # Enemy validation
 
-## Limited retreat and pursuit counterattack (2026-10-30)
+## One retreat and terrain safety (2026-11-03)
 
-Both FSM and Utility enemies have a three-second retreat budget per encounter.
-Only time actually spent in FLEE consumes it; idle/stun or brief Utility switches
-cannot refill it. When exhausted, FLEE is unavailable even if pressure is weak.
-FSM waits; Utility can choose its other available actions.
+Both FSM and Utility enemies retreat once per encounter, in the direction chosen
+at entry, for at most three game seconds. The action does not pause, reverse or
+restart because the player changes distance/direction, stops pursuing, or the
+enemy heals. Utility does not reselect during this continuous retreat.
 
-If visible threat stays strictly above 0.5 for three consecutive game seconds
-during the retreat episode (including waiting after the cap), the enemy turns,
-rearms one opening leap and commits to chase/leap/melee for the encounter.
-The leap still has its telegraph, landing and recovery, then melee follows when
-the target is in range. Low health, weighted selection and hysteresis cannot
-immediately send it back into FLEE. Stun still interrupts combat.
+At the time cap, the enemy immediately commits to combat and rearms one opening
+leap with the existing telegraph/landing/recovery. There is no pursuit pressure
+threshold or waiting for the player to come closer before ending retreat.
+Attack range and sight rules still apply. Low health and Utility reselection
+cannot grant a second retreat. Stun consumes an interrupted retreat attempt.
 
-Default threat is 1 - horizontal distance / flee_safe_distance, clamped to [0, 1],
-and zero without visible sight. Thus with safe distance 600, threat > 0.5 means
-a visible player closer than 300 units. Utility uses the profile's threat-distance
-Curve instead, so custom profiles can adjust this mapping. Threat <= 0.5,
-occlusion, stun or a committed attack breaks the consecutive pressure timer.
-After counterattack is armed, it follows normal target memory and sight rules;
-it never permits an attack through terrain.
+Before each ground movement, the actual body checks for blocking collisions and
+probes beyond its leading edge for walkable terrain. A wall or cliff ends FLEE
+immediately while still on supported ground. In this case the enemy faces the
+player and uses ground combat, without a fresh leap into the hazard. Chase uses
+the same movement guard. Terrain needs physics collision; this is not pathfinding.
 
-Encounter loss/new target, death, or sufficient healing clears the retreat policy.
-Healing means the FSM recovery threshold, or zero Utility flee-need response.
-The following fields are editable under Survival:
+Encounter loss/new target, death, or debug reset clears the one-use policy.
+Editable fields under Survival are documented in the common tuning guide:
 
-- flee_max_duration: 3 seconds of retreat.
-- counterattack_threat_threshold: 0.5, strict greater-than comparison.
-- counterattack_pressure_duration: 3 consecutive seconds.
+- flee_max_duration: 3 game seconds of continuous retreat.
+- movement_terrain_mask: 1 for the forward floor probe.
+- movement_floor_probe_depth: 48 world units of allowed floor drop.
 
-The comparison overlay shows retreat time, current visible threat, pressure time
-and whether counterattack is armed. Run flee_counterattack_validation.tscn in the
-isolated copy below to verify both decision modes, strict/consecutive pressure,
-walls, follow-up melee, cap persistence, healing/stun/death, configurable durations,
-weighted selection, and timing at 30/60/120 Hz.
-Headless validation: retreat/counterattack 64/64; all six suites 296/296.
+The comparison overlay shows retreat time, whether the attempt has been used,
+and whether counterattack is armed. The focused scene checks both decision modes,
+continuous direction, no pursuit condition, follow-up combat, an actual platform
+edge, an actual blocking wall, stun and encounter reset (16 checks). This change
+uses only this focused headless run; the earlier 296/296 result on 2026-10-30
+belongs to the previous pursuit-pressure policy, not the current revision.
 
 ```
 godot --headless --path <copied-project> res://tests/enemy/flee_counterattack_validation.tscn
@@ -116,7 +112,8 @@ block sight. Detection is omnidirectional within range. While occluded, enemies
 remember only the last seen position, then forget after `chase_memory`.
 The older `s_1e_1.gd` prototype also uses this sight check and last seen position.
 
-Flee starts at 20% health, ends at safe distance (600) or recovery to 35% health.
+Flee starts at 20% health in FSM, runs once and returns to combat at the cap or
+when blocked. Safe distance (600) only limits starting retreat.
 Set `flee_health_ratio = 0` to disable it. The current rig has no idle/stun clip,
 so those states pause the available pose. Skill stun delegates to the FSM;
 older enemies retain the existing component behavior.

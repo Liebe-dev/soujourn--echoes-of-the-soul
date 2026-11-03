@@ -30,11 +30,11 @@ signal utility_decided(action: StringName, scores: Dictionary)
 @export_group("Survival")
 ## Set to zero to disable fleeing for this enemy type.
 @export_range(0.0, 1.0) var flee_health_ratio: float = 0.2
-@export_range(0.0, 1.0) var flee_recover_ratio: float = 0.35
 @export_range(1.0, 2000.0) var flee_safe_distance: float = 600.0
 @export_range(0.1, 10.0, 0.1) var flee_max_duration := 3.0
-@export_range(0.0, 1.0) var counterattack_threat_threshold := 0.5
-@export_range(0.1, 10.0, 0.1) var counterattack_pressure_duration := 3.0
+@export_flags_2d_physics var movement_terrain_mask: int = 1
+## Maximum floor drop allowed by the forward ground probe, in world units.
+@export_range(1.0, 200.0) var movement_floor_probe_depth := 48.0
 
 @export_group("Opening Leap")
 @export_range(1.0, 1000.0) var leap_range: float = 280.0
@@ -107,10 +107,11 @@ var _utility_detected_target_id := 0
 var _known_player_health := 1.0
 var _previous_decision_mode := DecisionMode.FSM
 var flee_time := 0.0
-var flee_pressure_time := 0.0
+var flee_started := false
 var flee_exhausted := false
 var counterattack_active := false
 var _flee_target_id := 0
+var _flee_direction := 1
 
 
 func _ready() -> void:
@@ -249,6 +250,8 @@ func _evaluate_transition() -> State:
 		_utility_think_left = 0.0
 		utility_action = &""
 	if _stun_remaining > 0.0: return State.STUNNED
+	# A retreat is one continuous action, not a fresh decision at each AI tick.
+	if state == State.FLEE and flee_started and not flee_exhausted: return State.FLEE
 	if decision_mode == DecisionMode.UTILITY: return _evaluate_utility_transition()
 	if state == State.STUNNED: return State.RUN if is_instance_valid(target) else State.WALK
 	if state == State.LEAP: return state # Finish flight before choosing a ground action.
@@ -257,17 +260,10 @@ func _evaluate_transition() -> State:
 	if counterattack_active:
 		if state not in [State.DETECT, State.WINDUP, State.LAND, State.MELEE, State.RECOVERY]:
 			return _counterattack_transition()
-	elif flee_exhausted and state in [State.FLEE, State.RUN, State.WALK, State.IDLE]:
-		return State.IDLE
 	if state == State.FLEE and not counterattack_active:
-		if not has_target or global_position.distance_to(last_seen_position) >= flee_safe_distance: return State.IDLE
-		if health_ratio >= maxf(flee_recover_ratio, flee_health_ratio): return State.RUN
-		return state
-	if not counterattack_active and has_target and flee_health_ratio > 0.0 and health_ratio <= flee_health_ratio and global_position.distance_to(last_seen_position) < flee_safe_distance:
+		return State.WALK if not has_target else State.RUN
+	if not flee_started and has_target and is_on_floor() and flee_health_ratio > 0.0 and health_ratio <= flee_health_ratio and global_position.distance_to(last_seen_position) < flee_safe_distance:
 		return State.FLEE
-	# Wait at safety instead of immediately chasing back into flee range.
-	if not counterattack_active and has_target and flee_health_ratio > 0.0 and health_ratio <= flee_health_ratio and global_position.distance_to(last_seen_position) >= flee_safe_distance:
-		return State.IDLE
 	match state:
 		State.WALK, State.IDLE:
 			if has_target: return State.DETECT
@@ -292,30 +288,27 @@ func _evaluate_transition() -> State:
 	return state
 
 
-## Retreat is a limited budget per encounter; brief utility switches cannot refill it.
+## One retreat per encounter, even if the player stops pursuing or health changes.
 func _reset_flee_response() -> void:
 	flee_time = 0.0
-	flee_pressure_time = 0.0
+	flee_started = false
 	flee_exhausted = false
 	counterattack_active = false
 	_flee_target_id = 0
 
 
-func get_flee_threat() -> float:
-	if not is_instance_valid(target) or not target_visible: return 0.0
-	var normalized := absf(last_seen_position.x - global_position.x) / maxf(flee_safe_distance, 1.0)
-	if decision_mode == DecisionMode.UTILITY and utility_profile != null:
-		return UtilityProfile.response(utility_profile.threat_distance, normalized)
-	return clampf(1.0 - normalized, 0.0, 1.0)
+func _finish_flee(allow_leap: bool = true) -> void:
+	if flee_exhausted: return
+	flee_exhausted = true
+	counterattack_active = true
+	# At a dead end, stay with ground combat rather than leaping into the hazard.
+	opener_available = allow_leap
+	_utility_think_left = 0.0
 
 
 func _tick_flee_response(delta: float) -> void:
 	if delta <= 0.0: return
-	var health := float(current_health) / maxi(max_health, 1)
-	var recovered := health >= maxf(flee_recover_ratio, flee_health_ratio)
-	if decision_mode == DecisionMode.UTILITY:
-		recovered = UtilityProfile.response(utility_profile.flee_need, health) <= 0.0 if utility_profile != null else health >= 0.6
-	if is_dead or not is_instance_valid(target) or target.is_queued_for_deletion() or flee_health_ratio <= 0.0 or recovered:
+	if is_dead or not is_instance_valid(target) or target.is_queued_for_deletion():
 		_reset_flee_response()
 		return
 	var target_id := target.get_instance_id()
@@ -325,19 +318,33 @@ func _tick_flee_response(delta: float) -> void:
 	if counterattack_active: return
 	if state == State.FLEE:
 		flee_time += delta
-		if flee_time >= maxf(flee_max_duration, 0.1) and not flee_exhausted:
-			flee_exhausted = true
-			_utility_think_left = 0.0
-	# Breaks in sight/pressure reset the consecutive timer, rather than adding up bursts.
-	if (state == State.FLEE or flee_time > 0.0) and state in [State.FLEE, State.IDLE, State.RUN, State.WALK] and get_flee_threat() > counterattack_threat_threshold:
-		flee_pressure_time += delta
-	else:
-		flee_pressure_time = 0.0
-	if flee_pressure_time >= maxf(counterattack_pressure_duration, 0.1):
-		counterattack_active = true
-		flee_exhausted = true
-		opener_available = true # One fresh leap, followed by normal melee attacks.
-		_utility_think_left = 0.0
+		if flee_time >= maxf(flee_max_duration, 0.1): _finish_flee()
+
+
+## Probe beyond the leading edge of the actual body, before applying movement.
+func _movement_is_safe(direction: float, delta: float) -> bool:
+	if is_zero_approx(direction): return true
+	if not is_on_floor(): return false
+	var body_shape := get_node_or_null("CollisionShape2D") as CollisionShape2D
+	if body_shape == null or body_shape.shape == null or body_shape.disabled: return false
+	var lookahead := maxf(run_speed, 0.0) * maxf(delta, 0.0) + maxf(4.0, safe_margin * 2.0)
+	var collision := KinematicCollision2D.new()
+	if test_move(global_transform, Vector2(direction * lookahead, 0.0), collision):
+		if absf(collision.get_normal().x) > sin(floor_max_angle): return false
+	var bounds := body_shape.global_transform * body_shape.shape.get_rect()
+	var front_x := bounds.end.x if direction > 0.0 else bounds.position.x
+	var foot := Vector2(front_x + direction * lookahead, bounds.end.y)
+	var excluded: Array[RID] = [get_rid()]
+	for group in [&"Player", &"enemy_ai_agents"]:
+		for body in get_tree().get_nodes_in_group(group):
+			if body is CollisionObject2D and body != self: excluded.append(body.get_rid())
+	if is_instance_valid(target) and target is CollisionObject2D: excluded.append(target.get_rid())
+	var query := PhysicsRayQueryParameters2D.create(
+		foot - Vector2(0.0, lookahead + floor_snap_length + 2.0),
+		foot + Vector2(0.0, movement_floor_probe_depth), movement_terrain_mask, excluded)
+	query.collide_with_areas = false
+	var floor_hit := get_world_2d().direct_space_state.intersect_ray(query)
+	return not floor_hit.is_empty() and Vector2(floor_hit.normal).dot(up_direction) >= cos(floor_max_angle)
 
 
 func _counterattack_transition() -> State:
@@ -401,7 +408,7 @@ func _utility_context() -> Dictionary:
 		&"health": clampf(float(current_health) / maxi(max_health, 1), 0.0, 1.0),
 		&"player_health": _known_player_health, &"allies": allies, &"memory": memory,
 		&"opener": opener_available, &"leap_range": leap_range, &"melee_range": melee_range,
-		&"safe_distance": flee_safe_distance, &"flee_enabled": flee_health_ratio > 0.0,
+		&"safe_distance": flee_safe_distance, &"flee_enabled": flee_health_ratio > 0.0 and not flee_started,
 		&"flee_exhausted": flee_exhausted, &"counterattack": counterattack_active,
 		&"resting": state == State.IDLE,
 		&"phase_progress": _elapsed / maxf(idle_duration if state == State.IDLE else walk_duration, 0.01),
@@ -422,6 +429,7 @@ func _update_state(delta: float) -> void:
 			if not is_zero_approx(dx): _direction = 1 if dx > 0.0 else -1
 			_update_facing()
 			velocity.x = minf(run_speed, absf(dx) / delta) * signf(dx)
+			if is_on_floor() and not _movement_is_safe(signf(velocity.x), delta): velocity.x = 0.0
 		State.LEAP:
 			velocity.x = _leap_velocity_x
 			_set_damage_window(is_instance_valid(target) and target_visible)
@@ -429,10 +437,15 @@ func _update_state(delta: float) -> void:
 			var window := attack3_window if attack_animation == &"attack3" else attack2_window
 			_set_damage_window(target_visible and _elapsed >= maxf(window.x, 0.0) and _elapsed < window.y)
 		State.FLEE:
-			var dx := global_position.x - last_seen_position.x
-			if not is_zero_approx(dx): _direction = 1 if dx > 0.0 else -1
-			velocity.x = run_speed * _direction
-			_update_facing()
+			if _movement_is_safe(_flee_direction, delta):
+				_direction = _flee_direction
+				velocity.x = run_speed * _flee_direction
+				_update_facing()
+			else:
+				velocity.x = 0.0
+				_finish_flee(false)
+				_enter_state(State.RUN)
+				_face_target()
 		State.STUNNED: _stun_remaining = maxf(_stun_remaining - delta, 0.0)
 
 
@@ -517,7 +530,13 @@ func _enter_state(next: State) -> void:
 		State.IDLE:
 			_set_animation(&"walk")
 			animation_player.pause()
-		State.FLEE: _set_animation(&"run")
+		State.FLEE:
+			flee_started = true
+			_flee_target_id = target.get_instance_id() if is_instance_valid(target) else 0
+			var dx := global_position.x - last_seen_position.x
+			_flee_direction = (1 if dx > 0.0 else -1) if not is_zero_approx(dx) else _direction
+			utility_action = &"flee"
+			_set_animation(&"run")
 		State.STUNNED: animation_player.pause()
 		State.RECOVERY: pass
 	state_changed.emit(previous, state)
@@ -525,6 +544,7 @@ func _enter_state(next: State) -> void:
 
 func _exit_state(previous: State) -> void:
 	_set_damage_window(false)
+	if previous == State.FLEE and flee_started: _finish_flee()
 	if previous == State.STUNNED:
 		_stun_remaining = 0.0
 		_leap_velocity_x = 0.0

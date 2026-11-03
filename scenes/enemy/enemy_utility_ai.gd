@@ -34,7 +34,7 @@ func evaluate(context: Dictionary, profile: Profile) -> Dictionary:
 	scores[&"idle"] = profile.idle_weight * (0.04 + 0.9 * need * (1.0 - threat))
 	if context.distance > 8.0:
 		scores[&"chase"] = profile.chase_weight * context.memory * (0.3 + 0.7 * aggression)
-	if context.flee_enabled and not context.get(&"flee_exhausted", false) and context.distance < context.safe_distance:
+	if context.flee_enabled and context.grounded and not context.get(&"flee_exhausted", false) and context.distance < context.safe_distance:
 		scores[&"flee"] = profile.flee_weight * need * (0.4 + 0.6 * threat) * (1.0 - 0.45 * support) * (1.0 - 0.4 * weakness)
 	# Eligibility is a hard zero: scoring can never authorize an invisible/out-of-range attack.
 	if context.visible and context.grounded and context.reachable:

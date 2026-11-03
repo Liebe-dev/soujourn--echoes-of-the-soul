@@ -1,7 +1,7 @@
 # Hướng dẫn tùy chỉnh thông số game
 
 
-Cập nhật: **30/10/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
+Cập nhật: **03/11/2026**. Đây là file dùng chung: khi thêm hoặc đổi thông số, cập nhật ngay mục liên quan trong file này. Không tạo thêm một báo cáo riêng chỉ để thông báo chỗ chỉnh thông số.
 
 
 ## Mục lục
@@ -938,7 +938,7 @@ Mở **Utility Profile → Response Curves** để chỉnh đáp ứng. Các đi
 | `flee_need` | `(0,1), (0.2,1), (0.6,0), (1,0)` | Tỷ lệ HP Enemy; nhu cầu chạy mạnh nhất ở ≤20%, về 0 từ 60%. |
 | `player_weakness` | `(0,1), (1,0)` | Tỷ lệ HP Player được nhìn thấy gần nhất. |
 | `attack_distance` | `(0,1), (1,0.7)` | Khoảng cách ngang / tầm của đòn được xét. Điều kiện ngoài tầm vẫn loại hành động trước lựa chọn. |
-| `threat_distance` | `(0,1), (1,0)` | Khoảng cách ngang / `flee_safe_distance`; chỉ là áp lực nhìn thấy khi dùng cho bộ đếm phản công. |
+| `threat_distance` | `(0,1), (1,0)` | Khoảng cách ngang / `flee_safe_distance`; dùng chấm điểm Utility trước khi bắt đầu chạy, không quyết định tiếp tục/dừng đợt chạy. |
 | `ally_support` | `(0,0), (1,1)` | Số đồng đội hợp lệ / `full_support_allies`. |
 
 Trong **Utility Profile → Action Weights**, các mặc định script lần lượt là `melee_weight = 1`, `leap_weight = 0.9`, `chase_weight = 0.65`, `flee_weight = 1`, `patrol_weight = 1`, `idle_weight = 1`; trọng số miền 0–1, không có đơn vị. `full_support_allies = 3` đồng đội là mức bão hòa hỗ trợ. Đổi trọng số không cấp quyền tấn công khi khuất tầm nhìn hoặc sai tầm. Khi phản công bắt buộc đã bật, scorer loại Flee/Idle không phù hợp và ưu tiên đòn hợp lệ; chọn ngẫu nhiên không được cho quái chạy lại ngay.
@@ -947,20 +947,19 @@ Trong **Utility Profile → Action Weights**, các mặc định script lần l�
 
 ### Chạy trốn và phản công — Survival
 
-Chọn root **SpineEnemy** hoặc **UtilityEnemy** → **Survival**. Cả sáu trường sau đều chưa có scene override; mặc định nằm trong `spine_enemy.gd`. Các thời lượng là **giây game**, chịu pause/slow motion, không phải giây thực.
+**Cập nhật 03/11/2026:** chọn root **SpineEnemy** hoặc **UtilityEnemy** → **Survival**. Cả năm trường sau đều chưa có scene override; mặc định nằm trong `spine_enemy.gd`. Thời lượng là **giây game**, chịu pause/slow motion, không phải giây thực.
 
 | Tên biến | Mặc định script và scene kế thừa | Ý nghĩa |
 | --- | --- | --- |
 | `flee_health_ratio` | `0.2` | FSM bắt đầu chạy ở ≤20% HP. Đặt 0 để tắt chạy trốn cho cả FSM và Utility. Utility dùng Curve `flee_need` để tính mức muốn chạy khi trường này còn dương. |
-| `flee_recover_ratio` | `0.35` | Ngưỡng hồi HP kết thúc chạy/làm mới cơ chế ở FSM; Utility làm mới khi đáp ứng `flee_need` về 0. |
-| `flee_safe_distance` | `600` | Đơn vị world; khoảng an toàn và mẫu số chuẩn hóa threat. |
-| `flee_max_duration` | `3.0` | Quỹ giây game thực sự ở FLEE trong lần giao chiến; nghỉ/choáng/đổi trạng thái ngắn không cấp lại quỹ. Hết quỹ thì FLEE không còn được chọn. |
-| `counterattack_threat_threshold` | `0.5` | Ngưỡng threat 0–1; phải **lớn hơn**, bằng ngưỡng cũng ngắt bộ đếm liên tục. |
-| `counterattack_pressure_duration` | `3.0` | Số giây game pressure phải liên tục vượt ngưỡng để quay lại vồ rồi đánh. Có thể đếm khi đang rút lui hoặc chờ sau lúc hết quỹ chạy. |
+| `flee_safe_distance` | `600` | Đơn vị world; chỉ giới hạn khoảng cách cho phép bắt đầu chạy và chuẩn hóa threat cho Utility. Không làm quái dừng/chạy tiếp trong đợt chạy đã bắt đầu. |
+| `flee_max_duration` | `3.0` | Một đợt chạy liên tục tối đa 3 giây game cho mỗi lần chạm trán; chọn hướng lúc bắt đầu rồi giữ hướng. Hết thời gian thì quay lại chiến đấu ngay, không chờ người chơi đuổi. |
+| `movement_terrain_mask` | `1` | Lớp vật lý dùng dò mặt đất phía trước khi chạy đuổi/chạy trốn; mặt đất phải có collider trên lớp đã chọn. Kiểm tra tường dùng collider và collision mask của CharacterBody2D. |
+| `movement_floor_probe_depth` | `48.0` | Đơn vị world; độ rơi tối đa từ đáy collider tới mặt đất dò được. Tăng cho phép bước xuống bậc sâu hơn; giảm để dừng sớm trước chỗ hụt đất. |
 
-Với Curve mặc định, threat nhìn thấy = clamp(`1 - khoảng cách ngang / 600`, 0, 1); vì vậy >0,5 là Player nhìn thấy cách dưới 300 đơn vị world. FSM dùng công thức tuyến tính này; Utility dùng Curve `threat_distance` trong profile. Khuất tầm nhìn thì threat dùng cho phản công bằng 0, dù vẫn nhớ vị trí cũ. Threat ≤ ngưỡng, tường che, choáng hoặc đòn đang cam kết làm đứt bộ đếm trước lúc phản công được bật.
+`spine_enemy.gd::_movement_is_safe()` dò vượt mép trước collider thêm quãng di chuyển của nhịp vật lý và khoảng đệm tối thiểu 4 đơn vị world. Nếu bị tường chặn, thiếu đất hoặc đất dốc quá `floor_max_angle` của CharacterBody2D, quái kết thúc lần chạy trốn và quay mặt đánh trên mặt đất, không cấp thêm đòn vồ tại chỗ nguy hiểm. Khi đuổi, cùng phép dò chặn bước đi vào vực/tường. Đây là kiểm tra bước đi trực tiếp, chưa tìm đường vòng.
 
-Khi đã phản công: cấp đúng một opener mới, quay mặt từ Windup, vồ theo tầm/độ cao/đứng đất, giữ Land/Recovery rồi Melee nếu đủ tầm; không đánh xuyên tường. Sau đó giữ chiến đấu tới khi mất/đổi mục tiêu hoặc hồi đủ điều kiện. Choáng vẫn ngắt đòn; chết dọn toàn bộ dữ liệu. Các biến Remote `flee_time`, `flee_pressure_time`, `flee_exhausted`, `counterattack_active` và `get_flee_threat()` là dữ liệu theo dõi, không phải cấu hình khởi tạo cần lưu vào scene. Bảng debug của scene so sánh hiển thị trực tiếp các giá trị này.
+Hết thời gian trên đường an toàn: cấp đúng một opener mới, quay mặt từ Windup, vồ theo tầm/độ cao/đứng đất, giữ Land/Recovery rồi Melee nếu đủ tầm; không đánh xuyên tường. Gặp đường cụt thì chuyển sang đánh cận chiến khi người chơi đủ tầm. Mỗi lần chạm trán chỉ chạy một đợt; hồi máu, chấm điểm lại, đổi mode hay bị choáng không cấp thêm lượt. Choáng ngắt đợt chạy và giữ quyết định chiến đấu sau khi tỉnh. Mất/đổi mục tiêu, chết hoặc reset debug mới xóa lịch sử này. Đã bỏ `flee_recover_ratio`, `counterattack_threat_threshold`, `counterattack_pressure_duration` và bộ đếm đuổi liên tục. Các biến Remote `flee_time`, `flee_started`, `flee_exhausted`, `counterattack_active` là dữ liệu theo dõi, không phải cấu hình khởi tạo cần lưu vào scene. Bảng debug của scene so sánh hiển thị trực tiếp các giá trị này.
 
 ### HP, EXP và hành vi
 
