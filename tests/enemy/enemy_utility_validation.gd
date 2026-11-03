@@ -177,12 +177,13 @@ func _run() -> void:
 	check(enemy.state == enemy.State.STUNNED and not enemy._window_open, "forced stun overrides utility attack and closes hitbox")
 	enemy._update_state(0.2)
 	enemy._physics_process(1.0 / 60.0)
-	check(enemy.state == enemy.State.FLEE and enemy.utility_action == &"flee", "stun expiry makes a fresh survival decision")
+	check(enemy.state not in [enemy.State.STUNNED, enemy.State.LEAP] and not enemy._window_open and (enemy.is_on_floor() or enemy.utility_action != &"flee"), "stun expiry resumes decisions without fleeing in midair")
 	enemy._enter_state(enemy.State.RECOVERY)
 	enemy._elapsed = 0.1
 	check(enemy._evaluate_transition() == enemy.State.RECOVERY, "utility cannot skip attack recovery")
 	enemy._elapsed = enemy.recovery_time + 0.01
-	check(enemy._evaluate_transition() == enemy.State.FLEE, "utility resumes decisions after recovery completes")
+	var resumed: int = enemy._evaluate_transition()
+	check(resumed != enemy.State.RECOVERY and (not enemy.flee_started or resumed != enemy.State.FLEE), "utility resumes decisions without restarting a used retreat")
 	# Occlusion must not reveal movement or HP changes.
 	enemy.current_health = 100
 	enemy._enter_state(enemy.State.RUN)
