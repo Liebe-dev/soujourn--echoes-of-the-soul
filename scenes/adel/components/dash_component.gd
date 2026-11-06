@@ -51,8 +51,9 @@ func start_dash(direction: float, on_floor: bool, facing: int) -> bool:
 	_update_immunity()
 	return true
 
-func physics_update(delta: float) -> void:
-	if not is_dodging or delta <= 0.0: return
+# Report natural completion so the controller can leave DASH and resolve queued actions.
+func physics_update(delta: float) -> bool:
+	if not is_dodging or delta <= 0.0: return false
 	_body.velocity.y = 0.0
 	if phase == Phase.ACTIVE:
 		var previous := _elapsed
@@ -69,15 +70,14 @@ func physics_update(delta: float) -> void:
 	if phase == Phase.ACTIVE and _elapsed + 0.000001 >= _duration:
 		_body.velocity.x = 0.0
 		if is_air or _skid_duration <= 0.0:
-			_finish()
-		else:
-			phase = Phase.SKID
-			_update_immunity()
-			_elapsed = 0.0
-			_body.state_machine.transition(AdelStateMachine.State.DASH_SKID)
-			_body.presentation.play(&"dash skid")
-	elif phase == Phase.SKID and _elapsed + 0.000001 >= _skid_duration:
-		_finish()
+			return true
+		phase = Phase.SKID
+		_update_immunity()
+		_elapsed = 0.0
+		_body.state_machine.transition(AdelStateMachine.State.DASH_SKID)
+		_body.presentation.play(&"dash skid")
+		return false
+	return phase == Phase.SKID and _elapsed + 0.000001 >= _skid_duration
 
 func _motion_area(time: float) -> float:
 	return _target_speed * time + (_initial_speed - _target_speed) * _duration * (1.0 - pow(1.0 - time / _duration, 3.0)) / 3.0
@@ -89,11 +89,6 @@ func _update_immunity() -> void:
 	elif not in_window and _iframe_token != 0:
 		_body.damage.release_invulnerability(&"dash", _iframe_token)
 		_iframe_token = 0
-
-func _finish() -> void:
-	_body.state_machine.resume_locomotion() # Parent exit calls end_dash exactly once.
-	# Cooldown only gates the next dash; queued actions may start at skid end.
-	if not _body._try_consume_weapon_skill(): _body._try_consume_guard()
 
 func end_dash() -> void:
 	if not is_dodging: return

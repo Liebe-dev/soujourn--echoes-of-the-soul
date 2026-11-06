@@ -15,8 +15,6 @@ func frames(n: int) -> void:
 	for i in n:
 		await get_tree().physics_frame
 		await get_tree().process_frame
-func wait(t: float) -> void:
-	await get_tree().create_timer(t,true,false,true).timeout
 func check(ok: bool, label: String) -> void:
 	checks += 1
 	if not ok: failures += 1
@@ -140,7 +138,11 @@ func _run() -> void:
 	hud.hp = 70
 	p.take_damage(20,p.global_position+Vector2(80,0))
 	check(p.damage.is_stunned and not p._guard_requested and not p.jump_hitbox._window_open, "stagger clears landing request and hitbox")
-	await wait(1.1)
-	check(not p.is_guarding and p.can_move, "stagger recovery does not replay held landing Defense")
+	var recovery_deadline := Time.get_ticks_msec() + 3000
+	var replayed_guard := false
+	while not p.can_move and Time.get_ticks_msec() < recovery_deadline:
+		await frames(1)
+		replayed_guard = replayed_guard or p.is_guarding
+	check(p.can_move and not replayed_guard and not p.is_guarding and not p._guard_requested, "stagger recovery does not replay held landing Defense")
 	print("JUMP DEFENSE RESULT: %d checks, %d failures" % [checks,failures])
 	get_tree().quit(0 if failures == 0 else 1)

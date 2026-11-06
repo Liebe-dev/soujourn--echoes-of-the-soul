@@ -276,7 +276,6 @@ func _physics_process(delta: float) -> void:
 	var input_delta := 0.0 if CombatTime.is_hit_stopping() else delta
 	if _guard_requires_release and not Input.is_action_pressed("guard and deflect"):
 		_guard_requires_release = false
-	if _skill_requested: _try_consume_weapon_skill()
 	combat.tick_input_buffer(input_delta)
 	_defense_lock_left = maxf(_defense_lock_left - delta * get_attack_speed_multiplier(), 0.0)
 	if _guard_requested:
@@ -284,7 +283,7 @@ func _physics_process(delta: float) -> void:
 			_clear_guard_request()
 		else:
 			_guard_press_age += input_delta
-			_try_consume_guard()
+	_consume_buffered_combat_input()
 	if _combo_reset_timer > 0.0:
 		_combo_reset_timer = maxf(_combo_reset_timer - delta, 0.0)
 		if _combo_reset_timer <= 0.0: _reset_combo()
@@ -350,7 +349,7 @@ func _physics_locomotion(delta: float) -> void:
 		if dash.can_dash(direction, is_on_floor()):
 			_perform_dash(direction)
 			if dash.is_dodging:
-				dash.physics_update(delta)
+				_physics_dash(delta)
 				return
 
 		if can_move and not dash.is_dodging:
@@ -380,7 +379,10 @@ func _physics_locomotion(delta: float) -> void:
 			break
 
 func _physics_dash(delta: float) -> void:
-	dash.physics_update(delta)
+	if dash.physics_update(delta):
+		# The DASH parent exit starts the cooldown before dispatching queued input.
+		state_machine.resume_locomotion()
+		_consume_buffered_combat_input()
 
 func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> void:
 	if is_skill_finish_frozen() or dmg <= 0 or is_skill_damage_immune() or not damage.can_take_damage():
@@ -888,6 +890,10 @@ func release_weapon_skill() -> void:
 
 func _weapon_skill_input_blocked() -> bool:
 	return not can_use_weapon_skill() or saber_skill.is_cooling_down() or is_locked or not state_machine.movement_enabled or damage.is_stunned or damage.is_touched_enemy or is_sentinel_exit_pending() or is_sentinel_entering() or is_campfire_ui_active() or get_tree().paused
+
+func _consume_buffered_combat_input() -> void:
+	if _try_consume_weapon_skill(): return
+	if _guard_requested: _try_consume_guard()
 
 func _try_consume_weapon_skill() -> bool:
 	if not _skill_requested: return false
