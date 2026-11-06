@@ -107,7 +107,7 @@ func _physics_process(delta: float) -> void:
 
 @warning_ignore("unused_parameter")
 func take_damage(dmg: int, hit_from_global: Vector2 = Vector2.INF) -> bool:
-	# Kept for the SaberHitbox API; knockback belongs to a later milestone.
+	# Return whether the attack was accepted, including hits in immortal debug mode.
 	if ChargedFinish.is_freezing() or is_dead or dmg <= 0:
 		return false
 	# Accept the hit for feedback/stun while leaving HP and EXP untouched.

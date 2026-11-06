@@ -1,5 +1,7 @@
 class_name SaberHitbox
 extends Node2D
+const AttackDamage = preload("res://scenes/adel/components/attack_damage.gd")
+
 signal hit_confirmed(attack_name: StringName)
 signal target_hit(body: Node2D)
 var _impact_reported := false
@@ -65,28 +67,20 @@ func _set_combo_window_enabled(enabled: bool) -> void:
 		_sample_shape_damage(hitbox_shape, hitbox_area.collision_mask)
 
 func _on_hitbox_body_entered(body: Node2D) -> void:
-	if not _attack_active or not body.has_method("take_damage"):
+	if not _attack_active or not is_instance_valid(body) or body.is_queued_for_deletion() or not body.has_method("take_damage"):
 		return
 	var target_id := body.get_instance_id()
 	if _hit_targets.has(target_id):
 		return
 
 	_hit_targets[target_id] = true
-	var old_health = _read_health(body)
 	var amount: int = source_body.scale_attack_damage(_swing_damage)
-	var accepted = body.take_damage(amount, global_position)
-	if accepted == null and old_health != null and is_instance_valid(body):
-		var new_health = _read_health(body)
-		accepted = new_health != null and new_health < old_health
-	if accepted == true and amount > 0: target_hit.emit(body)
-	if accepted == true and amount > 0 and not _impact_reported:
+	if not AttackDamage.try_apply(body, amount, global_position):
+		return
+	if is_instance_valid(body): target_hit.emit(body)
+	if not _impact_reported:
 		_impact_reported = true
 		hit_confirmed.emit(_active_attack_name)
-
-func _read_health(body: Node):
-	for info in body.get_property_list():
-		if info.name == &"current_health": return body.get(&"current_health")
-	return null
 
 func _on_hitbox_animation_finished(_animation_name: StringName) -> void:
 	_attack_active = false

@@ -2,6 +2,8 @@ class_name JumpAttackHitbox
 extends Area2D
 ## One swing spans falling and landing; the coordinator controls its damage window.
 
+const AttackDamage = preload("res://scenes/adel/components/attack_damage.gd")
+
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var source_body: CharacterBody2D = get_parent().get_parent() as CharacterBody2D
 var _attack_active := false
@@ -57,7 +59,7 @@ func _try_hit_body(body: Node2D) -> void:
 	var id := body.get_instance_id()
 	if _hit_targets.has(id): return
 	_hit_targets[id] = true
-	body.take_damage(source_body.scale_attack_damage(_swing_damage), source_body.global_position)
+	AttackDamage.try_apply(body, source_body.scale_attack_damage(_swing_damage), source_body.global_position)
 
 func _has_live_source() -> bool:
 	return is_inside_tree() and not is_queued_for_deletion() and is_instance_valid(source_body) and source_body.is_inside_tree() and not source_body.is_queued_for_deletion()

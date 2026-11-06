@@ -38,7 +38,7 @@ godot --headless --path <copied-project> res://tests/camera/hitstop_zoom_validat
 godot --path <copied-project> --rendering-method gl_compatibility res://tests/camera/hitstop_zoom_validation.tscn
 ```
 
-56 assertions in each mode cover the accepted-hit path for all four Saber swings, actual Guard/Deflect input, all three real Q skill tiers, pulse amplitude/return, rejected/zero/whiff hits, retriggers, pause, stagger arbitration, enable/disable controls, existing jump no-hit-stop behavior, camera changes, and Player deletion. This version verifies the current user scene tuning: stagger distance220, frame0 duration0.4 and zoom return lead0.25; it does not replace those scene values with script defaults.
+49 assertions cover hit-stop without camera zoom on all four Saber swings, the configured Guard/Deflect pulse, the dedicated impact zoom on each Q tier, rejected/zero/whiff hits, retriggers, pause, stagger arbitration, enable/disable controls, jump damage, camera changes, and Player deletion. The suite uses the scene's zoom settings. The dedicated Q impact suite checks the zoom timing and magnitude for each tier.
 
 Native mode focuses a 1280x720 window and saves `hitstop-zoom-peak.png`. Timings are measured in unpaused real time; frame scheduling gives slight sampling differences at the short peak. Only the pulse duration is unscaled, not gameplay timers or animations.
 
