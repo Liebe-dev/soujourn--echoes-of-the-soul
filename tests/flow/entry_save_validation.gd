@@ -1,5 +1,7 @@
 extends Node
 ## Run only in a copied project with the documented isolated user directory.
+const SlotStore = preload("res://scenes/Mechanic/save_slot_store.gd")
+
 var checks := 0
 var failures := 0
 
@@ -181,10 +183,10 @@ func _run() -> void:
 	check(not SaveManager.get_slot_info(5).loadable, "missing saved scene disables Continue")
 	invalid = fixture(5)
 	invalid.hp = "invalid"
-	check(not SaveManager._valid_data(invalid), "wrong numeric types rejected")
+	check(not SlotStore.is_valid_data(invalid), "wrong numeric types rejected")
 	invalid = fixture(5)
 	invalid.version = 99
-	check(not SaveManager._valid_data(invalid), "unsupported future schema rejected")
+	check(not SlotStore.is_valid_data(invalid), "unsupported future schema rejected")
 	var legacy := fixture(5)
 	legacy.erase("version")
 	for key in ["attributes", "coin", "soul"]: legacy.erase(key)
@@ -233,5 +235,15 @@ func _run() -> void:
 			if FileAccess.get_file_as_string("user://" + archive) == old2: found_archive = true
 	check(found_archive, "explicit New Game keeps independent byte-exact prior-save archive")
 	check(bytes(1) == "{broken primary" and bytes(4) == "{broken", "confirmed New Game leaves all unrelated slots intact")
+	var original_legacy := bytes(5)
+	var replacement := SlotStore.write_new_game(5, fixture(5), PlayerProgress.config)
+	var replaced_legacy: bool = replacement.error.is_empty() and bytes(5) != original_legacy
+	if replacement.error.is_empty(): SlotStore.rollback_new_game(5, replacement)
+	check(replaced_legacy and bytes(5) == original_legacy, "new-game rollback restores the exact legacy primary")
+	SaveManager.delete_save_slot(4)
+	var created := SlotStore.write_new_game(4, fixture(4), PlayerProgress.config)
+	var created_primary: bool = created.error.is_empty() and SaveManager.has_save_in_slot(4)
+	if created.error.is_empty(): SlotStore.rollback_new_game(4, created)
+	check(created_primary and not SaveManager.has_save_in_slot(4), "new-game rollback removes a newly created primary")
 	print("ENTRY SAVE RESULT checks=", checks, " failures=", failures)
 	get_tree().quit(1 if failures else 0)

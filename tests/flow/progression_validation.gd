@@ -1,6 +1,7 @@
 extends Node
 const Config = preload("res://scenes/Mechanic/progression_config.gd")
 const Debug = preload("res://scenes/enemy/enemy_debug_settings.gd")
+const SlotStore = preload("res://scenes/Mechanic/save_slot_store.gd")
 var checks := 0
 var failures := 0
 
@@ -88,16 +89,16 @@ func _run() -> void:
 	check(SaveManager._read_slot_file(1).upgrade_points == 21, "repeated legacy read does not duplicate compensation")
 	var bad := migrated.duplicate(true)
 	bad.attributes[&"vitality"] = -1
-	check(not SaveManager._valid_data(bad), "negative attributes rejected")
+	check(not SlotStore.is_valid_data(bad), "negative attributes rejected")
 	bad = migrated.duplicate(true)
 	bad.coin = 0.5
-	check(not SaveManager._valid_data(bad), "fractional currency rejected")
+	check(not SlotStore.is_valid_data(bad), "fractional currency rejected")
 	bad = migrated.duplicate(true)
 	bad.attributes[&"unknown"] = 1
-	check(not SaveManager._valid_data(bad), "unknown attributes rejected")
+	check(not SlotStore.is_valid_data(bad), "unknown attributes rejected")
 	bad = legacy.duplicate(true)
 	bad.points_per_level = 3
-	check(not SaveManager._valid_data(bad), "custom legacy award schema rejected instead of guessing")
+	check(not SlotStore.is_valid_data(bad), "custom legacy award schema rejected instead of guessing")
 	bad = legacy.duplicate(true)
 	bad.level = 9007199254740991
 	write(5, bad)
