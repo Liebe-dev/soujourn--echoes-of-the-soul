@@ -833,7 +833,7 @@ Thiết kế này tạo điểm mở rộng cho hệ thống nâng cấp phòng 
 
 1.5. Chuẩn hóa trách nhiệm xử lý giữa nhân vật và kẻ địch
 
-Đề xuất loại bỏ logic kiểm tra hướng đánh và thời gian phản đòn trùng lặp trong scenes/testing/Enemies/enemy\_weapon.gd. Sau khi điều chỉnh, vũ khí của kẻ địch chỉ gửi yêu cầu gây sát thương thông qua body.take\_damage(20, global\_position); việc quyết định đòn đánh bị Deflect, Guard hay gây sát thương bình thường do phía nhân vật xử lý.
+Đề xuất loại bỏ logic kiểm tra hướng đánh và thời gian phản đòn trùng lặp trong `enemy_weapon.gd` (prototype cũ, đã xóa). Sau khi điều chỉnh, vũ khí của kẻ địch chỉ gửi yêu cầu gây sát thương thông qua body.take\_damage(20, global\_position); việc quyết định đòn đánh bị Deflect, Guard hay gây sát thương bình thường do phía nhân vật xử lý.
 
 Phương án này nhằm bảo đảm các nguồn sát thương sử dụng cùng một quy tắc phòng thủ, đồng thời loại bỏ thao tác ghi đè body.is\_doing\_action = false từ phía kẻ địch có nguy cơ làm gián đoạn trạng thái hành động của nhân vật.
 

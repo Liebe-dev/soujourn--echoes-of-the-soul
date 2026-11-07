@@ -4,6 +4,7 @@ const SlotStore = preload("res://scenes/Mechanic/save_slot_store.gd")
 
 var checks := 0
 var failures := 0
+var save_count := 0
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -26,6 +27,13 @@ func capture(label: String) -> void:
 func bytes(slot: int) -> String:
 	var path := SaveManager.get_save_path(slot)
 	return FileAccess.get_file_as_string(path) if FileAccess.file_exists(path) else "<missing>"
+
+func slot_files() -> Dictionary:
+	var files: Dictionary = {}
+	for filename in DirAccess.get_files_at(OS.get_user_data_dir()):
+		if filename.begins_with("soujourn_save"):
+			files[filename] = FileAccess.get_file_as_bytes("user://" + filename)
+	return files
 
 func write_text(slot: int, text: String) -> void:
 	var file := FileAccess.open(SaveManager.get_save_path(slot), FileAccess.WRITE)
@@ -66,6 +74,7 @@ func _run() -> void:
 		get_tree().quit(2)
 		return
 	SaveManager.delete_save()
+	SaveManager.save_written.connect(func(_slot): save_count += 1)
 	write_text(1, JSON.stringify(fixture(1)))
 	write_text(2, JSON.stringify(fixture(2)))
 	var original1 := bytes(1)
@@ -78,24 +87,29 @@ func _run() -> void:
 	await frames()
 	check(ResourceLoader.exists(SaveManager.NEW_GAME_SCENE) and ResourceLoader.exists(SaveManager.TITLE_SCENE), "both centralized entry/title destinations load")
 	await reveal_title(menu)
+	var before_new := slot_files()
 	menu._on_start_pressed()
-	check(bytes(1) == original1 and bytes(2) == original2, "Start preserves every occupied slot")
-	check(menu.slot_menu.visible and menu.slot_menu.slot_list.get_child_count() == 5, "Start offers five slots")
-	await capture("new-game-slots")
-	menu.slot_menu.select_slot(1)
-	check(menu.slot_menu.confirmation.visible and bytes(1) == original1 and bytes(2) == original2, "occupied slot requires confirmation without writes")
-	menu._close_slot_menu()
-	check(not menu.slot_menu.visible and bytes(1) == original1, "cancel replacement preserves existing save")
-	check(not SaveManager.start_new_game(2) and bytes(2) == original2, "API also rejects unconfirmed replacement")
-	await reveal_title(menu)
+	check(menu.state == menu.State.TRANSITIONING and not menu.slot_menu.visible, "New Game immediately transitions without a slot picker")
 	menu._on_start_pressed()
-	await menu._begin_selected_game(3, false)
+	await get_tree().scene_changed
 	await frames(5)
 	check(get_tree().current_scene.scene_file_path == SaveManager.NEW_GAME_SCENE, "New Game enters actual map scene")
-	check(SaveManager.active_slot == 3 and FileAccess.file_exists(SaveManager.get_save_path(3)), "new empty slot gets initial save")
-	check(bytes(1) == original1 and bytes(2) == original2, "new game in slot 3 does not change slots 1 or 2")
+	check(SaveManager.active_slot == SaveManager.NO_SAVE_SLOT and not SaveManager.has_active_save_slot() and save_count == 0, "new run has no disk slot and emits no save event")
+	check(slot_files() == before_new, "New Game preserves every primary, backup and archive without creating files")
 	check(PlayerProgress.level == 1 and PlayerProgress.exp == 0 and PlayerProgress.attributes[&"vitality"] == 0, "New Game resets progression in memory")
 	check(actor() != null and is_equal_approx(actor().global_position.x, 175.0) and not SaveManager.pending_continue, "dynamic Adel receives initial spawn after scene_changed")
+	await capture("new-game-unsaved")
+	check(not SaveManager.sync_progress_to_active_slot(), "progression cannot silently select a disk slot for a new run")
+	PlayerProgress.upgrade_points = 1
+	check(not SaveManager.commit_attribute_allocation({&"vitality": 1}) and PlayerProgress.upgrade_points == 1, "unsaved allocation requires a campfire slot without spending points")
+	PlayerProgress.upgrade_points = 0
+	actor().global_position.x += 200
+	SaveManager.respawn_at_checkpoint()
+	check(is_equal_approx(actor().global_position.x, 175.0) and SaveManager.active_slot == SaveManager.NO_SAVE_SLOT, "unsaved death returns to this run's start rather than an old save")
+	check(SaveManager.restart_current_area(), "unsaved run can restart its area")
+	await get_tree().scene_changed
+	await frames(5)
+	check(is_equal_approx(actor().global_position.x, 175.0) and slot_files() == before_new, "unsaved restart retains its in-memory start without disk writes")
 	var pause = actor().get_node("Camera2D/UI_Layer/PauseMenu")
 	pause.pause_and_unpause()
 	check(get_tree().paused and pause.visible, "pause opens in playable scene")
@@ -107,6 +121,39 @@ func _run() -> void:
 	await frames(5)
 	check(get_tree().current_scene.scene_file_path == SaveManager.TITLE_SCENE and not get_tree().paused, "pause Return to Title opens actual title and unpauses tree")
 	check(bytes(1) == original1 and bytes(2) == original2, "returning to title preserves saves")
+	menu = get_tree().current_scene
+	await reveal_title(menu)
+	await menu._on_start_pressed()
+	await frames(5)
+	var first_camp = get_tree().current_scene.get_node("Campfire")
+	first_camp._player = actor()
+	first_camp._player_in_range = true
+	await first_camp._sit_and_save()
+	check(first_camp.is_menu_ready() and slot_files() == before_new and save_count == 0 and not first_camp.saved_label.visible, "first campfire heals and opens its menu without auto-saving or claiming Saved")
+	first_camp._on_save_pressed()
+	check(first_camp.save_slot_menu.visible, "campfire Save offers slot selection")
+	await capture("first-save-slots")
+	first_camp._on_slot_menu_back_pressed()
+	check(slot_files() == before_new and not SaveManager.has_active_save_slot(), "cancelling first slot selection leaves the run unsaved")
+	first_camp._on_save_pressed()
+	first_camp._on_slot_selected(1, false)
+	check(first_camp._save_confirmation.visible and bytes(1) == original1, "first save to an occupied slot requires confirmation")
+	first_camp._save_confirmation.canceled.emit()
+	first_camp._save_confirmation.hide()
+	check(slot_files() == before_new and not SaveManager.has_active_save_slot(), "cancelling overwrite preserves the unsaved run and all saves")
+	var first_save_data: Dictionary = SaveManager._data.duplicate(true)
+	var first_save_temp: String = SaveManager.get_save_path(3) + ".tmp"
+	DirAccess.make_dir_absolute(first_save_temp)
+	first_camp._on_slot_selected(3, false)
+	check(not SaveManager.has_active_save_slot() and SaveManager._data == first_save_data and save_count == 0, "failed first save does not claim a slot or replace the in-memory start")
+	check(slot_files() == before_new, "failed first save preserves every disk slot")
+	DirAccess.remove_absolute(first_save_temp)
+	first_camp._on_slot_selected(3, false)
+	check(SaveManager.active_slot == 3 and SaveManager.has_active_save_slot() and save_count == 1 and SaveManager.get_checkpoint_id() == first_camp.get_checkpoint_id(), "choosing an empty campfire slot creates the first save and claims it")
+	check(bytes(1) == original1 and bytes(2) == original2 and SaveManager._read_slot_file(3).level == 1, "first save contains the fresh run and preserves other slots")
+	SaveManager.return_to_title()
+	await get_tree().scene_changed
+	await frames(5)
 	menu = get_tree().current_scene
 	await reveal_title(menu)
 	menu._on_continue_pressed()
@@ -136,7 +183,10 @@ func _run() -> void:
 	camp._player = player
 	camp._player_in_range = true
 	await camp._sit_and_save()
-	check(SaveManager.get_checkpoint_id() == "campfire_01" and hud.hp == hud.max_hp, "campfire rest heals and saves checkpoint")
+	check(SaveManager.get_checkpoint_id() == "preserve_1" and hud.hp == hud.max_hp and bytes(1) == original1, "resting on a loaded run heals without auto-saving")
+	camp._on_save_pressed()
+	camp._on_slot_selected(1, false)
+	check(SaveManager.get_checkpoint_id() == "campfire_01", "explicit campfire slot selection saves the checkpoint")
 	check(bytes(2) == original2 and SaveManager._data.custom_future_field.kept, "campfire preserves other slot and unknown save fields")
 	var before1 := bytes(1)
 	var before_data: Dictionary = SaveManager._data.duplicate(true)
@@ -221,20 +271,11 @@ func _run() -> void:
 	check(bytes(4) == "{broken", "failed menu transition preserves invalid data")
 	menu._close_slot_menu()
 	await reveal_title(menu)
-	menu._on_start_pressed()
-	menu.slot_menu.select_slot(2)
-	var old2 := bytes(2)
-	menu.slot_menu.confirmation.hide()
-	await menu._begin_selected_game(2, true)
+	var before_another_run := slot_files()
+	await menu._on_start_pressed()
 	await frames(5)
-	check(SaveManager.active_slot == 2 and PlayerProgress.level == 1 and bytes(2) != old2, "confirmed New Game replaces selected occupied slot and resets progression")
-	var archives := DirAccess.get_files_at(OS.get_user_data_dir())
-	var found_archive := false
-	for archive in archives:
-		if archive.begins_with("soujourn_save_2.json.before-new-game-"):
-			if FileAccess.get_file_as_string("user://" + archive) == old2: found_archive = true
-	check(found_archive, "explicit New Game keeps independent byte-exact prior-save archive")
-	check(bytes(1) == "{broken primary" and bytes(4) == "{broken", "confirmed New Game leaves all unrelated slots intact")
+	check(SaveManager.active_slot == SaveManager.NO_SAVE_SLOT and PlayerProgress.level == 1, "another New Game drops previous slot ownership and resets progression")
+	check(slot_files() == before_another_run, "another New Game leaves valid, corrupt, backup and archive files byte-exact")
 	var original_legacy := bytes(5)
 	var replacement := SlotStore.write_new_game(5, fixture(5), PlayerProgress.config)
 	var replaced_legacy: bool = replacement.error.is_empty() and bytes(5) != original_legacy
@@ -245,5 +286,22 @@ func _run() -> void:
 	var created_primary: bool = created.error.is_empty() and SaveManager.has_save_in_slot(4)
 	if created.error.is_empty(): SlotStore.rollback_new_game(4, created)
 	check(created_primary and not SaveManager.has_save_in_slot(4), "new-game rollback removes a newly created primary")
+	SaveManager.delete_save()
+	SaveManager.return_to_title()
+	await get_tree().scene_changed
+	await frames(5)
+	menu = get_tree().current_scene
+	await reveal_title(menu)
+	check(menu.get_node("Interface/Root/MainMenu/Continue").disabled, "Continue is disabled when no saved slot exists")
+	var before_empty_run := slot_files()
+	await menu._on_start_pressed()
+	await frames(5)
+	check(actor() != null and not SaveManager.has_save() and not SaveManager.has_active_save_slot() and slot_files() == before_empty_run, "New Game also enters an empty-save profile without creating a save")
+	SaveManager.return_to_title()
+	await get_tree().scene_changed
+	await frames(5)
+	menu = get_tree().current_scene
+	await reveal_title(menu)
+	check(menu.get_node("Interface/Root/MainMenu/Continue").disabled and slot_files() == before_empty_run, "leaving an unsaved run keeps Continue disabled and preserves the empty profile")
 	print("ENTRY SAVE RESULT checks=", checks, " failures=", failures)
 	get_tree().quit(1 if failures else 0)

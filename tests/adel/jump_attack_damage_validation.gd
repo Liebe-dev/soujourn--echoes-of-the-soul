@@ -251,7 +251,8 @@ func _run() -> void:
 	b.queue_free()
 	# A lethal jump reaches the inherited enemy death/EXP API once.
 	await reset_player(p, hud, enemy)
-	var wob = load("res://scenes/enemy/wobtear_enemy.tscn").instantiate()
+	var wob = load("res://scenes/enemy/spine_enemy.tscn").instantiate()
+	wob.max_health = 20
 	wob.speed = 0
 	wob.patrol_range = 0
 	scene.add_child(wob)

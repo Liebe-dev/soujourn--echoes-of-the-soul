@@ -3,8 +3,7 @@
 [ext_resource type="Texture2D" uid="uid://bmvih0hswruyb" path="res://asset/Map/background/BGScene2_2.png" id="1_hdqq5"]
 [ext_resource type="PackedScene" uid="uid://c2aqlr28m4cvc" path="res://scenes/Item/collectible_item_prefab.tscn" id="2_8d7w2"]
 [ext_resource type="PackedScene" uid="uid://dhhn1rh24dtco" path="res://scenes/adel/playable_adel.tscn" id="3_xlwwx"]
-[ext_resource type="PackedScene" uid="uid://u51knug3082i" path="res://scenes/testing/Enemies/enemy.tscn" id="5_88nui"]
-[ext_resource type="PackedScene" uid="uid://cewpn5rhropd5" path="res://scenes/enemy/s1e1.tscn" id="8_pekpq"]
+[ext_resource type="PackedScene" path="res://scenes/enemy/spine_enemy.tscn" id="8_pekpq"]
 [ext_resource type="PackedScene" uid="uid://campfire01" path="res://scenes/Mechanic/campfire.tscn" id="9_pekpq"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_kj3p2"]
@@ -32,10 +31,6 @@ shape = SubResource("RectangleShape2D_kj3p2")
 [node name="CollectibleItem" parent="." unique_id=818450812 instance=ExtResource("2_8d7w2")]
 position = Vector2(43, 869)
 
-[node name="Enemy" parent="." unique_id=1852725077 instance=ExtResource("5_88nui")]
-visible = false
-position = Vector2(1232, 792)
-
 [node name="Wall" type="StaticBody2D" parent="." unique_id=439899073]
 collision_mask = 0
 
@@ -58,7 +53,7 @@ position = Vector2(595, 902)
 position = Vector2(2035, 829)
 shape = SubResource("RectangleShape2D_2jrn0")
 
-[node name="S1e1" parent="." unique_id=1475965731 instance=ExtResource("8_pekpq")]
+[node name="SpineEnemy" parent="." unique_id=1475965731 instance=ExtResource("8_pekpq")]
 position = Vector2(1960, 664)
 
 [node name="PlayableAdel" parent="." unique_id=1485460165 instance=ExtResource("3_xlwwx")]

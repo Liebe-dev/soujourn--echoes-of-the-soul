@@ -51,6 +51,11 @@ func _run() -> void:
 	if not OS.get_user_data_dir().contains("CodexEntrySave20261014"):
 		get_tree().quit(2)
 		return
+	if not SaveManager.has_save():
+		var data: Dictionary = SaveManager._default_data()
+		data.scene_path = SaveManager.NEW_GAME_SCENE
+		data.checkpoint_id = "title_fixture"
+		check(SaveManager._write_slot_to_disk(1, data), "isolated Continue fixture is available")
 	menu = load("res://scenes/UI/title_screen.tscn").instantiate()
 	menu.prompt_exit_duration = 0.02
 	menu.menu_fade_duration = 0.02
@@ -112,8 +117,8 @@ func _run() -> void:
 	check(is_equal_approx(menu.settings_menu.music_slider.value, 0.4), "reopening Settings resyncs bus volume")
 	await click(menu.settings_menu.back_btn)
 	check(menu.state == menu.State.MAIN_MENU and option.has_focus(), "Back closes Settings and restores focus")
-	await click(start)
-	check(menu.state == menu.State.SLOTS and menu.slot_menu.visible, "actual Start click opens extracted slot scene")
+	await click(menu.get_node("Interface/Root/MainMenu/Continue"))
+	check(menu.state == menu.State.SLOTS and menu.slot_menu.visible, "actual Continue click opens extracted slot scene")
 	check(menu.slot_menu.slot_list.get_child_count() == SaveManager.MAX_SAVE_SLOTS, "slot scene renders every save summary")
 	await capture("slots")
 	await key(KEY_ESCAPE)
@@ -137,6 +142,18 @@ func _run() -> void:
 	for bus in ["Music", "SFX"]:
 		AudioServer.set_bus_volume_db(AudioServer.get_bus_index(bus), 0.0)
 		AudioServer.set_bus_mute(AudioServer.get_bus_index(bus), false)
+	var before_start: PackedByteArray = FileAccess.get_file_as_bytes(SaveManager.get_save_path(1))
+	await click(start)
+	check(menu.state == menu.State.TRANSITIONING and not menu.slot_menu.visible, "actual New Game click bypasses slot selection")
+	await get_tree().scene_changed
+	await frames(5)
+	check(get_tree().current_scene.scene_file_path == SaveManager.NEW_GAME_SCENE and not SaveManager.has_active_save_slot(), "New Game enters gameplay without owning a save slot")
+	check(FileAccess.get_file_as_bytes(SaveManager.get_save_path(1)) == before_start, "New Game preserves existing save bytes")
+	SaveManager.return_to_title()
+	await get_tree().scene_changed
+	await frames(3)
+	menu = get_tree().current_scene
+	menu._show_main_menu()
 	menu.menu_fade_duration = 0.02
 	menu.quit_fade_duration = 0.02
 	menu.quit_audio_duration = 0.02

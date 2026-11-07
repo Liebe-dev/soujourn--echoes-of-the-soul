@@ -7,12 +7,13 @@ const SlotStore = preload("res://scenes/Mechanic/save_slot_store.gd")
 const LEGACY_SAVE_PATH := SlotStore.LEGACY_SAVE_PATH
 const SAVE_VERSION := SlotStore.SAVE_VERSION
 const MAX_SAVE_SLOTS := SlotStore.MAX_SAVE_SLOTS
+const NO_SAVE_SLOT := 0
 
 signal save_written(slot: int)
 signal checkpoint_changed(checkpoint_id: String)
 
 var pending_continue := false
-var active_slot := 1
+var active_slot := NO_SAVE_SLOT
 var last_error := ""
 var _changing_scene := false
 var _session_selected := false
@@ -59,11 +60,24 @@ func needs_save_confirmation(slot: int) -> bool:
 func get_checkpoint_id() -> String:
 	return str(_data.get("checkpoint_id", ""))
 
-func start_new_game(slot: int, allow_overwrite: bool = false) -> bool:
+func has_active_save_slot() -> bool:
+	return _session_selected and SlotStore.is_valid_slot(active_slot)
+
+func get_entry_scene_path(is_new_game: bool, slot: int = -1) -> String:
 	last_error = ""
-	if _changing_scene or not SlotStore.is_valid_slot(slot): return _fail("Cannot start this slot.")
-	if has_save_in_slot(slot) and not allow_overwrite:
-		return _fail("Confirm replacement of slot %d first." % slot)
+	if _changing_scene:
+		_fail("A scene transition is already running.")
+		return ""
+	if is_new_game: return NEW_GAME_SCENE
+	var data := _read_slot_file(slot)
+	if data.is_empty():
+		_fail("Slot %d is empty, invalid, or its scene is unavailable." % slot)
+		return ""
+	return str(data.scene_path)
+
+func start_new_game() -> bool:
+	last_error = ""
+	if _changing_scene: return _fail("A scene transition is already running.")
 	var packed := _load_scene(NEW_GAME_SCENE)
 	if packed == null: return false
 	var scene := packed.instantiate()
@@ -75,15 +89,12 @@ func start_new_game(slot: int, allow_overwrite: bool = false) -> bool:
 	data.scene_path = NEW_GAME_SCENE
 	data.checkpoint_id = "start"
 	data.spawn_position = {"x": spawn.global_position.x, "y": spawn.global_position.y}
-	data.saved_at = Time.get_datetime_string_from_system()
-	var disk_change := SlotStore.write_new_game(slot, data, PlayerProgress.config)
-	if not disk_change.error.is_empty():
-		scene.free()
-		return _fail(disk_change.error)
 	var previous_data := _data
 	var previous_slot := active_slot
 	var previous_selected := _session_selected
-	_activate(data, slot)
+	var was_paused := get_tree().paused
+	# The start checkpoint belongs to this run in memory, with no disk slot yet.
+	_activate(data, NO_SAVE_SLOT)
 	pending_continue = true
 	_changing_scene = true
 	get_tree().paused = false
@@ -94,9 +105,8 @@ func start_new_game(slot: int, allow_overwrite: bool = false) -> bool:
 		pending_continue = false
 		_activate(previous_data, previous_slot)
 		_session_selected = previous_selected
-		SlotStore.rollback_new_game(slot, disk_change)
-		return _fail("Could not enter the new game. Previous save retained in backup.")
-	save_written.emit(slot)
+		get_tree().paused = was_paused
+		return _fail("Could not enter the new game.")
 	return true
 
 func return_to_title() -> bool:
@@ -299,7 +309,8 @@ func delete_save() -> void:
 	# Explicit legacy API only; New Game never calls this.
 	for slot in range(1, MAX_SAVE_SLOTS + 1): delete_save_slot(slot)
 	_data = _default_data()
-	active_slot = 1
+	active_slot = NO_SAVE_SLOT
+	_session_selected = false
 
 func delete_save_slot(slot: int) -> void:
 	if not SlotStore.is_valid_slot(slot): return
@@ -307,7 +318,7 @@ func delete_save_slot(slot: int) -> void:
 	if active_slot == slot: _data = _default_data()
 
 func sync_progress_to_active_slot() -> bool:
-	if needs_save_confirmation(active_slot): return _fail("Select a save slot before writing progression.")
+	if not has_active_save_slot(): return _fail("Rest at a campfire and select a save slot before writing progression.")
 	var data := _data.duplicate(true)
 	PlayerProgress.write_to_save_data(data)
 	if not _write_slot_to_disk(active_slot, data): return false
@@ -316,7 +327,7 @@ func sync_progress_to_active_slot() -> bool:
 
 func commit_attribute_allocation(allocation: Dictionary) -> bool:
 	last_error = ""
-	if _changing_scene or needs_save_confirmation(active_slot):
+	if _changing_scene or not has_active_save_slot():
 		return _fail("Rest at a campfire and select a save slot before upgrading.")
 	var candidate: Dictionary = PlayerProgress.allocation_candidate(allocation)
 	if candidate.is_empty(): return _fail("Allocation is invalid or no longer affordable.")

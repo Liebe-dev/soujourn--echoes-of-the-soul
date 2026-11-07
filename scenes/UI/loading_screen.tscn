@@ -1,0 +1,60 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://scenes/UI/loading_screen.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://asset/BG/BG.png" id="2_background"]
+
+[sub_resource type="StyleBoxFlat" id="Track"]
+bg_color = Color(1, 1, 1, 0.04)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(1, 1, 1, 0.85)
+
+[sub_resource type="StyleBoxFlat" id="Fill"]
+bg_color = Color(1, 1, 1, 1)
+
+[node name="LoadingScreen" type="CanvasLayer"]
+process_mode = 3
+layer = 100
+script = ExtResource("1_script")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="TextureRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture = ExtResource("2_background")
+expand_mode = 1
+stretch_mode = 6
+
+[node name="Progress" type="ProgressBar" parent="Root"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -352.0
+offset_top = -52.0
+offset_right = -72.0
+offset_bottom = -40.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+theme_override_styles/background = SubResource("Track")
+theme_override_styles/fill = SubResource("Fill")
+max_value = 1.0
+step = 0.001
+show_percentage = false

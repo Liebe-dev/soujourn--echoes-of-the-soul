@@ -1,7 +1,48 @@
 # Bàn giao animation / VFX combat Adel
 
-**Cập nhật: 03/11/2026, Asia/Saigon; giữ các snapshot 26–31/10 bên dưới.** Project: `D:/Godot Project/soujourn--echoes-of-the-soul`.
+**Cập nhật 06/11/2026 (Asia/Saigon).** Project `D:/Godot Project/soujourn--echoes-of-the-soul`.
 File này ở `D:/Godot Project/soujourn--echoes-of-the-soul/Context/Tai_lieu_ban_dao/HANDOFF_anim.md`.
+
+## Cập nhật 06/11/2026 — rig Adel, texture mắt và việc cần tiếp quản
+
+Đọc mục này trước. Các mục 03/11 trở về trước lưu trạng thái, quyết định và bằng chứng của từng đợt. Đối chiếu scene và source hiện tại nếu khác snapshot. Trong mục này, `P` là thư mục project ở trên và `O` là `D:/Adobe Photoshop/Sojourn Echoes of the Soul/Output preview/`.
+
+### Mục tiêu và quyết định đã chốt
+
+- Việc gần nhất là xác định vì sao sau khi đặt key đổi texture trong `get_up`, khi xem anim khác Adel vẫn hiện ảnh nhắm mắt. Người dùng yêu cầu “chưa làm gì hết” ở lượt trao đổi về texture. AI đã kiểm tra file và hướng dẫn thao tác trong editor. Lượt 06/11 này chỉ ghi bàn giao.
+- Combat đã duyệt gồm Q brush hai răng cưa, dấu chém trúng Saber 1–4, máu bám Player và particles V3. Giữ hình dáng, thứ tự hiển thị và tuning đã duyệt khi tiếp tục việc khác. Đổi art/VFX theo quy trình preview → người dùng duyệt → tích hợp. Nguồn chỉnh thông số hiện hành là [huong_dan_tuy_chinh.md](../Bao_cao_ky_thuat/huong_dan_tuy_chinh.md).
+- Hệ vũ khí vẫn ở mức plan. Mechanical Combat Sword thuộc Đao. Bảy nhóm gameplay là Đại kiếm (rìu chiến), Kiếm dài, Đao, Dao, Cung (nỏ, súng), Thương (kích) và Khiên. Người dùng đã chốt **moveset có Q mặc định, mỗi món có thể có Q riêng**. Cách chia biến thể moveset và tách vũ khí khỏi FBF vẫn là đề xuất. Chưa có lệnh tạo Resource/equip, sửa runtime hay tách asset.
+
+### Việc đã có trong Git và source đã xác minh
+
+- Trước khi ghi bàn giao, working tree sạch, `main` và ref local `origin/main` cùng ở `7044905`. Đây là so sánh ref có sẵn, chưa fetch remote. Commit `9e2c95c` (`hitbox hotfix`, 03/11) đã nằm trong lịch sử HEAD. Các dòng “chưa commit” ở snapshot cũ nói về thời điểm của snapshot đó.
+- Commit `dd256d4` (`new anim`, 06/11) đã lưu scene rig, PSD và PNG mắt nhắm kèm file import. Sau đó `890ef8c` gom xác nhận damage, `71314aa` gom xử lý input đệm sau dash và `7044905` tách lưu slot khỏi checkpoint flow. Đây là các commit đã có khi tiếp quản.
+- Scene [adel spine action use.tscn](../../asset/Character/Adel/adel%20spine%20action%20use.tscn) được instance ở `PlayableAdel/SpinePivot/SpineRig` trong [playable_adel.tscn](../../scenes/adel/playable_adel.tscn). Sprite trong ảnh lỗi nằm ở `Skeleton2D/hip/torso2/torso1/head/head`. Node `Skeleton2D/hip/torso[merge]/head/head[merge]` thuộc nhánh rig khác. FBF dùng `TestAttackSprite` với track riêng.
+- Track rời rạc `Skeleton2D/hip/torso2/torso1/head/head:texture` có các key sau trong scene đã lưu. Sprite nào thực sự xuất hiện còn tùy visibility ở pose đó.
+
+  | Clip hoặc thuộc tính | Giá trị đã lưu |
+  | --- | --- |
+  | `get_up` | Một key ở `0.0s`, ảnh mở mắt `head[merge]_0002.png` |
+  | `lie_back` | Một key ở `0.0s`, ảnh nhắm mắt `head[merge] eye close.png` |
+  | `RESET` và Texture mặc định trên sprite `head` | Ảnh nhắm mắt. Key `RESET` ở `0.0s` |
+  | ` jump_start` (có khoảng trắng đầu), `dash`, `dash skid`, `dash_air`, `jump_air (fall)`, `jump_attack(air)`, `loot`, `rest`, `run`, `skid`, `walk` | Key ảnh mở mắt ở `0.0s` trên đúng sprite này. `idle` thiếu track texture của sprite này |
+
+- `get_up` và `lie_back` đã có trong AnimationLibrary của rig. Tìm tên clip trong script và scene chưa thấy gameplay gọi hai clip này. AnimationTree lưu `active = false` và state machine trong rig chỉ có nhánh nhảy. Code hoạt ảnh của Adel dùng AnimationPlayer trong [adel_animation_component.gd](../../scenes/adel/components/adel_animation_component.gd).
+- Q vẫn quét `PlayableAdel/CollisionShape2D` trong `_first_enemy_contact()` để dừng khi hurtbox thân chạm hurtbox quái. Combo 1–4 và damage lúc Q impact dùng chung `AttackHitbox/CollisionShape2D`, size local `(163.2899, 97)`, position local `(99.35505, 15.5)` trong scene. `WeaponHolder/Saber` là instance vũ khí. `WeaponPivot/SaberHitbox` là controller cửa sổ đánh. Xem [saber_weapon_skill.gd](../../scenes/adel/components/saber_weapon_skill.gd) và hướng dẫn tuning.
+
+### Cách đã thử, điều chưa biết và kết quả kiểm tra
+
+- **Hiện tượng người dùng quan sát trong editor.** Sau khi đổi Texture trên sprite dùng chung và key riêng clip đang xem, ảnh mới còn hiện khi chuyển clip. Ảnh lúc báo lỗi có dấu `*` chưa lưu. Bản lưu được đọc ở lượt trả lời khi đó chưa có track `head:texture`. Commit `dd256d4` cho thấy các key hiện tại như bảng trên. Chưa xác minh hiện tượng còn tái diễn sau commit.
+- **Giải thích đã đối chiếu tài liệu Godot.** Clip thiếu track có thể giữ giá trị sprite từ clip trước. Key `Visible` bật/tắt cả sprite. `RESET` lưu giá trị mặc định và **Edit → Apply Reset** áp giá trị đó khi xem trong editor. Với file hiện tại, Apply Reset sẽ đưa sprite này về **ảnh nhắm mắt**. Đặt mặc định mở mắt hoặc thêm key mở mắt vào mốc muốn mở mắt trong `get_up` là hướng dẫn đã đưa ra, chưa được AI áp dụng. Chưa biết pose mắt mặc định người dùng muốn, mắt cần mở ở mốc nào hoặc clip cần nối vào luồng gameplay nào. [Track thiếu trong AnimationMixer](https://docs.godotengine.org/en/stable/classes/class_animationmixer.html#class-animationmixer-property-deterministic) · [RESET trong editor](https://docs.godotengine.org/en/stable/tutorials/animation/introduction.html#using-reset-tracks)
+- **Các hướng combat đã thay thế.** Quét AttackHitbox để dừng Q khiến Player có thể dừng trước khi hai thân chạm. Chỉ đọc trạng thái hitbox cuối frame làm combo bỏ lỡ cửa sổ đánh ngắn khi update vượt cả cửa sổ. Bản sửa dùng lọc hướng, quét hurtbox thân cho Q và sự kiện mở cửa sổ combo. Xem snapshot 03/11 và 31/10 để biết test và giới hạn.
+- **Kiểm tra trong lượt bàn giao.** Đã đọc Git/scene/script, đối chiếu đường dẫn và mở báo cáo lịch sử. Q 03/11 đạt **704 kiểm tra headless và 12 kiểm tra native, 0 failures** trong project thử cách ly. Đây là kết quả của bản kiểm 03/11, trước khi đổi rig và gom damage ngày 06/11. Chưa chạy lại game, test combat hay tái hiện chuyển clip trên checkout 06/11.
+
+### File, tài nguyên và bước tiếp theo
+
+- **Texture và nguồn rig.** `P/asset/Character/Adel/layers/Adel spine action use/head[merge]_0002.png` và `head[merge] eye close.png` cùng thư mục. PSD nguồn là `P/asset/Character/Adel/Adel spine action use.psd`. Ảnh editor lúc báo lỗi ở `C:/Users/xuank/AppData/Local/Temp/codex-clipboard-a055895b-a4a2-44f7-b8bc-9a9488ab350a.png`, còn thấy khi bàn giao và có thể bị dọn.
+- **Bằng chứng combat.** `O/adel-q-hurtbox-stop-2026-11-03/verification.json`, `native/verification.json` và `native/{left,right}_{before,contact}.png` trong cùng thư mục. Log/snapshot combo 31/10 ở `O/adel-hitbox-handoff-2026-10-31/`. Ref art trong [refs_anim](refs_anim/). Preview và bằng chứng ngoài repo có thể tìm theo các snapshot VFX phía dưới.
+- **Nguồn để khảo sát tách FBF.** `D:/Adobe Photoshop/Sojourn Echoes of the Soul/Project Adel/Animation combat/` có `saber_moveset.psd`, `saber_moveset 12.psd`, các PNG rời và sheet. Runtime xem `P/asset/Character/Adel/Saber attack/`, `TestAttackSprite` trong scene rig và [weapon_data.gd](../../scenes/adel/weapon/weapon_data.gd) (vẫn dùng `saber` / `Saber`). Đã thấy file, chưa kiểm layer của PSD. Đề xuất thử một đòn Đao với hai vũ khí trên cùng FBF thân chưa được duyệt hoặc chạy thử.
+- **Khi tiếp quản.** Đọc [AGENTS.md](AGENTS.md), mục này và phần liên quan của [HANDOFF.md](HANDOFF.md). Kiểm tra branch, diff và scene đã lưu trước khi sửa. Nếu tiếp tục chuyện texture, xác định clip và pose mắt người dùng muốn, rồi kiểm tra `lie_back → get_up → idle/run/dash` trong editor hoặc luồng gameplay thực nếu đã nối. Dùng đúng đường dẫn sprite và phân biệt kết quả editor với runtime. Nếu tiếp tục nhánh vũ khí, ưu tiên khảo sát PSD/layer và làm rõ ngoại lệ theo moveset. Chỉ tách asset hoặc làm prototype khi có yêu cầu thực hiện.
 
 ## Hiện hành 03/11/2026 — Q dừng khi hurtbox chạm hurtbox
 

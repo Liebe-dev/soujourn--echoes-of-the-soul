@@ -202,8 +202,7 @@ func _sit_and_save() -> void:
 	_player.play_rest_animation()
 	_player.global_position.x = global_position.x + rest_offset if face_left else global_position.x - rest_offset
 	SaveManager.heal_player_full()
-	var saved := SaveManager.save_at_campfire(self)
-	var result_message := "Saved" if saved else SaveManager.last_error
+	# Resting heals; saving requires Save and an explicit slot selection.
 	if cinematic_camera:
 		cinematic_camera.enabled = true
 		cinematic_camera.global_position = global_position
@@ -214,7 +213,6 @@ func _sit_and_save() -> void:
 	_phase = Phase.RESTING
 	rest_menu.show()
 	_set_cursor_ready(true)
-	_show_saved_flash(result_message)
 
 func _stand_up() -> void:
 	if _phase != Phase.RESTING or not _player_is_live(): return

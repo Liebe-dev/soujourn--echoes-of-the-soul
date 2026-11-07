@@ -110,7 +110,6 @@ target, and checks `sight_obstacle_mask` (default terrain layer 1). Walls must
 have enabled physics collision on a selected layer; purely visual walls do not
 block sight. Detection is omnidirectional within range. While occluded, enemies
 remember only the last seen position, then forget after `chase_memory`.
-The older `s_1e_1.gd` prototype also uses this sight check and last seen position.
 
 Flee starts at 20% health in FSM, runs once and returns to combat at the cap or
 when blocked. Safe distance (600) only limits starting retreat.

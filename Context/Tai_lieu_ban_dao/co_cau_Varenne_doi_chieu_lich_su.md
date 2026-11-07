@@ -138,3 +138,30 @@ Quyết định cần ưu tiên ở lần thảo luận kế tiếp là tư các
 ## Phạm vi công việc đã thực hiện
 
 Lượt tiếp quản này đọc và đối chiếu các nguồn nêu trên, nghiên cứu lịch sử theo mức truy cập ghi trong phần nguồn, và bổ sung đề xuất vào duy nhất tài liệu Markdown này. Giữ nguyên DOCX/PDF do người dùng cung cấp, hai bản An Châu, hai file bàn giao và code/scene. Không render DOCX mới, không chạy game, không kiểm thử quest, Observe, AI boss hay gameplay loop; những phần đó không được xem là đã triển khai hoặc nghiệm thu từ việc kiểm tra tài liệu.
+
+
+## Cập nhật 06/11/2026: cơ cấu theo ba cột (đề xuất, chưa vào Word)
+
+**Căn cứ làm việc do người dùng chọn ngày 06/11:** Thống đốc đứng đầu chính quyền An Châu; Varenne là liên hiệp công nghiệp hưởng đặc quyền. Người dùng chỉ chọn mô hình làm cơ sở thảo luận. Chưa chốt: ai bổ nhiệm Thống đốc, ai cấp đặc quyền, điều kiện thu hồi, trách nhiệm trước Old Kroy. Không bịa đạo luật hay hiệp ước cho các chỗ này.
+
+**Mức kiểm chứng:** tách quyền công và doanh nghiệp được hỗ trợ bởi đối chiếu 1911 ở trên (Sở Tài chính / Thương chính / Công ty Than là các tổ chức khác nhau). Các chức và tầng dưới đây **không** có căn cứ sử liệu riêng; đây là **phỏng tác cho Varenne**. Hạn chế: chưa có điều lệ công ty hay niên giám.
+
+### Bảng phân cột (chỉ chức danh; thứ tự trong cột chưa phải quan hệ chỉ huy)
+
+| Chính quyền An Châu | Liên hiệp Varenne | Vũ lực / quyền lực cá nhân |
+|---|---|---|
+| Thống đốc An Châu | (Người điều hành Varenne tại An Châu — **chưa có tên, chưa chốt có tạo hay không**) | La Clôture de Fer (bốn người, riêng của Obscur; không xếp tầng) |
+| Chánh văn phòng | Giám đốc nhà máy; Quản đốc khu vực | Chỉ huy bảo an (**cần chọn: công quyền hay bảo vệ doanh nghiệp**) |
+| Giám đốc Sở Liêm phóng (Obscur, nếu giữ) | Kỹ sư trưởng; Chủ sự kế toán; Quản kho; Trưởng đoàn vận tải | |
+| Phụ trách cấp phép/kiểm tra mỏ (tên chưa chốt, thay "Giám đốc Sở Mỏ") | Đốc công; Thủ quỹ; Kỹ thuật viên | |
+| Phụ trách công trình công cộng (Công chính) | Cai phu | |
+| Phụ trách ngân sách công; Nhân viên thu phí (chỉ nếu là thuế/lệ phí công) | | |
+
+### Điều cần người dùng quyết định tiếp
+1. Có tạo chức điều hành Varenne ở An Châu không, hay dùng nhân vật sẵn có?
+2. Chánh thanh tra là thanh tra công vụ, an toàn mỏ hay kiểm toán nội bộ Varenne (chưa đặt vào cột nào).
+3. Chỉ huy bảo an thuộc công quyền hay doanh nghiệp.
+4. Đại diện Kenkyokara: chưa gán (đại diện lợi ích trong Varenne / đầu mối cung ứng / liên lạc chính trị).
+5. Năm và xứ mẫu nếu muốn sát sử (đề xuất: Nam Kỳ trước 9/3/1945), rồi tìm công báo/niên giám.
+
+Bảng này chưa thay bảng năm tầng trong DOCX.

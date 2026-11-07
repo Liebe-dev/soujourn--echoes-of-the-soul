@@ -1,5 +1,6 @@
 extends Node2D
 ## Owns title navigation; SaveManager owns all save I/O.
+const LOADING_SCREEN := preload("res://scenes/UI/loading_screen.tscn")
 enum State { INTRO, AWAITING_START, REVEALING_MENU, MAIN_MENU, SLOTS, SETTINGS, TRANSITIONING }
 
 @export_group("Title Timing")
@@ -18,6 +19,7 @@ enum State { INTRO, AWAITING_START, REVEALING_MENU, MAIN_MENU, SLOTS, SETTINGS, 
 @onready var bgm_player: AudioStreamPlayer = $Audio/Music
 @onready var settings_menu = $Interface/Root/SettingsMenu
 @onready var slot_menu = $Interface/Root/SaveSlotMenu
+@onready var entry_status: Label = $Interface/Root/EntryStatus
 @onready var _start_button: Button = $Interface/Root/MainMenu/Start
 @onready var _continue_button: Button = $Interface/Root/MainMenu/Continue
 @onready var _option_button: Button = $Interface/Root/MainMenu/Option
@@ -26,7 +28,6 @@ enum State { INTRO, AWAITING_START, REVEALING_MENU, MAIN_MENU, SLOTS, SETTINGS, 
 @onready var _start_sound: AudioStreamPlayer = $Audio/StartSound
 
 var state: State = State.INTRO
-var _slot_mode: StringName = &"new"
 var _visual_tween: Tween
 
 func _ready() -> void:
@@ -55,6 +56,7 @@ func _enter_state(next: State) -> void:
 	state = next
 	press_start_label.visible = next in [State.AWAITING_START, State.REVEALING_MENU]
 	menu_buttons.visible = next in [State.MAIN_MENU, State.SETTINGS]
+	entry_status.visible = next == State.MAIN_MENU and not entry_status.text.is_empty()
 	fade_rect.visible = next in [State.INTRO, State.TRANSITIONING]
 	fade_rect.mouse_filter = Control.MOUSE_FILTER_STOP if next == State.TRANSITIONING else Control.MOUSE_FILTER_IGNORE
 	if next != State.SETTINGS: settings_menu.hide()
@@ -100,38 +102,60 @@ func _show_main_menu(focus_button: Button = null) -> void:
 	focus_button.grab_focus()
 
 func _on_start_pressed() -> void:
-	if state == State.MAIN_MENU: _open_slot_menu(&"new")
+	if state == State.MAIN_MENU: await _begin_game(true)
 
 func _on_continue_pressed() -> void:
-	if state == State.MAIN_MENU and not _continue_button.disabled: _open_slot_menu(&"continue")
+	if state == State.MAIN_MENU and not _continue_button.disabled: _open_slot_menu()
 
-func _open_slot_menu(mode: StringName) -> void:
-	_slot_mode = mode
+func _open_slot_menu() -> void:
 	_enter_state(State.SLOTS)
 	var summaries: Array[Dictionary] = []
 	for slot in range(1, SaveManager.MAX_SAVE_SLOTS + 1):
 		summaries.append(SaveManager.get_slot_info(slot))
-	slot_menu.open(mode, summaries)
+	slot_menu.open(&"continue", summaries)
 
 func _close_slot_menu() -> void:
 	if state == State.SLOTS: _show_main_menu()
 
-func _begin_selected_game(slot: int, overwrite: bool) -> void:
+func _begin_selected_game(slot: int, _overwrite: bool) -> void:
 	if state != State.SLOTS: return
+	await _begin_game(false, slot)
+
+func _begin_game(is_new_game: bool, slot: int = -1) -> void:
+	entry_status.text = ""
 	_enter_state(State.TRANSITIONING)
-	slot_menu.set_busy(true)
+	var content: Control = menu_buttons if is_new_game else slot_menu
+	content.show()
+	if not is_new_game: slot_menu.set_busy(true)
 	var original_volume := bgm_player.volume_db
 	fade_rect.modulate.a = 0.0
 	_visual_tween = create_tween().set_parallel(true)
-	_visual_tween.tween_property(slot_menu, "modulate:a", 0.0, game_fade_duration)
+	_visual_tween.tween_property(content, "modulate:a", 0.0, game_fade_duration)
 	_visual_tween.tween_property(fade_rect, "modulate:a", 1.0, game_fade_duration)
 	_visual_tween.tween_property(bgm_player, "volume_db", -50.0, game_fade_duration)
 	await _visual_tween.finished
-	var entered: bool = SaveManager.start_new_game(slot, overwrite) if _slot_mode == &"new" else SaveManager.continue_game(slot)
+	var path := SaveManager.get_entry_scene_path(is_new_game, slot)
+	var loading: CanvasLayer
+	var prepared: PackedScene
+	if not path.is_empty():
+		loading = LOADING_SCREEN.instantiate()
+		get_tree().root.add_child(loading)
+		prepared = await loading.prepare_scene(path)
+		if prepared == null: SaveManager.last_error = loading.last_error
+		else: loading.watch_scene(path)
+	# Keep `prepared` referenced until SaveManager reuses the loaded scene cache.
+	var entered := false
+	if prepared != null:
+		entered = SaveManager.start_new_game() if is_new_game else SaveManager.continue_game(slot)
 	if not entered:
+		if loading != null: loading.queue_free()
 		bgm_player.volume_db = original_volume
-		_open_slot_menu(_slot_mode)
-		slot_menu.status_label.text = SaveManager.last_error
+		if is_new_game:
+			entry_status.text = SaveManager.last_error
+			_show_main_menu()
+		else:
+			_open_slot_menu()
+			slot_menu.status_label.text = SaveManager.last_error
 
 func _on_option_pressed() -> void:
 	if state != State.MAIN_MENU: return

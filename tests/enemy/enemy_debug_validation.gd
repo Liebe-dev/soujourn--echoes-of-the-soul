@@ -128,7 +128,7 @@ func run() -> void:
 	await frames(8)
 	check(fresh.position.y > start_y and is_equal_approx(fresh.position.x, start_x), "new AI-disabled enemy falls naturally without walking")
 	check(fresh._debug_ai_was_disabled and not fresh._window_open, "spawned enemies immediately inherit the AI toggle")
-	var wobtear = load("res://scenes/enemy/wobtear_enemy.tscn").instantiate()
+	var wobtear = load("res://scenes/enemy/spine_enemy.tscn").instantiate()
 	wobtear.position = origin + Vector2(850, 0)
 	scene.add_child(wobtear)
 	await frames(5)

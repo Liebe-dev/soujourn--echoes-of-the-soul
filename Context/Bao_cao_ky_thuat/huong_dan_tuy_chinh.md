@@ -924,7 +924,7 @@ Debug: mở `res://scenes/UI/hud.tscn` → **SentinelDebugControls**. `debug_key
 
 ### Chọn đúng scene
 
-Enemy chiến đấu hiện hành: `res://scenes/enemy/spine_enemy.tscn` → **SpineEnemy**. Rig animation: `res://scenes/enemy/enemy_spine.tscn` → AnimationPlayer. `wobtear_enemy.tscn` là EnemyBase tuần tra tối thiểu. Map có thể override từng instance; sửa scene gốc để đổi chung, sửa instance để đổi riêng.
+Enemy chiến đấu hiện hành: `res://scenes/enemy/spine_enemy.tscn` → **SpineEnemy**. Rig animation: `res://scenes/enemy/enemy_spine.tscn` → AnimationPlayer. Map có thể override từng instance; sửa scene gốc để đổi chung, sửa instance để đổi riêng.
 
 ### FSM và Utility AI — cập nhật sáng 30/10/2026
 
@@ -953,7 +953,7 @@ Mở **Utility Profile → Response Curves** để chỉnh đáp ứng. Các đi
 
 Trong **Utility Profile → Action Weights**, các mặc định script lần lượt là `melee_weight = 1`, `leap_weight = 0.9`, `chase_weight = 0.65`, `flee_weight = 1`, `patrol_weight = 1`, `idle_weight = 1`; trọng số miền 0–1, không có đơn vị. `full_support_allies = 3` đồng đội là mức bão hòa hỗ trợ. Đổi trọng số không cấp quyền tấn công khi khuất tầm nhìn hoặc sai tầm. Khi phản công bắt buộc đã bật, scorer loại Flee/Idle không phù hợp và ưu tiên đòn hợp lệ; chọn ngẫu nhiên không được cho quái chạy lại ngay.
 
-**Detection → Sight Obstacle Mask** (`sight_obstacle_mask`) mặc định script **1**, không override scene. Chọn các lớp vật lý của tường/địa hình; helper `enemy_sight.gd::can_see()` dùng tia giữa hai tâm collider và bỏ qua Enemy/target. Tường chỉ có hình ảnh, không có collider trên lớp được chọn sẽ không chặn phát hiện. Script prototype `s_1e_1.gd` cũng có export này mặc định 1, không override hiện tại. Cơ chế hiện chưa là hình nón FOV hay tìm đường quanh tường.
+**Detection → Sight Obstacle Mask** (`sight_obstacle_mask`) mặc định script **1**, không override scene. Chọn các lớp vật lý của tường/địa hình; helper `enemy_sight.gd::can_see()` dùng tia giữa hai tâm collider và bỏ qua Enemy/target. Tường chỉ có hình ảnh, không có collider trên lớp được chọn sẽ không chặn phát hiện. Cơ chế hiện chưa là hình nón FOV hay tìm đường quanh tường.
 
 ### Chạy trốn và phản công — Survival
 
@@ -974,7 +974,7 @@ Hết thời gian trên đường an toàn: cấp đúng một opener mới, qua
 ### HP, EXP và hành vi
 
 - **Health:** `max_health`, `exp_reward` (kế thừa EnemyBase).
-- **Currency Rewards:** `coin_reward = 5` Coin/vòng đời, `soul_reward = 1` Soul/vòng đời là **mặc định script thử nghiệm** trong `enemy_base.gd`. `spine_enemy.tscn`, `wobtear_enemy.tscn` và các instance hiện không override hai trường; để chỉnh chọn root enemy → nhóm này. Nhận một lần lúc chết hợp lệ, không có đơn vị thời gian. Reload/respawn enemy tạo vòng đời mới; chưa lưu xác chết lâu dài. Enemy legacy dùng script khác không tự nhận thưởng tiền.
+- **Currency Rewards:** `coin_reward = 5` Coin/vòng đời, `soul_reward = 1` Soul/vòng đời là **mặc định script thử nghiệm** trong `enemy_base.gd`. `spine_enemy.tscn` và các instance hiện không override hai trường; để chỉnh chọn root enemy → nhóm này. Nhận một lần lúc chết hợp lệ, không có đơn vị thời gian. Reload/respawn enemy tạo vòng đời mới; chưa lưu xác chết lâu dài. Enemy legacy dùng script khác không tự nhận thưởng tiền.
 - **Patrol:** `speed`, `patrol_range`, `walk_duration`, `idle_duration`, `initial_direction`. Đây là đi tuần, không phải tốc độ đuổi.
 - **Detection:** `detection_distance`, `disengage_distance`, `chase_memory`, `reset_opener_on_disengage`, `run_speed`. Nên để disengage lớn hơn detect để tránh đổi trạng thái liên tục. Walk → detect player → Run là chuyển tiếp animation, không tự rút ngắn bằng cách tăng run_speed.
 - **Opening Leap:** `leap_range`, `windup_time`, `jump_speed`, `max_leap_speed`, `landing_time`, `leap_damage`.
@@ -1041,30 +1041,6 @@ Scene `res://scenes/enemy/spine_enemy.tscn` → **SpineEnemy**.
 **Rig Alignment**
 
 - **Animation Offsets** (`animation_offsets`): scene gốc `Dictionary theo clip; mở Inspector để xem từng mục`; script `Dictionary theo clip; mở Inspector để xem từng mục`.
-
-#### Wobtear
-
-Scene `res://scenes/enemy/wobtear_enemy.tscn` → **WobtearEnemy**.
-
-
-**Health**
-
-- **Max Health** (`max_health`): scene gốc `20`; script `20`.
-- **Exp Reward** (`exp_reward`): scene gốc `30`; script `30`.
-
-**Patrol**
-
-- **Speed** (`speed`): scene gốc `150`; script `150`.
-- **Patrol Range** (`patrol_range`): scene gốc `200`; script `200`.
-- **Walk Duration** (`walk_duration`): scene gốc `5`; script `5`.
-- **Idle Duration** (`idle_duration`): scene gốc `5`; script `5`.
-- **Initial Direction** (`initial_direction`): scene gốc `1`; script `1`.
-
-**Animation**
-
-- **Animation Idle** (`animation_idle`): scene gốc `&"idle"`; script `&"idle"`.
-- **Animation Walk** (`animation_walk`): scene gốc `&"walking"`; script `&"walking"`.
-- **Sprite Faces Left** (`sprite_faces_left`): scene gốc `true`; script `true`.
 
 
 ### Vùng đánh và vùng nhận hit
@@ -1287,6 +1263,73 @@ Scene `res://scenes/Mechanic/campfire.tscn` → **Campfire**.
 
 ### Vào game và save
 
+**Loading New Game/Continue — 07/11/2026:** sau fade vào game, title hiện
+`res://scenes/UI/loading_screen.tscn` với nguyên texture **`res://asset/BG/BG.png`**,
+không vẽ thêm logo/chữ. `loading_screen.gd::prepare_scene()` dùng
+`ResourceLoader.load_threaded_request/get_status/get` để nạp tài nguyên nền;
+thanh chỉ lấy tiến độ tài nguyên thực, không chạy theo thời gian giả. Giá trị
+100% nghĩa là tài nguyên đã nạp, sau đó còn khởi tạo scene/Player trên luồng chính.
+Overlay tồn tại ngoài title, chặn input và giữ gameplay pause trong lúc khôi phục
+checkpoint; chỉ dọn sau khi Player ready, `pending_continue=false` và đã vẽ một
+frame. Không đặt thời gian chờ tối thiểu. Thất bại chuẩn bị tải trả về menu cũ,
+hiện lỗi; không ghi save hoặc thay slot. Continue tại campfire, respawn và Restart
+Area giữ luồng riêng hiện hành, không tự thêm loading vào các thao tác này.
+
+- **Nền:** `loading_screen.tscn → Root/Background`, TextureRect full rect,
+  Expand Mode **Ignore Size**, Stretch Mode **Keep Aspect Covered**; dùng ảnh gốc.
+- **Thanh trắng:** **Root/Progress → Layout → Offsets**, neo phải/dưới `(1,1)`;
+  Left `-352`, Top `-52`, Right `-72`, Bottom `-40` pixel viewport. Kích thước
+  hiện tại **280×12 px**, cách mép phải **72 px**, mép dưới **40 px**. Chỉnh các
+  offset tại node này để đổi vị trí/kích thước; đây là giá trị authored scene,
+  không export/mặc định script hoặc override instance.
+- **Màu/viền:** Progress → Theme Overrides → Styles → **Fill/Background**.
+  Fill trắng RGBA `(1,1,1,1)`; nền `(1,1,1,0.04)`, viền trắng alpha `0.85`,
+  bốn cạnh `1 px`. Các giá trị là StyleBoxFlat authored trong scene, không có
+  mặc định script/override. Max Value `1`, Step `0.001`, Show Percentage `false`;
+  script đặt Value theo tiến độ 0–1. CanvasLayer **Layer=100** phủ title và HUD.
+- **Nối luồng:** `title_screen.gd::_begin_game()` giữ PackedScene đã chuẩn bị để
+  SaveManager dùng cache; `save_manager.gd::get_entry_scene_path()` kiểm tra
+  slot/đích trước khi nạp, không kích hoạt phiên hoặc ghi file. **Game Fade
+  Duration** vẫn `0.8s` ở Title Timing; không đổi timing combat/VFX hoặc save schema.
+
+Kiểm chứng sau thêm loading trên bản sao và dữ liệu riêng: loading **13/13
+headless + 13/13 native Forward+/D3D12**, hồi quy entry/save **75/75 headless**,
+title **42/42 headless** (gồm một check tạo fixture Continue). Đã xem ảnh loading
+thật; lượt native ghi 98 frame loading và tiến độ từ 0 qua các giá trị trung gian
+đến 1. Không có script/shader error ở các lượt này. Các kết quả **75 native**
+ghi ở mục đổi New Game bên dưới thuộc lượt trước khi thêm loading.
+
+**Luồng hiện hành — 07/11/2026:** **New Game → vào game ngay**, không mở chọn
+slot và không ghi save/backup/archive. Lượt chơi mới dùng điểm bắt đầu trong bộ
+nhớ. Đến campfire, tương tác để nghỉ/hồi phục, rồi chọn **Save → slot 1–5** mới
+ghi save. Ngồi nghỉ, Back hoặc hủy xác nhận không lưu; quy tắc này cũng áp dụng
+cho các lần nghỉ sau. Slot có dữ liệu thuộc lượt khác cần xác nhận ghi đè; giữ
+backup và các slot còn lại. **Continue** vẫn chọn slot đã lưu như trước.
+
+Trong `res://scenes/UI/save_manager.gd`, `start_new_game()` không nhận slot;
+`NO_SAVE_SLOT=0` là trạng thái chưa chọn slot, không phải slot thứ sáu, không có
+đơn vị/Inspector/override. `has_active_save_slot()` chỉ đúng sau khi chọn slot
+qua Save tại campfire hoặc Continue. Trước lần lưu đầu, chết/Restart Area dùng
+điểm bắt đầu của lượt mới, không lấy checkpoint của save cũ. Thoát về title giữ
+nguyên file cũ. Xác nhận nâng chỉ số vẫn yêu cầu chọn slot tại campfire trước;
+không tự tạo save khi đồng bộ progression.
+
+Nếu mở game thất bại, title trả lại menu chính và hiển thị lỗi tại
+**Interface/Root/EntryStatus** trong `title_screen.tscn`: Label cỡ chữ `20` pixel,
+vùng `(500,1010)`–`(1420,1070)` pixel viewport, màu `(1,0.65,0.65,1)`.
+Đây là giá trị authored của scene, không có mặc định script/override instance;
+mặc định ẩn, chỉ hiện khi New Game báo lỗi. Bộ chọn slot tại title hiện chỉ được
+dùng bởi Continue; popup ghi đè cũ của SaveSlotMenu không nằm trong luồng New Game.
+
+Kiểm chứng 07/11 trên bản sao checkout có custom user directory riêng:
+`entry_save_validation` **75/75 headless + 75/75 native OpenGL**,
+`title_screen_validation` **41/41**, `campfire_ui_validation` **60/60**,
+`progression_validation` **57/57** (ba bộ sau headless). Đã kiểm tra profile
+không có save, bảo toàn bytes save/backup khi New Game, chết/restart trước lần
+lưu đầu, hủy chọn/ghi đè, ghi lần đầu thất bại không nhận slot, Continue và
+ghi campfire rõ ràng; đã xem ảnh map và menu Save. Không có script error ở
+các lượt cuối; đây là kiểm chứng luồng lưu game, không phải nghiệm thu toàn bộ game.
+
 Màn hình mở đầu là `res://scenes/UI/title_screen.tscn` → node gốc **TitleScreen** (Node2D), script **`res://scenes/UI/title_screen.gd`**. Đã đổi tên từ `menu (2)`/`Node2D2`; hiện gom cây node thành Background, Interface, TransitionLayer và Audio. Chỉnh scene chạy khi F5 ở **Project Settings → Application → Run → Main Scene**, hiện `res://scenes/UI/title_screen.tscn` (`application/run/main_scene` trong `project.godot`). Đây là đường dẫn scene, không có đơn vị; project đang ghi trực tiếp giá trị này, không có override map.
 
 <a id="title-screen"></a>
@@ -1306,11 +1349,11 @@ Màn hình mở đầu là `res://scenes/UI/title_screen.tscn` → node gốc **
 
 **Progression/save phiên bản 2:** `SaveManager.SAVE_VERSION = 2`, không có đơn vị/Inspector/override. Lưu tám điểm đầu tư, điểm còn lại, Coin/Soul; HP/stamina tối đa tính lại từ Resource, không lấy snapshot cũ làm công thức. Đọc v1/không có version theo luật cũ 1 điểm/cấp: hoàn số nâng HP + stamina, giữ điểm dư kể cả điểm debug, cộng max(điểm/cấp cấu hình − 1, 0) × (level − 1). Bù chỉ ở đường đọc v1; v2 không tính lại. Schema legacy có khai báo điểm/cấp riêng hoặc trộn khóa thuộc tính/tiền mới bị từ chối thay vì đoán. HP giữ số hiện có, chỉ clamp xuống tối đa mới. Thông báo chuyển cơ chế hiện tại campfire.
 
-Đọc/Continue không ghi file. Trước lần ghi thay v1 hợp lệ, giữ nguyên bytes ở `soujourn_save[_n].json.before-stats-v2.bak`; vẫn có `.bak` xoay và archive trước New Game riêng. Nếu không sao lưu/ghi được thì không xác nhận nâng. Không sửa/xóa save thật để thử migration.
+Đọc/Continue không ghi file. Trước lần ghi thay v1 hợp lệ, giữ nguyên bytes ở `soujourn_save[_n].json.before-stats-v2.bak`; vẫn có `.bak` xoay. New Game không tạo archive; các archive từ luồng New Game cũ vẫn giữ nguyên. Nếu không sao lưu/ghi được thì không xác nhận nâng. Không sửa/xóa save thật để thử migration.
 
 Coin/Soul thuộc `PlayerProgress.coin/soul`; `add_currency()` nhận thưởng, `try_spend_currency()` kiểm tra hai số dư và trừ cùng lúc trong RAM, chưa phải giao dịch vật phẩm/rèn. Giới hạn lưu kỹ thuật là số nguyên không âm tới `MAX_SAVED_INTEGER = 9007199254740991` để JSON roundtrip chính xác; không phải soft cap gameplay. Thưởng địch được lưu cùng progression khi ghi campfire/xác nhận nâng; không tự ghi từng kill. Chưa có luật mất tiền khi chết, thưởng Observe/nhiệm vụ, shop/bán đồ/rèn hoặc Soul mua điểm.
 
-Slot và backup nằm ở `user://`, dùng menu Project → Open User Data Folder để tìm. Slot1 `soujourn_save.json`, slot2–5 `soujourn_save_2.json`…`_5.json`, `.bak` là backup gần nhất. Các file `.before-new-game-...bak` là bản trước Replace. Không sửa/xóa các file đó chỉ để thử tuning. Dùng bản sao project với custom user directory khi chạy suite save/flow.
+Slot và backup nằm ở `user://`, dùng menu Project → Open User Data Folder để tìm. Slot1 `soujourn_save.json`, slot2–5 `soujourn_save_2.json`…`_5.json`, `.bak` là backup gần nhất. Các file `.before-new-game-...bak` còn có là archive của luồng Replace lịch sử. Không sửa/xóa các file đó chỉ để thử tuning. Dùng bản sao project với custom user directory khi chạy suite save/flow.
 
 <a id="video-settings"></a>
 **Video — màn hình, FPS và xác nhận thay đổi**
